@@ -103,12 +103,48 @@
       .filters{grid-template-columns:repeat(3,1fr)}
       .results{grid-template-columns:1fr}
       .grid{grid-template-columns:repeat(2,1fr)}
+      .facet{position:relative;top:auto}
     }
+
+    /* Mobile */
     @media (max-width: 680px){
-      .filters{grid-template-columns:1fr 1fr}
+      .container{padding:0 14px}
+      .topbar .container{flex-direction:column;align-items:flex-start;gap:10px;padding:10px 14px}
+      .badge{width:100%;justify-content:flex-start}
+
       .navlinks{display:none}
+      .cta{display:none}
+      .nav-toggle{display:inline-flex}
+
+      .headline{font-size:26px}
+      .filters{grid-template-columns:1fr;gap:10px;padding:12px 14px 14px}
+      .filter-actions{flex-wrap:wrap;gap:10px;padding:0 14px 14px}
+      .filter-actions .btn{width:100%;justify-content:center}
+      .filter-actions > div{width:100%;justify-content:flex-start;margin-left:0 !important;flex-wrap:wrap}
+
       .grid{grid-template-columns:1fr}
+      .card-foot{flex-direction:column;align-items:stretch;gap:10px}
+      .card-foot .btn{width:100%;justify-content:center}
+      .badge-small{width:100%}
+
+      .mag-grid{grid-template-columns:1fr}
+      .foot{grid-template-columns:1fr;gap:14px}
     }
+
+    /* Mobile menu */
+    .nav-toggle{display:none;border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 12px;cursor:pointer}
+    .nav-toggle svg{width:22px;height:22px}
+    .mobileMenu{position:fixed;inset:0;z-index:60;display:none}
+    .mobileMenu.show{display:block}
+    .mobileMenu .backdrop{position:absolute;inset:0;background:rgba(2,6,23,.55)}
+    .mobileMenu .panel{position:absolute;top:0;right:0;height:100%;width:min(92vw,380px);background:var(--card);border-left:1px solid var(--line);box-shadow:var(--shadow);display:flex;flex-direction:column}
+    .mobileMenu .panelHead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px;border-bottom:1px solid var(--line)}
+    .mobileMenu .panelHead .title{display:flex;align-items:center;gap:10px;font-weight:800}
+    .mobileMenu .panelBody{padding:10px 14px;display:flex;flex-direction:column;gap:6px;overflow:auto}
+    .mobileMenu a{padding:12px 12px;border-radius:12px;border:1px solid var(--line);background:#fff}
+    .mobileMenu a:hover{background:#eff3ff;color:var(--brand)}
+    .mobileMenu .panelCta{padding:14px;border-top:1px solid var(--line);display:grid;gap:10px}
+    .mobileMenu .panelCta .btn{width:100%;justify-content:center}
   </style>
 </head>
 <body>
@@ -129,6 +165,9 @@
   <!-- Nav -->
   <header>
     <div class="container nav">
+      <button class="nav-toggle" id="navToggle" aria-label="Otevřít menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg>
+      </button>
       <div class="brand">
         <div class="logo" aria-label="PlotAO logo">
           <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><rect x="4" y="5" width="4" height="14" rx="1"/><rect x="10" y="5" width="4" height="14" rx="1"/><rect x="16" y="5" width="4" height="14" rx="1"/></svg>
@@ -150,6 +189,35 @@
       </div>
     </div>
   </header>
+
+  <!-- Mobile menu (mobil) -->
+  <div class="mobileMenu" id="mobileMenu" aria-hidden="true">
+    <div class="backdrop" id="menuBackdrop"></div>
+    <div class="panel" role="dialog" aria-modal="true" aria-label="Mobilní menu">
+      <div class="panelHead">
+        <div class="title">
+          <div class="logo" style="width:34px;height:34px;border-radius:10px">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><rect x="4" y="5" width="4" height="14" rx="1"/><rect x="10" y="5" width="4" height="14" rx="1"/><rect x="16" y="5" width="4" height="14" rx="1"/></svg>
+          </div>
+          PlotAO.cz
+        </div>
+        <button class="btn btn-ghost" id="menuClose" aria-label="Zavřít menu">Zavřít</button>
+      </div>
+      <div class="panelBody">
+        <a href="#">Betonové</a>
+        <a href="#">Hliníkové</a>
+        <a href="#">Dřevěné</a>
+        <a href="#">Gabiony</a>
+        <a href="#">Pletivo</a>
+        <a href="#">Brány &amp; Pohony</a>
+        <a href="#mag">Magazín</a>
+      </div>
+      <div class="panelCta">
+        <button class="btn btn-ghost" onclick="openLead('poptavka')">Zadat poptávku</button>
+        <button class="btn btn-primary" onclick="openLead('prodejci')">Pro dodavatele</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Hero + Filtry -->
   <section class="hero">
@@ -441,6 +509,31 @@
     function openLead(origin){
       alert('Odeslat poptávku / otevřít formulář ('+origin+') – v produkci napojit na CRM / e‑mail.');
     }
+
+    // Mobile menu
+    const navToggle = document.getElementById('navToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const menuBackdrop = document.getElementById('menuBackdrop');
+    const menuClose = document.getElementById('menuClose');
+
+    function openMenu(){
+      mobileMenu.classList.add('show');
+      mobileMenu.setAttribute('aria-hidden','false');
+      navToggle?.setAttribute('aria-expanded','true');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeMenu(){
+      mobileMenu.classList.remove('show');
+      mobileMenu.setAttribute('aria-hidden','true');
+      navToggle?.setAttribute('aria-expanded','false');
+      document.body.style.overflow = '';
+    }
+
+    navToggle?.addEventListener('click', openMenu);
+    menuBackdrop?.addEventListener('click', closeMenu);
+    menuClose?.addEventListener('click', closeMenu);
+    window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeMenu(); });
+    mobileMenu?.querySelectorAll('a').forEach(a=>a.addEventListener('click', closeMenu));
 
     // init
     render(DATA);
