@@ -1,11 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 160" role="img" aria-labelledby="title desc">
-<title id="title">PLOTAO.CZ</title><desc id="desc">Logo Plotao s plotovým sloupkem ve tvaru písmene P</desc>
-<g transform="translate(8 8)">
-  <path fill="#17212B" d="M38 0h61l35 20v32H72v88H38z"/>
-  <path fill="#17212B" d="M99 20h48c58 0 89 29 89 68 0 38-31 64-77 64h-34v-40h34c18 0 30-9 30-25s-12-27-34-27H99z"/>
-  <path fill="#F28C18" d="M20 36h52v36h92c10 0 17 8 17 18s-7 18-17 18H72v44H20z"/>
-  <path fill="#17212B" d="M8 24 38 7v145L8 134z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 650 140" role="img" aria-labelledby="title desc">
+<title id="title">PLOTAO.CZ</title><desc id="desc">Logo Plotao s jednoduchým symbolem plotu</desc>
+<g transform="translate(4 10)">
+ <rect width="120" height="120" rx="28" fill="#087443"/>
+ <rect x="22" y="19" width="16" height="88" rx="5" fill="#fff"/>
+ <path d="M18 19h24l-12-11z" fill="#fff"/>
+ <rect x="38" y="35" width="62" height="15" rx="7.5" fill="#f07828"/>
+ <rect x="38" y="71" width="62" height="15" rx="7.5" fill="#f07828"/>
+ <rect x="96" y="25" width="11" height="82" rx="4" fill="#fff"/>
 </g>
-<text x="268" y="108" fill="#17212B" font-family="Arial,Helvetica,sans-serif" font-size="80" font-weight="900" letter-spacing="-3">PLOTAO</text>
-<text x="606" y="108" fill="#F28C18" font-family="Arial,Helvetica,sans-serif" font-size="58" font-weight="900" letter-spacing="-2">.CZ</text>
+<text x="145" y="91" fill="#17251e" font-family="Arial,Helvetica,sans-serif" font-size="66" font-weight="900" letter-spacing="-2">PLOTAO</text>
+<text x="514" y="91" fill="#f07828" font-family="Arial,Helvetica,sans-serif" font-size="43" font-weight="900">.CZ</text>
 </svg>
