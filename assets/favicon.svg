@@ -1,6 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Plotao">
-<rect width="256" height="256" rx="56" fill="#17212B"/>
-<path fill="#FFFFFF" d="M62 35h55l40 23v38h-54v125H62z"/>
-<path fill="#FFFFFF" d="M117 58h30c51 0 78 26 78 64 0 37-28 62-70 62h-28v-43h28c17 0 27-8 27-21 0-14-10-23-29-23h-36z"/>
-<path fill="#F28C18" d="M34 76h69v42h70c10 0 18 8 18 19s-8 19-18 19h-70v65H34z"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect x="4" y="4" width="120" height="120" rx="28" fill="#087443"/><rect x="26" y="23" width="16" height="88" rx="5" fill="#fff"/><path d="M22 23h24L34 12z" fill="#fff"/><rect x="42" y="39" width="62" height="15" rx="7.5" fill="#f07828"/><rect x="42" y="75" width="62" height="15" rx="7.5" fill="#f07828"/><rect x="100" y="29" width="11" height="82" rx="4" fill="#fff"/></svg>
