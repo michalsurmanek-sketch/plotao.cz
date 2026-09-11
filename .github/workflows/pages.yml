@@ -34,9 +34,11 @@ jobs:
               '<script src="/assets/gabion-options.js"></script>',
               '<script src="/assets/aluminium-config.js"></script>',
               '<script src="/assets/privacy-config.js"></script>',
+              '<script src="/assets/metal-config.js"></script>',
               '<script src="/assets/pricing-benchmark.js"></script>',
               '<script src="/assets/aluminium-pricing.js"></script>',
-              '<script src="/assets/privacy-pricing.js"></script>'
+              '<script src="/assets/privacy-pricing.js"></script>',
+              '<script src="/assets/metal-pricing.js"></script>'
           ]
           for tag in tags:
               if tag not in s:
