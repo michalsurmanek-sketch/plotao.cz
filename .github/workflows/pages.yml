@@ -31,11 +31,12 @@ jobs:
           s = p.read_text(encoding='utf-8')
           tags = [
               '<script src="/assets/calculator-v2.js"></script>',
+              '<script src="/assets/geometry-fix.js"></script>',
               '<script src="/assets/gabion-options.js"></script>',
               '<script src="/assets/aluminium-config.js"></script>',
               '<script src="/assets/privacy-config.js"></script>',
               '<script src="/assets/metal-config.js"></script>',
-              '<script src="/assets/pricing-benchmark.js"></script>',
+              '<script src="/assets/pricing-benchmark-v2.js"></script>',
               '<script src="/assets/aluminium-pricing.js"></script>',
               '<script src="/assets/privacy-pricing.js"></script>',
               '<script src="/assets/metal-pricing.js"></script>',
