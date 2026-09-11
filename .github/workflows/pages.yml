@@ -31,11 +31,14 @@ jobs:
           s = p.read_text(encoding='utf-8')
           tags = [
               '<script src="/assets/calculator-v2.js"></script>',
+              '<script src="/assets/gabion-options.js"></script>',
               '<script src="/assets/pricing-benchmark.js"></script>'
           ]
           for tag in tags:
               if tag not in s:
                   s = s.replace('</body>', tag + '</body>')
+          if '<main class="wrap" id="kalkulator">' not in s:
+              s = s.replace('<main class="wrap">','<main class="wrap" id="kalkulator">',1)
           p.write_text(s, encoding='utf-8')
           PY
       - name: Configure Pages
