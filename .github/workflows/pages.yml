@@ -38,7 +38,8 @@ jobs:
               '<script src="/assets/pricing-benchmark.js"></script>',
               '<script src="/assets/aluminium-pricing.js"></script>',
               '<script src="/assets/privacy-pricing.js"></script>',
-              '<script src="/assets/metal-pricing.js"></script>'
+              '<script src="/assets/metal-pricing.js"></script>',
+              '<script src="/assets/price-bridge.js"></script>'
           ]
           for tag in tags:
               if tag not in s:
