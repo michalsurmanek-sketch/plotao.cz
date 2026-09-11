@@ -46,6 +46,7 @@ jobs:
               '<script src="/assets/extra-fence-pricing.js"></script>',
               '<script src="/assets/slab-pricing-v2.js"></script>',
               '<script src="/assets/gate-pricing-v1.js"></script>',
+              '<script src="/assets/gate-drive-pricing-v1.js"></script>',
               '<script src="/assets/price-bridge.js"></script>',
               '<script src="/assets/mobile-price-bridge.js"></script>'
           ]
