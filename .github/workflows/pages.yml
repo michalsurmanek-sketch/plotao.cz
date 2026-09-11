@@ -32,6 +32,7 @@ jobs:
           tags = [
               '<script src="/assets/calculator-v2.js"></script>',
               '<script src="/assets/gabion-options.js"></script>',
+              '<script src="/assets/aluminium-config.js"></script>',
               '<script src="/assets/pricing-benchmark.js"></script>'
           ]
           for tag in tags:
