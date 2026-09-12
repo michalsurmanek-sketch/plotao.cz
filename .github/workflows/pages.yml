@@ -30,7 +30,7 @@ jobs:
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
           tags = [
-              '<script src="/assets/calculator-v2.js"></script>',
+              '<script src="/assets/calculator-v3.js"></script>',
               '<script src="/assets/geometry-v3.js"></script>',
               '<script src="/assets/gabion-options.js"></script>',
               '<script src="/assets/aluminium-config.js"></script>',
@@ -39,6 +39,7 @@ jobs:
               '<script src="/assets/concrete-config.js"></script>',
               '<script src="/assets/extra-fence-config.js"></script>',
               '<script src="/assets/pricing-benchmark-v4.js"></script>',
+              '<script src="/assets/concrete-price-guard.js"></script>',
               '<script src="/assets/panel-pricing-v5.js"></script>',
               '<script src="/assets/mesh-pricing-v2.js"></script>',
               '<script src="/assets/aluminium-pricing.js"></script>',
