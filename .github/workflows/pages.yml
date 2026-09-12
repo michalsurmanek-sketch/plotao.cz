@@ -70,3 +70,28 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Verify live custom domain
+        env:
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          marker_url="https://plotao.cz/deploy-marker.txt?sha=${EXPECTED_SHA}"
+          html_url="https://plotao.cz/?sha=${EXPECTED_SHA}"
+          expected_meta="<meta name=\"plotao-deploy\" content=\"${EXPECTED_SHA}\">"
+          for attempt in $(seq 1 18); do
+            actual="$(curl -fsSL --connect-timeout 10 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$marker_url" 2>/dev/null | tr -d '\r\n' || true)"
+            page="$(curl -fsSL --connect-timeout 10 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$html_url" 2>/dev/null || true)"
+            marker_ok=0
+            html_ok=0
+            [ "$actual" = "$EXPECTED_SHA" ] && marker_ok=1
+            printf '%s' "$page" | grep -Fq "$expected_meta" && html_ok=1 || true
+            if [ "$marker_ok" = 1 ] && [ "$html_ok" = 1 ]; then
+              echo "Live custom domain serves expected deploy in marker and HTML: $EXPECTED_SHA"
+              exit 0
+            fi
+            echo "Attempt $attempt: marker_ok=$marker_ok html_ok=$html_ok expected=$EXPECTED_SHA actual=${actual:-<empty>}"
+            sleep 10
+          done
+          echo "plotao.cz did not expose the expected deploy marker consistently in both marker file and HTML"
+          exit 1
