@@ -31,8 +31,8 @@ jobs:
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
 
-          # The inline calculator is retained only as the base UI/DOM renderer.
-          # Its old commercial constants must never be a competing price source.
+          # Keep the inline calculator only as the base UI/DOM renderer.
+          # All old commercial constants are neutralized before deployment.
           for old, new in {
               "price:1680":"price:0",
               "price:720":"price:0",
@@ -69,6 +69,7 @@ jobs:
               '<script src="/assets/metal-config.js"></script>',
               '<script src="/assets/concrete-config.js"></script>',
               '<script src="/assets/extra-fence-config.js"></script>',
+              '<script src="/assets/options-router-v1.js"></script>',
               '<script src="/assets/structural-pricing-v5.js"></script>',
               '<script src="/assets/panel-pricing-v5.js"></script>',
               '<script src="/assets/mesh-pricing-v2.js"></script>',
@@ -104,6 +105,7 @@ jobs:
           required = [
               '/assets/calculator-v3.js',
               '/assets/geometry-v3.js',
+              '/assets/options-router-v1.js',
               '/assets/structural-pricing-v5.js',
               '/assets/panel-pricing-v5.js',
               '/assets/mesh-pricing-v2.js',
