@@ -87,7 +87,8 @@ jobs:
               '<script src="/assets/price-bridge.js"></script>',
               '<script src="/assets/mobile-price-bridge.js"></script>',
               '<script src="/assets/accuracy-guard.js"></script>',
-              '<script src="/assets/lead-safety-v1.js"></script>'
+              '<script src="/assets/lead-safety-v1.js"></script>',
+              '<script src="/assets/step-scroll-v1.js"></script>'
           ]
           for tag in tags:
               if tag not in s:
@@ -117,6 +118,7 @@ jobs:
               '/assets/concrete-material-v1.js',
               '/assets/accuracy-guard.js',
               '/assets/lead-safety-v1.js',
+              '/assets/step-scroll-v1.js',
               'name="plotao-deploy"',
               'data-v="material" class="on"',
               'Ceník aktualizován 12. 9. 2026'
