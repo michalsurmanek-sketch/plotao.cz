@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
-const price=read('assets/price-bridge.js'),accuracy=read('assets/accuracy-guard.js'),mobile=read('assets/mobile-price-bridge.js'),truth=read('assets/ui-truth-v1.js'),lead=read('assets/lead-safety-v1.js'),validity=read('assets/geometry-validity-v1.js'),geometry=read('assets/geometry-v3.js'),panelLanding=read('panelovy-plot.html'),concreteLanding=read('betonovy-plot.html');
+const price=read('assets/price-bridge.js'),accuracy=read('assets/accuracy-guard.js'),mobile=read('assets/mobile-price-bridge.js'),truth=read('assets/ui-truth-v1.js'),lead=read('assets/lead-safety-v1.js'),validity=read('assets/geometry-validity-v1.js'),geometry=read('assets/geometry-v3.js'),ui=read('assets/ui-bootstrap-v1.js'),index=read('index.html'),panelLanding=read('panelovy-plot.html'),concreteLanding=read('betonovy-plot.html');
 ok(price.includes('if(mobile)mobile.textContent=text'),'main price bridge must mirror computed material total to mobile price');
 ok(accuracy.includes('partialize(main);partialize(sticky)'),'partial budget must be mirrored to desktop and mobile');
 ok(accuracy.includes('if(sticky)sticky.textContent=headline'),'invalid/individual headline must be mirrored to mobile');
@@ -16,6 +16,15 @@ ok(validity.includes("if(!invalid())return false"),'validity layer must release 
 ok(!validity.includes('locked=true')&&!validity.includes('invalidLock'),'validity layer must not keep a persistent invalid lock');
 ok(geometry.includes('endpointHasFence')&&geometry.includes("linked(ss,s.i)&&endpointHasFence(ss,ops,s.i-1,'end')"),'geometry must inspect previous connected segment at opening boundary');
 ok(geometry.includes("linked(ss,s.i+1)&&endpointHasFence(ss,ops,s.i+1,'start')"),'geometry must inspect next connected segment at opening boundary');
+
+ok(index.includes('<script src="/assets/ui-bootstrap-v1.js"></script>'),'index must load the external UI bootstrap');
+ok(!index.includes('<script>const types=[')&&!index.includes('function calc(){'),'legacy inline calculator must not return to index');
+ok(ui.includes("['Plotová výplň','Podhrabové desky','Vjezdová brána','Vstupní branka','Montáž a zemní práce','Demontáž','Rohové napojení','Beton do patek','Doprava']"),'UI bootstrap must create the result rows used by pricing modules');
+ok(ui.includes("['Úseky oplocení','Plotová pole','Sloupky celkem','Průběžné sloupky','Koncové sloupky','Rohové sloupky','Bránové sloupky','Brankové sloupky','Rohové spoje','Podhrabové desky','Beton podle typu patek','Vjezdová brána','Branka']"),'UI bootstrap must create the material rows used by geometry/material modules');
+ok(ui.includes('renderTypes();renderOptions();renderSegments();syncToggles()'),'UI bootstrap must initialise type/options/segments/toggles before pricing modules run');
+ok(ui.includes("window.PLOTAO_UI_READY=true")&&ui.includes("new CustomEvent('plotao:ui-ready')"),'UI bootstrap must publish readiness');
+ok(!ui.includes('function calc(')&&!ui.includes('price:1680')&&!ui.includes('workRate=')&&!ui.includes('gatePrice('),'UI bootstrap must remain free of pricing formulas');
+
 ok(panelLanding.includes('Ověřený materiálový rozpočet získáte hned')&&panelLanding.includes('dopravu a montáž naceníme podle místa a podmínek realizace'),'panel landing must distinguish verified material from individual realization pricing');
 ok(!panelLanding.includes('dopravu i montáž.</p>'),'panel landing must not claim delivery and installation are instant calculator inputs');
 ok(concreteLanding.includes('Materiálový benchmark získáte hned')&&concreteLanding.includes('dopravu a montáž naceníme podle místa, terénu a přístupu'),'concrete landing must distinguish material benchmark from realization pricing');
