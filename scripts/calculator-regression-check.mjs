@@ -38,6 +38,8 @@ assert(panel.includes('g.gateSides')&&panel.includes('g.wicketSides'),'panel-pri
 const mesh=read('assets/mesh-pricing-v2.js');
 assert(mesh.includes('openingSides')&&mesh.includes('strain*2+openingSides'),'mesh-pricing: braces/tension points must use actual fence sides adjoining openings');
 assert(mesh.includes('window.PLOTAO_GEOMETRY?.fenceLen'),'mesh-pricing: mesh length must come from validated geometry');
+assert(mesh.includes('slab?post48:post38'),'mesh-pricing: classic mesh with underfence slabs must use 48mm line posts compatible with slab holders');
+assert(mesh.includes('linePostDiameter:weld||slab?48:38'),'mesh-pricing: exported benchmark must report the actual line-post diameter');
 
 const structural=read('assets/structural-pricing-v5.js');
 assert(structural.includes('window.PLOTAO_GEOMETRY?.fenceLen'),'structural pricing: gabion length must come from validated geometry instead of raw gate-width subtraction');
@@ -97,6 +99,12 @@ assert(mesh30.fields===10,'numeric mesh 30m/3m: expected 10 fields');
 assert(mesh30.strain===1,'numeric mesh 30m/3m: expected one strain point at the 24m module boundary');
 assert(mesh30.line===8&&mesh30.posts===11,'numeric mesh 30m/3m: expected 8 line + 1 strain + 2 end posts');
 assert(close(mesh30.concrete,.58),'numeric mesh 30m/3m: expected 0.58 m3 footing model');
+const meshCore30=30*87+8*229+3*229+4*223+167+4*15;
+const meshSlabs30=10*772+4*44.77+8*56;
+const meshBags30=Math.ceil(.58*2000/25)*129.71;
+assert(meshCore30===6248,'numeric mesh 30m/3m: verified core with 48mm slab-compatible posts must stay 6,248 CZK');
+assert(close(meshSlabs30,8347.08,.01),'numeric mesh 30m/3m: slabs + compatible holders must stay 8,347.08 CZK');
+assert(close(meshCore30+meshSlabs30+meshBags30,20691.45,.01),'numeric mesh 30m/3m: known material total must stay 20,691.45 CZK');
 
 const connected20={fields:8,line:6,corner:1,end:2,posts:9};
 const separate20={fields:8,line:6,corner:0,end:4,posts:10};
