@@ -6,6 +6,8 @@ const price=read('assets/price-bridge.js'),accuracy=read('assets/accuracy-guard.
 ok(price.includes('if(mobile)mobile.textContent=text'),'main price bridge must mirror computed material total to mobile price');
 ok(accuracy.includes('partialize(main);partialize(sticky)'),'partial budget must be mirrored to desktop and mobile');
 ok(accuracy.includes('if(sticky)sticky.textContent=headline'),'invalid/individual headline must be mirrored to mobile');
+ok(accuracy.includes("if(h>400)return{kind:'invalid'"),'accuracy guard must reject heights above the calculator 400cm limit');
+ok(accuracy.includes("e.unsupported&&e.reason==='height'"),'accuracy guard must block mobile DOPS totals when requested height differs from verified product height');
 ok(mobile.includes("if($('.price strong'))$('.price strong').textContent=text")&&mobile.includes("if($('.mobile-price strong'))$('.mobile-price strong').textContent=text"),'mobile fence benchmark must update desktop and sticky total together');
 ok(truth.includes('Ověřený materiál spočítáme hned'),'intro must clearly distinguish verified material from services');
 ok(truth.includes('Doprava a Na klíč = individuální doplnění'),'scope explanation must disclose individual delivery/turnkey pricing');
