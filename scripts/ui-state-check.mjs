@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
-const price=read('assets/price-bridge.js'),accuracy=read('assets/accuracy-guard.js'),mobile=read('assets/mobile-price-bridge.js'),truth=read('assets/ui-truth-v1.js'),lead=read('assets/lead-safety-v1.js'),validity=read('assets/geometry-validity-v1.js'),geometry=read('assets/geometry-v3.js');
+const price=read('assets/price-bridge.js'),accuracy=read('assets/accuracy-guard.js'),mobile=read('assets/mobile-price-bridge.js'),truth=read('assets/ui-truth-v1.js'),lead=read('assets/lead-safety-v1.js'),validity=read('assets/geometry-validity-v1.js'),geometry=read('assets/geometry-v3.js'),panelLanding=read('panelovy-plot.html'),concreteLanding=read('betonovy-plot.html');
 ok(price.includes('if(mobile)mobile.textContent=text'),'main price bridge must mirror computed material total to mobile price');
 ok(accuracy.includes('partialize(main);partialize(sticky)'),'partial budget must be mirrored to desktop and mobile');
 ok(accuracy.includes('if(sticky)sticky.textContent=headline'),'invalid/individual headline must be mirrored to mobile');
@@ -16,6 +16,10 @@ ok(validity.includes("if(!invalid())return false"),'validity layer must release 
 ok(!validity.includes('locked=true')&&!validity.includes('invalidLock'),'validity layer must not keep a persistent invalid lock');
 ok(geometry.includes('endpointHasFence')&&geometry.includes("linked(ss,s.i)&&endpointHasFence(ss,ops,s.i-1,'end')"),'geometry must inspect previous connected segment at opening boundary');
 ok(geometry.includes("linked(ss,s.i+1)&&endpointHasFence(ss,ops,s.i+1,'start')"),'geometry must inspect next connected segment at opening boundary');
+ok(panelLanding.includes('Ověřený materiálový rozpočet získáte hned')&&panelLanding.includes('dopravu a montáž naceníme podle místa a podmínek realizace'),'panel landing must distinguish verified material from individual realization pricing');
+ok(!panelLanding.includes('dopravu i montáž.</p>'),'panel landing must not claim delivery and installation are instant calculator inputs');
+ok(concreteLanding.includes('Materiálový benchmark získáte hned')&&concreteLanding.includes('dopravu a montáž naceníme podle místa, terénu a přístupu'),'concrete landing must distinguish material benchmark from realization pricing');
+ok(!concreteLanding.includes('doprava a montáž v kalkulátoru Plotao'),'concrete landing meta copy must not claim instant delivery/installation pricing');
 function boundarySides({connectedLeft=false,connectedRight=false,leftFence=false,rightFence=false,localLeft=false,localRight=false}){let sides=(localLeft?1:0)+(localRight?1:0);if(connectedLeft&&leftFence)sides++;if(connectedRight&&rightFence)sides++;return sides}
 ok(boundarySides({connectedLeft:true,leftFence:true,localRight:true})===2,'gate at start of connected segment must count previous fence plus local right fence');
 ok(boundarySides({connectedLeft:false,leftFence:true,localRight:true})===1,'gate at start of separate segment must not count previous fence');
