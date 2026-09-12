@@ -1,7 +1,11 @@
+import fs from 'node:fs';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url),core=require('../assets/gate-drive-pricing-core-v1.js');
 const fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 const pick=c=>core.selectVerifiedDrive(c);
+const adapter=fs.readFileSync('assets/gate-drive-pricing-v1.js','utf8');
+ok(adapter.includes('PLOTAO_GATE_DRIVE_PRICING_CORE')&&adapter.includes('selectVerifiedDrive'),'gate-drive browser adapter must use shared verified-drive core');
+ok(!adapter.includes('price:11470')&&!adapter.includes('price:14756'),'verified motor prices must not be duplicated back into browser adapter');
 
 let x=pick({active:false,gateType:'double',leafLength:1.9,totalWeight:35});
 ok(x.active===false&&x.price===0,'manual/no-drive mode must stay excluded');
