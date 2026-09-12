@@ -56,6 +56,11 @@ assert(accuracy.includes('PLOTAO_SLAB_PRICE')&&accuracy.includes('unsupportedHol
 assert(accuracy.includes('unsupportedOpenings'),'unverified gate/wicket footing concrete must force partial budget');
 const priceBridge=read('assets/price-bridge.js');
 assert(priceBridge.includes('c.unsupportedOpenings')&&priceBridge.includes('s.unsupportedHolders'),'price bridge must preserve partial totals for footing/slab exceptions');
+const lead=read('assets/lead-safety-v1.js');
+assert(lead.includes("input:not([type=number])")&&lead.includes("input[type=number]"),'lead snapshot must read current segment name and length inputs');
+assert(!lead.includes('input[data-name]')&&!lead.includes('input[data-length]'),'lead snapshot must not return to obsolete segment selectors');
+assert(lead.includes('PLOTAO_SEGMENT_CONNECTIONS')&&lead.includes("'samostatný úsek'")&&lead.includes("'navazuje rohem'"),'lead snapshot must preserve section connectivity');
+assert(lead.includes('gateSection')&&lead.includes('gatePos')&&lead.includes('wicketSection')&&lead.includes('wicketPos'),'lead snapshot must preserve opening section and position');
 const slabSafety=read('assets/panel-slab-safety-v1.js');assert(slabSafety.includes("startsWith('300')"),'3m slabs must stay blocked for panels');
 const gate=read('assets/gate-pricing-v1.js');assert(gate.includes('slab().with')&&gate.includes('leafLength')&&gate.includes('totalWeight'),'gate exact matching/specs required');
 const drive=read('assets/gate-drive-pricing-v1.js');assert(drive.includes('gate.leafLength')&&drive.includes('gate.totalWeight')&&!drive.includes("if(w<=4)"),'drive must use verified gate specs');
