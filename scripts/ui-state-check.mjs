@@ -15,7 +15,8 @@ ok(truth.includes("id='scopeTruthNote'")||truth.includes("n.id='scopeTruthNote'"
 ok(truth.includes('Ověřené položky počítáme z aktuálních cenových podkladů; individuální položky jsou označené zvlášť.'),'result note must distinguish verified pricing inputs from individual items');
 ok(modalA11y.includes("modal.setAttribute('aria-labelledby','modalTitle')")&&modalA11y.includes("modal.setAttribute('aria-describedby','modalText')"),'modal must expose its title and description to assistive technology');
 ok(modalA11y.includes("close.setAttribute('aria-label','Zavřít dialog')"),'modal close control must have an accessible name');
-ok(modalA11y.includes("e.key==='Tab'")&&modalA11y.includes('last.focus()')&&modalA11y.includes('first.focus()'),'modal keyboard focus must remain trapped inside the open dialog');
+ok(modalA11y.includes("e.key!=='Tab'")&&modalA11y.includes('last.focus()')&&modalA11y.includes('first.focus()'),'modal keyboard focus must remain trapped inside the open dialog');
+ok(modalA11y.includes("e.key==='Escape'")&&modalA11y.includes('},true)'),'modal Escape focus restoration must run in capture phase before the legacy close handler');
 ok(modalA11y.includes('function restore()')&&modalA11y.includes('target.focus()'),'closing modal must restore focus to its opener');
 ok(gateUi.includes("labels.slice(0,3).forEach(el=>show(el,gateOn))"),'gate UI must hide all three gate controls when gate is off');
 ok(gateUi.includes("if(labels[3])show(labels[3],doorOn)"),'gate UI must independently hide the wicket width when wicket is off');
