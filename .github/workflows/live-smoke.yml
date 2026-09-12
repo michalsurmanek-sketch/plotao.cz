@@ -1,0 +1,32 @@
+name: Verify live Plotao.cz
+
+on:
+  workflow_run:
+    workflows: ["Deploy Plotao.cz to Pages"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  verify-live:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify deployed marker on custom domain
+        env:
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          url="https://plotao.cz/deploy-marker.txt?sha=${EXPECTED_SHA}"
+          for attempt in $(seq 1 18); do
+            actual="$(curl -fsSL --connect-timeout 10 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$url" 2>/dev/null | tr -d '\r\n' || true)"
+            if [ "$actual" = "$EXPECTED_SHA" ]; then
+              echo "Live custom domain serves expected deploy: $actual"
+              exit 0
+            fi
+            echo "Attempt $attempt: expected $EXPECTED_SHA, got ${actual:-<empty>}"
+            sleep 10
+          done
+          echo "plotao.cz did not expose the expected deploy marker"
+          exit 1
