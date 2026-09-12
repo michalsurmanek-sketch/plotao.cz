@@ -39,6 +39,7 @@ jobs:
               '<script src="/assets/concrete-config.js"></script>',
               '<script src="/assets/extra-fence-config.js"></script>',
               '<script src="/assets/pricing-benchmark-v4.js"></script>',
+              '<script src="/assets/panel-pricing-v5.js"></script>',
               '<script src="/assets/mesh-pricing-v2.js"></script>',
               '<script src="/assets/aluminium-pricing.js"></script>',
               '<script src="/assets/privacy-pricing.js"></script>',
