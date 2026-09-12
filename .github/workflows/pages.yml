@@ -27,6 +27,7 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import os
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
           tags = [
@@ -58,7 +59,12 @@ jobs:
                   s = s.replace('</body>', tag + '</body>')
           if '<main class="wrap" id="kalkulator">' not in s:
               s = s.replace('<main class="wrap">','<main class="wrap" id="kalkulator">',1)
+          sha = os.environ.get('GITHUB_SHA','unknown')
+          marker = f'<meta name="plotao-deploy" content="{sha}">'
+          if 'name="plotao-deploy"' not in s:
+              s = s.replace('</head>', marker + '</head>', 1)
           p.write_text(s, encoding='utf-8')
+          Path('deploy-marker.txt').write_text(sha + '\n', encoding='utf-8')
           PY
       - name: Configure Pages
         uses: actions/configure-pages@v5
