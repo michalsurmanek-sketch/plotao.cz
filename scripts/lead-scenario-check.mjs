@@ -13,7 +13,9 @@ ok(adapter.includes("sessionStorage.setItem(key('lead')")&&adapter.includes('ses
 ok(adapter.includes("if(m!=='partner'&&form.elements.place)")&&adapter.includes("form.elements.place.value=$('#place')?.value||''"),'partner draft must never inherit customer calculator location');
 ok(adapter.includes("[['#lead','lead'],['#help','help'],['#partner','partner']]")&&adapter.includes('restoreMode(form,m)'),'opening each modal mode must restore only its own draft');
 ok(modeUi.includes("mode==='partner'")&&modeUi.includes("labelText(placeLabel,'Oblast působnosti')")&&modeUi.includes('place.required=true'),'partner modal must expose and require area of operation');
+ok(modeUi.includes("Napište kontakt a oblast, ve které montujete ploty.")&&modeUi.includes("Poznámka / typy plotů"),'partner modal copy must describe a contractor signup, not a customer quote');
 ok(modeUi.includes("mode==='help'")&&modeUi.includes("Obec / PSČ (volitelné)")&&modeUi.includes('place.required=false'),'help modal must keep location optional');
+ok(modeUi.includes('Výpočet plotu nemusíte dokončit.')&&modeUi.includes('note.required=true')&&modeUi.includes('Stručně popište svůj dotaz'),'help modal must clearly request an actual question without requiring fence completion');
 ok(modeUi.includes("scope==='delivery'||scope==='turnkey'")&&modeUi.includes("labelText(placeLabel,scope==='material'?'Obec / PSČ (volitelné)':'Obec / PSČ')"),'customer modal must require location only for delivery/turnkey scopes');
 
 let d=core.normalizeLead(base,'2026-09-12T20:00:00.000Z');
@@ -53,9 +55,11 @@ ok(v.valid===false&&v.errors.some(e=>e.code==='wicket-placement'),'wicket extend
 v=core.validateLead({...base,gate:true,gateWidth:4,gateSection:99,gatePos:1});
 ok(v.valid===false&&v.errors.some(e=>e.code==='gate-placement'||e.code==='gate-section'),'out-of-range gate section must not create a silently valid customer lead');
 
-v=core.validateLead({...base,mode:'help',fenceType:'',height:0,segments:[],priceKind:'neplatné zadání',gate:true,gateSection:99,place:''});
-ok(v.valid===true,'help request with valid contact must not require a completed fence calculation');
-v=core.validateLead({...base,mode:'help',phone:'1234',fenceType:'',height:0,segments:[]});
+v=core.validateLead({...base,mode:'help',fenceType:'',height:0,segments:[],priceKind:'neplatné zadání',gate:true,gateSection:99,place:'',note:'Jak vyřešit roh ve svahu?'});
+ok(v.valid===true,'help request with valid contact and question must not require a completed fence calculation');
+v=core.validateLead({...base,mode:'help',fenceType:'',height:0,segments:[],note:'   '});
+ok(v.valid===false&&v.errors.some(e=>e.code==='help-question'),'help mode must reject an empty question');
+v=core.validateLead({...base,mode:'help',phone:'1234',fenceType:'',height:0,segments:[],note:'Potřebuji poradit'});
 ok(v.valid===false&&v.errors.some(e=>e.code==='phone'),'help mode must still validate contact information');
 
 v=core.validateLead({...base,mode:'partner',place:'Zlínský kraj',fenceType:'',height:0,segments:[],priceKind:'neplatné zadání',gate:true,gateSection:99});
@@ -71,10 +75,10 @@ ok(weird.options.length===2&&weird.options[1]==='Zelená','lead options must be 
 const out=core.toText({...base,gate:true,gateWidth:4,gateSection:0,gatePos:8,gateDrive:'auto'});
 ok(out.includes('PLOTAO.CZ – podklady poptávky')&&out.includes('+420777123456')&&out.includes('Panelový plot')&&out.includes('Brána: double · 4 m · auto · úsek 1 · pozice 8 m'),'customer clipboard export must use normalized customer payload');
 ok(out.includes('Předek 20 m')&&out.includes('Bok 17 m · navazuje rohem'),'customer clipboard export must preserve all normalized fence sections');
-const helpOut=core.toText({...base,mode:'help'});
-ok(helpOut.startsWith('PLOTAO.CZ – žádost o radu'),'help export must be clearly identified as help, not a quote lead');
+const helpOut=core.toText({...base,mode:'help',note:'Jak vyřešit roh ve svahu?'});
+ok(helpOut.startsWith('PLOTAO.CZ – žádost o radu')&&helpOut.includes('Dotaz:\nJak vyřešit roh ve svahu?'),'help export must be clearly identified and expose the actual question');
 const partnerOut=core.toText({...base,mode:'partner',place:'Zlínský kraj',fenceType:'',segments:[]});
 ok(partnerOut.startsWith('PLOTAO.CZ – zájem montážní firmy')&&partnerOut.includes('Oblast působnosti: Zlínský kraj')&&!partnerOut.includes('Plot:'),'partner export must not masquerade as a customer fence calculation');
 
 if(fail.length){console.error('Lead scenario checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Lead scenario checks OK: isolated mode drafts plus customer, help and partner validation are protected');
+console.log('Lead scenario checks OK: isolated drafts, useful help requests, customer leads and partner validation are protected');
