@@ -35,6 +35,7 @@ jobs:
           node scripts/build-pipeline-check.mjs
           node scripts/source-boundary-check.mjs
           node scripts/calculator-regression-check.mjs
+          node scripts/panel-pricing-scenario-check.mjs
           node scripts/options-state-check.mjs
           node scripts/ui-state-check.mjs
 
