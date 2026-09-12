@@ -33,6 +33,7 @@ jobs:
           for file in assets/*.js; do node --check "$file"; done
           node scripts/calculator-regression-check.mjs
           node scripts/options-state-check.mjs
+          node scripts/ui-state-check.mjs
       - name: Inject calculator enhancements
         run: |
           python - <<'PY'
