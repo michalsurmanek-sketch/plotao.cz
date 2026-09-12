@@ -26,56 +26,42 @@ jobs:
       - name: Verify calculator source integrity
         run: |
           set -euo pipefail
-          legacy=(
-            assets/calculator-v2.js
-            assets/geometry-fix.js
-            assets/concrete-price-guard.js
-            assets/pricing-benchmark-v4.js
-          )
+          legacy=(assets/calculator-v2.js assets/geometry-fix.js assets/concrete-price-guard.js assets/pricing-benchmark-v4.js)
           for file in "${legacy[@]}"; do
-            if [ -e "$file" ]; then
-              echo "Legacy calculator module must stay deleted: $file"
-              exit 1
-            fi
+            if [ -e "$file" ]; then echo "Legacy calculator module must stay deleted: $file"; exit 1; fi
           done
-          for file in assets/*.js; do
-            node --check "$file"
-          done
+          for file in assets/*.js; do node --check "$file"; done
+          node scripts/calculator-regression-check.mjs
       - name: Inject calculator enhancements
         run: |
           python - <<'PY'
           from pathlib import Path
           import os
-          p = Path('index.html')
-          s = p.read_text(encoding='utf-8')
-          for old, new in {
-              "price:1680":"price:0","price:720":"price:0","price:2650":"price:0","price:3180":"price:0","price:4650":"price:0","price:3950":"price:0","price:3850":"price:0","price:4250":"price:0","price:780":"price:0","price:2900":"price:0",
-              "basePrice=base?baseCount*base[1]:0":"basePrice=0","delivery=state.scope==='material'?0:2900":"delivery=0","workRate=state.type==='concrete'?1450:980":"workRate=0","work=state.scope==='turnkey'?fenceLen*workRate*terrain*ground*access:0":"work=0","demolition=state.scope==='turnkey'?fenceLen*({none:0,light:260,heavy:780}[$('#demolition').value]):0":"demolition=0","cornerWork=state.scope==='turnkey'?corners*650:0":"cornerWork=0","concrete=state.scope==='turnkey'?concreteVolume*2850:0":"concrete=0","dp=door?9900+Math.max(0,dw-.9)*7000:0":"dp=0","scope:'turnkey'":"scope:'material'","Ceník aktualizován 11. 9. 2026":"Ceník aktualizován 12. 9. 2026","form.onsubmit=e=>{e.preventDefault();alert('Formulář je připraven; databázové odeslání bude další krok.')}":"form.onsubmit=null"
-          }.items(): s = s.replace(old, new)
-          s = s.replace("function gatePrice(type,width,drive){return({double:22500,sliding:31500,cantilever:38500}[type]||22500)+Math.max(0,width-3)*5200+(drive==='auto'?18500:0)}","function gatePrice(type,width,drive){return 0}")
-          s = s.replace('<button data-v="material">Materiál</button><button data-v="delivery">S dopravou</button><button data-v="turnkey" class="on">Na klíč</button>','<button data-v="material" class="on">Materiál</button><button data-v="delivery">S dopravou</button><button data-v="turnkey">Na klíč</button>')
-          tags = [
-              '<script src="/assets/calculator-v3.js"></script>','<script src="/assets/geometry-v3.js"></script>','<script src="/assets/gabion-options.js"></script>','<script src="/assets/aluminium-config.js"></script>','<script src="/assets/privacy-config.js"></script>','<script src="/assets/metal-config.js"></script>','<script src="/assets/concrete-config.js"></script>','<script src="/assets/extra-fence-config.js"></script>','<script src="/assets/options-router-v1.js"></script>','<script src="/assets/panel-slab-safety-v1.js"></script>','<script src="/assets/structural-pricing-v5.js"></script>','<script src="/assets/panel-pricing-v5.js"></script>','<script src="/assets/mesh-pricing-v2.js"></script>','<script src="/assets/aluminium-pricing.js"></script>','<script src="/assets/privacy-pricing.js"></script>','<script src="/assets/metal-pricing.js"></script>','<script src="/assets/extra-fence-pricing.js"></script>','<script src="/assets/slab-pricing-v2.js"></script>','<script src="/assets/concrete-material-v1.js"></script>','<script src="/assets/gate-pricing-v1.js"></script>','<script src="/assets/gate-drive-pricing-v1.js"></script>','<script src="/assets/scope-integrity.js"></script>','<script src="/assets/price-bridge.js"></script>','<script src="/assets/mobile-price-bridge.js"></script>','<script src="/assets/accuracy-guard.js"></script>','<script src="/assets/lead-safety-v1.js"></script>','<script src="/assets/step-scroll-v1.js"></script>'
-          ]
+          p=Path('index.html'); s=p.read_text(encoding='utf-8')
+          for old,new in {
+            "price:1680":"price:0","price:720":"price:0","price:2650":"price:0","price:3180":"price:0","price:4650":"price:0","price:3950":"price:0","price:3850":"price:0","price:4250":"price:0","price:780":"price:0","price:2900":"price:0",
+            "basePrice=base?baseCount*base[1]:0":"basePrice=0","delivery=state.scope==='material'?0:2900":"delivery=0","workRate=state.type==='concrete'?1450:980":"workRate=0","work=state.scope==='turnkey'?fenceLen*workRate*terrain*ground*access:0":"work=0","demolition=state.scope==='turnkey'?fenceLen*({none:0,light:260,heavy:780}[$('#demolition').value]):0":"demolition=0","cornerWork=state.scope==='turnkey'?corners*650:0":"cornerWork=0","concrete=state.scope==='turnkey'?concreteVolume*2850:0":"concrete=0","dp=door?9900+Math.max(0,dw-.9)*7000:0":"dp=0","scope:'turnkey'":"scope:'material'","Ceník aktualizován 11. 9. 2026":"Ceník aktualizován 12. 9. 2026","form.onsubmit=e=>{e.preventDefault();alert('Formulář je připraven; databázové odeslání bude další krok.')}":"form.onsubmit=null"
+          }.items(): s=s.replace(old,new)
+          s=s.replace("function gatePrice(type,width,drive){return({double:22500,sliding:31500,cantilever:38500}[type]||22500)+Math.max(0,width-3)*5200+(drive==='auto'?18500:0)}","function gatePrice(type,width,drive){return 0}")
+          s=s.replace('<button data-v="material">Materiál</button><button data-v="delivery">S dopravou</button><button data-v="turnkey" class="on">Na klíč</button>','<button data-v="material" class="on">Materiál</button><button data-v="delivery">S dopravou</button><button data-v="turnkey">Na klíč</button>')
+          tags=['<script src="/assets/calculator-v3.js"></script>','<script src="/assets/geometry-v3.js"></script>','<script src="/assets/gabion-options.js"></script>','<script src="/assets/aluminium-config.js"></script>','<script src="/assets/privacy-config.js"></script>','<script src="/assets/metal-config.js"></script>','<script src="/assets/concrete-config.js"></script>','<script src="/assets/extra-fence-config.js"></script>','<script src="/assets/options-router-v1.js"></script>','<script src="/assets/panel-slab-safety-v1.js"></script>','<script src="/assets/structural-pricing-v5.js"></script>','<script src="/assets/panel-pricing-v5.js"></script>','<script src="/assets/mesh-pricing-v2.js"></script>','<script src="/assets/aluminium-pricing.js"></script>','<script src="/assets/privacy-pricing.js"></script>','<script src="/assets/metal-pricing.js"></script>','<script src="/assets/extra-fence-pricing.js"></script>','<script src="/assets/slab-pricing-v2.js"></script>','<script src="/assets/concrete-material-v1.js"></script>','<script src="/assets/gate-pricing-v1.js"></script>','<script src="/assets/gate-drive-pricing-v1.js"></script>','<script src="/assets/scope-integrity.js"></script>','<script src="/assets/price-bridge.js"></script>','<script src="/assets/mobile-price-bridge.js"></script>','<script src="/assets/accuracy-guard.js"></script>','<script src="/assets/lead-safety-v1.js"></script>','<script src="/assets/step-scroll-v1.js"></script>']
           for tag in tags:
-              if tag not in s: s = s.replace('</body>', tag + '</body>')
-          if '<main class="wrap" id="kalkulator">' not in s: s = s.replace('<main class="wrap">','<main class="wrap" id="kalkulator">',1)
-          sha = os.environ.get('GITHUB_SHA','unknown')
-          marker = f'<meta name="plotao-deploy" content="{sha}">'
-          if 'name="plotao-deploy"' not in s: s = s.replace('</head>', marker + '</head>', 1)
-          p.write_text(s, encoding='utf-8')
-          Path('deploy-marker.txt').write_text(sha + '\n', encoding='utf-8')
+            if tag not in s: s=s.replace('</body>',tag+'</body>')
+          if '<main class="wrap" id="kalkulator">' not in s: s=s.replace('<main class="wrap">','<main class="wrap" id="kalkulator">',1)
+          sha=os.environ.get('GITHUB_SHA','unknown'); marker=f'<meta name="plotao-deploy" content="{sha}">'
+          if 'name="plotao-deploy"' not in s: s=s.replace('</head>',marker+'</head>',1)
+          p.write_text(s,encoding='utf-8'); Path('deploy-marker.txt').write_text(sha+'\n',encoding='utf-8')
           PY
       - name: Verify production artifact integrity
         run: |
           python - <<'PY'
           from pathlib import Path
-          s = Path('index.html').read_text(encoding='utf-8')
-          required = ['/assets/calculator-v3.js','/assets/geometry-v3.js','/assets/options-router-v1.js','/assets/panel-slab-safety-v1.js','/assets/structural-pricing-v5.js','/assets/panel-pricing-v5.js','/assets/mesh-pricing-v2.js','/assets/slab-pricing-v2.js','/assets/concrete-material-v1.js','/assets/accuracy-guard.js','/assets/lead-safety-v1.js','/assets/step-scroll-v1.js','name="plotao-deploy"','data-v="material" class="on"','Ceník aktualizován 12. 9. 2026']
-          forbidden = ['price:1680','price:720','price:2650',"delivery=state.scope==='material'?0:2900","workRate=state.type==='concrete'?1450:980",'double:22500,sliding:31500,cantilever:38500',"drive==='auto'?18500:0","dp=door?9900+Math.max(0,dw-.9)*7000:0",'databázové odeslání bude další krok','/assets/calculator-v2.js','/assets/geometry-fix.js','/assets/concrete-price-guard.js','/assets/pricing-benchmark-v4.js']
+          s=Path('index.html').read_text(encoding='utf-8')
+          required=['/assets/calculator-v3.js','/assets/geometry-v3.js','/assets/options-router-v1.js','/assets/panel-slab-safety-v1.js','/assets/structural-pricing-v5.js','/assets/panel-pricing-v5.js','/assets/mesh-pricing-v2.js','/assets/slab-pricing-v2.js','/assets/concrete-material-v1.js','/assets/accuracy-guard.js','/assets/lead-safety-v1.js','/assets/step-scroll-v1.js','name="plotao-deploy"','data-v="material" class="on"','Ceník aktualizován 12. 9. 2026']
+          forbidden=['price:1680','price:720','price:2650',"delivery=state.scope==='material'?0:2900","workRate=state.type==='concrete'?1450:980",'double:22500,sliding:31500,cantilever:38500',"drive==='auto'?18500:0","dp=door?9900+Math.max(0,dw-.9)*7000:0",'databázové odeslání bude další krok','/assets/calculator-v2.js','/assets/geometry-fix.js','/assets/concrete-price-guard.js','/assets/pricing-benchmark-v4.js']
           missing=[x for x in required if x not in s]; leaked=[x for x in forbidden if x in s]; marker=Path('deploy-marker.txt').read_text(encoding='utf-8').strip()
           if missing or leaked or not marker or marker=='unknown': raise SystemExit(f'Pages artifact integrity failed; missing={missing}; legacy={leaked}; marker={marker!r}')
-          print('Pages artifact integrity OK:', marker)
+          print('Pages artifact integrity OK:',marker)
           PY
       - name: Configure Pages
         uses: actions/configure-pages@v5
