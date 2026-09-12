@@ -54,6 +54,8 @@ assert(structural.includes('if(materialH>300)'),'structural pricing: concrete po
 const slab=read('assets/slab-pricing-v2.js');
 assert(slab.includes("productLength:2.45,bay:2.5"),'slab-pricing: panel 2450mm product must retain nominal 2.5m bay');
 assert(slab.includes("productLength:2.95,bay:3"),'slab-pricing: mesh 2950mm product must retain nominal 3m bay');
+assert(slab.includes("panel:{20:{end:54,through:null},30:{end:71,through:null}}"),'slab-pricing: panel 20/30cm slabs must not use round-post through holders on square panel posts');
+assert(slab.includes('dvojici kompatibilních koncových U držáků'),'slab-pricing: panel holder explanation must keep the square-post mounting rule visible');
 assert(slab.includes('unsupportedHolders')&&slab.includes('unpricedOpeningHolders'),'slab-pricing: holders adjoining gates/wickets must not be priced as ordinary post holders');
 
 const accuracy=read('assets/accuracy-guard.js');
@@ -70,8 +72,6 @@ const drive=read('assets/gate-drive-pricing-v1.js');
 assert(drive.includes('gate.leafLength')&&drive.includes('gate.totalWeight'),'gate drive: automation must require verified gate dimensions/weight');
 assert(!drive.includes("if(w<=4)"),'gate drive: width-only motor selection must not return');
 
-// Numeric reference scenarios. These deliberately encode the intended physical layout,
-// so a future refactor cannot silently change the basic quantities.
 const roleVolume={line:.05,strain:.06,end:.06,corner:.075};
 function straightRun(length,gap,{mesh=false}={}){
   const maxSection=mesh?Math.max(gap,Math.floor(25/gap)*gap):length;
@@ -90,23 +90,10 @@ function straightRun(length,gap,{mesh=false}={}){
 }
 function exactPanelStock(runLengths,width=2.5){
   let full=0,res=[];
-  for(const l0 of runLengths){
-    const l=Math.max(0,l0),n=Math.floor((l+.000001)/width),r=l-n*width;
-    full+=n;if(r>.001)res.push(r);
-  }
+  for(const l0 of runLengths){const l=Math.max(0,l0),n=Math.floor((l+.000001)/width),r=l-n*width;full+=n;if(r>.001)res.push(r)}
   res.sort((a,b)=>b-a);let best=res.length,bins=[];
-  function place(i){
-    if(i===res.length){best=Math.min(best,bins.length);return}
-    if(bins.length>=best)return;
-    const x=res[i],seen=new Set;
-    for(let j=0;j<bins.length;j++){
-      const cap=+bins[j].toFixed(4);if(seen.has(cap)||bins[j]+.000001<x)continue;
-      seen.add(cap);bins[j]-=x;place(i+1);bins[j]+=x;
-    }
-    bins.push(width-x);place(i+1);bins.pop();
-  }
-  if(res.length)place(0);else best=0;
-  return full+best;
+  function place(i){if(i===res.length){best=Math.min(best,bins.length);return}if(bins.length>=best)return;const x=res[i],seen=new Set;for(let j=0;j<bins.length;j++){const cap=+bins[j].toFixed(4);if(seen.has(cap)||bins[j]+.000001<x)continue;seen.add(cap);bins[j]-=x;place(i+1);bins[j]+=x}bins.push(width-x);place(i+1);bins.pop()}
+  if(res.length)place(0);else best=0;return full+best;
 }
 
 const panel37=straightRun(37,2.5);
@@ -122,6 +109,8 @@ assert(close(panelMaterial+panelSlabs+panelBags,37709.86,.01),'numeric panel 37m
 assert(exactPanelStock([37])===15,'numeric panel 37m: one run must purchase 15 panels');
 assert(exactPanelStock([6,6])===5,'numeric panel 6m+6m: reusable 1m offcuts must reduce purchase from 6 fields to 5 panels');
 assert(exactPanelStock([1.4,1.4,1.4])===3,'numeric panel offcuts: three 1.4m pieces cannot be packed into only two 2.5m stock panels');
+const panel30cmSlabHolders=15*2*71;
+assert(panel30cmSlabHolders===2130,'numeric panel 30cm slabs: 15 slabs must use 30 square-post end holders, not round-post through holders');
 
 const mesh30=straightRun(30,3,{mesh:true});
 assert(mesh30.fields===10,'numeric mesh 30m/3m: expected 10 fields');
@@ -139,8 +128,5 @@ const connected20={fields:8,line:6,corner:1,end:2,posts:9};
 const separate20={fields:8,line:6,corner:0,end:4,posts:10};
 assert(connected20.posts===9&&separate20.posts===10,'numeric 10m+10m sections: connected corner must share one post; separate runs must not');
 
-if(failures.length){
-  console.error('Calculator regression checks failed:\n- '+failures.join('\n- '));
-  process.exit(1);
-}
+if(failures.length){console.error('Calculator regression checks failed:\n- '+failures.join('\n- '));process.exit(1)}
 console.log(`Calculator regression checks OK (${assets.length} JS assets checked; numeric scenarios passed)`);
