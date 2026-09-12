@@ -5,6 +5,10 @@ for(const f of assets){const s=read('assets/'+f);assert(!s.includes('setInterval
 
 const geometry=read('assets/geometry-v3.js');
 [['Math.floor(25/gp)*gp','tension sections align to nominal bay'],['pa+gp*k','full fields stay on nominal spacing'],['gateSides','gate sides published'],['wicketSides','wicket sides published'],['endpointHasFence','joint openings inspect adjacent sections'],["linked(ss,s.i)&&endpointHasFence(ss,ops,s.i-1,'end')",'connected start sees previous fence'],["linked(ss,s.i+1)&&endpointHasFence(ss,ops,s.i+1,'start')",'connected end sees next fence'],["document.addEventListener('plotao:placement'",'placement triggers geometry'],["document.addEventListener('plotao:segment-connections'",'connections trigger geometry'],['PLOTAO_SEGMENT_CONNECTIONS','connections classify posts'],["'outer:'+i+':start",'separate start node'],["'outer:'+i+':end",'separate end node'],['gross=ss.reduce','gross differs from net'],["'Celková trasa '+g.gross",'total badge uses gross'],["'Výplň '+g.fenceLen",'fill badge uses net']].forEach(([x,m])=>assert(geometry.includes(x),'geometry-v3: '+m));
+assert(!geometry.includes('vol={line:'),'geometry-v3: legacy role-volume footing constants must not return');
+assert(!geometry.includes("$('#concreteAmount')"),'geometry-v3: concreteAmount must be owned only by concrete-material');
+assert(!geometry.includes('Beton podle typu patek'),'geometry-v3: material-list footing volume must be owned only by concrete-material');
+assert(!geometry.includes('concrete,'),'geometry-v3: legacy concrete total must not be published');
 
 const connections=read('assets/segment-connections-v1.js');assert(connections.includes('Samostatný úsek')&&connections.includes('Navazuje rohem'),'segment connections choices required');
 const calculator=read('assets/calculator-v3.js');assert(calculator.includes('plan-disconnected'),'separate sections must be visible in plan');
@@ -43,10 +47,13 @@ assert(concreteMaterial.includes("type()==='mesh'&&!meshHasSlab()"),'mesh braces
 assert(concreteMaterial.includes('meshHasSlab()')&&concreteMaterial.includes('Patky vzpěr bez podhrabovky'),'slab-mounted braces must not receive hidden concrete');
 assert(concreteMaterial.includes('unsupportedOpenings:openingUnknown'),'gate/wicket footing uncertainty must be exported');
 assert(!concreteMaterial.includes('PLOTAO_GEOMETRY?.concrete'),'concrete-material must not reuse legacy role-volume total');
+assert(concreteMaterial.includes("$('#concreteAmount')")&&concreteMaterial.includes('Beton podle typu patek'),'concrete-material must own both visible footing-volume outputs');
 
 const accuracy=read('assets/accuracy-guard.js');
 assert(accuracy.includes('PLOTAO_SLAB_PRICE')&&accuracy.includes('unsupportedHolders'),'unverified opening slab holders must force partial budget');
 assert(accuracy.includes('unsupportedOpenings'),'unverified gate/wicket footing concrete must force partial budget');
+const priceBridge=read('assets/price-bridge.js');
+assert(priceBridge.includes('c.unsupportedOpenings')&&priceBridge.includes('s.unsupportedHolders'),'price bridge must preserve partial totals for footing/slab exceptions');
 const slabSafety=read('assets/panel-slab-safety-v1.js');assert(slabSafety.includes("startsWith('300')"),'3m slabs must stay blocked for panels');
 const gate=read('assets/gate-pricing-v1.js');assert(gate.includes('slab().with')&&gate.includes('leafLength')&&gate.includes('totalWeight'),'gate exact matching/specs required');
 const drive=read('assets/gate-drive-pricing-v1.js');assert(drive.includes('gate.leafLength')&&drive.includes('gate.totalWeight')&&!drive.includes("if(w<=4)"),'drive must use verified gate specs');
