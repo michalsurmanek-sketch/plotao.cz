@@ -1,0 +1,17 @@
+import fs from 'node:fs';
+const src=fs.readFileSync('assets/options-router-v1.js','utf8');
+const fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
+ok(src.includes("function ensure(group,fallback)"),'router must fill only missing per-type option state');
+ok(src.includes("buttons.some(b=>b.classList.contains('on'))"),'router must preserve an already selected valid option');
+ok(src.includes("ensure('[data-pv]','3d')"),'panel variant fallback missing');
+ok(src.includes("ensure('[data-pc]','green')"),'panel colour fallback missing');
+ok(src.includes("ensure('[data-pb]','without')"),'panel slab toggle fallback missing');
+ok(src.includes("ensure('[data-pbs]','250x20')"),'panel slab size fallback missing');
+ok(src.includes("ensure('[data-mv]','classic')"),'mesh variant fallback missing');
+ok(src.includes("ensure('[data-ms]','green')"),'mesh surface fallback missing');
+ok(src.includes("ensure('[data-mb]','without')"),'mesh slab toggle fallback missing');
+ok(src.includes("ensure('[data-mbs]','300x20')"),'mesh slab size fallback missing');
+ok(src.includes("plotao:options-reset"),'type switch must publish one explicit state-reset event');
+ok(!src.includes("for(const b of buttons)b.classList.toggle('on'"),'router must not overwrite a valid remembered choice on every type switch');
+if(fail.length){console.error('Option state regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
+console.log('Option state regression checks OK');
