@@ -30,6 +30,8 @@ assert(mesh.includes('braceNeed=d.key+50'),'mesh braces sized independently');
 assert(mesh.includes('linePostLength:linePost.key')&&mesh.includes('braceLength:bracePost.key'),'mesh selected lengths exported');
 assert(mesh.includes('postWeld={170:245,200:288,230:337,250:365}'),'current grooved post prices required');
 assert(mesh.includes('post48={150:184,175:211,200:229,220:295,230:296,240:305,260:319,300:399}'),'current Ø48 prices required');
+assert(mesh.includes("if(!linePost||!termPost||!bracePost)return unsupported"),'mesh unavailable required post length must become individual');
+assert(mesh.includes("document.addEventListener('change',()=>schedule(40))")&&mesh.includes("document.addEventListener('click',()=>schedule(70))"),'mesh slab toggle must immediately reschedule benchmark');
 
 const structural=read('assets/structural-pricing-v5.js');assert(structural.includes('window.PLOTAO_GEOMETRY?.fenceLen'),'gabion must use validated net length');assert(structural.includes('if(materialH>300)'),'concrete over 300cm must not extrapolate');
 
@@ -57,6 +59,10 @@ assert(priceBridge.includes('c.unsupportedOpenings')&&priceBridge.includes('s.un
 const slabSafety=read('assets/panel-slab-safety-v1.js');assert(slabSafety.includes("startsWith('300')"),'3m slabs must stay blocked for panels');
 const gate=read('assets/gate-pricing-v1.js');assert(gate.includes('slab().with')&&gate.includes('leafLength')&&gate.includes('totalWeight'),'gate exact matching/specs required');
 const drive=read('assets/gate-drive-pricing-v1.js');assert(drive.includes('gate.leafLength')&&drive.includes('gate.totalWeight')&&!drive.includes("if(w<=4)"),'drive must use verified gate specs');
+
+function chooseFrom(keys,need){return keys.find(x=>x>=need)??null}
+assert(chooseFrom([170,200,230,250],200+50+20)===null,'welded 200cm +20cm slab must be individual: no verified 270cm grooved post');
+assert(chooseFrom([170,200,230,250],180+50+20)===250,'welded 180cm +20cm slab may use verified 250cm grooved post');
 
 function straightRun(length,gap,{mesh=false}={}){const maxSection=mesh?Math.max(gap,Math.floor(25/gap)*gap):length;let fields=0,line=0,strain=0;for(let a=0;a<length-.001;a+=maxSection){const section=Math.min(length,a+maxSection)-a,f=Math.ceil(section/gap);fields+=f;line+=Math.max(0,f-1);if(a+maxSection<length-.001)strain++}const end=2;return{fields,line,strain,end,posts:line+strain+end}}
 function exactPanelStock(runLengths,width=2.5){let full=0,res=[];for(const l0 of runLengths){const l=Math.max(0,l0),n=Math.floor((l+.000001)/width),r=l-n*width;full+=n;if(r>.001)res.push(r)}res.sort((a,b)=>b-a);let best=res.length,bins=[];function place(i){if(i===res.length){best=Math.min(best,bins.length);return}if(bins.length>=best)return;const x=res[i],seen=new Set;for(let j=0;j<bins.length;j++){const cap=+bins[j].toFixed(4);if(seen.has(cap)||bins[j]+.000001<x)continue;seen.add(cap);bins[j]-=x;place(i+1);bins[j]+=x}bins.push(width-x);place(i+1);bins.pop()}if(res.length)place(0);else best=0;return full+best}
