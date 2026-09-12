@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 const src=fs.readFileSync('assets/options-router-v1.js','utf8');
 const seg=fs.readFileSync('assets/segment-connections-v1.js','utf8');
+const slab=fs.readFileSync('assets/slab-pricing-v2.js','utf8');
+const mobile=fs.readFileSync('assets/mobile-price-bridge.js','utf8');
 const fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 ok(src.includes("function ensure(group,fallback)"),'router must fill only missing per-type option state');
 ok(src.includes("buttons.some(b=>b.classList.contains('on'))"),'router must preserve an already selected valid option');
@@ -19,5 +21,11 @@ ok(seg.includes("closest('[data-remove],.remove')"),'segment removal must suppor
 ok(seg.includes("e.target.closest('#addSegment')"),'segment additions must explicitly reschedule connection rendering');
 ok(seg.includes('if(i>0&&i<links.length)links[i]=false'),'removing a middle segment must not invent a new corner between formerly non-adjacent sections');
 ok(seg.includes('Každý rovný úsek zadejte zvlášť'),'segment UX copy must explain connected vs separate sections');
+ok(slab.includes('function clearState(b)'),'slab pricing must expose an explicit stale-state cleanup path');
+ok(slab.includes('window.PLOTAO_SLAB_PRICE=null'),'slab state must be cleared after leaving panel/mesh');
+ok(slab.includes("rb.textContent='Nezapočítáno'"),'slab result row must be neutralized after leaving panel/mesh');
+ok(mobile.includes('function clear()'),'mobile price bridge must clear stale benchmark UI');
+ok(mobile.includes("$('#mobileTotalNote')"),'mobile benchmark note cleanup missing');
+ok(mobile.includes('delete t.dataset.mobileBenchmark'),'mobile fill benchmark marker must be cleared after leaving mobile mesh');
 if(fail.length){console.error('Option/segment state regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
 console.log('Option/segment state regression checks OK');
