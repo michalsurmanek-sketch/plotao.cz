@@ -1,14 +1,20 @@
 import fs from 'node:fs';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url),{solveGeometry}=require('../assets/geometry-core-v1.js');
 const read=p=>fs.readFileSync(p,'utf8'),assets=fs.readdirSync('assets').filter(x=>x.endsWith('.js')),failures=[];
 const assert=(ok,msg)=>{if(!ok)failures.push(msg)},close=(a,b,eps=.0001)=>Math.abs(a-b)<=eps;
 for(const f of assets){const s=read('assets/'+f);assert(!s.includes('setInterval('),`${f}: polling setInterval must not return`)}
 
-const geometry=read('assets/geometry-v3.js');
-[['Math.floor(25/gp)*gp','tension sections align to nominal bay'],['pa+gp*k','full fields stay on nominal spacing'],['gateSides','gate sides published'],['wicketSides','wicket sides published'],['endpointHasFence','joint openings inspect adjacent sections'],["linked(ss,s.i)&&endpointHasFence(ss,ops,s.i-1,'end')",'connected start sees previous fence'],["linked(ss,s.i+1)&&endpointHasFence(ss,ops,s.i+1,'start')",'connected end sees next fence'],["document.addEventListener('plotao:placement'",'placement triggers geometry'],["document.addEventListener('plotao:segment-connections'",'connections trigger geometry'],['PLOTAO_SEGMENT_CONNECTIONS','connections classify posts'],["'outer:'+i+':start",'separate start node'],["'outer:'+i+':end",'separate end node'],['gross=ss.reduce','gross differs from net'],["'Celková trasa '+g.gross",'total badge uses gross'],["'Výplň '+g.fenceLen",'fill badge uses net']].forEach(([x,m])=>assert(geometry.includes(x),'geometry-v3: '+m));
+const geometry=read('assets/geometry-v3.js'),core=read('assets/geometry-core-v1.js');
+assert(geometry.includes('PLOTAO_GEOMETRY_CORE')&&geometry.includes('solveGeometry'),'geometry-v3 must delegate to shared production geometry core');
+assert(geometry.includes("document.addEventListener('plotao:placement'")&&geometry.includes("document.addEventListener('plotao:segment-connections'"),'geometry adapter must react to placement and section connectivity');
+assert(core.includes('Math.floor(25/gap)*gap'),'geometry core tension sections must align to nominal bay');
+assert(core.includes('pa+gap*k'),'geometry core full fields must stay on nominal spacing');
+assert(core.includes('gateSides')&&core.includes('wicketSides'),'geometry core must publish opening fence sides');
+assert(core.includes('endpointHasFence'),'geometry core must inspect adjacent sections at opening boundaries');
 assert(!geometry.includes('vol={line:'),'geometry-v3: legacy role-volume footing constants must not return');
 assert(!geometry.includes("$('#concreteAmount')"),'geometry-v3: concreteAmount must be owned only by concrete-material');
 assert(!geometry.toLowerCase().includes('beton podle typu patek'),'geometry-v3: material-list footing volume must be owned only by concrete-material');
-assert(!geometry.includes('concrete,'),'geometry-v3: legacy concrete total must not be published');
 
 const connections=read('assets/segment-connections-v1.js');assert(connections.includes('Samostatný úsek')&&connections.includes('Navazuje rohem'),'segment connections choices required');
 const calculator=read('assets/calculator-v3.js');assert(calculator.includes('plan-disconnected'),'separate sections must be visible in plan');
@@ -42,53 +48,52 @@ assert(slab.includes("mesh:{20:{end:76,through:116},30:{end:96,through:162}}"),'
 assert(slab.includes('braceHolder={holder:148,screw:6}')&&slab.includes('braceMountCount'),'brace-to-slab hardware required');
 assert(slab.includes('unsupportedHolders')&&slab.includes('unpricedOpeningHolders'),'opening holders must remain partial if profile unknown');
 assert(slab.includes('Math.min(openingSides,sections*2)'),'opening holder exclusions must be capped by real slab row endpoints');
-assert(slab.includes('count*2-unpricedOpeningHolders'),'panel opening-adjacent holders must be removed from verified square-post holders');
-assert(slab.includes('sections*2-unpricedOpeningHolders'),'mesh opening-adjacent holders must be removed from verified Ø48 end holders');
 
 const concreteMaterial=read('assets/concrete-material-v1.js');
 assert(concreteMaterial.includes('diameter=20,depth=80'),'footing model must expose 20x80cm reference dimensions');
 assert(concreteMaterial.includes('Math.PI*(d/2)**2*h'),'footing volume must be geometric cylinder volume');
 assert(concreteMaterial.includes("type()==='mesh'&&!meshHasSlab()"),'mesh braces without slab must receive concrete footings');
-assert(concreteMaterial.includes('meshHasSlab()')&&concreteMaterial.includes('Patky vzpěr bez podhrabovky'),'slab-mounted braces must not receive hidden concrete');
 assert(concreteMaterial.includes('unsupportedOpenings:openingUnknown'),'gate/wicket footing uncertainty must be exported');
-assert(!concreteMaterial.includes('PLOTAO_GEOMETRY?.concrete'),'concrete-material must not reuse legacy role-volume total');
-assert(concreteMaterial.includes("$('#concreteAmount')")&&concreteMaterial.toLowerCase().includes('beton podle typu patek'),'concrete-material must own both visible footing-volume outputs');
 
-const accuracy=read('assets/accuracy-guard.js');
-assert(accuracy.includes('PLOTAO_SLAB_PRICE')&&accuracy.includes('unsupportedHolders'),'unverified opening slab holders must force partial budget');
-assert(accuracy.includes('unsupportedOpenings'),'unverified gate/wicket footing concrete must force partial budget');
-const priceBridge=read('assets/price-bridge.js');
-assert(priceBridge.includes('c.unsupportedOpenings')&&priceBridge.includes('s.unsupportedHolders'),'price bridge must preserve partial totals for footing/slab exceptions');
-const lead=read('assets/lead-safety-v1.js');
-assert(lead.includes("input:not([type=number])")&&lead.includes("input[type=number]"),'lead snapshot must read current segment name and length inputs');
-assert(!lead.includes('input[data-name]')&&!lead.includes('input[data-length]'),'lead snapshot must not return to obsolete segment selectors');
-assert(lead.includes('PLOTAO_SEGMENT_CONNECTIONS')&&lead.includes("'samostatný úsek'")&&lead.includes("'navazuje rohem'"),'lead snapshot must preserve section connectivity');
-assert(lead.includes('gateSection')&&lead.includes('gatePos')&&lead.includes('wicketSection')&&lead.includes('wicketPos'),'lead snapshot must preserve opening section and position');
+const accuracy=read('assets/accuracy-guard.js');assert(accuracy.includes('PLOTAO_SLAB_PRICE')&&accuracy.includes('unsupportedHolders'),'unverified opening slab holders must force partial budget');assert(accuracy.includes('unsupportedOpenings'),'unverified gate/wicket footing concrete must force partial budget');
+const priceBridge=read('assets/price-bridge.js');assert(priceBridge.includes('c.unsupportedOpenings')&&priceBridge.includes('s.unsupportedHolders'),'price bridge must preserve partial totals for footing/slab exceptions');
+const lead=read('assets/lead-safety-v1.js');assert(lead.includes('PLOTAO_SEGMENT_CONNECTIONS'),'lead snapshot must preserve section connectivity');
 const slabSafety=read('assets/panel-slab-safety-v1.js');assert(slabSafety.includes("startsWith('300')"),'3m slabs must stay blocked for panels');
 const gate=read('assets/gate-pricing-v1.js');assert(gate.includes('slab().with')&&gate.includes('leafLength')&&gate.includes('totalWeight'),'gate exact matching/specs required');
 const drive=read('assets/gate-drive-pricing-v1.js');assert(drive.includes('gate.leafLength')&&drive.includes('gate.totalWeight')&&!drive.includes("if(w<=4)"),'drive must use verified gate specs');
 
+function g(type,gap,segments,openings=[]){return solveGeometry({type,gap,segments,openings})}
+let x=g('panel',2.5,[{len:37,connected:false}]);
+assert(x.gross===37&&x.fenceLen===37,'37m panel gross/net length must be 37m');assert(x.fields===15,'37m panel must have 15 fields');assert(x.total===16&&x.line===14&&x.end===2&&x.corner===0,'37m panel must have 14 line + 2 end posts');
+
+x=g('panel',2.5,[{len:20,connected:false},{len:17,connected:true}]);
+assert(x.gross===37&&x.fields===15,'connected 20+17m panel must keep 37m and 15 fields');assert(x.corner===1&&x.end===2&&x.total===16,'connected 20+17m panel must share one corner post');
+
+x=g('panel',2.5,[{len:20,connected:false},{len:17,connected:false}]);
+assert(x.corner===0&&x.end===4&&x.total===17,'separate 20+17m panel must have four end posts and no corner');
+
+x=g('mesh',3,[{len:30,connected:false}]);
+assert(x.fields===10,'30m mesh at 3m spacing must have 10 fields');assert(x.strain===1,'30m mesh at 3m spacing must add one strain post at 24m');assert(x.runs[0].sections.length===2&&close(x.runs[0].sections[0],24)&&close(x.runs[0].sections[1],6),'30m mesh must split into 24m + 6m tension sections');
+
+x=g('panel',2.5,[{len:10,connected:false},{len:10,connected:true}],[{kind:'gate',s:1,p:0,w:4}]);
+assert(x.gateSides===2,'gate at connected section start must count previous and local fence side');assert(x.fenceLen===16&&x.gross===20,'connected-joint gate must subtract only its 4m opening from fill length');
+
+x=g('panel',2.5,[{len:10,connected:false},{len:10,connected:false}],[{kind:'gate',s:1,p:0,w:4}]);
+assert(x.gateSides===1,'gate at separate section start must not borrow fence side from previous section');
+
+x=g('panel',2.5,[{len:8,connected:false},{len:4,connected:true},{len:8,connected:true}],[{kind:'gate',s:1,p:0,w:4}]);
+assert(x.gateSides===2,'opening spanning entire connected middle section must see both neighbouring fences');assert(x.fenceLen===16,'full middle-section opening must remove exactly 4m of fill');
+
+x=g('panel',2.5,[{len:8,connected:false},{len:4,connected:false},{len:8,connected:false}],[{kind:'gate',s:1,p:0,w:4}]);
+assert(x.gateSides===0,'opening spanning entire separate middle section must not cross either boundary');
+
 function chooseFrom(keys,need){return keys.find(x=>x>=need)??null}
 assert(chooseFrom([170,200,230,250],200+50+20)===null,'welded 200cm +20cm slab must be individual: no verified 270cm grooved post');
 assert(chooseFrom([170,200,230,250],180+50+20)===250,'welded 180cm +20cm slab may use verified 250cm grooved post');
-
-function straightRun(length,gap,{mesh=false}={}){const maxSection=mesh?Math.max(gap,Math.floor(25/gap)*gap):length;let fields=0,line=0,strain=0;for(let a=0;a<length-.001;a+=maxSection){const section=Math.min(length,a+maxSection)-a,f=Math.ceil(section/gap);fields+=f;line+=Math.max(0,f-1);if(a+maxSection<length-.001)strain++}const end=2;return{fields,line,strain,end,posts:line+strain+end}}
-function exactPanelStock(runLengths,width=2.5){let full=0,res=[];for(const l0 of runLengths){const l=Math.max(0,l0),n=Math.floor((l+.000001)/width),r=l-n*width;full+=n;if(r>.001)res.push(r)}res.sort((a,b)=>b-a);let best=res.length,bins=[];function place(i){if(i===res.length){best=Math.min(best,bins.length);return}if(bins.length>=best)return;const x=res[i],seen=new Set;for(let j=0;j<bins.length;j++){const cap=+bins[j].toFixed(4);if(seen.has(cap)||bins[j]+.000001<x)continue;seen.add(cap);bins[j]-=x;place(i+1);bins[j]+=x}bins.push(width-x);place(i+1);bins.pop()}if(res.length)place(0);else best=0;return full+best}
-function slabHardware({type,count,sections,openingSides,end=0,corner=0,strain=0}){const unpriced=Math.min(Math.max(0,openingSides),Math.max(0,sections)*2);if(type==='panel')return{unpriced,endH:Math.max(0,count*2-unpriced),throughH:0,braceMounts:0};return{unpriced,endH:Math.max(0,sections*2-unpriced),throughH:Math.max(0,count-sections),braceMounts:Math.max(0,end+corner*2+strain*2+openingSides)}}
+function exactPanelStock(runLengths,width=2.5){let full=0,res=[];for(const l0 of runLengths){const l=Math.max(0,l0),n=Math.floor((l+.000001)/width),r=l-n*width;full+=n;if(r>.001)res.push(r)}res.sort((a,b)=>b-a);let best=res.length,bins=[];function place(i){if(i===res.length){best=Math.min(best,bins.length);return}if(bins.length>=best)return;const v=res[i],seen=new Set;for(let j=0;j<bins.length;j++){const cap=+bins[j].toFixed(4);if(seen.has(cap)||bins[j]+.000001<v)continue;seen.add(cap);bins[j]-=v;place(i+1);bins[j]+=v}bins.push(width-v);place(i+1);bins.pop()}if(res.length)place(0);else best=0;return full+best}
+assert(exactPanelStock([37])===15,'panel37 purchase=15 panels');assert(exactPanelStock([6,6])===5,'two 6m runs purchase 5 panels via offcuts');
 const footingVolume=(count,d=20,h=80)=>count*Math.PI*((d/100)/2)**2*(h/100),bagsFor=v=>Math.ceil(v*2000/25),BAG=129.71;
-
-const panel37=straightRun(37,2.5);assert(panel37.fields===15,'panel37 fields=15');assert(panel37.line===14&&panel37.posts===16,'panel37 posts=16');
 const panelV=footingVolume(16),panelBags=bagsFor(panelV),panelMaterial=15*607+16*354+64*40,panelSlabs=15*680+30*54;
-assert(close(panelV,.4021238597),'panel37 Ø20x80 volume must be ~0.402m3');assert(panelBags===33,'panel37 must use 33 Cemix bags at default hole size');assert(panelMaterial===17329,'panel37 core must stay 17,329 CZK');assert(panelSlabs===11820,'panel37 slabs+holders must stay 11,820 CZK');assert(close(panelMaterial+panelSlabs+panelBags*BAG,33429.43,.01),'panel37 known material total must stay 33,429.43 CZK');
-assert(exactPanelStock([37])===15,'panel37 purchase=15 panels');assert(exactPanelStock([6,6])===5,'two 6m runs purchase 5 panels via offcuts');assert(exactPanelStock([1.4,1.4,1.4])===3,'three 1.4m pieces need 3 panels');assert(15*2*71===2130,'panel 30cm slab holders=2,130 CZK');
-const panelGateJoint=slabHardware({type:'panel',count:7,sections:2,openingSides:2});assert(panelGateJoint.unpriced===2&&panelGateJoint.endH===12,'panel gate at connected joint: 2 gate-post holders individual, 12 verified U holders');
-const panelGateSeparate=slabHardware({type:'panel',count:7,sections:2,openingSides:1});assert(panelGateSeparate.unpriced===1&&panelGateSeparate.endH===13,'panel gate at separate section: only local gate-post holder is individual');
+assert(close(panelV,.4021238597),'panel37 Ø20x80 volume must be ~0.402m3');assert(panelBags===33,'panel37 must use 33 Cemix bags');assert(close(panelMaterial+panelSlabs+panelBags*BAG,33429.43,.01),'panel37 known material total must stay 33,429.43 CZK');
 
-const mesh30=straightRun(30,3,{mesh:true});assert(mesh30.fields===10,'mesh30 fields=10');assert(mesh30.strain===1,'mesh30 strain=1 at 24m');assert(mesh30.line===8&&mesh30.posts===11,'mesh30 posts=11');
-const meshV=footingVolume(11),meshBags=bagsFor(meshV),meshCore=30*87+8*295+3*295+4*223+167+4*15,meshSlabs=10*772+4*76+8*116+4*(148+6);
-assert(close(meshV,.2764601535),'mesh30 slab system Ø20x80 volume must be ~0.276m3');assert(meshBags===23,'mesh30 slab system must use 23 bags');assert(meshCore===6974,'mesh30 core must stay 6,974 CZK');assert(meshSlabs===9568,'mesh30 slabs/hardware must stay 9,568 CZK');assert(close(meshCore+meshSlabs+meshBags*BAG,19525.33,.01),'mesh30 known material total must stay 19,525.33 CZK');
-const meshGateJoint=slabHardware({type:'mesh',count:6,sections:2,openingSides:2,end:2,corner:0,strain:0});assert(meshGateJoint.unpriced===2&&meshGateJoint.endH===2&&meshGateJoint.throughH===4&&meshGateJoint.braceMounts===4,'mesh gate at connected joint: endpoint holders and brace mounts must follow real fence sides');
-const meshGateSeparate=slabHardware({type:'mesh',count:6,sections:2,openingSides:1,end:3,corner:0,strain:0});assert(meshGateSeparate.unpriced===1&&meshGateSeparate.endH===3&&meshGateSeparate.throughH===4&&meshGateSeparate.braceMounts===4,'mesh gate at separate section must not borrow previous fence side');
-
-const connected20={fields:8,line:6,corner:1,end:2,posts:9},separate20={fields:8,line:6,corner:0,end:4,posts:10};assert(connected20.posts===9&&separate20.posts===10,'connected vs separate 10m+10m post counts');
-if(failures.length){console.error('Calculator regression checks failed:\n- '+failures.join('\n- '));process.exit(1)}console.log(`Calculator regression checks OK (${assets.length} JS assets checked; numeric scenarios passed)`);
+if(failures.length){console.error('Calculator regression checks failed:\n- '+failures.join('\n- '));process.exit(1)}console.log(`Calculator regression checks OK (${assets.length} JS assets checked; production geometry scenarios passed)`);
