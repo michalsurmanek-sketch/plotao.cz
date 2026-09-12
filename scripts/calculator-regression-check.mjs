@@ -14,9 +14,16 @@ const geometry=read('assets/geometry-v3.js');
 assert(geometry.includes('Math.floor(25/gp)*gp'),'geometry-v3: tension sections must align to nominal bay spacing');
 assert(geometry.includes('gateSides')&&geometry.includes('wicketSides'),'geometry-v3: opening-adjacent fence sides must be published');
 assert(geometry.includes("document.addEventListener('plotao:placement'"),'geometry-v3: placement changes must trigger geometry');
+assert(geometry.includes('gross=ss.reduce'),'geometry-v3: gross route length must be distinct from net fence fill');
+assert(geometry.includes("'Celková trasa '+g.gross"),'geometry-v3: total length badge must use gross route only once');
+assert(geometry.includes("'Výplň '+g.fenceLen"),'geometry-v3: fill badge must use net fence length');
 
 const panel=read('assets/panel-pricing-v5.js');
 assert(panel.includes('g.gateSides')&&panel.includes('g.wicketSides'),'panel-pricing: clips adjoining openings must be counted');
+
+const mesh=read('assets/mesh-pricing-v2.js');
+assert(mesh.includes('openingSides')&&mesh.includes('strain*2+openingSides'),'mesh-pricing: braces/tension points must use actual fence sides adjoining openings');
+assert(mesh.includes('window.PLOTAO_GEOMETRY?.fenceLen'),'mesh-pricing: mesh length must come from validated geometry');
 
 const slab=read('assets/slab-pricing-v2.js');
 assert(slab.includes("productLength:2.45,bay:2.5"),'slab-pricing: panel 2450mm product must retain nominal 2.5m bay');
