@@ -53,7 +53,12 @@
 
   function toText(raw){
     const d=normalizeLead(raw),seg=d.segments.map((x,i)=>x.name+' '+x.length.toLocaleString('cs-CZ',{maximumFractionDigits:2})+' m'+(i?(' · '+x.connection):'')).join('; '),gate=d.gate?(d.gateType+' · '+d.gateWidth.toLocaleString('cs-CZ')+' m · '+d.gateDrive+' · úsek '+(d.gateSection+1)+' · pozice '+d.gatePos.toLocaleString('cs-CZ')+' m'):'ne',wicket=d.wicket?(d.wicketWidth.toLocaleString('cs-CZ')+' m · úsek '+(d.wicketSection+1)+' · pozice '+d.wicketPos.toLocaleString('cs-CZ')+' m'):'ne';
-    const lines=['PLOTAO.CZ – podklady poptávky','','Kontakt:',d.name||'—',d.phone||'—',d.email||'—','Místo: '+(d.place||d.placeFromCalculator||'—'),'','Plot: '+(d.fenceType||'—'),'Výška: '+(d.height||'—')+' cm','Úseky: '+(seg||'—'),'Varianty: '+(d.options.join(', ')||'—'),'Brána: '+gate,'Branka: '+wicket,'Rozsah: '+(d.scope||'—'),'Zobrazená cena: '+(d.displayedPrice||'—'),'Stav ceny: '+(d.priceKind||'—')]+(d.priceReason?['Důvod / co dopočítat: '+d.priceReason]:[])+['','Poznámka:',d.note||'—'];
+    const lines=[
+      'PLOTAO.CZ – podklady poptávky','',
+      'Kontakt:',d.name||'—',d.phone||'—',d.email||'—','Místo: '+(d.place||d.placeFromCalculator||'—'),'',
+      'Plot: '+(d.fenceType||'—'),'Výška: '+(d.height||'—')+' cm','Úseky: '+(seg||'—'),'Varianty: '+(d.options.join(', ')||'—'),'Brána: '+gate,'Branka: '+wicket,'Rozsah: '+(d.scope||'—'),'Zobrazená cena: '+(d.displayedPrice||'—'),'Stav ceny: '+(d.priceKind||'—'),
+      ...(d.priceReason?['Důvod / co dopočítat: '+d.priceReason]:[]),'','Poznámka:',d.note||'—'
+    ];
     return lines.join('\n');
   }
 
