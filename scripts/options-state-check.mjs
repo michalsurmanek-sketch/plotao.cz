@@ -17,6 +17,7 @@ ok(!src.includes("for(const b of buttons)b.classList.toggle('on'"),'router must 
 ok(!seg.includes('MutationObserver'),'segment connections must not self-observe their own rendered controls');
 ok(seg.includes("closest('[data-remove],.remove')"),'segment removal must support both current remove button forms');
 ok(seg.includes("e.target.closest('#addSegment')"),'segment additions must explicitly reschedule connection rendering');
+ok(seg.includes('if(i>0&&i<links.length)links[i]=false'),'removing a middle segment must not invent a new corner between formerly non-adjacent sections');
 ok(seg.includes('Každý rovný úsek zadejte zvlášť'),'segment UX copy must explain connected vs separate sections');
 if(fail.length){console.error('Option/segment state regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
 console.log('Option/segment state regression checks OK');
