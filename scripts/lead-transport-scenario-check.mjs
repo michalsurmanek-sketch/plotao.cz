@@ -25,12 +25,15 @@ ok(r.ok===false&&r.code==='disabled','missing runtime endpoint must keep server 
 r=core.prepare({...payload,schemaVersion:1},{endpoint:'https://api.example.cz/leads',allowedOrigins:['https://api.example.cz']});
 ok(r.ok===false&&r.code==='payload','unexpected payload schema must be blocked before network access');
 
-const adapter=fs.readFileSync('assets/lead-transport-v1.js','utf8'),safety=fs.readFileSync('assets/lead-safety-v1.js','utf8');
+const adapter=fs.readFileSync('assets/lead-transport-v1.js','utf8'),safety=fs.readFileSync('assets/lead-safety-v1.js','utf8'),manifest=fs.readFileSync('scripts/pages-manifest.mjs','utf8'),index=fs.readFileSync('index.html','utf8');
 ok(adapter.includes('core.prepare(payload,config())')&&adapter.includes('fetch(prepared.endpoint'),'browser transport must fetch only a core-approved endpoint');
 ok(adapter.includes('new AbortController()')&&adapter.includes('setTimeout(()=>controller.abort(),10000)'),'browser transport must enforce a finite network timeout');
 ok(!adapter.includes('credentials:\'include\'')&&!adapter.includes('credentials:"include"'),'browser transport must never opt into cookie credentials');
 ok(safety.includes('function transportReady()')&&safety.includes("await copyDraft(result.data,b,'Odeslání se nepodařilo. Podklady nebyly ztraceny.')"),'form must preserve a safe copy fallback after delivery failure');
 ok(safety.includes('sessionStorage.removeItem(key(result.data.mode))'),'only a successfully delivered mode draft may be cleared');
+const corePos=manifest.indexOf('/assets/lead-transport-core-v1.js'),adapterPos=manifest.indexOf('/assets/lead-transport-v1.js'),safetyPos=manifest.indexOf('/assets/lead-safety-v1.js');
+ok(corePos>=0&&corePos<adapterPos&&adapterPos<safetyPos,'production build must load transport core, then adapter, then form safety');
+ok(!index.includes('PLOTAO_LEAD_TRANSPORT_CONFIG'),'production source must keep server delivery disabled until an approved backend config is deliberately added');
 
 if(fail.length){console.error('Lead transport scenario checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Lead transport scenario checks OK: HTTPS allowlist, payload envelope, timeout and fallback are protected');
+console.log('Lead transport scenario checks OK: HTTPS allowlist, disabled-by-default runtime, script order, timeout and fallback are protected');
