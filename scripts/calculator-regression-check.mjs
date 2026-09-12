@@ -38,6 +38,10 @@ const mesh=read('assets/mesh-pricing-v2.js');
 assert(mesh.includes('openingSides')&&mesh.includes('strain*2+openingSides'),'mesh-pricing: braces/tension points must use actual fence sides adjoining openings');
 assert(mesh.includes('window.PLOTAO_GEOMETRY?.fenceLen'),'mesh-pricing: mesh length must come from validated geometry');
 
+const structural=read('assets/structural-pricing-v5.js');
+assert(structural.includes('window.PLOTAO_GEOMETRY?.fenceLen'),'structural pricing: gabion length must come from validated geometry instead of raw gate-width subtraction');
+assert(structural.includes('if(materialH>300)'),'structural pricing: concrete post pricing above 300 cm must stay individual, not extrapolated');
+
 const slab=read('assets/slab-pricing-v2.js');
 assert(slab.includes("productLength:2.45,bay:2.5"),'slab-pricing: panel 2450mm product must retain nominal 2.5m bay');
 assert(slab.includes("productLength:2.95,bay:3"),'slab-pricing: mesh 2950mm product must retain nominal 3m bay');
