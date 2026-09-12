@@ -13,6 +13,7 @@
   function validatePayload(payload){return!!(payload&&typeof payload==='object'&&payload.schemaVersion===2&&MODES.has(payload.mode)&&typeof payload.name==='string'&&typeof payload.phone==='string'&&typeof payload.email==='string')}
   function prepare(payload,config={},now){
     if(!validatePayload(payload))return{ok:false,code:'payload'};
+    if(config.enabled!==true)return{ok:false,code:'disabled'};
     const endpoint=normalizeEndpoint(config.endpoint);if(!endpoint)return{ok:false,code:'disabled'};
     const allowedOrigins=normalizeOrigins(config.allowedOrigins),origin=new URL(endpoint).origin;
     if(!allowedOrigins.includes(origin))return{ok:false,code:'origin'};
