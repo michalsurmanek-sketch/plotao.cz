@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url),{solveGeometry}=require('../assets/geometry-core-v1.js');
 const read=p=>fs.readFileSync(p,'utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
-const price=read('assets/price-bridge.js'),accuracy=read('assets/accuracy-guard.js'),mobile=read('assets/mobile-price-bridge.js'),truth=read('assets/ui-truth-v1.js'),gateUi=read('assets/gate-ui-v1.js'),lead=read('assets/lead-safety-v1.js'),validity=read('assets/geometry-validity-v1.js'),geometry=read('assets/geometry-v3.js'),core=read('assets/geometry-core-v1.js'),ui=read('assets/ui-bootstrap-v1.js'),index=read('index.html'),panelLanding=read('panelovy-plot.html'),concreteLanding=read('betonovy-plot.html');
+const price=read('assets/price-bridge.js'),accuracy=read('assets/accuracy-guard.js'),mobile=read('assets/mobile-price-bridge.js'),truth=read('assets/ui-truth-v1.js'),gateUi=read('assets/gate-ui-v1.js'),lead=read('assets/lead-safety-v1.js'),leadCore=read('assets/lead-core-v1.js'),validity=read('assets/geometry-validity-v1.js'),geometry=read('assets/geometry-v3.js'),core=read('assets/geometry-core-v1.js'),ui=read('assets/ui-bootstrap-v1.js'),index=read('index.html'),panelLanding=read('panelovy-plot.html'),concreteLanding=read('betonovy-plot.html');
 ok(price.includes('if(mobile)mobile.textContent=text'),'main price bridge must mirror computed material total to mobile price');
 ok(accuracy.includes('partialize(main);partialize(sticky)'),'partial budget must be mirrored to desktop and mobile');
 ok(accuracy.includes('if(sticky)sticky.textContent=headline'),'invalid/individual headline must be mirrored to mobile');
@@ -17,7 +17,8 @@ ok(gateUi.includes("control.disabled=!on"),'hidden gate/wicket controls must als
 ok(gateUi.includes("placement.style.display=gateOn||doorOn?'':'none'"),'opening placement block must disappear when no opening is selected');
 ok(lead.includes('function priceStatus()'),'lead snapshot must classify current displayed price state');
 ok(lead.includes('priceKind:ps.kind')&&lead.includes('priceReason:ps.reason'),'lead snapshot must preserve price state and accuracy explanation');
-ok(lead.includes('Stav ceny: ')&&lead.includes('Důvod / co dopočítat: '),'copied lead text must expose price status and missing-price reason');
+ok(leadCore.includes('Stav ceny: ')&&leadCore.includes('Důvod / co dopočítat: '),'shared lead export must expose price status and missing-price reason');
+ok(lead.includes('PLOTAO_LEAD_CORE')&&lead.includes('core.toText'),'lead browser adapter must use shared lead payload/export core');
 ok(lead.includes("$('#accuracyGuard')"),'lead price explanation must come from the visible accuracy guard');
 ok(validity.includes("if(!invalid())return false"),'validity layer must release naturally when placement becomes valid');
 ok(!validity.includes('locked=true')&&!validity.includes('invalidLock'),'validity layer must not keep a persistent invalid lock');
