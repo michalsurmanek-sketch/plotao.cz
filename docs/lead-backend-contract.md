@@ -4,18 +4,31 @@ Tento kontrakt popisuje jediný podporovaný způsob serverového příjmu formu
 
 ## Stav na frontendu
 
-Frontend používá `lead-core-v1.js` pro normalizaci/validaci a `lead-transport-core-v1.js` pro schválení síťového cíle. Dokud není definována runtime konfigurace `window.PLOTAO_LEAD_TRANSPORT_CONFIG`, serverové odesílání zůstává vypnuté a formulář zachová bezpečný session/clipboard fallback.
+Frontend používá `lead-core-v1.js` pro normalizaci/validaci a `lead-transport-core-v1.js` pro schválení síťového cíle. Produkční runtime konfigurace je v `assets/lead-transport-config-v1.js` a standardně je záměrně vypnutá. Serverové odesílání se povolí jen při současném splnění všech tří podmínek: `enabled: true`, platný HTTPS endpoint a přesná shoda originu endpointu s `allowedOrigins`.
 
 Runtime konfigurace smí obsahovat pouze veřejný endpoint a explicitní allowlist jeho originu. Nikdy do ní nepatří service-role klíč, secret key, databázové heslo, privátní API klíč ani jiný serverový secret.
 
-Příklad tvaru konfigurace po zprovoznění backendu:
+Výchozí produkční stav:
 
 ```js
 window.PLOTAO_LEAD_TRANSPORT_CONFIG = {
+  enabled: false,
+  endpoint: '',
+  allowedOrigins: []
+};
+```
+
+Příklad konfigurace až po plném ověření backendu:
+
+```js
+window.PLOTAO_LEAD_TRANSPORT_CONFIG = {
+  enabled: true,
   endpoint: 'https://<project-ref>.supabase.co/functions/v1/submit-lead',
   allowedOrigins: ['https://<project-ref>.supabase.co']
 };
 ```
+
+Samotné vyplnění endpointu bez `enabled: true` transport nezapne.
 
 ## HTTP požadavek
 
@@ -64,7 +77,8 @@ Zdroj je připravený v repozitáři, ale **není tím automaticky nasazený do 
 - `supabase/functions/submit-lead/validation.mjs` — sdílená serverová validace payloadu.
 - `supabase/functions/submit-lead/deno.json` — přesně připnutá verze `@supabase/server`.
 - `supabase/config.toml` — `verify_jwt = false` pouze pro `submit-lead`, protože jde o veřejný kontaktní endpoint; autorizaci/anti-abuse provádí samotná funkce.
-- `scripts/lead-backend-source-check.mjs` — CI regresní test bezpečnostních invariantů.
+- `assets/lead-transport-config-v1.js` — jediný produkční přepínač aktivace; default je `enabled:false` bez endpointu.
+- `scripts/lead-backend-source-check.mjs` a `scripts/lead-transport-scenario-check.mjs` — CI regresní testy bezpečnostních invariantů.
 
 Edge Function nepoužívá ani nečte privilegovaný klíč v browseru nebo ze zdrojového kódu. Pro databázový zápis používá serverový `ctx.supabaseAdmin` poskytnutý Supabase runtime.
 
@@ -110,7 +124,7 @@ Po zpřístupnění správného projektu PLOTAO konektoru je pořadí nasazení 
 5. Nasadit Edge Function `submit-lead` s `verify_jwt=false`.
 6. Poslat testovací validní lead a potvrdit, že se v `plotao_leads` vytvořil právě jeden záznam.
 7. Otestovat neplatný origin, příliš velké tělo, neplatný payload a rate limit.
-8. Teprve potom vložit přesný function endpoint do `window.PLOTAO_LEAD_TRANSPORT_CONFIG` a jeho Supabase origin do `allowedOrigins`.
+8. Teprve potom změnit **jen** `assets/lead-transport-config-v1.js`: nastavit přesný function endpoint, jeho origin do `allowedOrigins` a nakonec `enabled:true`.
 9. Nechat projít hlavní CI, Pages deploy a ověření skutečné vlastní domény.
 
 Serverové odesílání se smí aktivovat teprve po současném splnění všech bodů:
@@ -120,5 +134,5 @@ Serverové odesílání se smí aktivovat teprve po současném splnění všech
 - CORS je omezený na PLOTAO,
 - serverová validace a rate limiting jsou nasazené,
 - perzistence byla ověřena testovacím požadavkem,
-- runtime konfigurace obsahuje přesný endpoint i jeho origin v `allowedOrigins`,
+- produkční konfigurace má přesný endpoint, správný origin a `enabled:true`,
 - CI a ověření živé vlastní domény zůstanou zelené.
