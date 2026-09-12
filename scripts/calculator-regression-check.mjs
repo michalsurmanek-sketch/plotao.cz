@@ -52,7 +52,10 @@ const accuracy=read('assets/accuracy-guard.js');assert(accuracy.includes('unsupp
 const priceBridge=read('assets/price-bridge.js');assert(priceBridge.includes('c.unsupportedOpenings')&&priceBridge.includes('s.unsupportedHolders'),'price bridge must preserve partial totals');
 const lead=read('assets/lead-safety-v1.js');assert(lead.includes('PLOTAO_SEGMENT_CONNECTIONS'),'lead snapshot must preserve section connectivity');
 const slabSafety=read('assets/panel-slab-safety-v1.js');assert(slabSafety.includes("startsWith('300')"),'3m slabs must stay blocked for panels');
-const gate=read('assets/gate-pricing-v1.js');assert(gate.includes('slab().with')&&gate.includes('leafLength')&&gate.includes('totalWeight'),'gate exact matching/specs required');
+const gateAdapter=read('assets/gate-pricing-v1.js'),gateCore=read('assets/gate-pricing-core-v1.js');
+assert(gateAdapter.includes('PLOTAO_GATE_PRICING_CORE')&&gateAdapter.includes('computeVerifiedGate'),'gate browser adapter must delegate exact matching to shared pricing core');
+assert(gateCore.includes('slabWith')&&gateCore.includes('leafLength')&&gateCore.includes('totalWeight'),'gate shared core must preserve slab matching and verified drive specs');
+assert(gateCore.includes('panelGate')&&gateCore.includes('panelDoor')&&gateCore.includes('meshGate')&&gateCore.includes('meshDoor'),'gate shared core must cover verified panel and mesh openings');
 const drive=read('assets/gate-drive-pricing-v1.js');assert(drive.includes('gate.leafLength')&&drive.includes('gate.totalWeight')&&!drive.includes("if(w<=4)"),'drive must use verified gate specs');
 
 function g(type,gap,segments,openings=[]){return solveGeometry({type,gap,segments,openings})}
