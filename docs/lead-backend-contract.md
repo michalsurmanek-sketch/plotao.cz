@@ -6,14 +6,14 @@ Tento kontrakt popisuje jediný podporovaný způsob serverového příjmu formu
 
 Frontend používá `lead-core-v1.js` pro normalizaci/validaci a `lead-transport-core-v1.js` pro schválení síťového cíle. Dokud není definována runtime konfigurace `window.PLOTAO_LEAD_TRANSPORT_CONFIG`, serverové odesílání zůstává vypnuté a formulář zachová bezpečný session/clipboard fallback.
 
-Runtime konfigurace smí obsahovat pouze veřejný endpoint a explicitní allowlist jeho originu. Nikdy do ní nepatří service-role klíč, databázové heslo, privátní API klíč ani jiný serverový secret.
+Runtime konfigurace smí obsahovat pouze veřejný endpoint a explicitní allowlist jeho originu. Nikdy do ní nepatří service-role klíč, secret key, databázové heslo, privátní API klíč ani jiný serverový secret.
 
 Příklad tvaru konfigurace po zprovoznění backendu:
 
 ```js
 window.PLOTAO_LEAD_TRANSPORT_CONFIG = {
-  endpoint: 'https://<schvaleny-host>/leads',
-  allowedOrigins: ['https://<schvaleny-host>']
+  endpoint: 'https://<project-ref>.supabase.co/functions/v1/submit-lead',
+  allowedOrigins: ['https://<project-ref>.supabase.co']
 };
 ```
 
@@ -51,9 +51,24 @@ Server musí znovu validovat minimálně:
 3. Kontakt, délkové limity textů a datové typy; klientská validace není bezpečnostní hranice.
 4. Maximální velikost request body.
 5. Rate limit / anti-abuse ochranu bez nutnosti posílat browser cookies.
-6. CORS pouze pro schválené originy webu PLOTAO; nepoužívat `*` pro produkční endpoint s osobními údaji.
+6. CORS pouze pro schválený origin `https://plotao.cz`; nepoužívat `*` pro produkční endpoint s osobními údaji.
 7. Server nesmí důvěřovat `displayedPrice` jako účetní nebo smluvní ceně. Je to snapshot UI pro zpracování poptávky.
 8. Logy nesmí zbytečně vypisovat celé telefonní číslo, e-mail, poznámku ani celý request body.
+
+## Připravená Supabase implementace
+
+Zdroj je připravený v repozitáři, ale **není tím automaticky nasazený do Supabase**:
+
+- `supabase/schema/plotao-leads.sql` — tabulky `plotao_leads` a `plotao_lead_rate_events`, RLS, explicitní odebrání práv rolím `anon` a `authenticated` a minimální práva pro `service_role`.
+- `supabase/functions/submit-lead/index.ts` — veřejná Edge Function s přesným CORS originem, 64 KiB limitem těla, serverovou validací a rate limitem.
+- `supabase/functions/submit-lead/validation.mjs` — sdílená serverová validace payloadu.
+- `supabase/functions/submit-lead/deno.json` — přesně připnutá verze `@supabase/server`.
+- `supabase/config.toml` — `verify_jwt = false` pouze pro `submit-lead`, protože jde o veřejný kontaktní endpoint; autorizaci/anti-abuse provádí samotná funkce.
+- `scripts/lead-backend-source-check.mjs` — CI regresní test bezpečnostních invariantů.
+
+Edge Function nepoužívá ani nečte privilegovaný klíč v browseru nebo ze zdrojového kódu. Pro databázový zápis používá serverový `ctx.supabaseAdmin` poskytnutý Supabase runtime.
+
+Rate limit ukládá jen salted SHA-256 digest klientského síťového klíče, nikdy syrovou IP adresu. Funkce vyžaduje Supabase secret `PLOTAO_RATE_SALT` o délce alespoň 32 znaků. Tento secret nesmí být commitnutý do GitHubu ani vložený do frontendu.
 
 ## Doporučené uložení
 
@@ -84,7 +99,19 @@ s HTTP `200`, `201` nebo jiným úspěšným 2xx statusem.
 
 Chyba validace má vracet 4xx; serverová chyba 5xx. Frontend při neúspěchu draft nemaže a nabídne lokální kopii podkladů.
 
-## Aktivace
+## Aktivace v Supabase
+
+Po zpřístupnění správného projektu PLOTAO konektoru je pořadí nasazení pevné:
+
+1. Ověřit project ref a že nejde o projekt SLEVAO.
+2. Aplikovat `supabase/schema/plotao-leads.sql` do PLOTAO databáze.
+3. Spustit Supabase security/performance advisors a opravit relevantní nálezy.
+4. Nastavit náhodný secret `PLOTAO_RATE_SALT` pouze v Supabase secrets.
+5. Nasadit Edge Function `submit-lead` s `verify_jwt=false`.
+6. Poslat testovací validní lead a potvrdit, že se v `plotao_leads` vytvořil právě jeden záznam.
+7. Otestovat neplatný origin, příliš velké tělo, neplatný payload a rate limit.
+8. Teprve potom vložit přesný function endpoint do `window.PLOTAO_LEAD_TRANSPORT_CONFIG` a jeho Supabase origin do `allowedOrigins`.
+9. Nechat projít hlavní CI, Pages deploy a ověření skutečné vlastní domény.
 
 Serverové odesílání se smí aktivovat teprve po současném splnění všech bodů:
 
@@ -94,4 +121,4 @@ Serverové odesílání se smí aktivovat teprve po současném splnění všech
 - serverová validace a rate limiting jsou nasazené,
 - perzistence byla ověřena testovacím požadavkem,
 - runtime konfigurace obsahuje přesný endpoint i jeho origin v `allowedOrigins`,
-- CI a live smoke zůstanou zelené.
+- CI a ověření živé vlastní domény zůstanou zelené.
