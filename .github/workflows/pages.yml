@@ -38,6 +38,7 @@ jobs:
           node scripts/panel-pricing-scenario-check.mjs
           node scripts/mesh-pricing-scenario-check.mjs
           node scripts/gate-pricing-scenario-check.mjs
+          node scripts/gate-drive-pricing-scenario-check.mjs
           node scripts/aluminium-pricing-scenario-check.mjs
           node scripts/privacy-pricing-scenario-check.mjs
           node scripts/structural-pricing-scenario-check.mjs
