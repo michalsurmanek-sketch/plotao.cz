@@ -13,9 +13,10 @@ ok(p.wireM===32&&p.wireRolls===1&&p.tensioners===4&&p.accessoryCost===227,'class
 ok(p.materialTotal===6974,'30m classic mesh + slab verified core must stay 6,974 CZK before slabs/concrete');
 
 g=geom(2.5,[{len:30,connected:false}]);p=computeMeshPrice({geometry:g,variant:'classic',surface:'green',requestedHeight:150,withSlab:false,slabHeight:0});
+ok(g.line===10&&g.strain===1,'30m classic mesh without slab at 2.5m spacing must have 10 line + 1 strain post');
 ok(p.linePostDiameter===38&&p.linePostLength===200,'classic mesh without slab must use Ø38 200cm line posts');
 ok(p.terminalPostLength===200&&p.braceLength===200,'classic mesh without slab must use verified 200cm terminal posts/braces');
-ok(p.materialTotal===5792,'30m classic mesh without slab verified core must stay 5,792 CZK');
+ok(p.materialTotal===6136,'30m classic mesh without slab verified core must stay 6,136 CZK');
 
 g=geom(2.5,[{len:30,connected:false}]);p=computeMeshPrice({geometry:g,variant:'welded',surface:'green',requestedHeight:150,withSlab:false,slabHeight:0});
 ok(!p.unsupported,'30m welded green mesh must be priceable');
@@ -26,13 +27,13 @@ ok(p.materialTotal===13472,'30m welded green verified core must stay 13,472 CZK'
 
 g=geom(3,[{len:10,connected:false},{len:10,connected:true}],[{kind:'gate',s:1,p:0,w:4}]);p=computeMeshPrice({geometry:g,variant:'classic',surface:'green',requestedHeight:150,withSlab:true,slabHeight:20});
 ok(g.gateSides===2&&p.openingSides===2,'connected-joint mesh gate must have two real fence sides');
-ok(p.braces===6,'connected-joint gate must add exactly two opening-side braces');
-ok(p.tensioners===6,'connected-joint gate must add exactly two center-wire tensioners');
+ok(p.braces===4,'connected-joint gate must use two outer-end braces + two real opening-side braces');
+ok(p.tensioners===4,'connected-joint gate center-wire tensioners must follow two outer ends + two opening sides');
 
 g=geom(3,[{len:10,connected:false},{len:10,connected:false}],[{kind:'gate',s:1,p:0,w:4}]);p=computeMeshPrice({geometry:g,variant:'classic',surface:'green',requestedHeight:150,withSlab:true,slabHeight:20});
 ok(g.gateSides===1&&p.openingSides===1,'separate mesh gate must have only one local fence side');
-ok(p.braces===7,'separate gate scenario must retain extra end support without borrowing previous section fence');
-ok(p.tensioners===7,'separate gate scenario tensioners must follow actual ends + opening side');
+ok(p.braces===4,'separate gate must use three real ordinary ends + one local opening-side brace');
+ok(p.tensioners===4,'separate gate tensioners must follow three ends + one local opening side');
 
 p=computeMeshPrice({geometry:geom(3,[{len:20,connected:false}]),variant:'welded',surface:'green',requestedHeight:200,withSlab:true,slabHeight:20});
 ok(p.unsupported===true&&p.reason==='post','200cm welded mesh +20cm slab must become individual without verified 270cm grooved post');
