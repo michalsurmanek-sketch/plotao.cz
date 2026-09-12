@@ -31,7 +31,7 @@ jobs:
           s = p.read_text(encoding='utf-8')
           tags = [
               '<script src="/assets/calculator-v2.js"></script>',
-              '<script src="/assets/geometry-fix.js"></script>',
+              '<script src="/assets/geometry-v3.js"></script>',
               '<script src="/assets/gabion-options.js"></script>',
               '<script src="/assets/aluminium-config.js"></script>',
               '<script src="/assets/privacy-config.js"></script>',
