@@ -52,7 +52,8 @@ jobs:
               "cornerWork=state.scope==='turnkey'?corners*650:0":"cornerWork=0",
               "concrete=state.scope==='turnkey'?concreteVolume*2850:0":"concrete=0",
               "dp=door?9900+Math.max(0,dw-.9)*7000:0":"dp=0",
-              "scope:'turnkey'":"scope:'material'"
+              "scope:'turnkey'":"scope:'material'",
+              "Ceník aktualizován 11. 9. 2026":"Ceník aktualizován 12. 9. 2026"
           }.items():
               s = s.replace(old, new)
           s = s.replace("function gatePrice(type,width,drive){return({double:22500,sliding:31500,cantilever:38500}[type]||22500)+Math.max(0,width-3)*5200+(drive==='auto'?18500:0)}",
@@ -78,6 +79,7 @@ jobs:
               '<script src="/assets/metal-pricing.js"></script>',
               '<script src="/assets/extra-fence-pricing.js"></script>',
               '<script src="/assets/slab-pricing-v2.js"></script>',
+              '<script src="/assets/concrete-material-v1.js"></script>',
               '<script src="/assets/gate-pricing-v1.js"></script>',
               '<script src="/assets/gate-drive-pricing-v1.js"></script>',
               '<script src="/assets/scope-integrity.js"></script>',
@@ -110,9 +112,11 @@ jobs:
               '/assets/panel-pricing-v5.js',
               '/assets/mesh-pricing-v2.js',
               '/assets/slab-pricing-v2.js',
+              '/assets/concrete-material-v1.js',
               '/assets/accuracy-guard.js',
               'name="plotao-deploy"',
-              'data-v="material" class="on"'
+              'data-v="material" class="on"',
+              'Ceník aktualizován 12. 9. 2026'
           ]
           forbidden = [
               'price:1680',
