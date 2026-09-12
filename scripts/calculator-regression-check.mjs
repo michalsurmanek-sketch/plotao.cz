@@ -41,6 +41,9 @@ assert(slab.includes("panel:{20:{end:54,through:null},30:{end:71,through:null}}"
 assert(slab.includes("mesh:{20:{end:76,through:116},30:{end:96,through:162}}"),'current mesh holder prices required');
 assert(slab.includes('braceHolder={holder:148,screw:6}')&&slab.includes('braceMountCount'),'brace-to-slab hardware required');
 assert(slab.includes('unsupportedHolders')&&slab.includes('unpricedOpeningHolders'),'opening holders must remain partial if profile unknown');
+assert(slab.includes('Math.min(openingSides,sections*2)'),'opening holder exclusions must be capped by real slab row endpoints');
+assert(slab.includes('count*2-unpricedOpeningHolders'),'panel opening-adjacent holders must be removed from verified square-post holders');
+assert(slab.includes('sections*2-unpricedOpeningHolders'),'mesh opening-adjacent holders must be removed from verified Ø48 end holders');
 
 const concreteMaterial=read('assets/concrete-material-v1.js');
 assert(concreteMaterial.includes('diameter=20,depth=80'),'footing model must expose 20x80cm reference dimensions');
@@ -71,16 +74,21 @@ assert(chooseFrom([170,200,230,250],180+50+20)===250,'welded 180cm +20cm slab ma
 
 function straightRun(length,gap,{mesh=false}={}){const maxSection=mesh?Math.max(gap,Math.floor(25/gap)*gap):length;let fields=0,line=0,strain=0;for(let a=0;a<length-.001;a+=maxSection){const section=Math.min(length,a+maxSection)-a,f=Math.ceil(section/gap);fields+=f;line+=Math.max(0,f-1);if(a+maxSection<length-.001)strain++}const end=2;return{fields,line,strain,end,posts:line+strain+end}}
 function exactPanelStock(runLengths,width=2.5){let full=0,res=[];for(const l0 of runLengths){const l=Math.max(0,l0),n=Math.floor((l+.000001)/width),r=l-n*width;full+=n;if(r>.001)res.push(r)}res.sort((a,b)=>b-a);let best=res.length,bins=[];function place(i){if(i===res.length){best=Math.min(best,bins.length);return}if(bins.length>=best)return;const x=res[i],seen=new Set;for(let j=0;j<bins.length;j++){const cap=+bins[j].toFixed(4);if(seen.has(cap)||bins[j]+.000001<x)continue;seen.add(cap);bins[j]-=x;place(i+1);bins[j]+=x}bins.push(width-x);place(i+1);bins.pop()}if(res.length)place(0);else best=0;return full+best}
+function slabHardware({type,count,sections,openingSides,end=0,corner=0,strain=0}){const unpriced=Math.min(Math.max(0,openingSides),Math.max(0,sections)*2);if(type==='panel')return{unpriced,endH:Math.max(0,count*2-unpriced),throughH:0,braceMounts:0};return{unpriced,endH:Math.max(0,sections*2-unpriced),throughH:Math.max(0,count-sections),braceMounts:Math.max(0,end+corner*2+strain*2+openingSides)}}
 const footingVolume=(count,d=20,h=80)=>count*Math.PI*((d/100)/2)**2*(h/100),bagsFor=v=>Math.ceil(v*2000/25),BAG=129.71;
 
 const panel37=straightRun(37,2.5);assert(panel37.fields===15,'panel37 fields=15');assert(panel37.line===14&&panel37.posts===16,'panel37 posts=16');
 const panelV=footingVolume(16),panelBags=bagsFor(panelV),panelMaterial=15*607+16*354+64*40,panelSlabs=15*680+30*54;
 assert(close(panelV,.4021238597),'panel37 Ø20x80 volume must be ~0.402m3');assert(panelBags===33,'panel37 must use 33 Cemix bags at default hole size');assert(panelMaterial===17329,'panel37 core must stay 17,329 CZK');assert(panelSlabs===11820,'panel37 slabs+holders must stay 11,820 CZK');assert(close(panelMaterial+panelSlabs+panelBags*BAG,33429.43,.01),'panel37 known material total must stay 33,429.43 CZK');
 assert(exactPanelStock([37])===15,'panel37 purchase=15 panels');assert(exactPanelStock([6,6])===5,'two 6m runs purchase 5 panels via offcuts');assert(exactPanelStock([1.4,1.4,1.4])===3,'three 1.4m pieces need 3 panels');assert(15*2*71===2130,'panel 30cm slab holders=2,130 CZK');
+const panelGateJoint=slabHardware({type:'panel',count:7,sections:2,openingSides:2});assert(panelGateJoint.unpriced===2&&panelGateJoint.endH===12,'panel gate at connected joint: 2 gate-post holders individual, 12 verified U holders');
+const panelGateSeparate=slabHardware({type:'panel',count:7,sections:2,openingSides:1});assert(panelGateSeparate.unpriced===1&&panelGateSeparate.endH===13,'panel gate at separate section: only local gate-post holder is individual');
 
 const mesh30=straightRun(30,3,{mesh:true});assert(mesh30.fields===10,'mesh30 fields=10');assert(mesh30.strain===1,'mesh30 strain=1 at 24m');assert(mesh30.line===8&&mesh30.posts===11,'mesh30 posts=11');
 const meshV=footingVolume(11),meshBags=bagsFor(meshV),meshCore=30*87+8*295+3*295+4*223+167+4*15,meshSlabs=10*772+4*76+8*116+4*(148+6);
 assert(close(meshV,.2764601535),'mesh30 slab system Ø20x80 volume must be ~0.276m3');assert(meshBags===23,'mesh30 slab system must use 23 bags');assert(meshCore===6974,'mesh30 core must stay 6,974 CZK');assert(meshSlabs===9568,'mesh30 slabs/hardware must stay 9,568 CZK');assert(close(meshCore+meshSlabs+meshBags*BAG,19525.33,.01),'mesh30 known material total must stay 19,525.33 CZK');
+const meshGateJoint=slabHardware({type:'mesh',count:6,sections:2,openingSides:2,end:2,corner:0,strain:0});assert(meshGateJoint.unpriced===2&&meshGateJoint.endH===2&&meshGateJoint.throughH===4&&meshGateJoint.braceMounts===4,'mesh gate at connected joint: endpoint holders and brace mounts must follow real fence sides');
+const meshGateSeparate=slabHardware({type:'mesh',count:6,sections:2,openingSides:1,end:3,corner:0,strain:0});assert(meshGateSeparate.unpriced===1&&meshGateSeparate.endH===3&&meshGateSeparate.throughH===4&&meshGateSeparate.braceMounts===4,'mesh gate at separate section must not borrow previous fence side');
 
 const connected20={fields:8,line:6,corner:1,end:2,posts:9},separate20={fields:8,line:6,corner:0,end:4,posts:10};assert(connected20.posts===9&&separate20.posts===10,'connected vs separate 10m+10m post counts');
 if(failures.length){console.error('Calculator regression checks failed:\n- '+failures.join('\n- '));process.exit(1)}console.log(`Calculator regression checks OK (${assets.length} JS assets checked; numeric scenarios passed)`);
