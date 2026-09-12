@@ -37,6 +37,9 @@ assert(panel.includes('g.gateSides')&&panel.includes('g.wicketSides'),'panel-pri
 assert(panel.includes('function slabHeight()'),'panel-pricing: underfence slab height must participate in post sizing');
 assert(panel.includes('need=pd.key+50+slabH'),'panel-pricing: post length must include panel height, embedment allowance and slab height');
 assert(panel.includes('postLength:post.key'),'panel-pricing: exported benchmark must report selected post length');
+assert(panel.includes('function stockPanels('),'panel-pricing: reusable cut panels must be optimized across runs');
+assert(panel.includes('panelCost=panelPieces*pd.val'),'panel-pricing: purchased panel count, not geometric field count, must drive panel cost');
+assert(panel.includes('panelPieces,panelWaste'),'panel-pricing: exported benchmark must expose purchased panel count and leftover material');
 
 const mesh=read('assets/mesh-pricing-v2.js');
 assert(mesh.includes('openingSides')&&mesh.includes('strain*2+openingSides'),'mesh-pricing: braces/tension points must use actual fence sides adjoining openings');
@@ -85,6 +88,26 @@ function straightRun(length,gap,{mesh=false}={}){
   const concrete=line*roleVolume.line+strain*roleVolume.strain+end*roleVolume.end;
   return{fields,line,strain,end,posts,concrete};
 }
+function exactPanelStock(runLengths,width=2.5){
+  let full=0,res=[];
+  for(const l0 of runLengths){
+    const l=Math.max(0,l0),n=Math.floor((l+.000001)/width),r=l-n*width;
+    full+=n;if(r>.001)res.push(r);
+  }
+  res.sort((a,b)=>b-a);let best=res.length,bins=[];
+  function place(i){
+    if(i===res.length){best=Math.min(best,bins.length);return}
+    if(bins.length>=best)return;
+    const x=res[i],seen=new Set;
+    for(let j=0;j<bins.length;j++){
+      const cap=+bins[j].toFixed(4);if(seen.has(cap)||bins[j]+.000001<x)continue;
+      seen.add(cap);bins[j]-=x;place(i+1);bins[j]+=x;
+    }
+    bins.push(width-x);place(i+1);bins.pop();
+  }
+  if(res.length)place(0);else best=0;
+  return full+best;
+}
 
 const panel37=straightRun(37,2.5);
 assert(panel37.fields===15,'numeric panel 37m: expected 15 fields');
@@ -96,6 +119,9 @@ const panelBags=Math.ceil(.82*2000/25)*129.71;
 assert(panelMaterial===17329,'numeric panel 37m: 153cm panel + 20cm slab must use 240cm posts and 17,329 CZK core');
 assert(panelSlabs===11820,'numeric panel 37m: 20cm slabs + verified end holders must stay 11,820 CZK');
 assert(close(panelMaterial+panelSlabs+panelBags,37709.86,.01),'numeric panel 37m: known material total must stay 37,709.86 CZK');
+assert(exactPanelStock([37])===15,'numeric panel 37m: one run must purchase 15 panels');
+assert(exactPanelStock([6,6])===5,'numeric panel 6m+6m: reusable 1m offcuts must reduce purchase from 6 fields to 5 panels');
+assert(exactPanelStock([1.4,1.4,1.4])===3,'numeric panel offcuts: three 1.4m pieces cannot be packed into only two 2.5m stock panels');
 
 const mesh30=straightRun(30,3,{mesh:true});
 assert(mesh30.fields===10,'numeric mesh 30m/3m: expected 10 fields');
