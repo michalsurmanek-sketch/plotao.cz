@@ -57,12 +57,13 @@ assert(extraCore.includes('panelLength:3.5')&&extraCore.includes('panelUnit:1286
 assert(extraCore.includes('counts=runs.map(x=>Math.ceil(x/mobile.panelLength))'),'mobile fence core must count panels independently per run');
 assert(extraCore.includes("kind:'masonry-reference'")&&extraCore.includes('length*6000')&&extraCore.includes('length*11000'),'masonry reference range must stay explicit and separate from exact totals');
 
-const slab=read('assets/slab-pricing-v2.js');
-assert(slab.includes("productLength:2.45,bay:2.5")&&slab.includes("productLength:2.95,bay:3"),'slab nominal bay/product lengths required');
-assert(slab.includes("panel:{20:{end:54,through:null},30:{end:71,through:null}}"),'panel square posts must not use round through holders');
-assert(slab.includes("mesh:{20:{end:76,through:116},30:{end:96,through:162}}"),'current mesh holder prices required');
-assert(slab.includes('braceHolder={holder:148,screw:6}')&&slab.includes('braceMountCount'),'brace-to-slab hardware required');
-assert(slab.includes('unsupportedHolders')&&slab.includes('unpricedOpeningHolders'),'opening holders must remain partial if profile unknown');
+const slabAdapter=read('assets/slab-pricing-v2.js'),slabCore=read('assets/slab-pricing-core-v1.js');
+assert(slabAdapter.includes('PLOTAO_SLAB_PRICING_CORE')&&slabAdapter.includes('computeSlabPrice'),'slab browser adapter must delegate slab/holder totals to shared pricing core');
+assert(slabCore.includes("productLength:2.45,bay:2.5")&&slabCore.includes("productLength:2.95,bay:3"),'slab core must preserve nominal bay vs physical product lengths');
+assert(slabCore.includes("panel:{20:{end:54,through:null},30:{end:71,through:null}}"),'panel square-post holder prices must stay in slab core');
+assert(slabCore.includes("mesh:{20:{end:76,through:116},30:{end:96,through:162}}"),'mesh holder prices must stay in slab core');
+assert(slabCore.includes('braceHolder={holder:148,screw:6}')&&slabCore.includes('braceMountCount'),'brace-to-slab hardware must be computed in shared core');
+assert(slabCore.includes('unsupportedHolders')&&slabCore.includes('unpricedOpeningHolders'),'opening-holder uncertainty must remain explicit in shared core');
 
 const concreteMaterialAdapter=read('assets/concrete-material-v1.js'),concreteMaterialCore=read('assets/concrete-material-core-v1.js');
 assert(concreteMaterialAdapter.includes('PLOTAO_CONCRETE_MATERIAL_CORE')&&concreteMaterialAdapter.includes('computeConcreteMaterial'),'concrete-material browser adapter must delegate to shared footing core');
