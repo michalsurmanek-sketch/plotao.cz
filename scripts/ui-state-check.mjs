@@ -12,6 +12,7 @@ ok(mobile.includes("if($('.price strong'))$('.price strong').textContent=text")&
 ok(truth.includes('Ověřený materiál spočítáme hned'),'intro must clearly distinguish verified material from services');
 ok(truth.includes('Doprava a Na klíč = individuální doplnění'),'scope explanation must disclose individual delivery/turnkey pricing');
 ok(truth.includes("id='scopeTruthNote'")||truth.includes("n.id='scopeTruthNote'"),'scope truth note must have a stable id and avoid duplicates');
+ok(truth.includes('Ověřené položky počítáme z aktuálních cenových podkladů; individuální položky jsou označené zvlášť.'),'result note must distinguish verified pricing inputs from individual items');
 ok(gateUi.includes("labels.slice(0,3).forEach(el=>show(el,gateOn))"),'gate UI must hide all three gate controls when gate is off');
 ok(gateUi.includes("if(labels[3])show(labels[3],doorOn)"),'gate UI must independently hide the wicket width when wicket is off');
 ok(gateUi.includes("grid.style.display=gateOn||doorOn?'grid':'none'"),'gate configuration grid must disappear when no opening is selected');
