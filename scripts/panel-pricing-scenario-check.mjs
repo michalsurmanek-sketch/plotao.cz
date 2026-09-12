@@ -1,6 +1,6 @@
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url),{solveGeometry}=require('../assets/geometry-core-v1.js'),{computePanelPrice}=require('../assets/panel-pricing-core-v1.js');
-const fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};const close=(a,b,e=.01)=>Math.abs(a-b)<=e;
+const fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 function geom(segments,openings=[]){return solveGeometry({type:'panel',gap:2.5,segments,openings})}
 let g=geom([{len:37,connected:false}]);let p=computePanelPrice({geometry:g,variant:'p3d',color:'green',requestedHeight:153,slabHeight:20});
 ok(!p.unsupported,'37m panel scenario must be priceable');
@@ -28,16 +28,18 @@ g=geom([{len:10,connected:false},{len:10,connected:true}],[{kind:'gate',s:1,p:0,
 ok(g.gateSides===2,'connected-joint gate must have two real fence sides');
 ok(p.openingSides===2,'panel pricing must inherit two gate-adjacent sides');
 ok(p.postCount===7,'gate posts must not be counted as ordinary panel posts');
-ok(p.clipQty===40,'gate at connected joint must add clips only for two real opening sides');
+ok(p.clipQty===36,'connected-joint gate must use 28 ordinary-post clips + 8 opening-side clips');
 ok(p.panelPieces===7,'16m net fill must buy seven panels after run/offcut optimization');
 
 g=geom([{len:10,connected:false},{len:10,connected:false}],[{kind:'gate',s:1,p:0,w:4}]);p=computePanelPrice({geometry:g,variant:'p3d',color:'green',requestedHeight:153,slabHeight:20});
 ok(g.gateSides===1&&p.openingSides===1,'separate gate must have only one local fence side');
 ok(p.postCount===8,'separate sections around gate must keep one extra ordinary end post');
-ok(p.clipQty===40,'separate gate arrangement must not invent cross-section gate clips');
+ok(p.clipQty===36,'separate gate must use 32 ordinary-post clips + 4 local opening-side clips');
 
 p=computePanelPrice({geometry:geom([{len:10,connected:false}]),variant:'p3d',color:'green',requestedHeight:203,slabHeight:30});
-ok(p.unsupported===true&&p.reason==='post','203cm panel +30cm slab must become individual when verified post length is unavailable');
+ok(!p.unsupported&&p.postLength===300,'203cm 3D panel +30cm slab must use verified 300cm post');
+p=computePanelPrice({geometry:geom([{len:10,connected:false}]),variant:'p2d',color:'green',requestedHeight:243,slabHeight:30});
+ok(p.unsupported===true&&p.reason==='post','243cm 2D panel +30cm slab must become individual when need exceeds verified 300cm post');
 
 if(fail.length){console.error('Panel pricing scenario checks failed:\n- '+fail.join('\n- '));process.exit(1)}
 console.log('Panel pricing scenario checks OK: production geometry + production panel pricing core');
