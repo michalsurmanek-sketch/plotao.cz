@@ -49,6 +49,7 @@ jobs:
           node scripts/lead-scenario-check.mjs
           node scripts/options-state-check.mjs
           node scripts/ui-state-check.mjs
+          node scripts/seo-regression-check.mjs
 
       - name: Prepare production Pages artifact
         run: node scripts/prepare-pages.mjs
