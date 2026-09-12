@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 const src=fs.readFileSync('assets/options-router-v1.js','utf8');
+const seg=fs.readFileSync('assets/segment-connections-v1.js','utf8');
 const fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 ok(src.includes("function ensure(group,fallback)"),'router must fill only missing per-type option state');
 ok(src.includes("buttons.some(b=>b.classList.contains('on'))"),'router must preserve an already selected valid option');
@@ -13,5 +14,9 @@ ok(src.includes("ensure('[data-mb]','without')"),'mesh slab toggle fallback miss
 ok(src.includes("ensure('[data-mbs]','300x20')"),'mesh slab size fallback missing');
 ok(src.includes("plotao:options-reset"),'type switch must publish one explicit state-reset event');
 ok(!src.includes("for(const b of buttons)b.classList.toggle('on'"),'router must not overwrite a valid remembered choice on every type switch');
-if(fail.length){console.error('Option state regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Option state regression checks OK');
+ok(!seg.includes('MutationObserver'),'segment connections must not self-observe their own rendered controls');
+ok(seg.includes("closest('[data-remove],.remove')"),'segment removal must support both current remove button forms');
+ok(seg.includes("e.target.closest('#addSegment')"),'segment additions must explicitly reschedule connection rendering');
+ok(seg.includes('Každý rovný úsek zadejte zvlášť'),'segment UX copy must explain connected vs separate sections');
+if(fail.length){console.error('Option/segment state regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
+console.log('Option/segment state regression checks OK');
