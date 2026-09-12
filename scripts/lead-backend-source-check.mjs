@@ -22,6 +22,7 @@ ok(r.ok===false&&r.errors.includes('name'),'oversized text must be rejected rath
 const index=fs.readFileSync('supabase/functions/submit-lead/index.ts','utf8');
 const sql=fs.readFileSync('supabase/schema/plotao-leads.sql','utf8');
 const config=fs.readFileSync('supabase/config.toml','utf8');
+const browserConfig=fs.readFileSync('assets/lead-transport-config-v1.js','utf8');
 const deno=JSON.parse(fs.readFileSync('supabase/functions/submit-lead/deno.json','utf8'));
 
 ok(index.includes("const ALLOWED_ORIGIN = 'https://plotao.cz'"),'Edge Function must pin production origin');
@@ -35,6 +36,7 @@ ok(sql.includes('alter table public.plotao_leads enable row level security')&&sq
 ok(sql.includes('grant select, insert, update on table public.plotao_leads to service_role'),'server role must have only required lead-table operations');
 ok(sql.includes('Raw IP addresses are never stored'),'rate-limit schema must document no raw IP retention');
 ok(deno.imports?.['@supabase/server']==='npm:@supabase/server@1.6.0','Supabase server dependency must be exactly pinned');
+ok(browserConfig.includes('enabled:false')&&browserConfig.includes("endpoint:''")&&browserConfig.includes('allowedOrigins:[]'),'production browser transport must remain explicitly disabled before verified backend activation');
 
 if(fail.length){console.error('Lead backend source checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Lead backend source checks OK: validation, RLS, exact CORS, body limits, rate limiting and pinned dependency are protected');
+console.log('Lead backend source checks OK: validation, RLS, exact CORS, body limits, rate limiting, pinned dependency and disabled browser activation are protected');
