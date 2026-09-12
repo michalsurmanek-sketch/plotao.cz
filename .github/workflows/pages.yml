@@ -96,6 +96,39 @@ jobs:
           p.write_text(s, encoding='utf-8')
           Path('deploy-marker.txt').write_text(sha + '\n', encoding='utf-8')
           PY
+      - name: Verify production artifact integrity
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s = Path('index.html').read_text(encoding='utf-8')
+          required = [
+              '/assets/calculator-v3.js',
+              '/assets/geometry-v3.js',
+              '/assets/structural-pricing-v5.js',
+              '/assets/panel-pricing-v5.js',
+              '/assets/mesh-pricing-v2.js',
+              '/assets/slab-pricing-v2.js',
+              '/assets/accuracy-guard.js',
+              'name="plotao-deploy"',
+              'data-v="material" class="on"'
+          ]
+          forbidden = [
+              'price:1680',
+              'price:720',
+              'price:2650',
+              "delivery=state.scope==='material'?0:2900",
+              "workRate=state.type==='concrete'?1450:980",
+              'double:22500,sliding:31500,cantilever:38500',
+              "drive==='auto'?18500:0",
+              "dp=door?9900+Math.max(0,dw-.9)*7000:0"
+          ]
+          missing = [x for x in required if x not in s]
+          leaked = [x for x in forbidden if x in s]
+          marker = Path('deploy-marker.txt').read_text(encoding='utf-8').strip()
+          if missing or leaked or not marker or marker == 'unknown':
+              raise SystemExit(f'Pages artifact integrity failed; missing={missing}; legacy={leaked}; marker={marker!r}')
+          print('Pages artifact integrity OK:', marker)
+          PY
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
