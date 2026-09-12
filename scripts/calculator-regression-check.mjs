@@ -63,11 +63,13 @@ assert(slab.includes("panel:{20:{end:54,through:null},30:{end:71,through:null}}"
 assert(slab.includes("mesh:{20:{end:76,through:116},30:{end:96,through:162}}"),'current mesh holder prices required');
 assert(slab.includes('braceHolder={holder:148,screw:6}')&&slab.includes('braceMountCount'),'brace-to-slab hardware required');
 assert(slab.includes('unsupportedHolders')&&slab.includes('unpricedOpeningHolders'),'opening holders must remain partial if profile unknown');
-const concreteMaterial=read('assets/concrete-material-v1.js');
-assert(concreteMaterial.includes('diameter=20,depth=80'),'footing model must expose 20x80cm reference dimensions');
-assert(concreteMaterial.includes('Math.PI*(d/2)**2*h'),'footing volume must be geometric cylinder volume');
-assert(concreteMaterial.includes("type()==='mesh'&&!meshHasSlab()"),'mesh braces without slab must receive concrete footings');
-assert(concreteMaterial.includes('unsupportedOpenings:openingUnknown'),'gate/wicket footing uncertainty must be exported');
+
+const concreteMaterialAdapter=read('assets/concrete-material-v1.js'),concreteMaterialCore=read('assets/concrete-material-core-v1.js');
+assert(concreteMaterialAdapter.includes('PLOTAO_CONCRETE_MATERIAL_CORE')&&concreteMaterialAdapter.includes('computeConcreteMaterial'),'concrete-material browser adapter must delegate to shared footing core');
+assert(concreteMaterialCore.includes('Math.PI*(d/2)**2*h'),'footing core volume must remain geometric cylinder volume');
+assert(concreteMaterialCore.includes("type==='mesh'&&!meshHasSlab"),'mesh braces without slab must receive concrete footings in shared core');
+assert(concreteMaterialCore.includes('unsupportedOpenings')&&concreteMaterialCore.includes('openingPosts'),'gate/wicket footing uncertainty must be exported by shared core');
+
 const accuracy=read('assets/accuracy-guard.js');assert(accuracy.includes('unsupportedHolders')&&accuracy.includes('unsupportedOpenings'),'accuracy guard must preserve partial slab/opening states');
 const priceBridge=read('assets/price-bridge.js');assert(priceBridge.includes('c.unsupportedOpenings')&&priceBridge.includes('s.unsupportedHolders'),'price bridge must preserve partial totals');
 const lead=read('assets/lead-safety-v1.js');assert(lead.includes('PLOTAO_SEGMENT_CONNECTIONS'),'lead snapshot must preserve section connectivity');
@@ -76,7 +78,10 @@ const gateAdapter=read('assets/gate-pricing-v1.js'),gateCore=read('assets/gate-p
 assert(gateAdapter.includes('PLOTAO_GATE_PRICING_CORE')&&gateAdapter.includes('computeVerifiedGate'),'gate browser adapter must delegate exact matching to shared pricing core');
 assert(gateCore.includes('slabWith')&&gateCore.includes('leafLength')&&gateCore.includes('totalWeight'),'gate shared core must preserve slab matching and verified drive specs');
 assert(gateCore.includes('panelGate')&&gateCore.includes('panelDoor')&&gateCore.includes('meshGate')&&gateCore.includes('meshDoor'),'gate shared core must cover verified panel and mesh openings');
-const drive=read('assets/gate-drive-pricing-v1.js');assert(drive.includes('gate.leafLength')&&drive.includes('gate.totalWeight')&&!drive.includes("if(w<=4)"),'drive must use verified gate specs');
+const driveAdapter=read('assets/gate-drive-pricing-v1.js'),driveCore=read('assets/gate-drive-pricing-core-v1.js');
+assert(driveAdapter.includes('PLOTAO_GATE_DRIVE_PRICING_CORE')&&driveAdapter.includes('selectVerifiedDrive'),'drive browser adapter must delegate verified motor selection to shared core');
+assert(driveCore.includes('leafLength')&&driveCore.includes('totalWeight')&&driveCore.includes('maxLeaf')&&driveCore.includes('maxWeight'),'drive core must use verified gate specs and manufacturer limits');
+assert(!driveAdapter.includes("if(w<=4)"),'drive adapter must never select a motor from opening width alone');
 
 function g(type,gap,segments,openings=[]){return solveGeometry({type,gap,segments,openings})}
 let x=g('panel',2.5,[{len:37,connected:false}]);assert(x.gross===37&&x.fenceLen===37&&x.fields===15,'37m panel geometry must stay 37m / 15 fields');assert(x.total===16&&x.line===14&&x.end===2&&x.corner===0,'37m panel posts must stay 14 line + 2 end');
