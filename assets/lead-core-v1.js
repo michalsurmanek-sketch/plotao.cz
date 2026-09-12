@@ -11,8 +11,8 @@
   function multiline(v,max=2000){return String(v??'').replace(/\r\n?/g,'\n').trim().slice(0,max)}
   function num(v,min=0,max=Number.MAX_SAFE_INTEGER,fallback=0){const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback}
   function int(v,min=0,max=Number.MAX_SAFE_INTEGER,fallback=0){return Math.trunc(num(v,min,max,fallback))}
-  function normalizePhone(v){const raw=text(v,80),plus=raw.startsWith('+'),digits=raw.replace(/\D/g,'').slice(0,15);return(plus?'+':'')+digits}
-  function normalizeEmail(v){return text(v,254).toLowerCase()}
+  function normalizePhone(v){const raw=text(v,80),plus=raw.startsWith('+'),digits=raw.replace(/\D/g,'').slice(0,32);return(plus?'+':'')+digits}
+  function normalizeEmail(v){return text(v,320).toLowerCase()}
   function normalizeSegments(items){return(Array.isArray(items)?items:[]).map((x,i)=>({name:text(x?.name,120)||('Úsek '+(i+1)),length:num(x?.length,0,1000,0),connection:i===0?'začátek':CONNECTIONS.has(x?.connection)?x.connection:'navazuje rohem'}))}
   function normalizeOptions(items){const out=[];for(const item of Array.isArray(items)?items:[]){const v=text(item,160);if(v&&!out.includes(v))out.push(v);if(out.length>=40)break}return out}
 
@@ -22,9 +22,9 @@
       schemaVersion:SCHEMA_VERSION,
       savedAt:text(r.savedAt,40)||text(now,40)||new Date().toISOString(),
       name:text(r.name,120),phone:normalizePhone(r.phone),email:normalizeEmail(r.email),place:text(r.place,160),note:multiline(r.note,2000),
-      fenceType:text(r.fenceType,120),height:num(r.height,0,400,0),segments,options:normalizeOptions(r.options),
-      gate:!!r.gate,gateType:text(r.gateType,40),gateWidth:num(r.gateWidth,0,20,0),gateDrive:text(r.gateDrive,40),gateSection:int(r.gateSection,0,Math.max(0,segments.length-1),0),gatePos:num(r.gatePos,0,1000,0),
-      wicket:!!r.wicket,wicketWidth:num(r.wicketWidth,0,10,0),wicketSection:int(r.wicketSection,0,Math.max(0,segments.length-1),0),wicketPos:num(r.wicketPos,0,1000,0),
+      fenceType:text(r.fenceType,120),height:num(r.height,0,10000,0),segments,options:normalizeOptions(r.options),
+      gate:!!r.gate,gateType:text(r.gateType,40),gateWidth:num(r.gateWidth,0,20,0),gateDrive:text(r.gateDrive,40),gateSection:int(r.gateSection,0,999,0),gatePos:num(r.gatePos,0,1000,0),
+      wicket:!!r.wicket,wicketWidth:num(r.wicketWidth,0,10,0),wicketSection:int(r.wicketSection,0,999,0),wicketPos:num(r.wicketPos,0,1000,0),
       scope:text(r.scope,80),displayedPrice:text(r.displayedPrice,80),priceKind,priceReason:text(r.priceReason,1000),placeFromCalculator:text(r.placeFromCalculator,160)
     };
   }
@@ -34,7 +34,7 @@
     const phoneDigits=d.phone.replace(/\D/g,'');
     if(d.name.length<2)errors.push({field:'name',code:'name',message:'Doplňte jméno (alespoň 2 znaky).'});
     if(phoneDigits.length<9||phoneDigits.length>15)errors.push({field:'phone',code:'phone',message:'Zadejte platné telefonní číslo (9–15 číslic).'});
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email))errors.push({field:'email',code:'email',message:'Zadejte platný e-mail.'});
+    if(d.email.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email))errors.push({field:'email',code:'email',message:'Zadejte platný e-mail.'});
     if(!d.fenceType)errors.push({field:'fenceType',code:'fence-type',message:'Vyberte typ plotu.'});
     if(d.height<40||d.height>400)errors.push({field:'height',code:'height',message:'Výška plotu musí být 40–400 cm.'});
     const positive=d.segments.filter(x=>x.length>0);
