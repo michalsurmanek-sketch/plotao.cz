@@ -45,7 +45,11 @@ assert(privacyAdapter.includes('PLOTAO_PRIVACY_PRICING_CORE')&&privacyAdapter.in
 assert(privacyCore.includes('for(const run of runs)stockPer+=Math.ceil(run/stockLength)'),'privacy core must preserve stock waste per separate run');
 assert(privacyCore.includes("reason:'material'")&&privacyCore.includes("reason:'product'")&&privacyCore.includes("reason:'height'"),'privacy unsupported boundaries must stay explicit');
 
-const structural=read('assets/structural-pricing-v5.js');assert(structural.includes('window.PLOTAO_GEOMETRY?.fenceLen'),'gabion must use validated net length');assert(structural.includes('if(materialH>300)'),'concrete over 300cm must not extrapolate');
+const structuralAdapter=read('assets/structural-pricing-v5.js'),structuralCore=read('assets/structural-pricing-core-v1.js');
+assert(structuralAdapter.includes('PLOTAO_STRUCTURAL_PRICING_CORE')&&structuralAdapter.includes('computeConcretePrice')&&structuralAdapter.includes('computeGabionPrice'),'structural browser adapter must delegate concrete and gabion pricing to shared core');
+assert(structuralAdapter.includes('window.PLOTAO_GEOMETRY?.fenceLen'),'gabion adapter must pass validated net length');
+assert(structuralCore.includes('Math.ceil(requested/25)*25')&&structuralCore.includes("reason:'height'"),'concrete core must round to 25cm modules and block heights above verified range');
+assert(structuralCore.includes('density:1.7')&&structuralCore.includes('constructionLow')&&structuralCore.includes('stoneLow'),'gabion core must own volume/density and material range calculation');
 const slab=read('assets/slab-pricing-v2.js');
 assert(slab.includes("productLength:2.45,bay:2.5")&&slab.includes("productLength:2.95,bay:3"),'slab nominal bay/product lengths required');
 assert(slab.includes("panel:{20:{end:54,through:null},30:{end:71,through:null}}"),'panel square posts must not use round through holders');
