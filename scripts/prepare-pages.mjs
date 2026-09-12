@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {activeScripts} from './pages-manifest.mjs';
 
 const path='index.html';
 let html=fs.readFileSync(path,'utf8');
@@ -8,11 +9,6 @@ const changes=[];
 function replaceRequired(name,from,to){
   if(!html.includes(from)) throw new Error(`Pages build transform missing source: ${name}`);
   html=html.replace(from,to);
-  changes.push(name);
-}
-function replaceAllRequired(name,from,to){
-  if(!html.includes(from)) throw new Error(`Pages build transform missing source: ${name}`);
-  html=html.split(from).join(to);
   changes.push(name);
 }
 function ensureTag(tag){
@@ -53,10 +49,7 @@ const replacements=[
 ];
 for(const [name,from,to] of replacements) replaceRequired(name,from,to);
 
-const tags=[
-  '/assets/segment-connections-v1.js','/assets/calculator-v3.js','/assets/geometry-v3.js','/assets/geometry-validity-v1.js','/assets/gabion-options.js','/assets/aluminium-config.js','/assets/privacy-config.js','/assets/metal-config.js','/assets/concrete-config.js','/assets/extra-fence-config.js','/assets/options-router-v1.js','/assets/panel-slab-safety-v1.js','/assets/structural-pricing-v5.js','/assets/panel-pricing-v5.js','/assets/mesh-pricing-v2.js','/assets/aluminium-pricing.js','/assets/privacy-pricing.js','/assets/metal-pricing.js','/assets/extra-fence-pricing.js','/assets/slab-pricing-v2.js','/assets/concrete-material-v1.js','/assets/gate-pricing-v1.js','/assets/gate-drive-pricing-v1.js','/assets/scope-integrity.js','/assets/price-bridge.js','/assets/mobile-price-bridge.js','/assets/accuracy-guard.js','/assets/lead-safety-v1.js','/assets/step-scroll-v1.js','/assets/ui-truth-v1.js'
-];
-for(const src of tags) ensureTag(`<script src="${src}"></script>`);
+for(const src of activeScripts) ensureTag(`<script src="${src}"></script>`);
 
 if(!html.includes('<main class="wrap" id="kalkulator">')) replaceRequired('calculator anchor','<main class="wrap">','<main class="wrap" id="kalkulator">');
 if(!html.includes('name="plotao-deploy"')){
@@ -66,4 +59,4 @@ if(!html.includes('name="plotao-deploy"')){
 
 fs.writeFileSync(path,html,'utf8');
 fs.writeFileSync('deploy-marker.txt',sha+'\n','utf8');
-console.log(`Pages build prepared: ${changes.length} required transforms, ${tags.length} modules, SHA ${sha}`);
+console.log(`Pages build prepared: ${changes.length} required transforms, ${activeScripts.length} modules, SHA ${sha}`);
