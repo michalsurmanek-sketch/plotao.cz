@@ -48,6 +48,7 @@ jobs:
           node scripts/price-total-scenario-check.mjs
           node scripts/lead-scenario-check.mjs
           node scripts/lead-transport-scenario-check.mjs
+          node scripts/lead-backend-source-check.mjs
           node scripts/options-state-check.mjs
           node scripts/ui-state-check.mjs
           node scripts/seo-regression-check.mjs
