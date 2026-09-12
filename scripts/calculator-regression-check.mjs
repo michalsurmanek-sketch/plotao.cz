@@ -50,6 +50,13 @@ assert(structuralAdapter.includes('PLOTAO_STRUCTURAL_PRICING_CORE')&&structuralA
 assert(structuralAdapter.includes('window.PLOTAO_GEOMETRY?.fenceLen'),'gabion adapter must pass validated net length');
 assert(structuralCore.includes('Math.ceil(requested/25)*25')&&structuralCore.includes("reason:'height'"),'concrete core must round to 25cm modules and block heights above verified range');
 assert(structuralCore.includes('density:1.7')&&structuralCore.includes('constructionLow')&&structuralCore.includes('stoneLow'),'gabion core must own volume/density and material range calculation');
+
+const extraAdapter=read('assets/extra-fence-pricing.js'),extraCore=read('assets/extra-fence-pricing-core-v1.js');
+assert(extraAdapter.includes('PLOTAO_EXTRA_FENCE_PRICING_CORE')&&extraAdapter.includes('computeExtraFencePrice'),'extra-fence browser adapter must delegate mobile/masonry pricing to shared core');
+assert(extraCore.includes('panelLength:3.5')&&extraCore.includes('panelUnit:1286')&&extraCore.includes('footUnit:176')&&extraCore.includes('connectorUnit:78'),'mobile fence verified DOPS units must stay in shared core');
+assert(extraCore.includes('counts=runs.map(x=>Math.ceil(x/mobile.panelLength))'),'mobile fence core must count panels independently per run');
+assert(extraCore.includes("kind:'masonry-reference'")&&extraCore.includes('length*6000')&&extraCore.includes('length*11000'),'masonry reference range must stay explicit and separate from exact totals');
+
 const slab=read('assets/slab-pricing-v2.js');
 assert(slab.includes("productLength:2.45,bay:2.5")&&slab.includes("productLength:2.95,bay:3"),'slab nominal bay/product lengths required');
 assert(slab.includes("panel:{20:{end:54,through:null},30:{end:71,through:null}}"),'panel square posts must not use round through holders');
