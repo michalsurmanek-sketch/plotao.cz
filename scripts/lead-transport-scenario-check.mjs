@@ -16,7 +16,7 @@ ok(r.request.method==='POST'&&r.request.credentials==='omit','lead delivery must
 ok(r.request.headers['Content-Type']==='application/json'&&r.request.headers.Accept==='application/json','lead delivery must use explicit JSON headers');
 const body=r.ok?JSON.parse(r.request.body):{};
 ok(body.source==='plotao.cz'&&body.transportVersion===1&&body.submittedAt==='2026-09-12T20:30:00.000Z','transport envelope metadata must be stable');
-ok(body.lead===payload,'transport must carry the already validated/normalized lead object without rewriting it');
+ok(JSON.stringify(body.lead)===JSON.stringify(payload),'transport must carry the already validated/normalized lead content without rewriting it');
 
 r=core.prepare(payload,{endpoint:'https://evil.example/leads',allowedOrigins:['https://api.example.cz']});
 ok(r.ok===false&&r.code==='origin','endpoint outside the explicit allowlist must be blocked');
