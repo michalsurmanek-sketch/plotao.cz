@@ -45,6 +45,10 @@ assert(structural.includes('if(materialH>300)'),'structural pricing: concrete po
 const slab=read('assets/slab-pricing-v2.js');
 assert(slab.includes("productLength:2.45,bay:2.5"),'slab-pricing: panel 2450mm product must retain nominal 2.5m bay');
 assert(slab.includes("productLength:2.95,bay:3"),'slab-pricing: mesh 2950mm product must retain nominal 3m bay');
+assert(slab.includes('unsupportedHolders')&&slab.includes('unpricedOpeningHolders'),'slab-pricing: holders adjoining gates/wickets must not be priced as ordinary post holders');
+
+const accuracy=read('assets/accuracy-guard.js');
+assert(accuracy.includes('PLOTAO_SLAB_PRICE?.unsupportedHolders'),'accuracy guard: unverified slab holders at openings must force a partial budget');
 
 const slabSafety=read('assets/panel-slab-safety-v1.js');
 assert(slabSafety.includes("startsWith('300')"),'panel slab safety: 3m slab options must be blocked for panel type');
