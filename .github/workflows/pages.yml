@@ -43,6 +43,7 @@ jobs:
           node scripts/privacy-pricing-scenario-check.mjs
           node scripts/structural-pricing-scenario-check.mjs
           node scripts/extra-fence-pricing-scenario-check.mjs
+          node scripts/concrete-material-scenario-check.mjs
           node scripts/options-state-check.mjs
           node scripts/ui-state-check.mjs
 
