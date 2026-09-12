@@ -12,11 +12,21 @@ for(const f of assets){
 
 const geometry=read('assets/geometry-v3.js');
 assert(geometry.includes('Math.floor(25/gp)*gp'),'geometry-v3: tension sections must align to nominal bay spacing');
+assert(geometry.includes('pa+gp*k'),'geometry-v3: full fields must remain on nominal spacing; only the last field may shorten');
 assert(geometry.includes('gateSides')&&geometry.includes('wicketSides'),'geometry-v3: opening-adjacent fence sides must be published');
 assert(geometry.includes("document.addEventListener('plotao:placement'"),'geometry-v3: placement changes must trigger geometry');
+assert(geometry.includes("document.addEventListener('plotao:segment-connections'"),'geometry-v3: connected/separate section changes must trigger geometry');
+assert(geometry.includes('PLOTAO_SEGMENT_CONNECTIONS'),'geometry-v3: section connectivity must participate in post classification');
+assert(geometry.includes("'outer:'+i+':start")&&geometry.includes("'outer:'+i+':end"),'geometry-v3: separate sections must receive their own end nodes');
 assert(geometry.includes('gross=ss.reduce'),'geometry-v3: gross route length must be distinct from net fence fill');
 assert(geometry.includes("'Celková trasa '+g.gross"),'geometry-v3: total length badge must use gross route only once');
 assert(geometry.includes("'Výplň '+g.fenceLen"),'geometry-v3: fill badge must use net fence length');
+
+const connections=read('assets/segment-connections-v1.js');
+assert(connections.includes('Samostatný úsek')&&connections.includes('Navazuje rohem'),'segment connections: user must be able to choose connected versus separate runs');
+
+const calculator=read('assets/calculator-v3.js');
+assert(calculator.includes('plan-disconnected'),'calculator-v3: separate sections must be visible in the plan');
 
 const panel=read('assets/panel-pricing-v5.js');
 assert(panel.includes('g.gateSides')&&panel.includes('g.wicketSides'),'panel-pricing: clips adjoining openings must be counted');
