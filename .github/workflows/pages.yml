@@ -53,7 +53,8 @@ jobs:
               "concrete=state.scope==='turnkey'?concreteVolume*2850:0":"concrete=0",
               "dp=door?9900+Math.max(0,dw-.9)*7000:0":"dp=0",
               "scope:'turnkey'":"scope:'material'",
-              "Ceník aktualizován 11. 9. 2026":"Ceník aktualizován 12. 9. 2026"
+              "Ceník aktualizován 11. 9. 2026":"Ceník aktualizován 12. 9. 2026",
+              "form.onsubmit=e=>{e.preventDefault();alert('Formulář je připraven; databázové odeslání bude další krok.')}":"form.onsubmit=null"
           }.items():
               s = s.replace(old, new)
           s = s.replace("function gatePrice(type,width,drive){return({double:22500,sliding:31500,cantilever:38500}[type]||22500)+Math.max(0,width-3)*5200+(drive==='auto'?18500:0)}",
@@ -85,7 +86,8 @@ jobs:
               '<script src="/assets/scope-integrity.js"></script>',
               '<script src="/assets/price-bridge.js"></script>',
               '<script src="/assets/mobile-price-bridge.js"></script>',
-              '<script src="/assets/accuracy-guard.js"></script>'
+              '<script src="/assets/accuracy-guard.js"></script>',
+              '<script src="/assets/lead-safety-v1.js"></script>'
           ]
           for tag in tags:
               if tag not in s:
@@ -114,6 +116,7 @@ jobs:
               '/assets/slab-pricing-v2.js',
               '/assets/concrete-material-v1.js',
               '/assets/accuracy-guard.js',
+              '/assets/lead-safety-v1.js',
               'name="plotao-deploy"',
               'data-v="material" class="on"',
               'Ceník aktualizován 12. 9. 2026'
@@ -126,7 +129,8 @@ jobs:
               "workRate=state.type==='concrete'?1450:980",
               'double:22500,sliding:31500,cantilever:38500',
               "drive==='auto'?18500:0",
-              "dp=door?9900+Math.max(0,dw-.9)*7000:0"
+              "dp=door?9900+Math.max(0,dw-.9)*7000:0",
+              'databázové odeslání bude další krok'
           ]
           missing = [x for x in required if x not in s]
           leaked = [x for x in forbidden if x in s]
