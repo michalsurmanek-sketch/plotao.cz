@@ -3,10 +3,13 @@ import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url),core=require('../assets/lead-core-v1.js');
 const fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 const base={mode:'lead',name:' Jan Novák ',phone:'+420 777 123 456',email:'JAN.NOVAK@EXAMPLE.CZ',place:' Uherské Hradiště ',note:' Prosím zavolat. ',fenceType:'Panelový plot',height:153,segments:[{name:'Předek',length:20,connection:'začátek'},{name:'Bok',length:17,connection:'navazuje rohem'}],options:['3D','Zelená'],gate:false,gateType:'double',gateWidth:4,gateDrive:'none',gateSection:0,gatePos:0,wicket:false,wicketWidth:1,wicketSection:0,wicketPos:0,scopeValue:'material',scope:'Materiál',displayedPrice:'42 000 Kč',priceKind:'ověřená cena',priceReason:'',placeFromCalculator:'Uherské Hradiště'};
-const adapter=fs.readFileSync('assets/lead-safety-v1.js','utf8');
+const adapter=fs.readFileSync('assets/lead-safety-v1.js','utf8'),modeUi=fs.readFileSync('assets/lead-mode-ui-v1.js','utf8');
 ok(adapter.includes('PLOTAO_LEAD_CORE')&&adapter.includes('normalizeLead')&&adapter.includes('validateLead')&&adapter.includes('core.toText'),'lead browser adapter must delegate payload normalization, validation and text export to shared core');
 ok(adapter.includes('PLOTAO_SEGMENT_CONNECTIONS'),'lead browser adapter must preserve segment connectivity in snapshots');
 ok(adapter.includes("mode:form.dataset.mode||'lead'")&&adapter.includes("scopeValue:scopeBtn?.dataset.v||'material'"),'browser snapshot must preserve modal mode and stable scope value');
+ok(modeUi.includes("mode==='partner'")&&modeUi.includes("labelText(placeLabel,'Oblast působnosti')")&&modeUi.includes('place.required=true'),'partner modal must expose and require area of operation');
+ok(modeUi.includes("mode==='help'")&&modeUi.includes("Obec / PSČ (volitelné)")&&modeUi.includes('place.required=false'),'help modal must keep location optional');
+ok(modeUi.includes("scope==='delivery'||scope==='turnkey'")&&modeUi.includes("labelText(placeLabel,scope==='material'?'Obec / PSČ (volitelné)':'Obec / PSČ')"),'customer modal must require location only for delivery/turnkey scopes');
 
 let d=core.normalizeLead(base,'2026-09-12T20:00:00.000Z');
 ok(d.schemaVersion===2,'lead payload schema version must reflect mode-aware schema');
@@ -45,13 +48,11 @@ ok(v.valid===false&&v.errors.some(e=>e.code==='wicket-placement'),'wicket extend
 v=core.validateLead({...base,gate:true,gateWidth:4,gateSection:99,gatePos:1});
 ok(v.valid===false&&v.errors.some(e=>e.code==='gate-placement'||e.code==='gate-section'),'out-of-range gate section must not create a silently valid customer lead');
 
-// Help mode needs valid contact, but must not be blocked by an unfinished calculator configuration.
 v=core.validateLead({...base,mode:'help',fenceType:'',height:0,segments:[],priceKind:'neplatné zadání',gate:true,gateSection:99,place:''});
 ok(v.valid===true,'help request with valid contact must not require a completed fence calculation');
 v=core.validateLead({...base,mode:'help',phone:'1234',fenceType:'',height:0,segments:[]});
 ok(v.valid===false&&v.errors.some(e=>e.code==='phone'),'help mode must still validate contact information');
 
-// Partner mode is a contractor/company contact, not a customer fence quote.
 v=core.validateLead({...base,mode:'partner',place:'Zlínský kraj',fenceType:'',height:0,segments:[],priceKind:'neplatné zadání',gate:true,gateSection:99});
 ok(v.valid===true,'partner request must ignore customer fence geometry and price state');
 v=core.validateLead({...base,mode:'partner',place:'',placeFromCalculator:'',fenceType:'',height:0,segments:[]});
