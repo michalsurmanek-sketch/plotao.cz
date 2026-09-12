@@ -66,11 +66,10 @@
     return['Plot: '+(d.fenceType||'—'),'Výška: '+(d.height||'—')+' cm','Úseky: '+(seg||'—'),'Varianty: '+(d.options.join(', ')||'—'),'Brána: '+gate,'Branka: '+wicket,'Rozsah: '+(d.scope||d.scopeValue||'—'),'Zobrazená cena: '+(d.displayedPrice||'—'),'Stav ceny: '+(d.priceKind||'—'),...(d.priceReason?['Důvod / co dopočítat: '+d.priceReason]:[])];
   }
   function toText(raw){
-    const d=normalizeLead(raw),place=d.place||d.placeFromCalculator||'—';
-    if(d.mode==='partner')return['PLOTAO.CZ – zájem montážní firmy','','Kontakt:',d.name||'—',d.phone||'—',d.email||'—','Oblast působnosti: '+place,'','Poznámka:',d.note||'—'].join('\n');
-    const title=d.mode==='help'?'PLOTAO.CZ – žádost o radu':'PLOTAO.CZ – podklady poptávky',lines=[title,'','Kontakt:',d.name||'—',d.phone||'—',d.email||'—','Místo: '+place,''];
-    if(d.mode==='lead'||d.fenceType)lines.push(...fenceLines(d),'');
-    lines.push(d.mode==='help'?'Dotaz:':'Poznámka:',d.note||'—');
+    const d=normalizeLead(raw);
+    if(d.mode==='partner')return['PLOTAO.CZ – zájem montážní firmy','','Kontakt:',d.name||'—',d.phone||'—',d.email||'—','Oblast působnosti: '+(d.place||'—'),'','Poznámka:',d.note||'—'].join('\n');
+    if(d.mode==='help')return['PLOTAO.CZ – žádost o radu','','Kontakt:',d.name||'—',d.phone||'—',d.email||'—','Místo: '+(d.place||'—'),'','Dotaz:',d.note||'—'].join('\n');
+    const place=d.place||d.placeFromCalculator||'—',lines=['PLOTAO.CZ – podklady poptávky','','Kontakt:',d.name||'—',d.phone||'—',d.email||'—','Místo: '+place,'',...fenceLines(d),'','Poznámka:',d.note||'—'];
     return lines.join('\n');
   }
 
