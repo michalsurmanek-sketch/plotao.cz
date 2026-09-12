@@ -40,6 +40,7 @@ jobs:
           node scripts/gate-pricing-scenario-check.mjs
           node scripts/aluminium-pricing-scenario-check.mjs
           node scripts/privacy-pricing-scenario-check.mjs
+          node scripts/structural-pricing-scenario-check.mjs
           node scripts/options-state-check.mjs
           node scripts/ui-state-check.mjs
 
