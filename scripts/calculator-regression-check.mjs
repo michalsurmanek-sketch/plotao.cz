@@ -36,6 +36,15 @@ assert(meshCore.includes('postWeld={170:245,200:288,230:337,250:365}'),'verified
 assert(meshCore.includes('post48={150:184,175:211,200:229,220:295,230:296,240:305,260:319,300:399}'),'verified Ø48 prices must stay in mesh core');
 assert(meshCore.includes("reason:'post'"),'missing verified post length must become individual');
 
+const aluAdapter=read('assets/aluminium-pricing.js'),aluCore=read('assets/aluminium-pricing-core-v1.js');
+assert(aluAdapter.includes('PLOTAO_ALUMINIUM_PRICING_CORE')&&aluAdapter.includes('computeAluminiumPrice'),'aluminium browser adapter must delegate to shared pricing core');
+assert(aluCore.includes('privacyGap')&&aluCore.includes('chooseLength'),'aluminium core must own privacy pitch and stock-length selection');
+assert(aluCore.includes("reason:'combined'")&&aluCore.includes("reason:'wood'")&&aluCore.includes("reason:'height'"),'aluminium unsupported boundaries must stay explicit');
+const privacyAdapter=read('assets/privacy-pricing.js'),privacyCore=read('assets/privacy-pricing-core-v1.js');
+assert(privacyAdapter.includes('PLOTAO_PRIVACY_PRICING_CORE')&&privacyAdapter.includes('computePrivacyPrice'),'privacy browser adapter must delegate to shared pricing core');
+assert(privacyCore.includes('for(const run of runs)stockPer+=Math.ceil(run/stockLength)'),'privacy core must preserve stock waste per separate run');
+assert(privacyCore.includes("reason:'material'")&&privacyCore.includes("reason:'product'")&&privacyCore.includes("reason:'height'"),'privacy unsupported boundaries must stay explicit');
+
 const structural=read('assets/structural-pricing-v5.js');assert(structural.includes('window.PLOTAO_GEOMETRY?.fenceLen'),'gabion must use validated net length');assert(structural.includes('if(materialH>300)'),'concrete over 300cm must not extrapolate');
 const slab=read('assets/slab-pricing-v2.js');
 assert(slab.includes("productLength:2.45,bay:2.5")&&slab.includes("productLength:2.95,bay:3"),'slab nominal bay/product lengths required');
