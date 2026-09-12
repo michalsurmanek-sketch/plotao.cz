@@ -1,6 +1,10 @@
+import fs from 'node:fs';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url),core=require('../assets/concrete-material-core-v1.js');
 const fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};const close=(a,b,eps=.001)=>Math.abs(a-b)<=eps;
+const adapter=fs.readFileSync('assets/concrete-material-v1.js','utf8');
+ok(adapter.includes('PLOTAO_CONCRETE_MATERIAL_CORE')&&adapter.includes('computeConcreteMaterial'),'concrete-material browser adapter must use shared footing core');
+ok(!adapter.includes('Math.PI*(d/2)**2*h'),'cylinder-volume formula must live only in shared core, not be duplicated in UI adapter');
 
 let x=core.computeConcreteMaterial({type:'panel',scope:'material',geometry:{line:14,end:2,corner:0,strain:0,gate:0,wicket:0,gateSides:0,wicketSides:0},diameter:20,depth:80,mode:'bag'});
 ok(x.counts.posts===16&&x.counts.braces===0&&x.counts.total===16,'panel 14 line + 2 end posts must produce 16 concrete footings');
