@@ -5,8 +5,8 @@ const fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 const base={mode:'lead',name:' Jan Novák ',phone:'+420 777 123 456',email:'JAN.NOVAK@EXAMPLE.CZ',place:' Uherské Hradiště ',note:' Prosím zavolat. ',fenceType:'Panelový plot',height:153,segments:[{name:'Předek',length:20,connection:'začátek'},{name:'Bok',length:17,connection:'navazuje rohem'}],options:['3D','Zelená'],gate:false,gateType:'double',gateWidth:4,gateDrive:'none',gateSection:0,gatePos:0,wicket:false,wicketWidth:1,wicketSection:0,wicketPos:0,scopeValue:'material',scope:'Materiál',displayedPrice:'42 000 Kč',priceKind:'ověřená cena',priceReason:'',placeFromCalculator:'Uherské Hradiště'};
 const adapter=fs.readFileSync('assets/lead-safety-v1.js','utf8'),modeUi=fs.readFileSync('assets/lead-mode-ui-v1.js','utf8');
 ok(adapter.includes('PLOTAO_LEAD_CORE')&&adapter.includes('normalizeLead')&&adapter.includes('validateLead')&&adapter.includes('core.toText'),'lead browser adapter must delegate payload normalization, validation and text export to shared core');
-ok(adapter.includes('PLOTAO_SEGMENT_CONNECTIONS'),'lead browser adapter must preserve segment connectivity in snapshots');
-ok(adapter.includes("mode:mode(form.dataset.mode)")&&adapter.includes("scopeValue:scopeBtn?.dataset.v||'material'"),'browser snapshot must preserve modal mode and stable scope value');
+ok(adapter.includes('PLOTAO_SEGMENT_CONNECTIONS'),'lead browser adapter must preserve segment connectivity in customer snapshots');
+ok(adapter.includes("m=mode(form.dataset.mode),includeFence=m==='lead'")&&adapter.includes("segments:includeFence?segments():[]")&&adapter.includes("displayedPrice:includeFence?"),'help and partner drafts must not carry customer fence geometry or price state');
 ok(adapter.includes("KEY_PREFIX='plotao-form-draft-v2-'")&&adapter.includes("function key(v){return KEY_PREFIX+mode(v)}"),'lead drafts must use separate storage keys by modal mode');
 ok(adapter.includes('sessionStorage.setItem(key(n.mode)')&&adapter.includes('sessionStorage.getItem(key(v))'),'draft save and restore must both resolve the current modal-specific key');
 ok(adapter.includes("sessionStorage.setItem(key('lead')")&&adapter.includes('sessionStorage.removeItem(LEGACY_KEY)'),'legacy shared draft must migrate only into the customer lead bucket');
@@ -76,9 +76,9 @@ const out=core.toText({...base,gate:true,gateWidth:4,gateSection:0,gatePos:8,gat
 ok(out.includes('PLOTAO.CZ – podklady poptávky')&&out.includes('+420777123456')&&out.includes('Panelový plot')&&out.includes('Brána: double · 4 m · auto · úsek 1 · pozice 8 m'),'customer clipboard export must use normalized customer payload');
 ok(out.includes('Předek 20 m')&&out.includes('Bok 17 m · navazuje rohem'),'customer clipboard export must preserve all normalized fence sections');
 const helpOut=core.toText({...base,mode:'help',note:'Jak vyřešit roh ve svahu?'});
-ok(helpOut.startsWith('PLOTAO.CZ – žádost o radu')&&helpOut.includes('Dotaz:\nJak vyřešit roh ve svahu?'),'help export must be clearly identified and expose the actual question');
-const partnerOut=core.toText({...base,mode:'partner',place:'Zlínský kraj',fenceType:'',segments:[]});
-ok(partnerOut.startsWith('PLOTAO.CZ – zájem montážní firmy')&&partnerOut.includes('Oblast působnosti: Zlínský kraj')&&!partnerOut.includes('Plot:'),'partner export must not masquerade as a customer fence calculation');
+ok(helpOut.startsWith('PLOTAO.CZ – žádost o radu')&&helpOut.includes('Dotaz:\nJak vyřešit roh ve svahu?')&&!helpOut.includes('Plot:')&&!helpOut.includes('Stav ceny:'),'help export must contain the question but no customer quote payload');
+const partnerOut=core.toText({...base,mode:'partner',place:'Zlínský kraj',placeFromCalculator:'Jiná obec',fenceType:'Panelový plot',segments:base.segments});
+ok(partnerOut.startsWith('PLOTAO.CZ – zájem montážní firmy')&&partnerOut.includes('Oblast působnosti: Zlínský kraj')&&!partnerOut.includes('Jiná obec')&&!partnerOut.includes('Plot:'),'partner export must use explicit service area only and exclude customer calculator payload');
 
 if(fail.length){console.error('Lead scenario checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Lead scenario checks OK: isolated drafts, useful help requests, customer leads and partner validation are protected');
+console.log('Lead scenario checks OK: isolated drafts and mode-specific payloads are protected');
