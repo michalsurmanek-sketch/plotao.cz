@@ -6,7 +6,12 @@ const base={mode:'lead',name:' Jan Novák ',phone:'+420 777 123 456',email:'JAN.
 const adapter=fs.readFileSync('assets/lead-safety-v1.js','utf8'),modeUi=fs.readFileSync('assets/lead-mode-ui-v1.js','utf8');
 ok(adapter.includes('PLOTAO_LEAD_CORE')&&adapter.includes('normalizeLead')&&adapter.includes('validateLead')&&adapter.includes('core.toText'),'lead browser adapter must delegate payload normalization, validation and text export to shared core');
 ok(adapter.includes('PLOTAO_SEGMENT_CONNECTIONS'),'lead browser adapter must preserve segment connectivity in snapshots');
-ok(adapter.includes("mode:form.dataset.mode||'lead'")&&adapter.includes("scopeValue:scopeBtn?.dataset.v||'material'"),'browser snapshot must preserve modal mode and stable scope value');
+ok(adapter.includes("mode:mode(form.dataset.mode)")&&adapter.includes("scopeValue:scopeBtn?.dataset.v||'material'"),'browser snapshot must preserve modal mode and stable scope value');
+ok(adapter.includes("KEY_PREFIX='plotao-form-draft-v2-'")&&adapter.includes("function key(v){return KEY_PREFIX+mode(v)}"),'lead drafts must use separate storage keys by modal mode');
+ok(adapter.includes('sessionStorage.setItem(key(n.mode)')&&adapter.includes('sessionStorage.getItem(key(v))'),'draft save and restore must both resolve the current modal-specific key');
+ok(adapter.includes("sessionStorage.setItem(key('lead')")&&adapter.includes('sessionStorage.removeItem(LEGACY_KEY)'),'legacy shared draft must migrate only into the customer lead bucket');
+ok(adapter.includes("if(m!=='partner'&&form.elements.place)")&&adapter.includes("form.elements.place.value=$('#place')?.value||''"),'partner draft must never inherit customer calculator location');
+ok(adapter.includes("[['#lead','lead'],['#help','help'],['#partner','partner']]")&&adapter.includes('restoreMode(form,m)'),'opening each modal mode must restore only its own draft');
 ok(modeUi.includes("mode==='partner'")&&modeUi.includes("labelText(placeLabel,'Oblast působnosti')")&&modeUi.includes('place.required=true'),'partner modal must expose and require area of operation');
 ok(modeUi.includes("mode==='help'")&&modeUi.includes("Obec / PSČ (volitelné)")&&modeUi.includes('place.required=false'),'help modal must keep location optional');
 ok(modeUi.includes("scope==='delivery'||scope==='turnkey'")&&modeUi.includes("labelText(placeLabel,scope==='material'?'Obec / PSČ (volitelné)':'Obec / PSČ')"),'customer modal must require location only for delivery/turnkey scopes');
@@ -72,4 +77,4 @@ const partnerOut=core.toText({...base,mode:'partner',place:'Zlínský kraj',fenc
 ok(partnerOut.startsWith('PLOTAO.CZ – zájem montážní firmy')&&partnerOut.includes('Oblast působnosti: Zlínský kraj')&&!partnerOut.includes('Plot:'),'partner export must not masquerade as a customer fence calculation');
 
 if(fail.length){console.error('Lead scenario checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Lead scenario checks OK: customer, help and partner modes plus contact/geometry validation are protected');
+console.log('Lead scenario checks OK: isolated mode drafts plus customer, help and partner validation are protected');
