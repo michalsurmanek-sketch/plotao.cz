@@ -4,6 +4,7 @@ const seg=fs.readFileSync('assets/segment-connections-v1.js','utf8');
 const slab=fs.readFileSync('assets/slab-pricing-v2.js','utf8');
 const mobile=fs.readFileSync('assets/mobile-price-bridge.js','utf8');
 const calc=fs.readFileSync('assets/calculator-v3.js','utf8');
+const concrete=fs.readFileSync('assets/concrete-material-v1.js','utf8');
 const fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 ok(src.includes("function ensure(group,fallback)"),'router must fill only missing per-type option state');
 ok(src.includes("buttons.some(b=>b.classList.contains('on'))"),'router must preserve an already selected valid option');
@@ -25,10 +26,13 @@ ok(seg.includes('Každý rovný úsek zadejte zvlášť'),'segment UX copy must 
 ok(slab.includes('function clearState(b)'),'slab pricing must expose an explicit stale-state cleanup path');
 ok(slab.includes('window.PLOTAO_SLAB_PRICE=null'),'slab state must be cleared after leaving panel/mesh');
 ok(slab.includes("rb.textContent='Nezapočítáno'"),'slab result row must be neutralized after leaving panel/mesh');
+ok(slab.includes("PLOTAO_PLACEMENT?.valid===false")&&slab.includes('function invalidState(b)'),'slab benchmark must suppress invalid opening geometry');
 ok(mobile.includes('function clear()'),'mobile price bridge must clear stale benchmark UI');
 ok(mobile.includes("$('#mobileTotalNote')"),'mobile benchmark note cleanup missing');
 ok(mobile.includes('delete t.dataset.mobileBenchmark'),'mobile fill benchmark marker must be cleared after leaving mobile mesh');
 ok(calc.includes('class="plan-warning"'),'invalid gate/wicket placement must replace the previous plan with a warning');
 ok(calc.includes('Předchozí plán byl skryt'),'invalid placement warning must explain that stale geometry is hidden');
+ok(concrete.includes("PLOTAO_PLACEMENT?.valid===false"),'footing benchmark must suppress invalid opening geometry');
+ok(concrete.includes("publish({invalid:true,price:0,volume:0})"),'invalid footing state must be explicitly published');
 if(fail.length){console.error('Option/segment state regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
 console.log('Option/segment state regression checks OK');
