@@ -16,10 +16,12 @@ ok(validity.includes("if(!invalid())return false"),'validity layer must release 
 ok(!validity.includes('locked=true')&&!validity.includes('invalidLock'),'validity layer must not keep a persistent invalid lock');
 ok(geometry.includes('endpointHasFence')&&geometry.includes("linked(ss,s.i)&&endpointHasFence(ss,ops,s.i-1,'end')"),'geometry must inspect previous connected segment at opening boundary');
 ok(geometry.includes("linked(ss,s.i+1)&&endpointHasFence(ss,ops,s.i+1,'start')"),'geometry must inspect next connected segment at opening boundary');
-function boundarySides({connected,leftFence,rightFence,localLeft=false,localRight=false}){let sides=(localLeft?1:0)+(localRight?1:0);if(connected&&leftFence)sides++;if(connected&&rightFence)sides++;return sides}
-ok(boundarySides({connected:true,leftFence:true,rightFence:false,localRight:true})===2,'gate at start of connected segment must count previous fence plus local right fence');
-ok(boundarySides({connected:false,leftFence:true,rightFence:false,localRight:true})===1,'gate at start of separate segment must not count previous fence');
-ok(boundarySides({connected:true,leftFence:false,rightFence:true,localLeft:true})===2,'gate at end of connected segment must count next fence plus local left fence');
-ok(boundarySides({connected:false,leftFence:false,rightFence:true,localLeft:true})===1,'gate at end of separate segment must not count next fence');
+function boundarySides({connectedLeft=false,connectedRight=false,leftFence=false,rightFence=false,localLeft=false,localRight=false}){let sides=(localLeft?1:0)+(localRight?1:0);if(connectedLeft&&leftFence)sides++;if(connectedRight&&rightFence)sides++;return sides}
+ok(boundarySides({connectedLeft:true,leftFence:true,localRight:true})===2,'gate at start of connected segment must count previous fence plus local right fence');
+ok(boundarySides({connectedLeft:false,leftFence:true,localRight:true})===1,'gate at start of separate segment must not count previous fence');
+ok(boundarySides({connectedRight:true,rightFence:true,localLeft:true})===2,'gate at end of connected segment must count next fence plus local left fence');
+ok(boundarySides({connectedRight:false,rightFence:true,localLeft:true})===1,'gate at end of separate segment must not count next fence');
+ok(boundarySides({connectedLeft:true,connectedRight:true,leftFence:true,rightFence:true})===2,'opening spanning a fully connected middle segment must count both neighbouring fence sides');
+ok(boundarySides({connectedLeft:false,connectedRight:false,leftFence:true,rightFence:true})===0,'opening spanning a fully separate segment must not jump across either boundary');
 if(fail.length){console.error('UI state regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
 console.log('UI state regression checks OK');
