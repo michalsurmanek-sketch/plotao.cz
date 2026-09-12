@@ -56,6 +56,7 @@
   function validateLead(raw){
     const d=normalizeLead(raw),errors=[];validateContact(d,errors);
     if(d.mode==='lead')validateFence(d,errors);
+    else if(d.mode==='help'&&d.note.length<5)errors.push({field:'note',code:'help-question',message:'Napište prosím stručně, s čím potřebujete poradit.'});
     else if(d.mode==='partner'&&!d.place)errors.push({field:'place',code:'partner-area',message:'Doplňte obec, okres nebo oblast působnosti.'});
     return{valid:errors.length===0,errors,data:d};
   }
@@ -69,7 +70,7 @@
     if(d.mode==='partner')return['PLOTAO.CZ – zájem montážní firmy','','Kontakt:',d.name||'—',d.phone||'—',d.email||'—','Oblast působnosti: '+place,'','Poznámka:',d.note||'—'].join('\n');
     const title=d.mode==='help'?'PLOTAO.CZ – žádost o radu':'PLOTAO.CZ – podklady poptávky',lines=[title,'','Kontakt:',d.name||'—',d.phone||'—',d.email||'—','Místo: '+place,''];
     if(d.mode==='lead'||d.fenceType)lines.push(...fenceLines(d),'');
-    lines.push('Poznámka:',d.note||'—');
+    lines.push(d.mode==='help'?'Dotaz:':'Poznámka:',d.note||'—');
     return lines.join('\n');
   }
 
