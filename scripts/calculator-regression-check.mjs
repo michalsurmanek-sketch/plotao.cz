@@ -34,6 +34,9 @@ assert(calculator.includes('plan-disconnected'),'calculator-v3: separate section
 
 const panel=read('assets/panel-pricing-v5.js');
 assert(panel.includes('g.gateSides')&&panel.includes('g.wicketSides'),'panel-pricing: clips adjoining openings must be counted');
+assert(panel.includes('function slabHeight()'),'panel-pricing: underfence slab height must participate in post sizing');
+assert(panel.includes('need=pd.key+50+slabH'),'panel-pricing: post length must include panel height, embedment allowance and slab height');
+assert(panel.includes('postLength:post.key'),'panel-pricing: exported benchmark must report selected post length');
 
 const mesh=read('assets/mesh-pricing-v2.js');
 assert(mesh.includes('openingSides')&&mesh.includes('strain*2+openingSides'),'mesh-pricing: braces/tension points must use actual fence sides adjoining openings');
@@ -87,12 +90,12 @@ const panel37=straightRun(37,2.5);
 assert(panel37.fields===15,'numeric panel 37m: expected 15 fields');
 assert(panel37.line===14&&panel37.posts===16,'numeric panel 37m: expected 14 line + 2 end posts');
 assert(close(panel37.concrete,.82),'numeric panel 37m: expected 0.82 m3 footing model');
-const panelMaterial=15*607+16*323+64*40;
+const panelMaterial=15*607+16*354+64*40;
 const panelSlabs=15*680+30*54;
 const panelBags=Math.ceil(.82*2000/25)*129.71;
-assert(panelMaterial===16833,'numeric panel 37m: verified panel/post/clip basis must stay 16,833 CZK');
+assert(panelMaterial===17329,'numeric panel 37m: 153cm panel + 20cm slab must use 240cm posts and 17,329 CZK core');
 assert(panelSlabs===11820,'numeric panel 37m: 20cm slabs + verified end holders must stay 11,820 CZK');
-assert(close(panelMaterial+panelSlabs+panelBags,37213.86,.01),'numeric panel 37m: known material total must stay 37,213.86 CZK');
+assert(close(panelMaterial+panelSlabs+panelBags,37709.86,.01),'numeric panel 37m: known material total must stay 37,709.86 CZK');
 
 const mesh30=straightRun(30,3,{mesh:true});
 assert(mesh30.fields===10,'numeric mesh 30m/3m: expected 10 fields');
