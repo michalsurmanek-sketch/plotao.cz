@@ -27,20 +27,27 @@ const logoTags=[...html.matchAll(/<img\b[^>]*\bsrc=["']\/assets\/logo-plotao\.sv
 if(!logoTags.length||logoTags.some(tag=>!(/\bwidth=["']2172["']/i.test(tag)&&/\bheight=["']724["']/i.test(tag)))){
   throw new Error('Pages artifact logo images must expose their intrinsic 2172x724 dimensions to prevent layout shift');
 }
-const logoPath='assets/logo-plotao.svg',logoSvg=fs.readFileSync(logoPath,'utf8'),logoSize=fs.statSync(logoPath).size;
-if(logoSize>=500000)throw new Error(`Pages artifact logo is still oversized: ${logoSize} bytes`);
-const logoPngMatch=logoSvg.match(/data:image\/png;base64,([A-Za-z0-9+/=]+)/);
-if(!logoPngMatch)throw new Error('Pages artifact logo is missing its embedded PNG');
-const logoPng=Buffer.from(logoPngMatch[1],'base64');
-if(!logoPng.subarray(0,8).equals(Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a])))throw new Error('Pages artifact logo contains an invalid PNG');
-const chunkTypes=[];let logoOffset=8;
-while(logoOffset+12<=logoPng.length){
-  const length=logoPng.readUInt32BE(logoOffset),end=logoOffset+12+length;
-  if(end>logoPng.length)throw new Error('Pages artifact logo contains a truncated PNG chunk');
-  const type=logoPng.toString('ascii',logoOffset+4,logoOffset+8);chunkTypes.push(type);logoOffset=end;if(type==='IEND')break;
+
+const PNG_SIGNATURE=Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]);
+function verifyEmbeddedPngSvg(file,label,maxSize){
+  const svg=fs.readFileSync(file,'utf8'),size=fs.statSync(file).size;
+  if(size>=maxSize)throw new Error(`Pages artifact ${label} is still oversized: ${size} bytes`);
+  const match=svg.match(/data:image\/png;base64,([A-Za-z0-9+/=]+)/);
+  if(!match)throw new Error(`Pages artifact ${label} is missing its embedded PNG`);
+  const png=Buffer.from(match[1],'base64');
+  if(!png.subarray(0,8).equals(PNG_SIGNATURE))throw new Error(`Pages artifact ${label} contains an invalid PNG`);
+  const chunkTypes=[];let offset=8;
+  while(offset+12<=png.length){
+    const length=png.readUInt32BE(offset),end=offset+12+length;
+    if(end>png.length)throw new Error(`Pages artifact ${label} contains a truncated PNG chunk`);
+    const type=png.toString('ascii',offset+4,offset+8);chunkTypes.push(type);offset=end;if(type==='IEND')break;
+  }
+  for(const forbidden of ['caBX','eXIf','tEXt','zTXt','iTXt','tIME'])if(chunkTypes.includes(forbidden))throw new Error(`Pages artifact ${label} still contains removable ${forbidden} metadata`);
+  for(const requiredType of ['IHDR','IDAT','IEND'])if(!chunkTypes.includes(requiredType))throw new Error(`Pages artifact ${label} PNG is missing ${requiredType}`);
+  return size;
 }
-if(chunkTypes.includes('caBX'))throw new Error('Pages artifact logo still contains C2PA caBX metadata');
-for(const requiredType of ['IHDR','IDAT','IEND'])if(!chunkTypes.includes(requiredType))throw new Error(`Pages artifact logo PNG is missing ${requiredType}`);
+const logoSize=verifyEmbeddedPngSvg('assets/logo-plotao.svg','logo',500000);
+const faviconSize=verifyEmbeddedPngSvg('assets/favicon.svg','favicon',45763);
 
 const scriptSources=[...html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*><\/script>/gi)].map(match=>match[1]);
 const normalizedSources=scriptSources.map(src=>src.split('?')[0]);
@@ -60,4 +67,4 @@ for(const src of managedVersioned){
 
 const posGeo=html.indexOf('/assets/geometry-v3.js'),posGuard=html.indexOf('/assets/geometry-validity-v1.js'),posPanel=html.indexOf('/assets/panel-pricing-v5.js');
 if(!(posGeo>=0&&posGeo<posGuard&&posGuard<posPanel)) throw new Error('Geometry validity guard must load after geometry and before pricing modules');
-console.log(`Pages artifact integrity OK: ${marker}; ${activeScripts.length} content-versioned modules, structured/social metadata, logo dimensions and optimized logo (${logoSize} bytes) verified`);
+console.log(`Pages artifact integrity OK: ${marker}; ${activeScripts.length} content-versioned modules, metadata, optimized logo (${logoSize} bytes) and favicon (${faviconSize} bytes) verified`);
