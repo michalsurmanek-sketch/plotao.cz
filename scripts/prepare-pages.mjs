@@ -96,29 +96,35 @@ const orderedScripts=activeScripts.map(src=>`<script src="${src}?v=${assetVersio
 html=html.replace('</body>',orderedScripts+'</body>');
 
 if(!html.includes('<main class="wrap" id="kalkulator">')) throw new Error('Pages build source missing calculator anchor');
-
 html=html.replace(/<img\b[^>]*\bsrc=["']\/assets\/logo-plotao\.svg["'][^>]*>/gi,tag=>{
   const cleaned=tag.replace(/\swidth=["'][^"']*["']/i,'').replace(/\sheight=["'][^"']*["']/i,'');
   return cleaned.replace(/>$/, ' width="2172" height="724">');
 });
 
-// Preserve decoded pixels exactly while stripping non-rendering PNG metadata and
-// repacking the existing scanline stream for production-only transfer savings.
 const logoStats=optimizeEmbeddedPngSvg('assets/logo-plotao.svg','Logo');
 const faviconStats=optimizeEmbeddedPngSvg('assets/favicon.svg','Favicon');
 
 html=html.replace(/<script\s+type=["']application\/ld\+json["']\s+data-plotao-schema=["']1["']>[\s\S]*?<\/script>/gi,'');
 const schemaTag=`<script type="application/ld+json" data-plotao-schema="1">${JSON.stringify(structuredData)}</script>`;
-
 html=html.replace(/<meta\s+name=["']twitter:(?:card|title|description)["'][^>]*>/gi,'');
 const socialMeta='<meta name="twitter:card" content="summary"><meta name="twitter:title" content="Kalkulátor ceny plotu a materiálu | PLOTAO.cz"><meta name="twitter:description" content="Ověřený materiálový rozpočet plotu podle typu, výšky, úseků a otvorů.">';
-
 html=html.replace(/<meta name="plotao-deploy" content="[^"]*">/g,'');
 if(!html.includes('</head>')) throw new Error('Pages build: </head> not found');
 html=html.replace('</head>',schemaTag+socialMeta+`<meta name="plotao-deploy" content="${sha}"></head>`);
 
 fs.writeFileSync(path,html,'utf8');
 fs.writeFileSync('deploy-marker.txt',sha+'\n','utf8');
+
+// Build a strict public tree. Never publish CI tests, docs, Supabase source/schema or
+// other repository internals just because they live next to the static website.
+const dist='dist';
+fs.rmSync(dist,{recursive:true,force:true});
+fs.mkdirSync(dist,{recursive:true});
+for(const file of fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort())fs.copyFileSync(file,`${dist}/${file}`);
+for(const file of ['robots.txt','sitemap.xml','CNAME','deploy-marker.txt'])if(fs.existsSync(file))fs.copyFileSync(file,`${dist}/${file}`);
+fs.cpSync('assets',`${dist}/assets`,{recursive:true});
+
 console.log(`Logo optimized losslessly: ${logoStats.before} -> ${logoStats.after} bytes (embedded PNG ${logoStats.pngBefore} -> ${logoStats.pngAfter})`);
 console.log(`Favicon optimized losslessly: ${faviconStats.before} -> ${faviconStats.after} bytes (embedded PNG ${faviconStats.pngBefore} -> ${faviconStats.pngAfter})`);
+console.log(`Public Pages tree prepared in ${dist}/ with ${fs.readdirSync(dist).length} top-level entries; repository internals excluded`);
 console.log(`Pages build prepared from clean source: ${activeScripts.length} content-versioned modules, SHA ${sha}`);
