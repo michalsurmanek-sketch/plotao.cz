@@ -42,14 +42,14 @@
     if(d.height<40||d.height>400)errors.push({field:'height',code:'height',message:'Výška plotu musí být 40–400 cm.'});
     if(!d.segments.length)errors.push({field:'segments',code:'segments',message:'Zadejte alespoň jeden úsek oplocení.'});
     if(d.segments.length>12)errors.push({field:'segments',code:'segments-count',message:'Kalkulátor podporuje maximálně 12 úseků.'});
-    const badSegment=d.segments.findIndex(x=>x.length<=0);if(badSegment>=0)errors.push({field:'segments',code:'segment-length',message:'Každý úsek musí mít délku větší než 0 m.'});
+    const badSegment=d.segments.findIndex(x=>x.length<.01);if(badSegment>=0)errors.push({field:'segments',code:'segment-length',message:'Každý úsek musí mít délku alespoň 0,01 m.'});
     const totalLength=d.segments.reduce((sum,x)=>sum+x.length,0);if(totalLength>1000+.001)errors.push({field:'segments',code:'segments-total',message:'Celková délka oplocení může být maximálně 1000 m.'});
     if(d.priceKind==='neplatné zadání')errors.push({field:'configuration',code:'invalid-price',message:'Nejdřív opravte neplatné zadání kalkulátoru.'});
     if((d.scopeValue==='delivery'||d.scopeValue==='turnkey')&&!d.place)errors.push({field:'place',code:'place-required',message:'Pro dopravu nebo realizaci na klíč doplňte obec nebo PSČ.'});
     function opening(kind,on,section,pos,width){
       if(!on)return false;
       const s=d.segments[section];
-      if(!s||s.length<=0){errors.push({field:kind,code:kind+'-section',message:(kind==='gate'?'Brána':'Branka')+' musí být umístěná v platném úseku.'});return false}
+      if(!s||s.length<.01){errors.push({field:kind,code:kind+'-section',message:(kind==='gate'?'Brána':'Branka')+' musí být umístěná v platném úseku.'});return false}
       if(width<=0||pos<0||pos+width>s.length+.02){errors.push({field:kind,code:kind+'-placement',message:(kind==='gate'?'Brána':'Branka')+' se musí celá vejít do zvoleného úseku.'});return false}
       return true;
     }
