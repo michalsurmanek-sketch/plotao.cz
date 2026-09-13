@@ -9,7 +9,8 @@ const leaked=forbiddenArtifact.filter(x=>html.includes(x));
 if(missing.length||leaked.length||!marker||marker==='unknown') throw new Error(`Pages artifact integrity failed; missing=${JSON.stringify(missing)}; legacy=${JSON.stringify(leaked)}; marker=${JSON.stringify(marker)}`);
 
 const scriptSources=[...html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*><\/script>/gi)].map(match=>match[1]);
-const managedSources=scriptSources.filter(src=>activeScripts.includes(src));
+const normalizedSources=scriptSources.map(src=>src.split('?')[0]);
+const managedSources=normalizedSources.filter(src=>activeScripts.includes(src));
 const duplicateSources=managedSources.filter((src,index)=>managedSources.indexOf(src)!==index);
 if(duplicateSources.length) throw new Error(`Pages artifact contains duplicate managed scripts: ${JSON.stringify([...new Set(duplicateSources)])}`);
 if(managedSources.length!==activeScripts.length||managedSources.some((src,index)=>src!==activeScripts[index])){
