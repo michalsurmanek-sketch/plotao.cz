@@ -49,6 +49,7 @@ ok(index.includes("address !== 'unknown'")&&index.includes('network\\n${address}
 ok(index.includes('contact\\n${lead.phone}\\n${lead.email}')&&index.includes('rateKeys = [...new Set(rateKeys)]'),'rate limiting must include a separate privacy-preserving normalized contact key');
 ok(index.includes('Promise.all(rateKeys.map')&&index.includes("checks.some((x) => (x.count || 0) >= RATE_LIMIT)"),'every active rate key must be checked independently against the same window');
 ok(index.includes(".insert(rateKeys.map((key_hash) => ({ key_hash })))"),'all active hashed rate keys must be recorded atomically in one insert call');
+ok(index.includes('const receivedAt = new Date().toISOString()')&&index.includes('submitted_at: receivedAt')&&!index.includes('submitted_at: validated.submittedAt'),'canonical stored submission time must come from the Edge Function clock, not an untrusted browser timestamp');
 ok(!index.includes('SUPABASE_SERVICE_ROLE_KEY')&&!index.includes('SUPABASE_SECRET_KEYS'),'backend source must not read or embed privileged keys directly');
 ok(index.includes('ctx.supabaseAdmin')&&index.includes(".from('plotao_leads')"),'Edge Function must store through the server admin client');
 ok(sql.includes('alter table public.plotao_leads enable row level security')&&sql.includes('revoke all on table public.plotao_leads from anon, authenticated'),'lead table must enable RLS and revoke browser-role grants');
@@ -58,4 +59,4 @@ ok(deno.imports?.['@supabase/server']==='npm:@supabase/server@1.6.0','Supabase s
 ok(browserConfig.includes('enabled:false')&&browserConfig.includes("endpoint:''")&&browserConfig.includes('allowedOrigins:[]'),'production browser transport must remain explicitly disabled before verified backend activation');
 
 if(fail.length){console.error('Lead backend source checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Lead backend source checks OK: geometry validation, RLS, exact CORS, body limits, multi-key hashed rate limiting, pinned dependency and disabled browser activation are protected');
+console.log('Lead backend source checks OK: geometry validation, RLS, exact CORS, body limits, multi-key hashed rate limiting, server receipt timestamps, pinned dependency and disabled browser activation are protected');
