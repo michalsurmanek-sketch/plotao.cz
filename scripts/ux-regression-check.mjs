@@ -24,6 +24,7 @@ ok(segmentLimit.includes('btn.disabled=full')&&segmentLimit.includes("btn.setAtt
 ok(segmentLimit.includes("btn.textContent=full?'Maximum 12 úseků':'+ Přidat úsek'"),'segment limit must be visible instead of silently ignoring further clicks');
 ok(segmentLimit.includes("new MutationObserver(sync).observe(root,{childList:true})"),'segment limit control must re-enable automatically after a section is removed');
 ok(segmentLimit.includes("s.setAttribute('aria-live','polite')"),'segment limit explanation must be announced to assistive technology');
+ok(segmentLimit.includes("btn.setAttribute('aria-describedby','segmentLimitStatus')")&&segmentLimit.includes("btn.style.cursor=full?'not-allowed':''"),'disabled segment control must be visibly explained and linked to its status message');
 
 ok(leadMode.includes("phone.type='tel'")&&leadMode.includes("phone.autocomplete='tel'")&&leadMode.includes("phone.inputMode='tel'"),'phone field must expose mobile telephone keyboard and autofill semantics');
 ok(leadMode.includes("email.type='email'")&&leadMode.includes("email.autocomplete='email'")&&leadMode.includes("email.inputMode='email'"),'email field must expose browser validation, autofill and mobile keyboard semantics');
