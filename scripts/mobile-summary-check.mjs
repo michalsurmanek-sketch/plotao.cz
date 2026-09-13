@@ -1,14 +1,17 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
-const src=read('assets/mobile-summary-state-v1.js'),safe=read('assets/mobile-safe-area-v1.js'),manifest=read('scripts/pages-manifest.mjs'),ui=read('assets/ui-bootstrap-v1.js'),truth=read('assets/ui-truth-v1.js');
+const src=read('assets/mobile-summary-state-v1.js'),safe=read('assets/mobile-safe-area-v1.js'),segmentLimit=read('assets/segment-limit-ui-v1.js'),manifest=read('scripts/pages-manifest.mjs'),ui=read('assets/ui-bootstrap-v1.js'),truth=read('assets/ui-truth-v1.js');
 
 ok(src.includes("if(p==='Přepočítávám…')return{kind:'pending',label:'Aktualizuji cenu',button:'Přepočítávám…'}"),'mobile summary must expose a distinct pending repricing state instead of presenting a stale exact price');
 ok(src.includes("if(p==='Nelze spočítat')return{kind:'invalid',label:'Stav kalkulace',button:'Opravit zadání ↑'}"),'invalid mobile summary must stop presenting an estimate');
 ok(src.includes("if(p==='Individuální nabídka')return{kind:'individual',label:'Stav kalkulace',button:'Zobrazit podklady →'}"),'individual pricing must be labelled as a state, not an estimate');
 ok(src.includes("if(p.startsWith('Od ')||p.includes('+ individuálně'))return{kind:'partial',label:'Částečný rozpočet',button:'Zobrazit rozpis →'}"),'partial totals must be clearly labelled');
 ok(src.includes("return{kind:'price',label:'Cena materiálu',button:'Zobrazit rozpis →'}"),'verified totals must be described as material price');
-ok(src.includes("function sharedTarget(){const api=window.PLOTAO_INPUT_VALIDITY;if(!api?.current)return undefined")&&src.includes("if(issue.code==='height')return $('#height')")&&src.includes("['segments','segments-count','segments-total'].includes(issue.code)")&&src.includes("if(issue.code==='segment-length')")&&src.includes("if(issue.code==='placement')return(issue.field?$('#'+issue.field):null)||$('#placementInfo')"),'invalid mobile CTA must route through shared validity and prefer the exact placement field over a generic warning block');
+ok(src.includes("if(issue.code==='segments')return $('#addSegment')||$('#segmentList')")&&src.includes("if(issue.code==='segments-count')return $$('#segmentList [data-remove],#segmentList .remove').at(-1)")&&src.includes("if(issue.code==='segments-total')return $$('#segmentList input[type=number]').at(-1)||$('#segmentLimitStatus')"),'segment errors must route the mobile CTA to an actionable add/remove/length control and use the real segmentLimitStatus id');
+ok(!src.includes('segmentLimitMessage'),'mobile routing must not reference the nonexistent legacy segmentLimitMessage id');
+ok(src.includes("if(issue.code==='segment-length')return $$('#segmentList input[type=number]').find")&&src.includes("if(issue.code==='placement')return(issue.field?$('#'+issue.field):null)||$('#placementInfo')"),'invalid mobile CTA must prefer the exact bad segment/placement field over a generic warning block');
 ok(src.includes("if(shared!==undefined)return shared||$('#kalkulator')||document.body"),'when shared validity is available and already valid, mobile routing must not fall back to a stale placement flag');
+ok(src.includes("if(segments.length>12)return $$('#segmentList [data-remove],#segmentList .remove').at(-1)")&&src.includes("if(total>1000+.001)return $$('#segmentList input[type=number]').at(-1)||$('#segmentLimitStatus')"),'startup fallback routing must also use actionable segment controls');
 ok(src.includes("window.PLOTAO_PLACEMENT?.valid===false"),'legacy placement routing must remain only as a startup fallback when the shared API is unavailable');
 ok(src.includes("scroll(target,true)")&&src.includes("el.focus({preventScroll:true})"),'invalid CTA must scroll to and focus the concrete actionable control');
 ok(src.includes("sticky.setAttribute('aria-busy',s.kind==='pending'?'true':'false')")&&src.includes("button.disabled=s.kind==='pending'"),'mobile bar and CTA must expose and enforce the pending state accessibly');
@@ -17,6 +20,9 @@ ok(src.includes("e.stopImmediatePropagation()"),'state-aware mobile CTA must rep
 ok(src.includes("strong.setAttribute('aria-live','polite')")&&src.includes("strong.setAttribute('aria-atomic','true')"),'sticky price/status updates must be announced accessibly');
 ok(src.includes("new MutationObserver(()=>schedule(0)).observe(el")||src.includes("new MutationObserver(()=>schedule(0)).observe(el,"),'mobile summary must track asynchronous price/status mutations');
 ok(src.includes("'plotao:input-validity','plotao:placement'") ,'mobile summary must resync immediately when shared validity recovers');
+ok(segmentLimit.includes("s.id='segmentLimitStatus'")&&segmentLimit.includes("btn.setAttribute('aria-describedby','segmentLimitStatus')"),'segment limit UI must expose one stable status id used by routing and controls');
+ok(segmentLimit.includes("if(over)describeAction(inputs.at(-1));else if(count>LIMIT)describeAction(removes.at(-1))"),'segment limit status must be associated with the concrete length/remove control that resolves the limit');
+ok(segmentLimit.includes("function clearAction()")&&segmentLimit.includes("el.removeAttribute('aria-describedby')"),'segment limit actionable description must be cleared when the limit condition changes');
 ok(safe.includes("viewport-fit=cover"),'mobile viewport must opt into safe-area geometry');
 ok(truth.includes('body{padding-bottom:86px!important}'),'regression test must model the legacy important mobile padding that safe-area protection overrides');
 ok(safe.includes("body{padding-bottom:calc(92px + env(safe-area-inset-bottom))!important}"),'page bottom padding must include the device safe-area inset and override the legacy important rule');
@@ -29,4 +35,4 @@ ok(truthPos>=0&&statePos>truthPos,'state-aware mobile summary must load after th
 ok(safePos>statePos,'safe-area protection must load after the mobile summary layer');
 
 if(fail.length){console.error('Mobile summary regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Mobile summary regression checks OK: pending/invalid states and exact shared-validity field routing stay truthful, accessible and usable');
+console.log('Mobile summary regression checks OK: pending/invalid states and actionable segment/placement routing stay truthful, accessible and usable');
