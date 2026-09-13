@@ -17,13 +17,14 @@ ok(src.includes("gate:openingErrorTarget(first,'gate')")&&src.includes("wicket:o
 ok(src.includes("function configurationErrorTarget(){let target=window.PLOTAO_PLACEMENT?.valid===false?($('#placementInfo')||$('#placementBox')||$('.gate-grid')):$('#accuracyGuard')"),'invalid opening/configuration errors must route to the visible placement controls before falling back to the accuracy explanation');
 ok(src.includes("if(target&&!target.matches?.('input,select,button,textarea,a[href],[tabindex]'))target.tabIndex=-1"),'non-interactive configuration error targets must be programmatically focusable');
 ok(src.includes("configuration:configurationErrorTarget()"),'lead error routing must use the configuration-aware focus helper');
-const invalidPos=src.indexOf("if(invalidReason||shown==='Nelze spočítat')return{kind:'neplatné zadání'"),deliveryPos=src.indexOf("if(scopeValue==='delivery')return{kind:'individuální nabídka'");
-ok(invalidPos>=0&&deliveryPos>invalidPos,'invalid calculator state must take precedence over delivery/turnkey individual pricing');
+const invalidPos=src.indexOf("if(invalidReason||shown==='Nelze spočítat')return{kind:'neplatné zadání'"),pendingPos=src.indexOf("if(pending||!shown)return{kind:'neplatné zadání',reason:'Počkejte na dokončení přepočtu ceny.'}"),deliveryPos=src.indexOf("if(scopeValue==='delivery')return{kind:'individuální nabídka'");
+ok(invalidPos>=0&&pendingPos>invalidPos&&deliveryPos>pendingPos,'invalid and pending calculator states must both take precedence over delivery/turnkey individual pricing');
+ok(src.includes("pending=shown==='Přepočítávám…'||shown==='Aktualizuji cenu'||!!window.PLOTAO_GATE_PRICE?.pending||!!window.PLOTAO_GATE_DRIVE?.pending"),'lead snapshot must detect both rendered and structured pending price states');
 ok(src.includes("if(scopeValue==='delivery')return{kind:'individuální nabídka'"),'valid delivery snapshots must be classified independently from rendered price timing');
 ok(src.includes("if(scopeValue==='turnkey')return{kind:'individuální nabídka'"),'valid turnkey snapshots must be classified independently from rendered price timing');
 ok(src.includes("scopeValue=includeFence?(scopeBtn?.dataset.v||'material'):'material'"),'snapshot must derive stable scope value before price classification');
 ok(src.includes("scope:includeFence?scopeLabel(scopeValue):''"),'snapshot must export a canonical human-readable scope label');
-ok(src.includes("displayedPrice:includeFence?(ps.kind==='neplatné zadání'?'Nelze spočítat':scopeValue==='material'?shown:'Individuální nabídka'):''"),'non-material snapshots must never carry a stale numeric price and invalid state must stay visibly invalid');
+ok(src.includes("displayedPrice:includeFence?(ps.reason==='Počkejte na dokončení přepočtu ceny.'?'Přepočítávám…':ps.kind==='neplatné zadání'?'Nelze spočítat':scopeValue==='material'?shown:'Individuální nabídka'):''"),'pending snapshots must stay visibly pending while invalid snapshots stay visibly invalid');
 ok(src.includes("ps=includeFence?priceStatus(scopeValue):{kind:'individuální nabídka',reason:''}"),'price state must be derived from selected scope plus current input validity, not only from the DOM');
 if(fail.length){console.error('Lead scope payload checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Lead scope payload checks OK: authoritative opening placement, segment minimum and precise error focus are protected');
+console.log('Lead scope payload checks OK: authoritative opening placement, pending price safety and precise error focus are protected');
