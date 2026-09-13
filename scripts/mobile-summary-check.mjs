@@ -1,0 +1,19 @@
+import fs from 'node:fs';
+const read=p=>fs.readFileSync(p,'utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
+const src=read('assets/mobile-summary-state-v1.js'),manifest=read('scripts/pages-manifest.mjs'),ui=read('assets/ui-bootstrap-v1.js'),truth=read('assets/ui-truth-v1.js');
+
+ok(src.includes("if(p==='Nelze spočítat')return{kind:'invalid',label:'Stav kalkulace',button:'Opravit zadání ↑'}"),'invalid mobile summary must stop presenting an estimate');
+ok(src.includes("if(p==='Individuální nabídka')return{kind:'individual',label:'Stav kalkulace',button:'Zobrazit podklady →'}"),'individual pricing must be labelled as a state, not an estimate');
+ok(src.includes("if(p.startsWith('Od ')||p.includes('+ individuálně'))return{kind:'partial',label:'Částečný rozpočet',button:'Zobrazit rozpis →'}"),'partial totals must be clearly labelled');
+ok(src.includes("return{kind:'price',label:'Cena materiálu',button:'Zobrazit rozpis →'}"),'verified totals must be described as material price');
+ok(src.includes("if(h&&(hv<=0||hv>400))return h")&&src.includes("const bad=$$('#segmentList input[type=number]').find(x=>+(x.value||0)<=0)")&&src.includes("window.PLOTAO_PLACEMENT?.valid===false"),'invalid CTA must route to the actual broken height, segment or opening input');
+ok(src.includes("e.stopImmediatePropagation()"),'state-aware mobile CTA must replace the legacy unconditional result scroll');
+ok(src.includes("strong.setAttribute('aria-live','polite')")&&src.includes("strong.setAttribute('aria-atomic','true')"),'sticky price/status updates must be announced accessibly');
+ok(src.includes("new MutationObserver(()=>schedule(0)).observe(el")||src.includes("new MutationObserver(()=>schedule(0)).observe(el,"),'mobile summary must track asynchronous price/status mutations');
+ok(ui.includes("$('#continueBtn')?.addEventListener('click',()=>$('.result')?.scrollIntoView"),'legacy bootstrap still owns the generic scroll and therefore requires the capture override');
+ok(truth.includes("if(label)label.textContent='Odhad ceny'"),'truth redesign still sets the static fallback label before state sync');
+const truthPos=manifest.indexOf('/assets/ui-truth-v1.js'),statePos=manifest.indexOf('/assets/mobile-summary-state-v1.js');
+ok(truthPos>=0&&statePos>truthPos,'state-aware mobile summary must load after the static UI redesign');
+
+if(fail.length){console.error('Mobile summary regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
+console.log('Mobile summary regression checks OK: invalid, individual, partial and verified states stay truthful and actionable');
