@@ -13,7 +13,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Verify deployed marker and HTML on custom domain
+      - name: Verify deployed marker, HTML and private paths on custom domain
         env:
           EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
@@ -21,6 +21,21 @@ jobs:
           marker_url="https://plotao.cz/deploy-marker.txt?sha=${EXPECTED_SHA}"
           html_url="https://plotao.cz/?sha=${EXPECTED_SHA}"
           expected_meta="<meta name=\"plotao-deploy\" content=\"${EXPECTED_SHA}\">"
+          private_paths=(
+            "/scripts/seo-regression-check.mjs"
+            "/supabase/functions/submit-lead/index.ts"
+            "/docs/lead-backend-contract.md"
+          )
+          verify_private_paths() {
+            for path in "${private_paths[@]}"; do
+              code="$(curl -sSL --connect-timeout 10 --max-time 20 -o /dev/null -w '%{http_code}' -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "https://plotao.cz${path}?sha=${EXPECTED_SHA}" || true)"
+              if [ "$code" != "404" ]; then
+                echo "Internal source path must stay unpublished: path=$path status=${code:-<empty>}"
+                return 1
+              fi
+              echo "Internal source path correctly returns 404: $path"
+            done
+          }
           for attempt in $(seq 1 18); do
             actual="$(curl -fsSL --connect-timeout 10 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$marker_url" 2>/dev/null | tr -d '\r\n' || true)"
             page="$(curl -fsSL --connect-timeout 10 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$html_url" 2>/dev/null || true)"
@@ -29,7 +44,8 @@ jobs:
             [ "$actual" = "$EXPECTED_SHA" ] && marker_ok=1
             printf '%s' "$page" | grep -Fq "$expected_meta" && html_ok=1 || true
             if [ "$marker_ok" = 1 ] && [ "$html_ok" = 1 ]; then
-              echo "Live custom domain serves expected deploy in marker and HTML: $EXPECTED_SHA"
+              verify_private_paths
+              echo "Live smoke confirms expected public deploy and private repository paths: $EXPECTED_SHA"
               exit 0
             fi
             echo "Attempt $attempt: marker_ok=$marker_ok html_ok=$html_ok expected=$EXPECTED_SHA actual=${actual:-<empty>}"
