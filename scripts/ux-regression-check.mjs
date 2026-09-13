@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
-const scroll=read('assets/step-scroll-v1.js'),a11y=read('assets/choice-accessibility-v1.js'),modal=read('assets/modal-accessibility-v1.js'),segmentLimit=read('assets/segment-limit-ui-v1.js'),leadMode=read('assets/lead-mode-ui-v1.js'),ui=read('assets/ui-bootstrap-v1.js'),manifest=read('scripts/pages-manifest.mjs');
+const scroll=read('assets/step-scroll-v1.js'),accuracy=read('assets/accuracy-guard.js'),a11y=read('assets/choice-accessibility-v1.js'),modal=read('assets/modal-accessibility-v1.js'),segmentLimit=read('assets/segment-limit-ui-v1.js'),leadMode=read('assets/lead-mode-ui-v1.js'),ui=read('assets/ui-bootstrap-v1.js'),manifest=read('scripts/pages-manifest.mjs');
 
 for(const [type,id] of Object.entries({privacy:'#privacyConfig',aluminium:'#aluminiumConfigBox',gabion:'#gabionOptionsBox',metal:'#metalConfig',concrete:'#concreteConfig',masonry:'#extraFenceConfig',mobile:'#extraFenceConfig',other:'#extraFenceConfig'}))ok(scroll.includes(type+":'"+id+"'")||scroll.includes(type+':"'+id+'"'),'next-step scroll must target the visible '+type+' configuration');
 ok(scroll.includes('scrollToEl(nextAfterType,180)'),'type scroll target must be resolved after dynamic configuration modules render');
@@ -31,6 +31,8 @@ ok(segmentLimit.includes("s.setAttribute('aria-live','polite')"),'segment limit 
 ok(segmentLimit.includes("btn.setAttribute('aria-describedby','segmentLimitStatus')")&&segmentLimit.includes("btn.style.cursor=full?'not-allowed':''"),'disabled segment control must be visibly explained and linked to its status message');
 ok(segmentLimit.includes("list.setAttribute('aria-invalid',over?'true':'false')")&&segmentLimit.includes("root.addEventListener('input',sync)"),'total-length validity must update live beside the section inputs');
 ok(segmentLimit.includes('Kalkulátor podporuje maximálně 1000 m celkem.'),'1000m calculator boundary must be explained locally instead of only in the result card');
+ok(segmentLimit.includes("maximumFractionDigits:2"),'local total-length error must preserve hundredth-metre precision at the 1000m boundary');
+ok((accuracy.match(/maximumFractionDigits:2/g)||[]).length===2,'main accuracy guard must preserve hundredth-metre precision in both shared and fallback total-length errors');
 
 ok(leadMode.includes("phone.type='tel'")&&leadMode.includes("phone.autocomplete='tel'")&&leadMode.includes("phone.inputMode='tel'"),'phone field must expose mobile telephone keyboard and autofill semantics');
 ok(leadMode.includes("email.type='email'")&&leadMode.includes("email.autocomplete='email'")&&leadMode.includes("email.inputMode='email'"),'email field must expose browser validation, autofill and mobile keyboard semantics');
