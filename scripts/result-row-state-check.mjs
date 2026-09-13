@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
-const slab=read('assets/slab-pricing-v2.js'),price=read('assets/price-bridge.js'),mobile=read('assets/mobile-price-bridge.js'),manifest=read('scripts/pages-manifest.mjs');
+const slab=read('assets/slab-pricing-v2.js'),price=read('assets/price-bridge.js'),mobile=read('assets/mobile-price-bridge.js'),concrete=read('assets/concrete-material-v1.js'),geometry=read('assets/geometry-v3.js'),manifest=read('scripts/pages-manifest.mjs');
 
 ok(slab.includes("if(!st.with){r.classList.add('off')")&&slab.includes("const small=r.querySelector('small');if(small)small.textContent=''"),'disabling slabs must clear the stale quantity/size note as well as the price');
 ok(price.includes('function clearBenchmarkFill()'),'generic price bridge must expose an owned fill-row cleanup path');
@@ -17,8 +17,16 @@ ok(mobile.includes("target.dataset.mobileBenchmark='1'")&&mobile.includes("note.
 ok(mobile.includes("fill?.querySelector('.mobile-benchmark-note')?.remove()"),'leaving DOPS must remove its stale note');
 ok(mobile.includes("document.addEventListener('plotao:options-reset',()=>schedule(0))"),'mobile fill cleanup must run immediately on type-option reset');
 
+ok(concrete.includes('function clearVolume()')&&concrete.includes("$('#concreteAmount').textContent='—'")&&concrete.includes("if(b)b.textContent='—'"),'inactive or invalid footing calculations must clear both visible concrete volume surfaces');
+ok(concrete.includes('function clearState(b){clearVolume();')&&concrete.includes('publish(null)'),'leaving panel/mesh or material scope must publish a cleared footing state');
+ok(concrete.includes("if(window.PLOTAO_PLACEMENT?.valid===false){clearVolume();"),'invalid opening geometry must hide stale concrete volume instead of showing the previous valid value');
+ok(concrete.includes("document.addEventListener('plotao:options-reset',()=>schedule(0))"),'footing material cleanup must run immediately on type-option reset');
+
+ok(geometry.includes("if(acc){if(type()==='mesh')")&&geometry.includes("else acc.innerHTML=''"),'mesh-specific accessory material rows must be cleared outside mesh type');
+ok(geometry.includes("document.addEventListener('plotao:options-reset',()=>schedule(0))"),'geometry material details must refresh immediately on type-option reset');
+
 const pricePos=manifest.indexOf('/assets/price-bridge.js'),mobilePos=manifest.indexOf('/assets/mobile-price-bridge.js');
 ok(pricePos>=0&&mobilePos>pricePos,'mobile bridge must load after the generic price bridge so ownership handoff is deterministic');
 
 if(fail.length){console.error('Result row state checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Result row state checks OK: slab notes and fill benchmark ownership cannot leak across configuration transitions');
+console.log('Result row state checks OK: slab notes, fill benchmark ownership and material-only details cannot leak across configuration transitions');
