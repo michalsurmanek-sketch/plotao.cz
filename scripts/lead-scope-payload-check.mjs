@@ -1,6 +1,9 @@
 import fs from 'node:fs';
 const src=fs.readFileSync('assets/lead-safety-v1.js','utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 ok(src.includes("function scopeLabel(v){return v==='delivery'?'Doprava':v==='turnkey'?'Na klíč':'Materiál'}"),'lead payload must use canonical scope labels without visual checkmarks');
+ok(src.includes("function placement(kind,keyName,selector){const p=window.PLOTAO_PLACEMENT?.[kind],v=p?.[keyName];return Number.isFinite(Number(v))?Number(v):+($(selector)?.value||0)}"),'lead snapshot must prefer authoritative opening placement state and use DOM only as fallback');
+ok(src.includes("gateSection:includeFence?placement('gate','section','#gateSection'):0")&&src.includes("gatePos:includeFence?placement('gate','pos','#gatePos'):0"),'gate section and position must come from the authoritative placement helper');
+ok(src.includes("wicketSection:includeFence?placement('door','section','#doorSection'):0")&&src.includes("wicketPos:includeFence?placement('door','pos','#doorPos'):0"),'wicket section and position must come from the authoritative placement helper');
 ok(src.includes("function invalidInputReason()")&&src.includes("window.PLOTAO_PLACEMENT?.valid===false"),'lead snapshot must independently detect invalid fence geometry before scope classification');
 const invalidPos=src.indexOf("if(invalidReason||shown==='Nelze spočítat')return{kind:'neplatné zadání'"),deliveryPos=src.indexOf("if(scopeValue==='delivery')return{kind:'individuální nabídka'");
 ok(invalidPos>=0&&deliveryPos>invalidPos,'invalid calculator state must take precedence over delivery/turnkey individual pricing');
@@ -11,4 +14,4 @@ ok(src.includes("scope:includeFence?scopeLabel(scopeValue):''"),'snapshot must e
 ok(src.includes("displayedPrice:includeFence?(ps.kind==='neplatné zadání'?'Nelze spočítat':scopeValue==='material'?shown:'Individuální nabídka'):''"),'non-material snapshots must never carry a stale numeric price and invalid state must stay visibly invalid');
 ok(src.includes("ps=includeFence?priceStatus(scopeValue):{kind:'individuální nabídka',reason:''}"),'price state must be derived from selected scope plus current input validity, not only from the DOM');
 if(fail.length){console.error('Lead scope payload checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Lead scope payload checks OK: invalid geometry wins over scope fallback and delivery/turnkey cannot inherit stale material totals');
+console.log('Lead scope payload checks OK: authoritative opening placement wins over DOM lag, invalid geometry wins over scope fallback, and delivery/turnkey cannot inherit stale material totals');
