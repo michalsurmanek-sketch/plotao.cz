@@ -30,6 +30,8 @@
   }
   function config(){const sb=slab();return{type:type(),actualHeight:actualH(),gateWidth:gateWidth(),doorWidth:doorWidth(),gateType:gateType(),slabWith:sb.with,slabHeight:sb.height,panelSurface:panelSurface(),panelVariant:panelVariant(),meshSurface:meshSurface(),meshVariant:meshVariant()}}
   function rowByLabel(label){return $$('.resultbody .row').find(r=>(r.querySelector('span')?.childNodes?.[0]?.textContent||r.querySelector('span')?.textContent||'').trim().toLowerCase().includes(label))||null}
+  function matByLabel(label){return $$('#materialList .matline').find(r=>(r.querySelector('span')?.textContent||'').trim().toLowerCase().includes(label))||null}
+  function setMaterial(label,text){const r=matByLabel(label),b=r?.querySelector('b');if(b)b.textContent=text||'—'}
   function setRow(label,val,note,offText='Individuální nabídka'){
     const r=rowByLabel(label);if(!r)return;
     const b=r.querySelector('b,strong')||r.lastElementChild;if(b)b.textContent=val==null?offText:money(val);
@@ -44,11 +46,12 @@
     const note='opravte umístění brány/branky';
     setRow('vjezdová brána',null,gateOn()?note:'brána není zvolena','Nezapočítáno');
     setRow('vstupní branka',null,doorOn()?note:'branka není zvolena','Nezapočítáno');
+    setMaterial('vjezdová brána','—');setMaterial('branka','—');
     b.style.display='none';
     window.PLOTAO_GATE_PRICE={type:type(),invalid:true,gate:null,door:null};
     document.dispatchEvent(new CustomEvent('plotao:gate-price',{detail:window.PLOTAO_GATE_PRICE}));
   }
-  function resetPending(){const b=box(),note='přepočítávám podle nové konfigurace';setRow('vjezdová brána',null,gateOn()?note:'brána není zvolena','Nezapočítáno');setRow('vstupní branka',null,doorOn()?note:'branka není zvolena','Nezapočítáno');if(b)b.style.display='none';publish({type:type(),pending:true,gate:null,door:null});schedule(25)}
+  function resetPending(){const b=box(),note='přepočítávám podle nové konfigurace';setRow('vjezdová brána',null,gateOn()?note:'brána není zvolena','Nezapočítáno');setRow('vstupní branka',null,doorOn()?note:'branka není zvolena','Nezapočítáno');setMaterial('vjezdová brána','—');setMaterial('branka','—');if(b)b.style.display='none';publish({type:type(),pending:true,gate:null,door:null});schedule(25)}
 
   function render(){
     const b=box();if(!b)return;
@@ -56,14 +59,14 @@
     const c=config(),parts=[];
     if(gateOn()){
       const g=verified(c,'gate');
-      if(g){setRow('vjezdová brána',g.price,g.label);parts.push('<div style="display:flex;justify-content:space-between;gap:12px"><span>Vjezdová brána</span><b>'+money(g.price)+'</b></div>')}
-      else{setRow('vjezdová brána',null,core.unsupportedNote(c,'gate'));parts.push('<div style="display:flex;justify-content:space-between;gap:12px"><span>Vjezdová brána</span><b>individuální nabídka</b></div>')}
-    }else setRow('vjezdová brána',null,'brána není zvolena','Nezapočítáno');
+      if(g){setRow('vjezdová brána',g.price,g.label);setMaterial('vjezdová brána',g.label);parts.push('<div style="display:flex;justify-content:space-between;gap:12px"><span>Vjezdová brána</span><b>'+money(g.price)+'</b></div>')}
+      else{setRow('vjezdová brána',null,core.unsupportedNote(c,'gate'));setMaterial('vjezdová brána','individuálně');parts.push('<div style="display:flex;justify-content:space-between;gap:12px"><span>Vjezdová brána</span><b>individuální nabídka</b></div>')}
+    }else{setRow('vjezdová brána',null,'brána není zvolena','Nezapočítáno');setMaterial('vjezdová brána','—')}
     if(doorOn()){
       const d=verified(c,'door');
-      if(d){setRow('vstupní branka',d.price,d.label);parts.push('<div style="display:flex;justify-content:space-between;gap:12px"><span>Vstupní branka</span><b>'+money(d.price)+'</b></div>')}
-      else{setRow('vstupní branka',null,core.unsupportedNote(c,'door'));parts.push('<div style="display:flex;justify-content:space-between;gap:12px"><span>Vstupní branka</span><b>individuální nabídka</b></div>')}
-    }else setRow('vstupní branka',null,'branka není zvolena','Nezapočítáno');
+      if(d){setRow('vstupní branka',d.price,d.label);setMaterial('branka',d.label);parts.push('<div style="display:flex;justify-content:space-between;gap:12px"><span>Vstupní branka</span><b>'+money(d.price)+'</b></div>')}
+      else{setRow('vstupní branka',null,core.unsupportedNote(c,'door'));setMaterial('branka','individuálně');parts.push('<div style="display:flex;justify-content:space-between;gap:12px"><span>Vstupní branka</span><b>individuální nabídka</b></div>')}
+    }else{setRow('vstupní branka',null,'branka není zvolena','Nezapočítáno');setMaterial('branka','—')}
     if(!parts.length){b.style.display='none';publish({type:c.type,gate:null,door:null});return}
     b.style.display='block';
     b.innerHTML='<div style="font-size:13px;font-weight:900;margin-bottom:8px">Brána a branka · přesný kusový benchmark</div><div style="display:grid;gap:6px;font-size:12px">'+parts.join('')+'</div><p style="margin:9px 0 0;color:#b9d8c9;font-size:11px;line-height:1.4">Brána se páruje se skutečně použitou vyráběnou výškou plotu, podhrabovou deskou a konkrétním produktem. U klasického pletiva výrobce například uvádí, že 120cm branka pasuje k 125cm pletivu bez desky nebo 100cm pletivu s 20cm podhrabem; 145cm branka obdobně k 150cm pletivu bez desky nebo 125cm pletivu s 20cm podhrabem. Šířky ani jiné výšky se neinterpolují.</p>';
