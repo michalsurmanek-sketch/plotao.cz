@@ -8,8 +8,7 @@
   function actualH(){if(type()==='panel')return +(window.PLOTAO_PANEL_PRICE?.height||requestedH());if(type()==='mesh')return +(window.PLOTAO_MESH_PRICE?.height||requestedH());return requestedH()}
   function gateOn(){return!!$('#gate')?.checked}
   function doorOn(){return!!$('#door')?.checked}
-  function invalidPlacement(){return window.PLOTAO_PLACEMENT?.valid===false}
-  function invalidHeight(){const h=requestedH();return h<40||h>400}
+  function invalidIssue(){const shared=window.PLOTAO_INPUT_VALIDITY?.current?.();if(shared)return shared;if(window.PLOTAO_PLACEMENT?.valid===false)return{code:'placement',note:'opravte umístění brány/branky'};const h=requestedH();if(h<40||h>400)return{code:'height',note:'opravte výšku plotu'};return null}
   function gateWidth(){return+($('#gateWidth')?.value||4)}
   function doorWidth(){return+($('#doorWidth')?.value||1)}
   function gateType(){return $('#gateType')?.value||'double'}
@@ -55,8 +54,7 @@
 
   function render(){
     const b=box();if(!b)return;
-    if(invalidPlacement()){invalidate(b);return}
-    if(invalidHeight()){invalidate(b,'opravte výšku plotu');return}
+    const issue=invalidIssue();if(issue){invalidate(b,issue.note);return}
     const c=config(),parts=[];
     if(gateOn()){
       const g=verified(c,'gate');
@@ -74,6 +72,6 @@
     publish({type:c.type,actualHeight:c.actualHeight,slab:{with:c.slabWith,height:c.slabHeight},gate:gateOn()?verified(c,'gate'):null,door:doorOn()?verified(c,'door'):null});
   }
   function schedule(delay=60){clearTimeout(schedule.t);schedule.t=setTimeout(render,delay)}
-  function init(){render();document.addEventListener('input',()=>schedule(60));document.addEventListener('change',()=>schedule(60));document.addEventListener('click',()=>schedule(100));document.addEventListener('plotao:panel-price',()=>schedule(40));document.addEventListener('plotao:mesh-price',()=>schedule(40));document.addEventListener('plotao:placement',()=>schedule(40));document.addEventListener('plotao:slab-price',()=>schedule(40));document.addEventListener('plotao:options-reset',resetPending)}
+  function init(){render();document.addEventListener('input',()=>schedule(60));document.addEventListener('change',()=>schedule(60));document.addEventListener('click',()=>schedule(100));document.addEventListener('plotao:panel-price',()=>schedule(40));document.addEventListener('plotao:mesh-price',()=>schedule(40));document.addEventListener('plotao:placement',()=>schedule(40));document.addEventListener('plotao:slab-price',()=>schedule(40));document.addEventListener('plotao:options-reset',resetPending);document.addEventListener('plotao:input-validity',()=>schedule(0))}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
