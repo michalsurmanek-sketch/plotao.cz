@@ -7,9 +7,10 @@ ok(src.includes("if(p==='Nelze spočítat')return{kind:'invalid',label:'Stav kal
 ok(src.includes("if(p==='Individuální nabídka')return{kind:'individual',label:'Stav kalkulace',button:'Zobrazit podklady →'}"),'individual pricing must be labelled as a state, not an estimate');
 ok(src.includes("if(p.startsWith('Od ')||p.includes('+ individuálně'))return{kind:'partial',label:'Částečný rozpočet',button:'Zobrazit rozpis →'}"),'partial totals must be clearly labelled');
 ok(src.includes("return{kind:'price',label:'Cena materiálu',button:'Zobrazit rozpis →'}"),'verified totals must be described as material price');
-ok(src.includes("function sharedTarget(){const api=window.PLOTAO_INPUT_VALIDITY;if(!api?.current)return undefined")&&src.includes("if(issue.code==='height')return $('#height')")&&src.includes("['segments','segments-count','segments-total'].includes(issue.code)")&&src.includes("if(issue.code==='segment-length')")&&src.includes("if(issue.code==='placement')return $('#placementInfo')"),'invalid mobile CTA must route through the same shared validity code as the main calculator');
+ok(src.includes("function sharedTarget(){const api=window.PLOTAO_INPUT_VALIDITY;if(!api?.current)return undefined")&&src.includes("if(issue.code==='height')return $('#height')")&&src.includes("['segments','segments-count','segments-total'].includes(issue.code)")&&src.includes("if(issue.code==='segment-length')")&&src.includes("if(issue.code==='placement')return(issue.field?$('#'+issue.field):null)||$('#placementInfo')"),'invalid mobile CTA must route through shared validity and prefer the exact placement field over a generic warning block');
 ok(src.includes("if(shared!==undefined)return shared||$('#kalkulator')||document.body"),'when shared validity is available and already valid, mobile routing must not fall back to a stale placement flag');
 ok(src.includes("window.PLOTAO_PLACEMENT?.valid===false"),'legacy placement routing must remain only as a startup fallback when the shared API is unavailable');
+ok(src.includes("scroll(target,true)")&&src.includes("el.focus({preventScroll:true})"),'invalid CTA must scroll to and focus the concrete actionable control');
 ok(src.includes("sticky.setAttribute('aria-busy',s.kind==='pending'?'true':'false')")&&src.includes("button.disabled=s.kind==='pending'"),'mobile bar and CTA must expose and enforce the pending state accessibly');
 ok(src.includes("s.kind==='pending'?'Čekám na dokončení přepočtu ceny'")&&src.includes("if(s.kind==='pending')return"),'pending mobile CTA must explain why it is disabled and must not navigate to a stale result');
 ok(src.includes("e.stopImmediatePropagation()"),'state-aware mobile CTA must replace the legacy unconditional result scroll');
@@ -28,4 +29,4 @@ ok(truthPos>=0&&statePos>truthPos,'state-aware mobile summary must load after th
 ok(safePos>statePos,'safe-area protection must load after the mobile summary layer');
 
 if(fail.length){console.error('Mobile summary regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Mobile summary regression checks OK: pending, invalid, partial and verified states plus shared routing and safe-area spacing stay truthful and usable');
+console.log('Mobile summary regression checks OK: pending/invalid states and exact shared-validity field routing stay truthful, accessible and usable');
