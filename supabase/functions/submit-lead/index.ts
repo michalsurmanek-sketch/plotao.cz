@@ -24,8 +24,12 @@ function response(status: number, body: Record<string, unknown>) {
 }
 
 function clientAddress(req: Request) {
-  const forwarded = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-  return forwarded || req.headers.get('cf-connecting-ip')?.trim() || req.headers.get('x-real-ip')?.trim() || 'unknown'
+  const cf = req.headers.get('cf-connecting-ip')?.trim()
+  if (cf) return cf.slice(0, 200)
+  const real = req.headers.get('x-real-ip')?.trim()
+  if (real) return real.slice(0, 200)
+  const forwarded = (req.headers.get('x-forwarded-for') || '').split(',').map((x) => x.trim()).filter(Boolean)
+  return (forwarded.at(-1) || 'unknown').slice(0, 200)
 }
 
 async function digest(value: string) {
@@ -94,37 +98,42 @@ export default {
 
       const validated = validateEnvelope(input)
       if (!validated.ok) return response(422, { error: 'validation_failed', fields: validated.errors })
+      const lead = validated.lead
 
-      let keyHash = ''
+      let rateKeys: string[] = []
       try {
+        const salt = rateSalt()
+        const address = clientAddress(req)
         const ua = (req.headers.get('user-agent') || 'unknown').slice(0, 300)
-        keyHash = await digest(`${rateSalt()}\n${clientAddress(req)}\n${ua}`)
+        if (address !== 'unknown') rateKeys.push(await digest(`${salt}\nnetwork\n${address}\n${ua}`))
+        rateKeys.push(await digest(`${salt}\ncontact\n${lead.phone}\n${lead.email}`))
+        rateKeys = [...new Set(rateKeys)]
       } catch {
         return response(503, { error: 'rate_limit_unavailable' })
       }
 
       const since = new Date(Date.now() - RATE_WINDOW_MS).toISOString()
-      const { count, error: countError } = await ctx.supabaseAdmin
+      const checks = await Promise.all(rateKeys.map((keyHash) => ctx.supabaseAdmin
         .from('plotao_lead_rate_events')
         .select('id', { count: 'exact', head: true })
         .eq('key_hash', keyHash)
-        .gte('created_at', since)
+        .gte('created_at', since)))
 
-      if (countError) {
-        console.error('plotao rate count failed', countError.code || 'unknown')
+      if (checks.some((x) => x.error)) {
+        const firstError = checks.find((x) => x.error)?.error
+        console.error('plotao rate count failed', firstError?.code || 'unknown')
         return response(503, { error: 'rate_limit_unavailable' })
       }
-      if ((count || 0) >= RATE_LIMIT) return response(429, { error: 'rate_limited' })
+      if (checks.some((x) => (x.count || 0) >= RATE_LIMIT)) return response(429, { error: 'rate_limited' })
 
       const { error: rateInsertError } = await ctx.supabaseAdmin
         .from('plotao_lead_rate_events')
-        .insert({ key_hash: keyHash })
+        .insert(rateKeys.map((key_hash) => ({ key_hash })))
       if (rateInsertError) {
         console.error('plotao rate insert failed', rateInsertError.code || 'unknown')
         return response(503, { error: 'rate_limit_unavailable' })
       }
 
-      const lead = validated.lead
       const row = {
         submitted_at: validated.submittedAt,
         source: 'plotao.cz',
