@@ -36,6 +36,13 @@ for(const file of pages){
   for(const img of html.match(/<img\b[^>]*>/gi)||[])ok(/\balt=["'][^"']*["']/i.test(img),`${file}: image missing alt attribute: ${img.slice(0,100)}`);
 }
 
+const landingPages=pages.filter(file=>file!=='index.html'&&file!=='typy-plotu.html');
+for(const file of landingPages){
+  const html=fs.readFileSync(file,'utf8');
+  ok(/<a\\b[^>]*href=["']\/#kalkulator["'][^>]*>[^<]*(?:Spočítat|Otevřít|Připravit)/i.test(html),`${file}: primary calculator CTA must link directly to /#kalkulator`);
+  ok(!/href=["']\/#calculator["']/i.test(html),`${file}: obsolete English calculator anchor must not return`);
+}
+
 const sitemap=fs.readFileSync('sitemap.xml','utf8');
 const urls=[...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1].trim());
 const expectedUrls=pages.map(f=>f==='index.html'?'https://plotao.cz/':`https://plotao.cz/${f}`);
