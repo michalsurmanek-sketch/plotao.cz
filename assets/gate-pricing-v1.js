@@ -4,11 +4,12 @@
   if(!core){console.error('PLOTAO gate pricing core is missing');return}
 
   function type(){return $('.type.on')?.dataset.id||''}
-  function requestedH(){return Math.max(40,+($('#height')?.value||150))}
+  function requestedH(){return +($('#height')?.value||0)}
   function actualH(){if(type()==='panel')return +(window.PLOTAO_PANEL_PRICE?.height||requestedH());if(type()==='mesh')return +(window.PLOTAO_MESH_PRICE?.height||requestedH());return requestedH()}
   function gateOn(){return!!$('#gate')?.checked}
   function doorOn(){return!!$('#door')?.checked}
   function invalidPlacement(){return window.PLOTAO_PLACEMENT?.valid===false}
+  function invalidHeight(){const h=requestedH();return h<40||h>400}
   function gateWidth(){return+($('#gateWidth')?.value||4)}
   function doorWidth(){return+($('#doorWidth')?.value||1)}
   function gateType(){return $('#gateType')?.value||'double'}
@@ -42,8 +43,7 @@
   function box(){let b=$('#gatePriceBox');if(!b){b=document.createElement('div');b.id='gatePriceBox';b.style.cssText='display:none;margin-top:14px;padding:14px;border:1px solid #ffffff26;border-radius:13px;background:#ffffff0d;color:#fff';($('#materialList')||$('.resultbody'))?.insertAdjacentElement('afterend',b)}return b}
   function verified(c,kind){return core.computeVerifiedGate(c,kind)}
   function publish(d){window.PLOTAO_GATE_PRICE=d;document.dispatchEvent(new CustomEvent('plotao:gate-price',{detail:d}))}
-  function invalidate(b){
-    const note='opravte umístění brány/branky';
+  function invalidate(b,note='opravte umístění brány/branky'){
     setRow('vjezdová brána',null,gateOn()?note:'brána není zvolena','Nezapočítáno');
     setRow('vstupní branka',null,doorOn()?note:'branka není zvolena','Nezapočítáno');
     setMaterial('vjezdová brána','—');setMaterial('branka','—');
@@ -56,6 +56,7 @@
   function render(){
     const b=box();if(!b)return;
     if(invalidPlacement()){invalidate(b);return}
+    if(invalidHeight()){invalidate(b,'opravte výšku plotu');return}
     const c=config(),parts=[];
     if(gateOn()){
       const g=verified(c,'gate');
