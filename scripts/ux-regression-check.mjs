@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
-const scroll=read('assets/step-scroll-v1.js'),a11y=read('assets/choice-accessibility-v1.js'),modal=read('assets/modal-accessibility-v1.js'),segmentLimit=read('assets/segment-limit-ui-v1.js'),manifest=read('scripts/pages-manifest.mjs');
+const scroll=read('assets/step-scroll-v1.js'),a11y=read('assets/choice-accessibility-v1.js'),modal=read('assets/modal-accessibility-v1.js'),segmentLimit=read('assets/segment-limit-ui-v1.js'),leadMode=read('assets/lead-mode-ui-v1.js'),manifest=read('scripts/pages-manifest.mjs');
 
 for(const [type,id] of Object.entries({privacy:'#privacyConfig',aluminium:'#aluminiumConfigBox',gabion:'#gabionOptionsBox',metal:'#metalConfig',concrete:'#concreteConfig',masonry:'#extraFenceConfig',mobile:'#extraFenceConfig',other:'#extraFenceConfig'}))ok(scroll.includes(type+":'"+id+"'")||scroll.includes(type+':"'+id+'"'),'next-step scroll must target the visible '+type+' configuration');
 ok(scroll.includes('scrollToEl(nextAfterType,180)'),'type scroll target must be resolved after dynamic configuration modules render');
@@ -25,9 +25,15 @@ ok(segmentLimit.includes("btn.textContent=full?'Maximum 12 úseků':'+ Přidat �
 ok(segmentLimit.includes("new MutationObserver(sync).observe(root,{childList:true})"),'segment limit control must re-enable automatically after a section is removed');
 ok(segmentLimit.includes("s.setAttribute('aria-live','polite')"),'segment limit explanation must be announced to assistive technology');
 
+ok(leadMode.includes("phone.type='tel'")&&leadMode.includes("phone.autocomplete='tel'")&&leadMode.includes("phone.inputMode='tel'"),'phone field must expose mobile telephone keyboard and autofill semantics');
+ok(leadMode.includes("email.type='email'")&&leadMode.includes("email.autocomplete='email'")&&leadMode.includes("email.inputMode='email'"),'email field must expose browser validation, autofill and mobile keyboard semantics');
+ok(leadMode.includes("email.autocapitalize='none'")&&leadMode.includes('email.spellcheck=false'),'email input must not be autocapitalized or spell-corrected on mobile');
+ok(leadMode.includes('name.required=true')&&leadMode.includes('phone.required=true')&&leadMode.includes('email.required=true'),'all lead modes must require the same core contact identity fields before submission');
+ok(leadMode.includes("name.autocomplete='name'")&&leadMode.includes("name.enterKeyHint='next'"),'name field must support contact autofill and efficient mobile keyboard progression');
+
 const limitPos=manifest.indexOf('/assets/segment-limit-ui-v1.js'),a11yPos=manifest.indexOf('/assets/choice-accessibility-v1.js'),scrollPos=manifest.indexOf('/assets/step-scroll-v1.js');
 ok(limitPos>manifest.indexOf('/assets/ui-bootstrap-v1.js'),'production manifest must load segment limit UI after bootstrap creates the section controls');
 ok(a11yPos>=0&&scrollPos>a11yPos,'production manifest must load the accessibility synchronizer before step scrolling');
 
 if(fail.length){console.error('UX regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('UX regression checks OK: dynamic next-step scroll, modal behavior, explicit segment limits and calculator choice accessibility are protected');
+console.log('UX regression checks OK: dynamic next-step scroll, modal behavior, explicit segment limits, mobile lead inputs and calculator choice accessibility are protected');
