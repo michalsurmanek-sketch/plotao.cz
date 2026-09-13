@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
-const slab=read('assets/slab-pricing-v2.js'),price=read('assets/price-bridge.js'),mobile=read('assets/mobile-price-bridge.js'),concrete=read('assets/concrete-material-v1.js'),geometry=read('assets/geometry-v3.js'),manifest=read('scripts/pages-manifest.mjs');
+const slab=read('assets/slab-pricing-v2.js'),price=read('assets/price-bridge.js'),mobile=read('assets/mobile-price-bridge.js'),concrete=read('assets/concrete-material-v1.js'),geometry=read('assets/geometry-v3.js'),gate=read('assets/gate-pricing-v1.js'),drive=read('assets/gate-drive-pricing-v1.js'),manifest=read('scripts/pages-manifest.mjs');
 
 ok(slab.includes("if(!st.with){r.classList.add('off')")&&slab.includes("const small=r.querySelector('small');if(small)small.textContent=''"),'disabling slabs must clear the stale quantity/size note as well as the price');
 ok(price.includes('function clearBenchmarkFill()'),'generic price bridge must expose an owned fill-row cleanup path');
@@ -25,8 +25,13 @@ ok(concrete.includes("document.addEventListener('plotao:options-reset',()=>sched
 ok(geometry.includes("if(acc){if(type()==='mesh')")&&geometry.includes("else acc.innerHTML=''"),'mesh-specific accessory material rows must be cleared outside mesh type');
 ok(geometry.includes("document.addEventListener('plotao:options-reset',()=>schedule(0))"),'geometry material details must refresh immediately on type-option reset');
 
+ok(gate.includes('function resetPending()')&&gate.includes("note='přepočítávám podle nové konfigurace'")&&gate.includes("publish({type:type(),pending:true,gate:null,door:null})"),'gate and wicket rows must be neutralized immediately before a new type configuration is priced');
+ok(gate.includes("document.addEventListener('plotao:options-reset',resetPending)"),'gate pricing must use the immediate pending reset on type-option changes');
+ok(drive.includes('function resetPending()')&&drive.includes("'přepočítávám pohon podle nové konfigurace'")&&drive.includes("publish({active:false,pending:true,unsupported:true,price:0})"),'gate drive row must drop the previous kit price while the new configuration is pending');
+ok(drive.includes("document.addEventListener('plotao:options-reset',resetPending)"),'gate drive pricing must use the immediate pending reset on type-option changes');
+
 const pricePos=manifest.indexOf('/assets/price-bridge.js'),mobilePos=manifest.indexOf('/assets/mobile-price-bridge.js');
 ok(pricePos>=0&&mobilePos>pricePos,'mobile bridge must load after the generic price bridge so ownership handoff is deterministic');
 
 if(fail.length){console.error('Result row state checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Result row state checks OK: slab notes, fill benchmark ownership and material-only details cannot leak across configuration transitions');
+console.log('Result row state checks OK: slab notes, fill ownership, material-only details and opening prices cannot leak across configuration transitions');
