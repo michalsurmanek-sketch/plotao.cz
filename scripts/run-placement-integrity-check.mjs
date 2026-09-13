@@ -13,7 +13,9 @@ ok(calc.includes("normalize('gate',false);normalize('door',false)")&&calc.includ
 ok(calc.includes("function adjustAfterRemove(index)")&&calc.includes('normalize(kind)}}'),'segment removal may still clamp an opening because its previous physical segment can cease to exist');
 ok(calc.includes("placements.gate.pos=Math.max(0,+e.target.value||0);publish()")&&calc.includes("placements.door.pos=Math.max(0,+e.target.value||0);publish()"),'direct opening-position edits must publish authoritative placement synchronously');
 ok(calc.includes("document.addEventListener('plotao:input-validity',e=>{if(e.detail?.issue?.code==='placement'||e.detail?.valid)publish()})"),'visual opening plan must hide/recover synchronously with shared placement validity');
+ok(calc.includes("if(!go&&!doo){b.style.display='none';b.innerHTML='';publish();return}")&&calc.includes("b.style.display='block'"),'opening placement controls must disappear when neither gate nor wicket is active and return when an opening is enabled');
+ok(calc.includes("let placements={gate:{section:0,pos:5},door:{section:0,pos:12}}")&&calc.includes("if(!go&&!doo){b.style.display='none';b.innerHTML='';publish();return}"),'hiding an empty placement UI must not erase stored gate/wicket positions');
 ok(lead.includes("const p=window.PLOTAO_PLACEMENT?.[kind],v=p?.[keyName]"),'lead snapshot must keep authoritative opening placement');
 
 if(fail.length){console.error('Run placement integrity checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Run placement integrity checks OK: explicit opening positions are preserved, published synchronously and only clamped when a segment is removed');
+console.log('Run placement integrity checks OK: explicit opening positions are preserved, empty placement UI stays hidden, and positions clamp only when a segment is removed');
