@@ -44,6 +44,11 @@ ok(!index.includes("Access-Control-Allow-Origin': '*'"),'Edge Function must neve
 ok(index.includes("{ auth: 'none', cors: 'disabled' }")&&config.includes('[functions.submit-lead]')&&config.includes('verify_jwt = false'),'public form function must use explicit custom security with verify_jwt=false');
 ok(index.includes('MAX_BODY_BYTES = 64 * 1024')&&index.includes('readBodyLimited'),'request body size limit must be enforced before JSON parsing');
 ok(index.includes("Deno.env.get('PLOTAO_RATE_SALT')")&&index.includes("crypto.subtle.digest('SHA-256'")&&index.includes('RATE_LIMIT = 8'),'salted hash rate limiting must be present');
+ok(index.includes("req.headers.get('cf-connecting-ip')")&&index.includes("req.headers.get('x-real-ip')")&&index.includes('forwarded.at(-1)'),'client address resolution must prefer platform proxy headers and never trust the first forwarded-for hop');
+ok(index.includes("address !== 'unknown'")&&index.includes('network\\n${address}\\n${ua}'),'missing network identity must skip the shared network key rather than rate-limit all unknown clients together');
+ok(index.includes('contact\\n${lead.phone}\\n${lead.email}')&&index.includes('rateKeys = [...new Set(rateKeys)]'),'rate limiting must include a separate privacy-preserving normalized contact key');
+ok(index.includes('Promise.all(rateKeys.map')&&index.includes("checks.some((x) => (x.count || 0) >= RATE_LIMIT)"),'every active rate key must be checked independently against the same window');
+ok(index.includes(".insert(rateKeys.map((key_hash) => ({ key_hash })))"),'all active hashed rate keys must be recorded atomically in one insert call');
 ok(!index.includes('SUPABASE_SERVICE_ROLE_KEY')&&!index.includes('SUPABASE_SECRET_KEYS'),'backend source must not read or embed privileged keys directly');
 ok(index.includes('ctx.supabaseAdmin')&&index.includes(".from('plotao_leads')"),'Edge Function must store through the server admin client');
 ok(sql.includes('alter table public.plotao_leads enable row level security')&&sql.includes('revoke all on table public.plotao_leads from anon, authenticated'),'lead table must enable RLS and revoke browser-role grants');
@@ -53,4 +58,4 @@ ok(deno.imports?.['@supabase/server']==='npm:@supabase/server@1.6.0','Supabase s
 ok(browserConfig.includes('enabled:false')&&browserConfig.includes("endpoint:''")&&browserConfig.includes('allowedOrigins:[]'),'production browser transport must remain explicitly disabled before verified backend activation');
 
 if(fail.length){console.error('Lead backend source checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Lead backend source checks OK: geometry validation, RLS, exact CORS, body limits, rate limiting, pinned dependency and disabled browser activation are protected');
+console.log('Lead backend source checks OK: geometry validation, RLS, exact CORS, body limits, multi-key hashed rate limiting, pinned dependency and disabled browser activation are protected');
