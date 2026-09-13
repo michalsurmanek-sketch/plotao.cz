@@ -35,7 +35,13 @@ ok(v.valid===false&&v.errors.some(e=>e.code==='email'),'email without public dom
 v=core.validateLead({...base,name:'J'});
 ok(v.valid===false&&v.errors.some(e=>e.code==='name'),'one-character name must be rejected');
 v=core.validateLead({...base,segments:[{name:'Předek',length:0,connection:'začátek'}]});
-ok(v.valid===false&&v.errors.some(e=>e.code==='segments'),'customer lead must contain at least one positive fence segment');
+ok(v.valid===false&&v.errors.some(e=>e.code==='segment-length'),'customer lead must reject a zero-length fence segment');
+v=core.validateLead({...base,segments:[{name:'Předek',length:20,connection:'začátek'},{name:'Bok',length:0,connection:'navazuje rohem'}]});
+ok(v.valid===false&&v.errors.some(e=>e.code==='segment-length'),'one valid segment must not hide another invalid zero-length segment');
+v=core.validateLead({...base,segments:Array.from({length:13},(_,i)=>({name:'Úsek '+(i+1),length:1,connection:i?'navazuje rohem':'začátek'}))});
+ok(v.valid===false&&v.errors.some(e=>e.code==='segments-count'),'customer lead must reject more than 12 fence segments instead of truncating them');
+v=core.validateLead({...base,segments:[{name:'A',length:600,connection:'začátek'},{name:'B',length:500,connection:'samostatný úsek'}]});
+ok(v.valid===false&&v.errors.some(e=>e.code==='segments-total'),'customer lead must enforce the calculator 1000m total-length boundary');
 v=core.validateLead({...base,priceKind:'neplatné zadání'});
 ok(v.valid===false&&v.errors.some(e=>e.code==='invalid-price'),'invalid calculator state must block customer lead preparation');
 
@@ -54,6 +60,10 @@ v=core.validateLead({...base,wicket:true,wicketWidth:1,wicketSection:1,wicketPos
 ok(v.valid===false&&v.errors.some(e=>e.code==='wicket-placement'),'wicket extending beyond its segment must be rejected');
 v=core.validateLead({...base,gate:true,gateWidth:4,gateSection:99,gatePos:1});
 ok(v.valid===false&&v.errors.some(e=>e.code==='gate-placement'||e.code==='gate-section'),'out-of-range gate section must not create a silently valid customer lead');
+v=core.validateLead({...base,gate:true,gateWidth:4,gateSection:0,gatePos:8,wicket:true,wicketWidth:1,wicketSection:0,wicketPos:10});
+ok(v.valid===false&&v.errors.some(e=>e.code==='openings-overlap'),'overlapping gate and wicket in the same section must be rejected');
+v=core.validateLead({...base,scopeValue:'delivery',scope:'Doprava',place:'Uherské Hradiště',priceKind:'individuální nabídka',displayedPrice:'Individuální nabídka',gate:true,gateWidth:4,gateSection:0,gatePos:8,wicket:true,wicketWidth:1,wicketSection:0,wicketPos:10});
+ok(v.valid===false&&v.errors.some(e=>e.code==='openings-overlap'),'delivery scope must not downgrade invalid overlapping openings into a valid individual quote');
 
 v=core.validateLead({...base,mode:'help',fenceType:'',height:0,segments:[],priceKind:'neplatné zadání',gate:true,gateSection:99,place:'',note:'Jak vyřešit roh ve svahu?'});
 ok(v.valid===true,'help request with valid contact and question must not require a completed fence calculation');
@@ -68,7 +78,7 @@ v=core.validateLead({...base,mode:'partner',place:'',placeFromCalculator:'',fenc
 ok(v.valid===false&&v.errors.some(e=>e.code==='partner-area'),'partner request must require an area of operation');
 
 const weird=core.normalizeLead({...base,segments:[{name:' A   B ',length:5000,connection:'začátek'},{name:'C',length:-4,connection:'nonsense'}],options:['3D','3D','  Zelená  ']});
-ok(weird.segments[0].name==='A B'&&weird.segments[0].length===1000,'segment name must collapse whitespace and length must clamp to calculator maximum');
+ok(weird.segments[0].name==='A B'&&weird.segments[0].length===1000,'segment name must collapse whitespace and length must clamp to per-segment calculator maximum');
 ok(weird.segments[1].length===0&&weird.segments[1].connection==='navazuje rohem','negative segment and unknown connection must normalize safely');
 ok(weird.options.length===2&&weird.options[1]==='Zelená','lead options must be trimmed and deduplicated');
 
@@ -81,4 +91,4 @@ const partnerOut=core.toText({...base,mode:'partner',place:'Zlínský kraj',plac
 ok(partnerOut.startsWith('PLOTAO.CZ – zájem montážní firmy')&&partnerOut.includes('Oblast působnosti: Zlínský kraj')&&!partnerOut.includes('Jiná obec')&&!partnerOut.includes('Plot:'),'partner export must use explicit service area only and exclude customer calculator payload');
 
 if(fail.length){console.error('Lead scenario checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Lead scenario checks OK: isolated drafts and mode-specific payloads are protected');
+console.log('Lead scenario checks OK: isolated drafts, geometry limits and mode-specific payloads are protected');
