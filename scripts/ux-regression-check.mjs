@@ -16,7 +16,7 @@ ok(a11y.includes("price.setAttribute('aria-live','polite')")&&a11y.includes("pri
 ok(a11y.includes("new MutationObserver(()=>schedule(0)).observe(root,{childList:true,subtree:true})"),'accessibility state must survive dynamic option/config rerenders');
 ok(ui.includes("function focusChoice(attr,value){queueMicrotask(()=>{const target=$$('[data-'+attr+']').find(x=>x.dataset[attr]===value)")&&ui.includes("target.focus({preventScroll:true})"),'rerendered calculator choices must restore keyboard focus to the same logical button without a scroll jump');
 ok(ui.includes("state[key]=value;renderOptions();focusChoice(attr,value)") ,'panel/mesh option choices must restore focus after renderOptions recreates their buttons');
-ok(ui.includes("state.type=value;renderTypes();renderOptions();focusChoice('id',value)") ,'fence type choices must restore focus after renderTypes recreates the type buttons');
+ok(ui.includes("state.type=value;syncUrlType(value);renderTypes();renderOptions();focusChoice('id',value)") ,'fence type choices must synchronize URL and restore focus after renderTypes recreates the type buttons');
 
 ok(modal.includes("modal.setAttribute('role','dialog')")&&modal.includes("modal.setAttribute('aria-modal','true')"),'lead modal must expose true modal-dialog semantics');
 ok(modal.includes("modal.setAttribute('aria-hidden',open?'false':'true')"),'lead modal must keep aria-hidden synchronized with visual open state');
