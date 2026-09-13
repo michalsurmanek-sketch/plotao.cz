@@ -51,19 +51,19 @@ for(const [file,type] of Object.entries(landingType)){
   ok(!/href=["']\/#calculator["']/i.test(html),`${file}: obsolete English calculator anchor must not return`);
 }
 
-const socialPages=['panelovy-plot.html','pletivovy-plot.html','betonovy-plot.html','hlinikovy-plot.html','plot-na-soukromi.html','gabionovy-plot.html','kovovy-plot.html','zdeny-plot.html'];
+const socialPages=Object.keys(landingType);
 for(const file of socialPages){
   const html=fs.readFileSync(file,'utf8'),can=canonical(html);
-  ok(metaBy(html,'property','og:title').length>=20,`${file}: upgraded landing must keep og:title`);
-  ok(metaBy(html,'property','og:description').length>=50,`${file}: upgraded landing must keep og:description`);
-  ok(metaBy(html,'property','og:type')==='website',`${file}: upgraded landing must keep og:type=website`);
+  ok(metaBy(html,'property','og:title').length>=20,`${file}: landing must keep og:title`);
+  ok(metaBy(html,'property','og:description').length>=50,`${file}: landing must keep og:description`);
+  ok(metaBy(html,'property','og:type')==='website',`${file}: landing must keep og:type=website`);
   ok(metaBy(html,'property','og:url')===can,`${file}: og:url must match canonical`);
-  ok(metaBy(html,'name','twitter:card')==='summary',`${file}: upgraded landing must keep twitter:card=summary`);
+  ok(metaBy(html,'name','twitter:card')==='summary',`${file}: landing must keep twitter:card=summary`);
   const schemaScripts=[...html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)].map(m=>m[1]);
   let schemas=[];for(const raw of schemaScripts){try{schemas.push(JSON.parse(raw))}catch{ok(false,`${file}: invalid JSON-LD`);}}
   const flattened=schemas.flatMap(s=>Array.isArray(s?.['@graph'])?s['@graph']:[s]);
-  ok(flattened.some(x=>x?.['@type']==='BreadcrumbList'),`${file}: upgraded landing must keep BreadcrumbList structured data`);
-  ok(flattened.some(x=>x?.['@type']==='FAQPage'),`${file}: upgraded landing must keep FAQPage structured data`);
+  ok(flattened.some(x=>x?.['@type']==='BreadcrumbList'),`${file}: landing must keep BreadcrumbList structured data`);
+  ok(flattened.some(x=>x?.['@type']==='FAQPage'),`${file}: landing must keep FAQPage structured data`);
 }
 
 const sitemap=fs.readFileSync('sitemap.xml','utf8');
@@ -81,4 +81,4 @@ ok(/User-agent:\s*\*/i.test(robots)&&/Allow:\s*\//i.test(robots),'robots.txt: pu
 ok(robots.includes('Sitemap: https://plotao.cz/sitemap.xml'),'robots.txt: canonical sitemap URL missing');
 
 if(fail.length){console.error('SEO regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`SEO regression checks OK: ${pages.length} public pages, canonical/title/H1/image/sitemap integrity protected; upgraded landing social/structured metadata protected`);
+console.log(`SEO regression checks OK: ${pages.length} public pages; all fence landing canonical/social/structured metadata and sitemap integrity protected`);
