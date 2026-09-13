@@ -17,6 +17,7 @@ ok(truth.includes('Ověřený materiál spočítáme hned'),'intro must clearly 
 ok(truth.includes('Doprava a Na klíč = individuální doplnění'),'scope explanation must disclose individual delivery/turnkey pricing');
 ok(truth.includes("id='scopeTruthNote'")||truth.includes("n.id='scopeTruthNote'"),'scope truth note must have a stable id and avoid duplicates');
 ok(truth.includes('Ověřené položky počítáme z aktuálních cenových podkladů; individuální položky jsou označené zvlášť.'),'result note must distinguish verified pricing inputs from individual items');
+ok(truth.includes('<a href="/">Domů</a>')&&!truth.includes('<a href="/">O nás</a>'),'footer home link must use a truthful label and must not impersonate a missing About page');
 ok(modalA11y.includes("modal.setAttribute('aria-labelledby','modalTitle')")&&modalA11y.includes("modal.setAttribute('aria-describedby','modalText')"),'modal must expose its title and description to assistive technology');
 ok(modalA11y.includes("close.setAttribute('aria-label','Zavřít dialog')"),'modal close control must have an accessible name');
 ok(modalA11y.includes("e.key!=='Tab'")&&modalA11y.includes('last.focus()')&&modalA11y.includes('first.focus()'),'modal keyboard focus must remain trapped inside the open dialog');
