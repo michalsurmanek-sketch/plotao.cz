@@ -99,6 +99,7 @@ export default {
       const validated = validateEnvelope(input)
       if (!validated.ok) return response(422, { error: 'validation_failed', fields: validated.errors })
       const lead = validated.lead
+      const receivedAt = new Date().toISOString()
 
       let rateKeys: string[] = []
       try {
@@ -135,7 +136,7 @@ export default {
       }
 
       const row = {
-        submitted_at: validated.submittedAt,
+        submitted_at: receivedAt,
         source: 'plotao.cz',
         mode: lead.mode,
         name: lead.name,
