@@ -17,6 +17,14 @@ function attr(html,tag,name,valueAttr='content'){
 function canonical(html){
   for(const m of html.matchAll(/<link\b[^>]*>/gi)){const t=m[0],rel=t.match(/\brel=["']([^"']+)["']/i)?.[1];if(rel?.toLowerCase()==='canonical')return t.match(/\bhref=["']([^"']+)["']/i)?.[1]||''}return'';
 }
+function metaBy(html,attrName,attrValue){
+  for(const m of html.matchAll(/<meta\b[^>]*>/gi)){
+    const t=m[0],key=t.match(new RegExp(`\\b${attrName}=["']([^"']+)["']`,'i'))?.[1];
+    if(key?.toLowerCase()!==attrValue.toLowerCase())continue;
+    return t.match(/\bcontent=["']([^"']+)["']/i)?.[1]?.trim()||'';
+  }
+  return'';
+}
 
 ok(pages.length>0,'no public HTML pages found');
 for(const file of pages){
@@ -43,6 +51,21 @@ for(const [file,type] of Object.entries(landingType)){
   ok(!/href=["']\/#calculator["']/i.test(html),`${file}: obsolete English calculator anchor must not return`);
 }
 
+const socialPages=['plot-na-soukromi.html','gabionovy-plot.html','kovovy-plot.html'];
+for(const file of socialPages){
+  const html=fs.readFileSync(file,'utf8'),can=canonical(html);
+  ok(metaBy(html,'property','og:title').length>=20,`${file}: upgraded landing must keep og:title`);
+  ok(metaBy(html,'property','og:description').length>=50,`${file}: upgraded landing must keep og:description`);
+  ok(metaBy(html,'property','og:type')==='website',`${file}: upgraded landing must keep og:type=website`);
+  ok(metaBy(html,'property','og:url')===can,`${file}: og:url must match canonical`);
+  ok(metaBy(html,'name','twitter:card')==='summary',`${file}: upgraded landing must keep twitter:card=summary`);
+  const schemaScripts=[...html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)].map(m=>m[1]);
+  let schemas=[];for(const raw of schemaScripts){try{schemas.push(JSON.parse(raw))}catch{ok(false,`${file}: invalid JSON-LD`);}}
+  const flattened=schemas.flatMap(s=>Array.isArray(s?.['@graph'])?s['@graph']:[s]);
+  ok(flattened.some(x=>x?.['@type']==='BreadcrumbList'),`${file}: upgraded landing must keep BreadcrumbList structured data`);
+  ok(flattened.some(x=>x?.['@type']==='FAQPage'),`${file}: upgraded landing must keep FAQPage structured data`);
+}
+
 const sitemap=fs.readFileSync('sitemap.xml','utf8');
 const urls=[...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1].trim());
 const expectedUrls=pages.map(f=>f==='index.html'?'https://plotao.cz/':`https://plotao.cz/${f}`);
@@ -58,4 +81,4 @@ ok(/User-agent:\s*\*/i.test(robots)&&/Allow:\s*\//i.test(robots),'robots.txt: pu
 ok(robots.includes('Sitemap: https://plotao.cz/sitemap.xml'),'robots.txt: canonical sitemap URL missing');
 
 if(fail.length){console.error('SEO regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`SEO regression checks OK: ${pages.length} public pages, canonical/title/H1/image/sitemap integrity protected`);
+console.log(`SEO regression checks OK: ${pages.length} public pages, canonical/title/H1/image/sitemap integrity protected; upgraded landing social/structured metadata protected`);
