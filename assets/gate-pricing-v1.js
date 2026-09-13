@@ -39,14 +39,15 @@
   }
   function box(){let b=$('#gatePriceBox');if(!b){b=document.createElement('div');b.id='gatePriceBox';b.style.cssText='display:none;margin-top:14px;padding:14px;border:1px solid #ffffff26;border-radius:13px;background:#ffffff0d;color:#fff';($('#materialList')||$('.resultbody'))?.insertAdjacentElement('afterend',b)}return b}
   function verified(c,kind){return core.computeVerifiedGate(c,kind)}
+  function publish(d){window.PLOTAO_GATE_PRICE=d;document.dispatchEvent(new CustomEvent('plotao:gate-price',{detail:d}))}
   function invalidate(b){
     const note='opravte umístění brány/branky';
     setRow('vjezdová brána',null,gateOn()?note:'brána není zvolena','Nezapočítáno');
     setRow('vstupní branka',null,doorOn()?note:'branka není zvolena','Nezapočítáno');
     b.style.display='none';
-    window.PLOTAO_GATE_PRICE={type:type(),invalid:true,gate:null,door:null};
-    document.dispatchEvent(new CustomEvent('plotao:gate-price',{detail:window.PLOTAO_GATE_PRICE}));
+    publish({type:type(),invalid:true,gate:null,door:null});
   }
+  function resetPending(){const b=box(),note='přepočítávám podle nové konfigurace';setRow('vjezdová brána',null,gateOn()?note:'brána není zvolena','Nezapočítáno');setRow('vstupní branka',null,doorOn()?note:'branka není zvolena','Nezapočítáno');if(b)b.style.display='none';publish({type:type(),pending:true,gate:null,door:null});schedule(25)}
 
   function render(){
     const b=box();if(!b)return;
@@ -62,13 +63,12 @@
       if(d){setRow('vstupní branka',d.price,d.label);parts.push('<div style="display:flex;justify-content:space-between;gap:12px"><span>Vstupní branka</span><b>'+money(d.price)+'</b></div>')}
       else{setRow('vstupní branka',null,core.unsupportedNote(c,'door'));parts.push('<div style="display:flex;justify-content:space-between;gap:12px"><span>Vstupní branka</span><b>individuální nabídka</b></div>')}
     }else setRow('vstupní branka',null,'branka není zvolena','Nezapočítáno');
-    if(!parts.length){b.style.display='none';window.PLOTAO_GATE_PRICE={type:c.type,gate:null,door:null};document.dispatchEvent(new CustomEvent('plotao:gate-price'));return}
+    if(!parts.length){b.style.display='none';publish({type:c.type,gate:null,door:null});return}
     b.style.display='block';
     b.innerHTML='<div style="font-size:13px;font-weight:900;margin-bottom:8px">Brána a branka · přesný kusový benchmark</div><div style="display:grid;gap:6px;font-size:12px">'+parts.join('')+'</div><p style="margin:9px 0 0;color:#b9d8c9;font-size:11px;line-height:1.4">Brána se páruje se skutečně použitou vyráběnou výškou plotu, podhrabovou deskou a konkrétním produktem. U klasického pletiva výrobce například uvádí, že 120cm branka pasuje k 125cm pletivu bez desky nebo 100cm pletivu s 20cm podhrabem; 145cm branka obdobně k 150cm pletivu bez desky nebo 125cm pletivu s 20cm podhrabem. Šířky ani jiné výšky se neinterpolují.</p>';
-    window.PLOTAO_GATE_PRICE={type:c.type,actualHeight:c.actualHeight,slab:{with:c.slabWith,height:c.slabHeight},gate:gateOn()?verified(c,'gate'):null,door:doorOn()?verified(c,'door'):null};
-    document.dispatchEvent(new CustomEvent('plotao:gate-price'));
+    publish({type:c.type,actualHeight:c.actualHeight,slab:{with:c.slabWith,height:c.slabHeight},gate:gateOn()?verified(c,'gate'):null,door:doorOn()?verified(c,'door'):null});
   }
   function schedule(delay=60){clearTimeout(schedule.t);schedule.t=setTimeout(render,delay)}
-  function init(){render();document.addEventListener('input',()=>schedule(60));document.addEventListener('change',()=>schedule(60));document.addEventListener('click',()=>schedule(100));document.addEventListener('plotao:panel-price',()=>schedule(40));document.addEventListener('plotao:mesh-price',()=>schedule(40));document.addEventListener('plotao:placement',()=>schedule(40));document.addEventListener('plotao:slab-price',()=>schedule(40));document.addEventListener('plotao:options-reset',()=>schedule(10))}
+  function init(){render();document.addEventListener('input',()=>schedule(60));document.addEventListener('change',()=>schedule(60));document.addEventListener('click',()=>schedule(100));document.addEventListener('plotao:panel-price',()=>schedule(40));document.addEventListener('plotao:mesh-price',()=>schedule(40));document.addEventListener('plotao:placement',()=>schedule(40));document.addEventListener('plotao:slab-price',()=>schedule(40));document.addEventListener('plotao:options-reset',resetPending)}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
