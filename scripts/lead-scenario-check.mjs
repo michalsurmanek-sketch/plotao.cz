@@ -42,6 +42,8 @@ v=core.validateLead({...base,segments:Array.from({length:13},(_,i)=>({name:'Úse
 ok(v.valid===false&&v.errors.some(e=>e.code==='segments-count'),'customer lead must reject more than 12 fence segments instead of truncating them');
 v=core.validateLead({...base,segments:[{name:'A',length:600,connection:'začátek'},{name:'B',length:500,connection:'samostatný úsek'}]});
 ok(v.valid===false&&v.errors.some(e=>e.code==='segments-total'),'customer lead must enforce the calculator 1000m total-length boundary');
+v=core.validateLead({...base,segments:[{name:'A',length:1001,connection:'začátek'}]});
+ok(v.valid===false&&v.errors.some(e=>e.code==='segments-total')&&v.data.segments[0].length===1001,'over-limit section length must remain visible to validation instead of being silently clamped to 1000m');
 v=core.validateLead({...base,priceKind:'neplatné zadání'});
 ok(v.valid===false&&v.errors.some(e=>e.code==='invalid-price'),'invalid calculator state must block customer lead preparation');
 
@@ -78,7 +80,7 @@ v=core.validateLead({...base,mode:'partner',place:'',placeFromCalculator:'',fenc
 ok(v.valid===false&&v.errors.some(e=>e.code==='partner-area'),'partner request must require an area of operation');
 
 const weird=core.normalizeLead({...base,segments:[{name:' A   B ',length:5000,connection:'začátek'},{name:'C',length:-4,connection:'nonsense'}],options:['3D','3D','  Zelená  ']});
-ok(weird.segments[0].name==='A B'&&weird.segments[0].length===1000,'segment name must collapse whitespace and length must clamp to per-segment calculator maximum');
+ok(weird.segments[0].name==='A B'&&weird.segments[0].length===5000,'segment name must collapse whitespace while an over-limit length must remain visible for later validation');
 ok(weird.segments[1].length===0&&weird.segments[1].connection==='navazuje rohem','negative segment and unknown connection must normalize safely');
 ok(weird.options.length===2&&weird.options[1]==='Zelená','lead options must be trimmed and deduplicated');
 
