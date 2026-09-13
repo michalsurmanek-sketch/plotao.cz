@@ -50,6 +50,7 @@ jobs:
           node scripts/input-field-accessibility-check.mjs
           node scripts/segment-edit-state-check.mjs
           node scripts/segment-connections-check.mjs
+          node scripts/segment-minimum-check.mjs
           node scripts/slab-pricing-scenario-check.mjs
           node scripts/slab-default-check.mjs
           node scripts/concrete-material-scenario-check.mjs
