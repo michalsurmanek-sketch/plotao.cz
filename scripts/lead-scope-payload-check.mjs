@@ -6,8 +6,9 @@ ok(src.includes("gateSection:includeFence?placement('gate','section','#gateSecti
 ok(src.includes("wicketSection:includeFence?placement('door','section','#doorSection'):0")&&src.includes("wicketPos:includeFence?placement('door','pos','#doorPos'):0"),'wicket section and position must come from the authoritative placement helper');
 ok(src.includes("function invalidInputReason()")&&src.includes("window.PLOTAO_PLACEMENT?.valid===false"),'lead snapshot must independently detect invalid fence geometry before scope classification');
 ok(src.includes("if(ss.length>12)return'Kalkulátor podporuje maximálně 12 úseků.'"),'lead snapshot must preserve the same explicit 12-section limit reason as the calculator guard');
+ok(src.includes("if(ss.some(x=>x.length<.01))return'Každý úsek musí mít délku alespoň 0,01 m.'"),'lead snapshot must use the same 0.01m minimum as calculator and backend');
 ok(src.includes("if(err?.code==='segments-count'||err?.code==='segments-total')")&&src.includes("const s=$('#segmentLimitStatus');if(s){s.tabIndex=-1;return s}"),'section count/total errors must focus the visible limit explanation');
-ok(src.includes("if(err?.code==='segment-length')return $$('#segmentList input[type=number]').find(x=>+(x.value||0)<=0)||list"),'segment-length errors must focus the actual invalid section length');
+ok(src.includes("if(err?.code==='segment-length')return $$('#segmentList input[type=number]').find(x=>+(x.value||0)<.01)||list"),'segment-length errors must focus the actual sub-minimum section length');
 ok(src.includes("if(err?.code==='segments')return $('#addSegment')||list"),'missing-section errors must focus the add-section action');
 ok(src.includes("segments:segmentErrorTarget(first)"),'lead error routing must use the code-aware section target helper');
 ok(src.includes("function openingErrorTarget(err,kind){const section=kind==='gate'?$('#gateSection'):$('#doorSection'),pos=kind==='gate'?$('#gatePos'):$('#doorPos')"),'opening errors must use one code-aware target helper for gate and wicket controls');
@@ -25,4 +26,4 @@ ok(src.includes("scope:includeFence?scopeLabel(scopeValue):''"),'snapshot must e
 ok(src.includes("displayedPrice:includeFence?(ps.kind==='neplatné zadání'?'Nelze spočítat':scopeValue==='material'?shown:'Individuální nabídka'):''"),'non-material snapshots must never carry a stale numeric price and invalid state must stay visibly invalid');
 ok(src.includes("ps=includeFence?priceStatus(scopeValue):{kind:'individuální nabídka',reason:''}"),'price state must be derived from selected scope plus current input validity, not only from the DOM');
 if(fail.length){console.error('Lead scope payload checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Lead scope payload checks OK: authoritative opening placement, geometry/section limits and precise section/opening/configuration error focus are protected');
+console.log('Lead scope payload checks OK: authoritative opening placement, segment minimum and precise error focus are protected');
