@@ -2,12 +2,22 @@ import fs from 'node:fs';
 import {createHash} from 'node:crypto';
 import {activeScripts,requiredArtifact,forbiddenArtifact} from './pages-manifest.mjs';
 
-const html=fs.readFileSync('index.html','utf8');
-const marker=fs.readFileSync('deploy-marker.txt','utf8').trim();
+const root='dist';
+if(!fs.existsSync(root)||!fs.statSync(root).isDirectory())throw new Error('Pages artifact dist/ directory is missing');
+const html=fs.readFileSync(`${root}/index.html`,'utf8');
+const marker=fs.readFileSync(`${root}/deploy-marker.txt`,'utf8').trim();
 const required=[...activeScripts,...requiredArtifact];
 const missing=required.filter(x=>!html.includes(x));
 const leaked=forbiddenArtifact.filter(x=>html.includes(x));
 if(missing.length||leaked.length||!marker||marker==='unknown') throw new Error(`Pages artifact integrity failed; missing=${JSON.stringify(missing)}; legacy=${JSON.stringify(leaked)}; marker=${JSON.stringify(marker)}`);
+
+const topLevel=new Set(fs.readdirSync(root));
+for(const forbidden of ['scripts','docs','supabase','.github','.git'])if(topLevel.has(forbidden))throw new Error(`Pages public dist must not expose repository-internal ${forbidden}/`);
+const htmlFiles=fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort();
+for(const file of htmlFiles)if(!topLevel.has(file))throw new Error(`Pages public dist missing HTML page: ${file}`);
+for(const requiredFile of ['assets','robots.txt','sitemap.xml','CNAME','deploy-marker.txt'])if(!topLevel.has(requiredFile))throw new Error(`Pages public dist missing ${requiredFile}`);
+const allowedTop=new Set([...htmlFiles,'assets','robots.txt','sitemap.xml','CNAME','deploy-marker.txt']);
+for(const entry of topLevel)if(!allowedTop.has(entry))throw new Error(`Pages public dist contains unexpected top-level entry: ${entry}`);
 
 const schemaMatch=html.match(/<script\s+type=["']application\/ld\+json["']\s+data-plotao-schema=["']1["']>([\s\S]*?)<\/script>/i);
 if(!schemaMatch) throw new Error('Pages artifact missing Plotao structured data');
@@ -46,8 +56,8 @@ function verifyEmbeddedPngSvg(file,label,maxSize){
   for(const requiredType of ['IHDR','IDAT','IEND'])if(!chunkTypes.includes(requiredType))throw new Error(`Pages artifact ${label} PNG is missing ${requiredType}`);
   return size;
 }
-const logoSize=verifyEmbeddedPngSvg('assets/logo-plotao.svg','logo',500000);
-const faviconSize=verifyEmbeddedPngSvg('assets/favicon.svg','favicon',45763);
+const logoSize=verifyEmbeddedPngSvg(`${root}/assets/logo-plotao.svg`,'logo',500000);
+const faviconSize=verifyEmbeddedPngSvg(`${root}/assets/favicon.svg`,'favicon',45763);
 
 const scriptSources=[...html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*><\/script>/gi)].map(match=>match[1]);
 const normalizedSources=scriptSources.map(src=>src.split('?')[0]);
@@ -60,11 +70,11 @@ if(managedSources.length!==activeScripts.length||managedSources.some((src,index)
 const managedVersioned=scriptSources.filter(src=>activeScripts.includes(src.split('?')[0]));
 for(const src of managedVersioned){
   const [clean,query='']=src.split('?');
-  const expected=createHash('sha256').update(fs.readFileSync('.'+clean)).digest('hex').slice(0,12);
+  const expected=createHash('sha256').update(fs.readFileSync(root+clean)).digest('hex').slice(0,12);
   const actual=new URLSearchParams(query).get('v');
   if(actual!==expected) throw new Error(`Pages artifact script cache version mismatch for ${clean}: expected=${expected} actual=${actual}`);
 }
 
 const posGeo=html.indexOf('/assets/geometry-v3.js'),posGuard=html.indexOf('/assets/geometry-validity-v1.js'),posPanel=html.indexOf('/assets/panel-pricing-v5.js');
 if(!(posGeo>=0&&posGeo<posGuard&&posGuard<posPanel)) throw new Error('Geometry validity guard must load after geometry and before pricing modules');
-console.log(`Pages artifact integrity OK: ${marker}; ${activeScripts.length} content-versioned modules, metadata, optimized logo (${logoSize} bytes) and favicon (${faviconSize} bytes) verified`);
+console.log(`Pages artifact integrity OK: ${marker}; strict public dist has ${topLevel.size} top-level entries, ${activeScripts.length} content-versioned modules, optimized logo (${logoSize} bytes) and favicon (${faviconSize} bytes)`);
