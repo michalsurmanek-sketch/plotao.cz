@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
-const privacy=read('assets/privacy-pricing.js'),extra=read('assets/extra-fence-pricing.js'),geometry=read('assets/geometry-v3.js'),calc=read('assets/calculator-v3.js'),lead=read('assets/lead-safety-v1.js');
+const privacy=read('assets/privacy-pricing.js'),extra=read('assets/extra-fence-pricing.js'),geometry=read('assets/geometry-v3.js'),calc=read('assets/calculator-v3.js'),planScroll=read('assets/plan-scroll-v1.js'),lead=read('assets/lead-safety-v1.js'),manifest=read('scripts/pages-manifest.mjs');
 
 for(const [name,src] of [['privacy',privacy],['extra',extra]]){
   ok(src.includes("function placement(kind,key,selector){const p=window.PLOTAO_PLACEMENT?.[kind],v=p?.[key];return Number.isFinite(Number(v))?Number(v):+($(selector)?.value||0)}"),`${name} run splitter must prefer authoritative PLOTAO_PLACEMENT and use DOM only as fallback`);
@@ -19,7 +19,14 @@ ok(calc.includes("if(pos+w<=len+.001&&(!occupied||!overlaps(candidate,occupied))
 ok(calc.includes("if(['gate','door'].includes(e.target.id)){if(e.target.checked)seedOpening(e.target.id);render();return}"),'gate/wicket activation must seed and publish placement synchronously before slower validity listeners run');
 ok(!calc.includes("['gateWidth','doorWidth'].includes(e.target.id))seedOpening"),'later width edits must never silently reseed or move an already activated opening');
 ok(calc.includes("let placements={gate:{section:0,pos:5},door:{section:0,pos:12}},seeded={gate:false,door:false}")&&calc.includes("if(!go&&!doo){b.style.display='none';b.innerHTML='';publish();return}"),'hiding an empty placement UI must not erase stored gate/wicket positions or first-use state');
+ok(planScroll.includes(".plan-lines{max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;scrollbar-width:thin"),'multi-section plan must scroll horizontally without making the whole plan card or total label move');
+ok(planScroll.includes("const scrollable=plan.scrollWidth>plan.clientWidth+1")&&planScroll.includes("plan.tabIndex=0")&&planScroll.includes("plan.removeAttribute('tabindex')"),'plan graph must enter the keyboard tab order only when it actually overflows');
+ok(planScroll.includes("plan.setAttribute('role','region')")&&planScroll.includes("plan.setAttribute('aria-label','Náhled členění plotu. Vodorovným posunem zobrazíte další úseky.')"),'overflowing plan graph must expose an accessible scroll-region description');
+ok(planScroll.includes("e.key==='ArrowRight'")&&planScroll.includes("e.key==='ArrowLeft'")&&planScroll.includes("e.key==='Home'")&&planScroll.includes("e.key==='End'"),'keyboard users must be able to traverse a wide plan with arrows and jump to either edge');
+ok(planScroll.includes("document.addEventListener('plotao:placement',schedule)")&&planScroll.includes("window.addEventListener('resize',schedule,{passive:true})"),'plan overflow state must resync after geometry changes and viewport resizing');
+const calcPos=manifest.indexOf('/assets/calculator-v3.js'),scrollPos=manifest.indexOf('/assets/plan-scroll-v1.js'),geometryPos=manifest.indexOf('/assets/geometry-core-v1.js');
+ok(calcPos>=0&&scrollPos>calcPos&&geometryPos>scrollPos,'plan scroll enhancement must load after calculator markup exists and before downstream geometry updates');
 ok(lead.includes("const p=window.PLOTAO_PLACEMENT?.[kind],v=p?.[keyName]"),'lead snapshot must keep authoritative opening placement');
 
 if(fail.length){console.error('Run placement integrity checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Run placement integrity checks OK: first activation is placed safely, explicit opening positions are preserved, empty UI stays hidden, and only segment removal may clamp');
+console.log('Run placement integrity checks OK: opening placement stays stable and wide multi-section plans remain scrollable and keyboard-accessible on mobile');
