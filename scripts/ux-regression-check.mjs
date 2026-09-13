@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
-const scroll=read('assets/step-scroll-v1.js'),accuracy=read('assets/accuracy-guard.js'),a11y=read('assets/choice-accessibility-v1.js'),modal=read('assets/modal-accessibility-v1.js'),segmentLimit=read('assets/segment-limit-ui-v1.js'),leadMode=read('assets/lead-mode-ui-v1.js'),ui=read('assets/ui-bootstrap-v1.js'),manifest=read('scripts/pages-manifest.mjs');
+const scroll=read('assets/step-scroll-v1.js'),accuracy=read('assets/accuracy-guard.js'),a11y=read('assets/choice-accessibility-v1.js'),modal=read('assets/modal-accessibility-v1.js'),segmentLimit=read('assets/segment-limit-ui-v1.js'),leadMode=read('assets/lead-mode-ui-v1.js'),ui=read('assets/ui-bootstrap-v1.js'),extra=read('assets/extra-fence-config.js'),manifest=read('scripts/pages-manifest.mjs');
 
 for(const [type,id] of Object.entries({privacy:'#privacyConfig',aluminium:'#aluminiumConfigBox',gabion:'#gabionOptionsBox',metal:'#metalConfig',concrete:'#concreteConfig',masonry:'#extraFenceConfig',mobile:'#extraFenceConfig',other:'#extraFenceConfig'}))ok(scroll.includes(type+":'"+id+"'")||scroll.includes(type+':"'+id+'"'),'next-step scroll must target the visible '+type+' configuration');
 ok(scroll.includes('scrollToEl(nextAfterType,180)'),'type scroll target must be resolved after dynamic configuration modules render');
@@ -18,6 +18,9 @@ ok(a11y.includes("new MutationObserver(()=>schedule(0)).observe(root,{childList:
 ok(ui.includes("function focusChoice(attr,value){queueMicrotask(()=>{const target=$$('[data-'+attr+']').find(x=>x.dataset[attr]===value)")&&ui.includes("target.focus({preventScroll:true})"),'rerendered calculator choices must restore keyboard focus to the same logical button without a scroll jump');
 ok(ui.includes("state[key]=value;renderOptions();focusChoice(attr,value)") ,'panel/mesh option choices must restore focus after renderOptions recreates their buttons');
 ok(ui.includes("state.type=value;syncUrlType(value);renderTypes();renderOptions();focusChoice('id',value)") ,'fence type choices must synchronize URL and restore focus after renderTypes recreates the type buttons');
+ok(extra.includes("function focusChoice(group,value){queueMicrotask(()=>{const target=$('#extraFenceConfig [data-eg=\"'+group+'\"][data-ev=\"'+value+'\"]')")&&extra.includes('target.focus({preventScroll:true})'),'masonry/mobile dynamic choices must restore focus after their configuration rerender');
+ok(extra.includes('s[group]=value;render();focusChoice(group,value)'),'extra fence option click must restore focus to the same logical choice after render');
+ok((extra.match(/loading=\"lazy\" decoding=\"async\"/g)||[]).length>=3,'mobile product imagery must decode asynchronously and stay lazy-loaded below the fold');
 
 ok(modal.includes("modal.setAttribute('role','dialog')")&&modal.includes("modal.setAttribute('aria-modal','true')"),'lead modal must expose true modal-dialog semantics');
 ok(modal.includes("modal.setAttribute('aria-hidden',open?'false':'true')"),'lead modal must keep aria-hidden synchronized with visual open state');
@@ -46,4 +49,4 @@ ok(limitPos>manifest.indexOf('/assets/ui-bootstrap-v1.js'),'production manifest 
 ok(a11yPos>=0&&scrollPos>a11yPos,'production manifest must load the accessibility synchronizer before step scrolling');
 
 if(fail.length){console.error('UX regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('UX regression checks OK: dynamic next-step scroll, choice focus, modal behavior, explicit segment/length limits, mobile lead inputs and calculator accessibility are protected');
+console.log('UX regression checks OK: dynamic next-step scroll, focus restoration across core/extra choices, modal behavior, explicit segment/length limits, lazy mobile imagery, mobile lead inputs and calculator accessibility are protected');
