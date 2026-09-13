@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
-const slab=read('assets/slab-pricing-v2.js'),price=read('assets/price-bridge.js'),mobile=read('assets/mobile-price-bridge.js'),concrete=read('assets/concrete-material-v1.js'),geometry=read('assets/geometry-v3.js'),gate=read('assets/gate-pricing-v1.js'),drive=read('assets/gate-drive-pricing-v1.js'),extraConfig=read('assets/extra-fence-config.js'),extraPrice=read('assets/extra-fence-pricing.js'),manifest=read('scripts/pages-manifest.mjs');
+const slab=read('assets/slab-pricing-v2.js'),price=read('assets/price-bridge.js'),mobile=read('assets/mobile-price-bridge.js'),concrete=read('assets/concrete-material-v1.js'),geometry=read('assets/geometry-v3.js'),gate=read('assets/gate-pricing-v1.js'),drive=read('assets/gate-drive-pricing-v1.js'),extraConfig=read('assets/extra-fence-config.js'),extraPrice=read('assets/extra-fence-pricing.js'),privacyConfig=read('assets/privacy-config.js'),concreteConfig=read('assets/concrete-config.js'),metalConfig=read('assets/metal-config.js'),aluminiumConfig=read('assets/aluminium-config.js'),gabionOptions=read('assets/gabion-options.js'),manifest=read('scripts/pages-manifest.mjs');
 
 ok(slab.includes("if(!st.with){r.classList.add('off')")&&slab.includes("const small=r.querySelector('small');if(small)small.textContent=''"),'disabling slabs must clear the stale quantity/size note as well as the price');
 ok(price.includes('function clearBenchmarkFill()'),'generic price bridge must expose an owned fill-row cleanup path');
@@ -37,8 +37,15 @@ ok(extraPrice.includes('function resetPending()')&&extraPrice.includes('clearBox
 ok(extraPrice.includes("document.addEventListener('plotao:options-reset',resetPending)"),'extra fence pricing must reset immediately on type-option changes');
 ok(extraPrice.includes("if(!['masonry','mobile','other'].includes(t)){clearBox(b);publish(null);return}"),'extra fence price state must stay cleared outside its supported types');
 
+ok(privacyConfig.includes("if(type()!=='privacy'){window.PLOTAO_PRIVACY=null")&&privacyConfig.includes("document.addEventListener('plotao:options-reset',sync)"),'privacy config must clear its active global outside privacy and switch synchronously');
+ok(concreteConfig.includes("if(type()!=='concrete'){window.PLOTAO_CONCRETE=null")&&concreteConfig.includes("document.addEventListener('plotao:options-reset',sync)"),'concrete config must clear its active global outside concrete and switch synchronously');
+ok(metalConfig.includes("if(type()!=='metal'){window.PLOTAO_METAL=null")&&metalConfig.includes("document.addEventListener('plotao:options-reset',sync)"),'metal config must clear its active global outside metal and switch synchronously');
+ok(aluminiumConfig.includes("if(selectedType()!=='aluminium'){window.PLOTAO_ALUMINIUM=null")&&aluminiumConfig.includes("document.addEventListener('plotao:options-reset',()=>sync(false))"),'aluminium config must clear its active global outside aluminium and switch synchronously');
+ok(gabionOptions.includes("const state={width:'0.30',stone:'quarry'}")&&gabionOptions.includes("document.addEventListener('plotao:options-reset',ensure)"),'gabion options must preserve user choices while switching synchronously');
+ok(gabionOptions.includes("if(!selected()){if(b){b.style.display='none';b.innerHTML=''}return}"),'gabion options must remove stale visible content outside gabion');
+
 const pricePos=manifest.indexOf('/assets/price-bridge.js'),mobilePos=manifest.indexOf('/assets/mobile-price-bridge.js');
 ok(pricePos>=0&&mobilePos>pricePos,'mobile bridge must load after the generic price bridge so ownership handoff is deterministic');
 
 if(fail.length){console.error('Result row state checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Result row state checks OK: slab notes, fill ownership, material-only details, opening prices and extra-fence states cannot leak across configuration transitions');
+console.log('Result row state checks OK: slab notes, fill ownership, material-only details, opening prices, extra-fence states and custom config boxes cannot leak across configuration transitions');
