@@ -3,7 +3,7 @@ import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url),core=require('../assets/lead-core-v1.js');
 const fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 const base={mode:'lead',name:' Jan Novák ',phone:'+420 777 123 456',email:'JAN.NOVAK@EXAMPLE.CZ',place:' Uherské Hradiště ',note:' Prosím zavolat. ',fenceType:'Panelový plot',height:153,segments:[{name:'Předek',length:20,connection:'začátek'},{name:'Bok',length:17,connection:'navazuje rohem'}],options:['3D','Zelená'],gate:false,gateType:'double',gateWidth:4,gateDrive:'none',gateSection:0,gatePos:0,wicket:false,wicketWidth:1,wicketSection:0,wicketPos:0,scopeValue:'material',scope:'Materiál',displayedPrice:'42 000 Kč',priceKind:'ověřená cena',priceReason:'',placeFromCalculator:'Uherské Hradiště'};
-const adapter=fs.readFileSync('assets/lead-safety-v1.js','utf8'),modeUi=fs.readFileSync('assets/lead-mode-ui-v1.js','utf8');
+const adapter=fs.readFileSync('assets/lead-safety-v1.js','utf8'),modeUi=fs.readFileSync('assets/lead-mode-ui-v1.js','utf8'),server=fs.readFileSync('supabase/functions/submit-lead/validation.mjs','utf8');
 ok(adapter.includes('PLOTAO_LEAD_CORE')&&adapter.includes('normalizeLead')&&adapter.includes('validateLead')&&adapter.includes('core.toText'),'lead browser adapter must delegate payload normalization, validation and text export to shared core');
 ok(adapter.includes('PLOTAO_SEGMENT_CONNECTIONS'),'lead browser adapter must preserve segment connectivity in customer snapshots');
 ok(adapter.includes("m=mode(form.dataset.mode),includeFence=m==='lead'")&&adapter.includes("segments:includeFence?segments():[]")&&adapter.includes("displayedPrice:includeFence?"),'help and partner drafts must not carry customer fence geometry or price state');
@@ -17,6 +17,7 @@ ok(modeUi.includes("Napište kontakt a oblast, ve které montujete ploty.")&&mod
 ok(modeUi.includes("mode==='help'")&&modeUi.includes("Obec / PSČ (volitelné)")&&modeUi.includes('place.required=false'),'help modal must keep location optional');
 ok(modeUi.includes('Výpočet plotu nemusíte dokončit.')&&modeUi.includes('note.required=true')&&modeUi.includes('Stručně popište svůj dotaz'),'help modal must clearly request an actual question without requiring fence completion');
 ok(modeUi.includes("scope==='delivery'||scope==='turnkey'")&&modeUi.includes("labelText(placeLabel,scope==='material'?'Obec / PSČ (volitelné)':'Obec / PSČ')"),'customer modal must require location only for delivery/turnkey scopes');
+ok(server.includes("if(!Array.isArray(v)||v.length>50||v.some(x=>typeof x!=='string'||tooLong(x,200)))return null"),'server must keep the canonical 50-option / 200-character option contract');
 
 let d=core.normalizeLead(base,'2026-09-12T20:00:00.000Z');
 ok(d.schemaVersion===2,'lead payload schema version must reflect mode-aware schema');
@@ -24,6 +25,9 @@ ok(d.mode==='lead'&&d.scopeValue==='material','normalized payload must preserve 
 ok(d.name==='Jan Novák'&&d.phone==='+420777123456'&&d.email==='jan.novak@example.cz','contact fields must normalize whitespace, phone punctuation and email case');
 ok(d.place==='Uherské Hradiště'&&d.note==='Prosím zavolat.','place and note must be trimmed');
 ok(d.segments.length===2&&d.segments[1].connection==='navazuje rohem','segment connectivity must survive normalization');
+const manyOptions=Array.from({length:45},(_,i)=>'Varianta '+(i+1)),longOption='X'.repeat(180),optionPayload=core.normalizeLead({...base,options:[...manyOptions,longOption]});
+ok(optionPayload.options.length===46,'client normalization must preserve all 45 ordinary options plus one long option because backend supports up to 50');
+ok(optionPayload.options.at(-1)===longOption&&optionPayload.options.at(-1).length===180,'client normalization must not truncate a valid 180-character option below the backend 200-character limit');
 
 let v=core.validateLead(d);
 ok(v.valid===true&&v.errors.length===0,'complete ordinary material lead must validate');
@@ -93,4 +97,4 @@ const partnerOut=core.toText({...base,mode:'partner',place:'Zlínský kraj',plac
 ok(partnerOut.startsWith('PLOTAO.CZ – zájem montážní firmy')&&partnerOut.includes('Oblast působnosti: Zlínský kraj')&&!partnerOut.includes('Jiná obec')&&!partnerOut.includes('Plot:'),'partner export must use explicit service area only and exclude customer calculator payload');
 
 if(fail.length){console.error('Lead scenario checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Lead scenario checks OK: isolated drafts, geometry limits and mode-specific payloads are protected');
+console.log('Lead scenario checks OK: isolated drafts, backend-aligned option limits, geometry limits and mode-specific payloads are protected');
