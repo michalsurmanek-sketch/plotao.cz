@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
-const panel=read('assets/panel-pricing-v5.js'),mesh=read('assets/mesh-pricing-v2.js'),alu=read('assets/aluminium-pricing.js'),gate=read('assets/gate-pricing-v1.js'),accuracy=read('assets/accuracy-guard.js'),lead=read('assets/lead-core-v1.js');
+const panel=read('assets/panel-pricing-v5.js'),mesh=read('assets/mesh-pricing-v2.js'),alu=read('assets/aluminium-pricing.js'),privacy=read('assets/privacy-pricing.js'),structural=read('assets/structural-pricing-v5.js'),extra=read('assets/extra-fence-pricing.js'),metal=read('assets/metal-pricing.js'),gate=read('assets/gate-pricing-v1.js'),accuracy=read('assets/accuracy-guard.js'),lead=read('assets/lead-core-v1.js');
 
 ok(panel.includes("function requested(){return +($('#height')?.value||0)}"),'panel adapter must keep the actual typed height instead of clamping it to 40cm');
 ok(panel.includes("if(h<40||h>400){b.style.display='none';window.PLOTAO_PANEL_PRICE={invalid:true,reason:'height-input'}"),'panel benchmark must disappear and publish invalid state outside 40–400cm');
@@ -14,6 +14,20 @@ ok(alu.includes("function h(){return +($('#height')?.value||0)}"),'aluminium ada
 ok(alu.includes("if(requested<40||requested>400){b.style.display='none';window.PLOTAO_ALUMINIUM_PRICE={invalid:true,reason:'height-input'}"),'aluminium benchmark must disappear and publish invalid state outside 40–400cm');
 ok(!alu.includes('function h(){return Math.max(40'),'aluminium adapter must never silently benchmark a sub-40cm request as 40cm');
 
+ok(privacy.includes("function h(){return +($('#height')?.value||0)}"),'privacy adapter must keep the actual typed height');
+ok(privacy.includes("if(height<40||height>400){b.style.display='none';window.PLOTAO_PRIVACY_PRICE={invalid:true,reason:'height-input'}"),'privacy benchmark must disappear outside 40–400cm');
+ok(!privacy.includes('Math.max(40,+($(\'#height\')'),'privacy adapter must not restore the old minimum-height clamp');
+
+ok(structural.includes("function h(){return +($('#height')?.value||0)}"),'structural adapter must keep the actual typed height');
+ok(structural.includes("if(height<40||height>400){b.style.display='none';if(t==='concrete')window.PLOTAO_CONCRETE_PRICE={invalid:true,reason:'height-input'};else window.PLOTAO_GABION_PRICE={invalid:true,reason:'height-input'}"),'concrete/gabion benchmarks must disappear and publish invalid state outside 40–400cm');
+ok(!structural.includes('function h(){return Math.max(40'),'structural adapter must not silently clamp invalid heights');
+
+ok(extra.includes("height=+($('#height')?.value||0)")&&extra.includes("if(height<40||height>400){clearBox(b);publish({invalid:true,reason:'height-input'});return}"),'mobile/masonry/other benchmark adapter must suppress detail output outside 40–400cm');
+ok(!extra.includes("height=Math.max(40,+($('#height')"),'extra fence adapter must not silently clamp invalid heights');
+
+ok(metal.includes("const height=+($('#height')?.value||0);if(height<40||height>400){b.style.display='none';window.PLOTAO_METAL_PRICE={invalid:true,reason:'height-input'}"),'metal detail must hide and publish invalid state outside 40–400cm');
+ok(!metal.includes("h=Math.max(.4,+($('#height')"),'metal detail must not silently display 40cm for an invalid lower height');
+
 ok(gate.includes("function requestedH(){return +($('#height')?.value||0)}"),'gate adapter must keep the actual typed fence height');
 ok(gate.includes("function invalidHeight(){const h=requestedH();return h<40||h>400}"),'gate benchmark must share the calculator 40–400cm validity boundary');
 ok(gate.includes("if(invalidHeight()){invalidate(b,'opravte výšku plotu');return}"),'gate and wicket exact prices must be suppressed for invalid fence height');
@@ -23,4 +37,4 @@ ok(accuracy.includes("if(h<40)return{kind:'invalid'")&&accuracy.includes("if(h>4
 ok(lead.includes("if(d.height<40||d.height>400)errors.push"),'lead core must reject the same invalid height range');
 
 if(fail.length){console.error('Height boundary checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Height boundary checks OK: invalid 40–400cm inputs cannot leak into panel, mesh, aluminium or gate benchmarks');
+console.log('Height boundary checks OK: invalid 40–400cm inputs cannot leak into any panel, mesh, aluminium, privacy, structural, extra, metal or gate benchmark');
