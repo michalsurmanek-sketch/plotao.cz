@@ -36,10 +36,10 @@ for(const file of pages){
   for(const img of html.match(/<img\b[^>]*>/gi)||[])ok(/\balt=["'][^"']*["']/i.test(img),`${file}: image missing alt attribute: ${img.slice(0,100)}`);
 }
 
-const landingPages=pages.filter(file=>file!=='index.html'&&file!=='typy-plotu.html');
-for(const file of landingPages){
-  const html=fs.readFileSync(file,'utf8');
-  ok(/<a\b[^>]*href=["']\/#kalkulator["'][^>]*>[^<]*(?:Spočítat|Otevřít|Připravit)/i.test(html),`${file}: primary calculator CTA must link directly to /#kalkulator`);
+const landingType={"panelovy-plot.html":"panel","pletivovy-plot.html":"mesh","betonovy-plot.html":"concrete","hlinikovy-plot.html":"aluminium","plot-na-soukromi.html":"privacy","gabionovy-plot.html":"gabion","kovovy-plot.html":"metal","zdeny-plot.html":"masonry","mobilni-oploceni.html":"mobile","specialni-oploceni.html":"other"};
+for(const [file,type] of Object.entries(landingType)){
+  const html=fs.readFileSync(file,'utf8'),target='/?type='+type+'#kalkulator';
+  ok(html.includes('href="'+target+'"'),`${file}: calculator CTA must preselect ${type} through ${target}`);
   ok(!/href=["']\/#calculator["']/i.test(html),`${file}: obsolete English calculator anchor must not return`);
 }
 

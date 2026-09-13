@@ -48,6 +48,7 @@ ok(ui.includes("if(state.type==='panel')")&&ui.includes("if(state.type==='mesh')
 ok(!ui.includes('privacyVariant')&&!ui.includes('metalVariant')&&!ui.includes('masonryVariant')&&!ui.includes('mobileVariant')&&!ui.includes('concreteSide'),'UI bootstrap must not retain obsolete duplicate custom-type state');
 ok(ui.includes('renderTypes();renderOptions();renderSegments();syncToggles()'),'UI bootstrap must initialise type/options/segments/toggles before pricing modules run');
 ok(ui.includes("window.PLOTAO_UI_READY=true")&&ui.includes("new CustomEvent('plotao:ui-ready')"),'UI bootstrap must publish readiness');
+ok(ui.includes("new URLSearchParams(location.search).get('type')")&&ui.includes("types.some(x=>x.id===requestedType)?requestedType:'panel'"),'landing-page type parameter must be allowlisted against calculator types and fall back to panel');
 ok(!ui.includes('function calc(')&&!ui.includes('price:1680')&&!ui.includes('workRate=')&&!ui.includes('gatePrice('),'UI bootstrap must remain free of pricing formulas');
 
 ok(panelLanding.includes('Ověřený materiálový rozpočet získáte hned')&&panelLanding.includes('dopravu a montáž naceníme podle místa a podmínek realizace'),'panel landing must distinguish verified material from individual realization pricing');
