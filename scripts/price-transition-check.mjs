@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-const src=fs.readFileSync('assets/accuracy-guard.js','utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
+const src=fs.readFileSync('assets/accuracy-guard.js','utf8'),gate=fs.readFileSync('assets/gate-pricing-v1.js','utf8'),drive=fs.readFileSync('assets/gate-drive-pricing-v1.js','utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 ok(src.includes("document.addEventListener('click',e=>schedule(e.target.closest?.('.type,#scope button')?0:140))"),'type and scope changes must run the accuracy guard immediately');
 ok(src.includes("document.addEventListener('plotao:options-reset',()=>schedule(0))"),'type option reset must immediately invalidate stale totals before slower pricing modules finish');
 ok(src.includes("function sharedInvalid(){const api=window.PLOTAO_INPUT_VALIDITY;if(!api?.current)return null")&&src.includes("const s=api.current();if(!s)return false"),'main accuracy state must prefer the shared synchronous validity API and distinguish valid from unavailable');
@@ -8,5 +8,11 @@ ok(src.includes("document.addEventListener('input',e=>schedule(criticalInput(e)?
 ok(src.includes("document.addEventListener('plotao:input-validity',()=>schedule(0))"),'shared invalid-to-valid recovery must refresh the main price state immediately');
 ok(src.includes("if(sticky)sticky.textContent=headline"),'immediate accuracy blocking must mirror the safe headline into the mobile sticky price');
 ok(src.includes("main.dataset.accuracyBlocked='1'"),'individual or invalid transitions must mark the desktop total as accuracy-blocked');
+ok(gate.includes("function criticalChange(e){return e.target?.matches?.('#gate,#door,#gateType,#gateWidth,#doorWidth')}"),'gate pricing must classify enablement, type and width edits as critical price transitions');
+ok(gate.includes("document.addEventListener('change',e=>{if(criticalChange(e)){resetPending();return}schedule(60)})"),'critical gate/wicket changes must neutralize the old exact price before the debounced benchmark reruns');
+ok(gate.includes("publish({type:type(),pending:true,gate:null,door:null});schedule(25)"),'gate pending state must clear structured exact prices before recomputation');
+ok(drive.includes("function criticalChange(e){return e.target?.matches?.('#gate,#gateType,#gateWidth,#gateDrive')}"),'gate-drive pricing must classify gate, type, width and drive mode as critical transitions');
+ok(drive.includes("if(e.target?.matches?.('#gateDrive')){resetPending();schedule(0);return}")&&drive.includes("if(criticalChange(e)){resetPending();return}"),'drive mode changes must recalc immediately while gate geometry changes must first wait for a fresh gate benchmark');
+ok(drive.includes("publish({active:false,pending:true,unsupported:true,price:0})"),'gate-drive pending state must zero the structured drive price immediately');
 if(fail.length){console.error('Price transition checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Price transition checks OK: stale exact totals are blocked and released immediately on shared geometry/input validity changes');
+console.log('Price transition checks OK: stale main, gate, wicket and drive prices are neutralized immediately across critical configuration changes');
