@@ -66,6 +66,7 @@ jobs:
           node scripts/ui-state-check.mjs
           node scripts/ux-regression-check.mjs
           node scripts/price-transition-check.mjs
+          node scripts/total-ownership-check.mjs
           node scripts/result-row-state-check.mjs
           node scripts/mobile-summary-check.mjs
           node scripts/scope-truth-check.mjs
