@@ -92,7 +92,8 @@ html=html.replace(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*><\/script>/gi,(tag,
   return activeScripts.includes(cleanSrc)?'':tag;
 });
 const assetVersion=src=>createHash('sha256').update(fs.readFileSync('.'+src)).digest('hex').slice(0,12);
-const orderedScripts=activeScripts.map(src=>`<script src="${src}?v=${assetVersion(src)}"></script>`).join('');
+const versionedScript=src=>`${src}?v=${assetVersion(src)}`;
+const orderedScripts=activeScripts.map(src=>`<script src="${versionedScript(src)}"></script>`).join('');
 html=html.replace('</body>',orderedScripts+'</body>');
 
 if(!html.includes('<main class="wrap" id="kalkulator">')) throw new Error('Pages build source missing calculator anchor');
@@ -108,15 +109,20 @@ html=html.replace(/<script\s+type=["']application\/ld\+json["']\s+data-plotao-sc
 const schemaTag=`<script type="application/ld+json" data-plotao-schema="1">${JSON.stringify(structuredData)}</script>`;
 html=html.replace(/<meta\s+name=["']twitter:(?:card|title|description)["'][^>]*>/gi,'');
 const socialMeta='<meta name="twitter:card" content="summary"><meta name="twitter:title" content="Kalkulátor ceny plotu a materiálu | PLOTAO.cz"><meta name="twitter:description" content="Ověřený materiálový rozpočet plotu podle typu, výšky, úseků a otvorů.">';
+
+// Start only the small dependency-critical prefix early. Execution remains in the
+// original classic-script order at the end of body; preloads only remove download wait.
+html=html.replace(/<link\s+rel=["']preload["'][^>]*data-plotao-critical=["']1["'][^>]*>/gi,'');
+const criticalScripts=activeScripts.slice(0,8);
+const criticalPreloads=criticalScripts.map(src=>`<link rel="preload" as="script" href="${versionedScript(src)}" data-plotao-critical="1">`).join('');
+
 html=html.replace(/<meta name="plotao-deploy" content="[^"]*">/g,'');
 if(!html.includes('</head>')) throw new Error('Pages build: </head> not found');
-html=html.replace('</head>',schemaTag+socialMeta+`<meta name="plotao-deploy" content="${sha}"></head>`);
+html=html.replace('</head>',criticalPreloads+schemaTag+socialMeta+`<meta name="plotao-deploy" content="${sha}"></head>`);
 
 fs.writeFileSync(path,html,'utf8');
 fs.writeFileSync('deploy-marker.txt',sha+'\n','utf8');
 
-// Build a strict public tree. Never publish CI tests, docs, Supabase source/schema or
-// other repository internals just because they live next to the static website.
 const dist='dist';
 fs.rmSync(dist,{recursive:true,force:true});
 fs.mkdirSync(dist,{recursive:true});
@@ -126,5 +132,6 @@ fs.cpSync('assets',`${dist}/assets`,{recursive:true});
 
 console.log(`Logo optimized losslessly: ${logoStats.before} -> ${logoStats.after} bytes (embedded PNG ${logoStats.pngBefore} -> ${logoStats.pngAfter})`);
 console.log(`Favicon optimized losslessly: ${faviconStats.before} -> ${faviconStats.after} bytes (embedded PNG ${faviconStats.pngBefore} -> ${faviconStats.pngAfter})`);
+console.log(`Critical script preload prepared: ${criticalScripts.length} versioned scripts; execution order unchanged`);
 console.log(`Public Pages tree prepared in ${dist}/ with ${fs.readdirSync(dist).length} top-level entries; repository internals excluded`);
 console.log(`Pages build prepared from clean source: ${activeScripts.length} content-versioned modules, SHA ${sha}`);
