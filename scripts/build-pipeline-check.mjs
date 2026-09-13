@@ -10,8 +10,12 @@ ok(workflow.includes('node scripts/verify-pages-artifact.mjs'),'Pages workflow m
 ok(workflow.includes('for file in assets/*.js scripts/*.mjs; do node --check "$file"; done'),'Pages workflow must syntax-check assets and build scripts');
 ok(workflow.includes('uses: actions/upload-pages-artifact@v3')&&workflow.includes('path: dist'),'Pages workflow must upload only the strict public dist directory');
 ok(!/upload-pages-artifact@v3[\s\S]{0,200}path:\s*\./.test(workflow),'Pages workflow must never upload the repository root');
-ok(workflow.includes('/scripts/seo-regression-check.mjs')&&workflow.includes('/supabase/functions/submit-lead/index.ts')&&workflow.includes('/docs/lead-backend-contract.md'),'Pages workflow must probe representative repository-internal paths after deployment');
+for(const path of ['/scripts/seo-regression-check.mjs','/supabase/functions/submit-lead/index.ts','/docs/lead-backend-contract.md']){
+  ok(workflow.includes(path),`Pages workflow must probe private path ${path}`);
+  ok(smoke.includes(path),`standalone live smoke must probe private path ${path}`);
+}
 ok(workflow.includes('Internal source path correctly returns 404'),'Pages workflow must require internal source paths to stay unpublished on the live domain');
+ok(smoke.includes('Internal source path correctly returns 404'),'standalone live smoke must require internal source paths to stay unpublished on the live domain');
 ok(!workflow.includes("python - <<'PY'")&&!workflow.includes('s=s.replace('),'inline Python/string patching must not return to Pages workflow');
 ok(!workflow.includes('price:1680')&&!workflow.includes('double:22500'),'legacy pricing constants must not live in workflow');
 ok(workflow.includes('- name: Verify live custom domain'),'main Pages workflow must verify the custom domain after Deploy');
@@ -29,4 +33,4 @@ for(const src of activeScripts){
   ok(fs.existsSync(file),`Pages manifest references missing asset: ${file}`);
 }
 if(fail.length){console.error('Build pipeline checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; Pages uploads strict dist only; live verification protects deploy identity and private repository paths`);
+console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; strict dist and both live verification paths protect deploy identity and repository internals`);
