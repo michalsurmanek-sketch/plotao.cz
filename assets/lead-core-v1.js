@@ -15,7 +15,7 @@
   function int(v,min=0,max=Number.MAX_SAFE_INTEGER,fallback=0){return Math.trunc(num(v,min,max,fallback))}
   function normalizePhone(v){const raw=text(v,80),plus=raw.startsWith('+'),digits=raw.replace(/\D/g,'').slice(0,32);return(plus?'+':'')+digits}
   function normalizeEmail(v){return text(v,320).toLowerCase()}
-  function normalizeSegments(items){return(Array.isArray(items)?items:[]).slice(0,12).map((x,i)=>({name:text(x?.name,120)||('Úsek '+(i+1)),length:num(x?.length,0,1000,0),connection:i===0?'začátek':CONNECTIONS.has(x?.connection)?x.connection:'navazuje rohem'}))}
+  function normalizeSegments(items){return(Array.isArray(items)?items:[]).slice(0,100).map((x,i)=>({name:text(x?.name,120)||('Úsek '+(i+1)),length:num(x?.length,0,1000,0),connection:i===0?'začátek':CONNECTIONS.has(x?.connection)?x.connection:'navazuje rohem'}))}
   function normalizeOptions(items){const out=[];for(const item of Array.isArray(items)?items:[]){const v=text(item,160);if(v&&!out.includes(v))out.push(v);if(out.length>=40)break}return out}
 
   function normalizeLead(raw,now){
@@ -41,6 +41,7 @@
     if(!d.fenceType)errors.push({field:'fenceType',code:'fence-type',message:'Vyberte typ plotu.'});
     if(d.height<40||d.height>400)errors.push({field:'height',code:'height',message:'Výška plotu musí být 40–400 cm.'});
     if(!d.segments.length)errors.push({field:'segments',code:'segments',message:'Zadejte alespoň jeden úsek oplocení.'});
+    if(d.segments.length>12)errors.push({field:'segments',code:'segments-count',message:'Kalkulátor podporuje maximálně 12 úseků.'});
     const badSegment=d.segments.findIndex(x=>x.length<=0);if(badSegment>=0)errors.push({field:'segments',code:'segment-length',message:'Každý úsek musí mít délku větší než 0 m.'});
     const totalLength=d.segments.reduce((sum,x)=>sum+x.length,0);if(totalLength>1000+.001)errors.push({field:'segments',code:'segments-total',message:'Celková délka oplocení může být maximálně 1000 m.'});
     if(d.priceKind==='neplatné zadání')errors.push({field:'configuration',code:'invalid-price',message:'Nejdřív opravte neplatné zadání kalkulátoru.'});
