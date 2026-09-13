@@ -58,6 +58,7 @@ jobs:
           node scripts/lead-scenario-check.mjs
           node scripts/lead-option-integrity-check.mjs
           node scripts/modal-draft-isolation-check.mjs
+          node scripts/modal-focus-containment-check.mjs
           node scripts/lead-mode-action-check.mjs
           node scripts/lead-scope-payload-check.mjs
           node scripts/lead-transport-scenario-check.mjs
