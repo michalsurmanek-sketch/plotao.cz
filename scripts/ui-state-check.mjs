@@ -23,11 +23,12 @@ ok(gateUi.includes("if(labels[3])show(labels[3],doorOn)"),'gate UI must independ
 ok(gateUi.includes("grid.style.display=gateOn||doorOn?'grid':'none'"),'gate configuration grid must disappear when no opening is selected');
 ok(gateUi.includes("control.disabled=!on"),'hidden gate/wicket controls must also be disabled from keyboard/form state');
 ok(gateUi.includes("placement.style.display=gateOn||doorOn?'':'none'"),'opening placement block must disappear when no opening is selected');
-ok(lead.includes('function priceStatus()'),'lead snapshot must classify current displayed price state');
+ok(lead.includes("function priceStatus(scopeValue='material')"),'lead snapshot must classify price state with selected scope awareness');
+ok(lead.includes("if(scopeValue==='delivery')return{kind:'individuální nabídka'")&&lead.includes("if(scopeValue==='turnkey')return{kind:'individuální nabídka'"),'delivery/turnkey lead price state must be independent of UI repaint timing');
 ok(lead.includes('priceKind:ps.kind')&&lead.includes('priceReason:ps.reason'),'lead snapshot must preserve price state and accuracy explanation');
 ok(leadCore.includes('Stav ceny: ')&&leadCore.includes('Důvod / co dopočítat: '),'shared lead export must expose price status and missing-price reason');
 ok(lead.includes('PLOTAO_LEAD_CORE')&&lead.includes('core.toText'),'lead browser adapter must use shared lead payload/export core');
-ok(lead.includes("$('#accuracyGuard')"),'lead price explanation must come from the visible accuracy guard');
+ok(lead.includes("$('#accuracyGuard')"),'material lead price explanation must come from the visible accuracy guard');
 ok(validity.includes("if(!invalid())return false"),'validity layer must release naturally when placement becomes valid');
 ok(!validity.includes('locked=true')&&!validity.includes('invalidLock'),'validity layer must not keep a persistent invalid lock');
 ok(geometry.includes('PLOTAO_GEOMETRY_CORE')&&geometry.includes('solveGeometry'),'browser geometry must delegate to the shared production solver');
