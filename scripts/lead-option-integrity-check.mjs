@@ -9,6 +9,7 @@ ok(details.includes("items.push('RAL: '+ral.value.trim())"),'custom aluminium RA
 ok(details.includes("'Tloušťka koše: '+selectedText('#gabionWidth')")&&details.includes("'Kamenivo: '+selectedText('#gabionStone')"),'gabion basket width and stone choice must be preserved in lead details');
 ok(details.includes("'Mezera výplně: '+gap+' mm'"),'privacy lead details must preserve the exact configured gap');
 ok(details.includes('if(p.innerHTML!==next)p.innerHTML=next'),'lead detail proxies must not rewrite identical content and trigger mutation loops');
+ok(details.includes("document.addEventListener('submit',e=>{if(e.target?.id==='form')sync()},true)"),'latest option state must be synchronized synchronously before the lead form snapshot is created');
 ok(details.includes("if(t!=='aluminium'){p?.remove();return}")&&details.includes("if(t!=='gabion')")&&details.includes("if(t!=='privacy')"),'type-specific lead proxies must be removed when their fence type is no longer active');
 const detailPos=manifest.indexOf('/assets/lead-option-details-v1.js'),leadPos=manifest.indexOf('/assets/lead-safety-v1.js');
 ok(detailPos>=0&&leadPos>detailPos,'lead option synchronizer must load before lead snapshot adapter');
