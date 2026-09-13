@@ -8,6 +8,8 @@ const ok=(v,m)=>{if(!v)fail.push(m)};
 ok(workflow.includes('node scripts/prepare-pages.mjs'),'Pages workflow must use prepare-pages.mjs');
 ok(workflow.includes('node scripts/verify-pages-artifact.mjs'),'Pages workflow must use verify-pages-artifact.mjs');
 ok(workflow.includes('for file in assets/*.js scripts/*.mjs; do node --check "$file"; done'),'Pages workflow must syntax-check assets and build scripts');
+ok(workflow.includes('uses: actions/upload-pages-artifact@v3')&&workflow.includes('path: dist'),'Pages workflow must upload only the strict public dist directory');
+ok(!/upload-pages-artifact@v3[\s\S]{0,200}path:\s*\./.test(workflow),'Pages workflow must never upload the repository root');
 ok(!workflow.includes("python - <<'PY'")&&!workflow.includes('s=s.replace('),'inline Python/string patching must not return to Pages workflow');
 ok(!workflow.includes('price:1680')&&!workflow.includes('double:22500'),'legacy pricing constants must not live in workflow');
 ok(workflow.includes('- name: Verify live custom domain'),'main Pages workflow must verify the custom domain after Deploy');
@@ -25,4 +27,4 @@ for(const src of activeScripts){
   ok(fs.existsSync(file),`Pages manifest references missing asset: ${file}`);
 }
 if(fail.length){console.error('Build pipeline checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; deploy pipeline and standalone live smoke verify marker + HTML`);
+console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; Pages uploads strict dist only; deploy pipeline and standalone live smoke verify marker + HTML`);
