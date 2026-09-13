@@ -29,6 +29,10 @@ ok(geometry.includes("document.addEventListener('plotao:options-reset',()=>sched
 ok(validity.includes("if(t.includes('úseky oplocení'))b.textContent=segments+' ks · '+total.toLocaleString('cs-CZ',{maximumFractionDigits:1})+' m trasy'"),'invalid placement may preserve only the still-known segment count and gross route length');
 ok(validity.includes("t.includes('plotová pole')||t.includes('plotova pole')||t.includes('sloup')||t.includes('rohové spoje')")&&validity.includes("b.textContent='—'"),'invalid placement must neutralize field/post/junction material counts instead of leaving the previous valid geometry');
 
+ok(gate.includes('function matByLabel(label)')&&gate.includes("function setMaterial(label,text)"),'gate pricing must own the gate/wicket lines in the material summary');
+ok(gate.includes("setMaterial('vjezdová brána',g.label)")&&gate.includes("setMaterial('branka',d.label)"),'verified gate and wicket products must appear in the material summary');
+ok(gate.includes("setMaterial('vjezdová brána','individuálně')")&&gate.includes("setMaterial('branka','individuálně')"),'unsupported gate/wicket choices must stay explicitly individual in the material summary');
+ok(gate.includes("setMaterial('vjezdová brána','—');setMaterial('branka','—')"),'invalid or pending opening transitions must clear stale material products');
 ok(gate.includes('function resetPending()')&&gate.includes("note='přepočítávám podle nové konfigurace'")&&gate.includes("publish({type:type(),pending:true,gate:null,door:null})"),'gate and wicket rows must be neutralized immediately before a new type configuration is priced');
 ok(gate.includes("document.addEventListener('plotao:options-reset',resetPending)"),'gate pricing must use the immediate pending reset on type-option changes');
 ok(drive.includes('function resetPending()')&&drive.includes("'přepočítávám pohon podle nové konfigurace'")&&drive.includes("publish({active:false,pending:true,unsupported:true,price:0})"),'gate drive row must drop the previous kit price while the new configuration is pending');
@@ -52,4 +56,4 @@ const pricePos=manifest.indexOf('/assets/price-bridge.js'),mobilePos=manifest.in
 ok(pricePos>=0&&mobilePos>pricePos,'mobile bridge must load after the generic price bridge so ownership handoff is deterministic');
 
 if(fail.length){console.error('Result row state checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Result row state checks OK: material geometry summary, fill ownership, opening prices and custom configuration states cannot leak across transitions');
+console.log('Result row state checks OK: material geometry and opening summaries, price ownership and custom configuration states cannot leak across transitions');
