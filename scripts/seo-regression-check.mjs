@@ -39,7 +39,7 @@ for(const file of pages){
 const landingPages=pages.filter(file=>file!=='index.html'&&file!=='typy-plotu.html');
 for(const file of landingPages){
   const html=fs.readFileSync(file,'utf8');
-  ok(/<a\\b[^>]*href=["']\/#kalkulator["'][^>]*>[^<]*(?:Spočítat|Otevřít|Připravit)/i.test(html),`${file}: primary calculator CTA must link directly to /#kalkulator`);
+  ok(/<a\b[^>]*href=["']\/#kalkulator["'][^>]*>[^<]*(?:Spočítat|Otevřít|Připravit)/i.test(html),`${file}: primary calculator CTA must link directly to /#kalkulator`);
   ok(!/href=["']\/#calculator["']/i.test(html),`${file}: obsolete English calculator anchor must not return`);
 }
 
