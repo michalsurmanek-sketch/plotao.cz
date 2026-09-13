@@ -45,7 +45,8 @@
     setRow('vjezdová brána',null,gateOn()?note:'brána není zvolena','Nezapočítáno');
     setRow('vstupní branka',null,doorOn()?note:'branka není zvolena','Nezapočítáno');
     b.style.display='none';
-    publish({type:type(),invalid:true,gate:null,door:null});
+    window.PLOTAO_GATE_PRICE={type:type(),invalid:true,gate:null,door:null};
+    document.dispatchEvent(new CustomEvent('plotao:gate-price',{detail:window.PLOTAO_GATE_PRICE}));
   }
   function resetPending(){const b=box(),note='přepočítávám podle nové konfigurace';setRow('vjezdová brána',null,gateOn()?note:'brána není zvolena','Nezapočítáno');setRow('vstupní branka',null,doorOn()?note:'branka není zvolena','Nezapočítáno');if(b)b.style.display='none';publish({type:type(),pending:true,gate:null,door:null});schedule(25)}
 
