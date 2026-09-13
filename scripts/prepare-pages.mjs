@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {createHash} from 'node:crypto';
 import {activeScripts,requiredArtifact,forbiddenArtifact} from './pages-manifest.mjs';
 
 const path='index.html';
@@ -41,8 +42,8 @@ html=html.replace(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*><\/script>/gi,(tag,
   const cleanSrc=src.split('?')[0];
   return activeScripts.includes(cleanSrc)?'':tag;
 });
-const version=sha.slice(0,12);
-const orderedScripts=activeScripts.map(src=>`<script src="${src}?v=${version}"></script>`).join('');
+const assetVersion=src=>createHash('sha256').update(fs.readFileSync('.'+src)).digest('hex').slice(0,12);
+const orderedScripts=activeScripts.map(src=>`<script src="${src}?v=${assetVersion(src)}"></script>`).join('');
 html=html.replace('</body>',orderedScripts+'</body>');
 
 if(!html.includes('<main class="wrap" id="kalkulator">')) throw new Error('Pages build source missing calculator anchor');
@@ -59,4 +60,4 @@ html=html.replace('</head>',schemaTag+`<meta name="plotao-deploy" content="${sha
 
 fs.writeFileSync(path,html,'utf8');
 fs.writeFileSync('deploy-marker.txt',sha+'\n','utf8');
-console.log(`Pages build prepared from clean source: ${activeScripts.length} ordered and versioned modules, SHA ${sha}`);
+console.log(`Pages build prepared from clean source: ${activeScripts.length} content-versioned modules, SHA ${sha}`);
