@@ -48,6 +48,7 @@ jobs:
           node scripts/material-validity-check.mjs
           node scripts/input-validity-guard-check.mjs
           node scripts/segment-edit-state-check.mjs
+          node scripts/segment-connections-check.mjs
           node scripts/slab-pricing-scenario-check.mjs
           node scripts/slab-default-check.mjs
           node scripts/concrete-material-scenario-check.mjs
