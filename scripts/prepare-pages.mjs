@@ -15,10 +15,15 @@ if(!html.includes('</body>')) throw new Error('Pages build: </body> not found');
 // Source HTML may already contain some active modules. Remove every managed tag first,
 // then inject the complete manifest once so dependency order is deterministic.
 for(const src of activeScripts){
+  const escaped=src.replace(/[.*+?^${}()|[\]\\]/g,'\\for(const src of activeScripts){
   const tag=`<script src="${src}"></script>`;
   html=html.split(tag).join('');
 }
-const orderedScripts=activeScripts.map(src=>`<script src="${src}"></script>`).join('');
+const orderedScripts=activeScripts.map(src=>`<script src="${src}"></script>`).join('');');
+  html=html.replace(new RegExp(`<script\\\\b[^>]*\\\\bsrc=["']${escaped}(?:\\\\?[^"']*)?["'][^>]*><\\\\/script>`,'gi'),'');
+}
+const version=sha.slice(0,12);
+const orderedScripts=activeScripts.map(src=>`<script src="${src}?v=${version}"></script>`).join('');
 html=html.replace('</body>',orderedScripts+'</body>');
 
 if(!html.includes('<main class="wrap" id="kalkulator">')) throw new Error('Pages build source missing calculator anchor');
