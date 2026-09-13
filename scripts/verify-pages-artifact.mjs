@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {createHash} from 'node:crypto';
 import {activeScripts,requiredArtifact,forbiddenArtifact} from './pages-manifest.mjs';
 
 const html=fs.readFileSync('index.html','utf8');
@@ -27,7 +28,14 @@ if(duplicateSources.length) throw new Error(`Pages artifact contains duplicate m
 if(managedSources.length!==activeScripts.length||managedSources.some((src,index)=>src!==activeScripts[index])){
   throw new Error(`Pages artifact script order differs from manifest; expected=${JSON.stringify(activeScripts)} actual=${JSON.stringify(managedSources)}`);
 }
+const managedVersioned=scriptSources.filter(src=>activeScripts.includes(src.split('?')[0]));
+for(const src of managedVersioned){
+  const [clean,query='']=src.split('?');
+  const expected=createHash('sha256').update(fs.readFileSync('.'+clean)).digest('hex').slice(0,12);
+  const actual=new URLSearchParams(query).get('v');
+  if(actual!==expected) throw new Error(`Pages artifact script cache version mismatch for ${clean}: expected=${expected} actual=${actual}`);
+}
 
 const posGeo=html.indexOf('/assets/geometry-v3.js'),posGuard=html.indexOf('/assets/geometry-validity-v1.js'),posPanel=html.indexOf('/assets/panel-pricing-v5.js');
 if(!(posGeo>=0&&posGeo<posGuard&&posGuard<posPanel)) throw new Error('Geometry validity guard must load after geometry and before pricing modules');
-console.log(`Pages artifact integrity OK: ${marker}; ${activeScripts.length} active modules and structured data verified`);
+console.log(`Pages artifact integrity OK: ${marker}; ${activeScripts.length} content-versioned modules and structured data verified`);
