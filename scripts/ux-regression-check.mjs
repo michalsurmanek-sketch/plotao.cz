@@ -9,6 +9,7 @@ ok(scroll.includes("getComputedStyle(el).display!=='none'")&&scroll.includes('ge
 ok(scroll.includes("window.matchMedia?.('(prefers-reduced-motion: reduce)')"),'smooth scrolling must respect reduced-motion preference without assuming matchMedia exists');
 
 ok(a11y.includes("setAttribute('aria-pressed'")&&a11y.includes("classList.contains('on')"),'choice buttons must expose selected state through aria-pressed');
+ok(a11y.includes("#extraFenceConfig [data-eg]")&&a11y.includes("$$('.mobile-choices').forEach")&&a11y.includes("setAttribute('aria-label','Varianta mobilního oplocení')"),'specialized mobile fence choices must expose grouped aria semantics and selected state');
 ok(a11y.includes("setAttribute('aria-label','Odebrat úsek '")&&a11y.includes("setAttribute('title','Odebrat úsek '"),'segment remove buttons must have a meaningful accessible name');
 ok(a11y.includes("$$('.type img').forEach(img=>img.setAttribute('alt',''))"),'decorative type images must not duplicate the button label for screen readers');
 ok(a11y.includes("$$('.type .check').forEach(x=>x.setAttribute('aria-hidden','true'))"),'visual selection checkmarks must stay hidden from assistive technology');
