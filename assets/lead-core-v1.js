@@ -17,7 +17,7 @@
   function normalizePhone(v){const raw=text(v,80),plus=raw.startsWith('+'),digits=raw.replace(/\D/g,'').slice(0,32);return(plus?'+':'')+digits}
   function normalizeEmail(v){return text(v,320).toLowerCase()}
   function normalizeSegments(items){return(Array.isArray(items)?items:[]).slice(0,100).map((x,i)=>({name:text(x?.name,100)||('Úsek '+(i+1)),length:num(x?.length,0,1000000,0),connection:i===0?'začátek':CONNECTIONS.has(x?.connection)?x.connection:'navazuje rohem'}))}
-  function normalizeOptions(items){const out=[];for(const item of Array.isArray(items)?items:[]){const v=text(item,200);if(v&&!out.includes(v))out.push(v);if(out.length>=50)break}return out}
+  function normalizeOptions(items){const out=[];for(const item of (Array.isArray(items)?items:[]).slice(0,100)){const v=text(item,1000);if(v&&!out.includes(v))out.push(v)}return out}
 
   function normalizeLead(raw,now){
     const r=raw||{},segments=normalizeSegments(r.segments),priceKind=PRICE_KINDS.has(r.priceKind)?r.priceKind:'individuální nabídka',mode=MODES.has(r.mode)?r.mode:'lead',scopeValue=SCOPES.has(r.scopeValue)?r.scopeValue:'material';
@@ -45,6 +45,8 @@
     if(d.segments.length>12)errors.push({field:'segments',code:'segments-count',message:'Kalkulátor podporuje maximálně 12 úseků.'});
     const badSegment=d.segments.findIndex(x=>x.length<.01);if(badSegment>=0)errors.push({field:'segments',code:'segment-length',message:'Každý úsek musí mít délku alespoň 0,01 m.'});
     const totalLength=d.segments.reduce((sum,x)=>sum+x.length,0);if(totalLength>1000+.001)errors.push({field:'segments',code:'segments-total',message:'Celková délka oplocení může být maximálně 1000 m.'});
+    if(d.options.length>50)errors.push({field:'configuration',code:'options-count',message:'Konfigurace může obsahovat maximálně 50 variant.'});
+    if(d.options.some(x=>x.length>200))errors.push({field:'configuration',code:'option-length',message:'Jedna varianta konfigurace může mít maximálně 200 znaků.'});
     if(d.priceKind==='neplatné zadání'){const pending=d.priceReason==='Počkejte na dokončení přepočtu ceny.';errors.push({field:'configuration',code:pending?'price-pending':'invalid-price',message:pending?'Počkejte na dokončení přepočtu ceny.':'Nejdřív opravte neplatné zadání kalkulátoru.'})}
     if((d.scopeValue==='delivery'||d.scopeValue==='turnkey')&&d.place.length<2)errors.push({field:'place',code:'place-required',message:'Pro dopravu nebo realizaci na klíč doplňte obec nebo PSČ (alespoň 2 znaky).'});
     function opening(kind,on,section,pos,width){
