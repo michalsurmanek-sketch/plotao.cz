@@ -25,6 +25,11 @@ function metaBy(html,attrName,attrValue){
   }
   return'';
 }
+function schemas(html,file){
+  const raw=[...html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)].map(m=>m[1]);
+  const parsed=[];for(const item of raw){try{parsed.push(JSON.parse(item))}catch{ok(false,`${file}: invalid JSON-LD`);}}
+  return parsed.flatMap(s=>Array.isArray(s?.['@graph'])?s['@graph']:[s]);
+}
 
 ok(pages.length>0,'no public HTML pages found');
 for(const file of pages){
@@ -51,19 +56,27 @@ for(const [file,type] of Object.entries(landingType)){
   ok(!/href=["']\/#calculator["']/i.test(html),`${file}: obsolete English calculator anchor must not return`);
 }
 
-const socialPages=Object.keys(landingType);
-for(const file of socialPages){
-  const html=fs.readFileSync(file,'utf8'),can=canonical(html);
+for(const file of Object.keys(landingType)){
+  const html=fs.readFileSync(file,'utf8'),can=canonical(html),flat=schemas(html,file);
   ok(metaBy(html,'property','og:title').length>=20,`${file}: landing must keep og:title`);
   ok(metaBy(html,'property','og:description').length>=50,`${file}: landing must keep og:description`);
   ok(metaBy(html,'property','og:type')==='website',`${file}: landing must keep og:type=website`);
   ok(metaBy(html,'property','og:url')===can,`${file}: og:url must match canonical`);
   ok(metaBy(html,'name','twitter:card')==='summary',`${file}: landing must keep twitter:card=summary`);
-  const schemaScripts=[...html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)].map(m=>m[1]);
-  let schemas=[];for(const raw of schemaScripts){try{schemas.push(JSON.parse(raw))}catch{ok(false,`${file}: invalid JSON-LD`);}}
-  const flattened=schemas.flatMap(s=>Array.isArray(s?.['@graph'])?s['@graph']:[s]);
-  ok(flattened.some(x=>x?.['@type']==='BreadcrumbList'),`${file}: landing must keep BreadcrumbList structured data`);
-  ok(flattened.some(x=>x?.['@type']==='FAQPage'),`${file}: landing must keep FAQPage structured data`);
+  ok(flat.some(x=>x?.['@type']==='BreadcrumbList'),`${file}: landing must keep BreadcrumbList structured data`);
+  ok(flat.some(x=>x?.['@type']==='FAQPage'),`${file}: landing must keep FAQPage structured data`);
+}
+
+{
+  const file='typy-plotu.html',html=fs.readFileSync(file,'utf8'),can=canonical(html),flat=schemas(html,file);
+  ok(metaBy(html,'property','og:title').length>=20,`${file}: overview must keep og:title`);
+  ok(metaBy(html,'property','og:description').length>=50,`${file}: overview must keep og:description`);
+  ok(metaBy(html,'property','og:type')==='website',`${file}: overview must keep og:type=website`);
+  ok(metaBy(html,'property','og:url')===can,`${file}: overview og:url must match canonical`);
+  ok(metaBy(html,'name','twitter:card')==='summary',`${file}: overview must keep twitter:card=summary`);
+  ok(flat.some(x=>x?.['@type']==='BreadcrumbList'),`${file}: overview must keep BreadcrumbList structured data`);
+  const list=flat.find(x=>x?.['@type']==='ItemList');
+  ok(Array.isArray(list?.itemListElement)&&list.itemListElement.length===10,`${file}: overview ItemList must contain all 10 fence types`);
 }
 
 const sitemap=fs.readFileSync('sitemap.xml','utf8');
@@ -81,4 +94,4 @@ ok(/User-agent:\s*\*/i.test(robots)&&/Allow:\s*\//i.test(robots),'robots.txt: pu
 ok(robots.includes('Sitemap: https://plotao.cz/sitemap.xml'),'robots.txt: canonical sitemap URL missing');
 
 if(fail.length){console.error('SEO regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`SEO regression checks OK: ${pages.length} public pages; all fence landing canonical/social/structured metadata and sitemap integrity protected`);
+console.log(`SEO regression checks OK: ${pages.length} public pages; all fence landing metadata, overview ItemList and sitemap integrity protected`);
