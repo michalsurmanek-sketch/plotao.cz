@@ -8,5 +8,7 @@ ok(src.includes("window.PLOTAO_SCOPE_INCOMPLETE=sc!=='material'"),'delivery and 
 ok(src.includes("scopeEl?.addEventListener('click',e=>{if(e.target.closest('button')){userChosen=true;render()}})"),'scope rows must switch synchronously in the same click that selects a new scope');
 ok(price.includes("document.addEventListener('plotao:scope-integrity',()=>schedule(0))"),'main material total must recalculate immediately after the scope rows reach their authoritative state');
 ok(!price.includes("'plotao:scope-integrity'].forEach(ev=>document.addEventListener(ev,()=>schedule(40)))"),'scope transition must not fall back to the generic delayed benchmark event path');
+ok(price.includes("totalAllowed=sc==='material'&&!blocked&&!window.PLOTAO_ACCURACY_BLOCK"),'only material scope with a supported and accuracy-released state may own the total-level benchmark');
+ok(price.includes("else{clearOwnedTotal();clearBenchmarkNote();return}"),'delivery/turnkey or blocked states must remove the total-level benchmark badge rather than re-create material-price copy');
 if(fail.length){console.error('Scope truth checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Scope truth checks OK: active scope is truthful and scope-to-price transitions are synchronous');
+console.log('Scope truth checks OK: active scope, total ownership and benchmark badges stay truthful across material/delivery/turnkey transitions');
