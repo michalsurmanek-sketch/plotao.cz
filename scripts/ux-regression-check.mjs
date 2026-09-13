@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
-const scroll=read('assets/step-scroll-v1.js'),a11y=read('assets/choice-accessibility-v1.js'),modal=read('assets/modal-accessibility-v1.js'),manifest=read('scripts/pages-manifest.mjs');
+const scroll=read('assets/step-scroll-v1.js'),a11y=read('assets/choice-accessibility-v1.js'),modal=read('assets/modal-accessibility-v1.js'),segmentLimit=read('assets/segment-limit-ui-v1.js'),manifest=read('scripts/pages-manifest.mjs');
 
 for(const [type,id] of Object.entries({privacy:'#privacyConfig',aluminium:'#aluminiumConfigBox',gabion:'#gabionOptionsBox',metal:'#metalConfig',concrete:'#concreteConfig',masonry:'#extraFenceConfig',mobile:'#extraFenceConfig',other:'#extraFenceConfig'}))ok(scroll.includes(type+":'"+id+"'")||scroll.includes(type+':"'+id+'"'),'next-step scroll must target the visible '+type+' configuration');
 ok(scroll.includes('scrollToEl(nextAfterType,180)'),'type scroll target must be resolved after dynamic configuration modules render');
@@ -19,8 +19,15 @@ ok(modal.includes("modal.setAttribute('aria-hidden',open?'false':'true')"),'lead
 ok(modal.includes("document.body.classList.toggle('plotao-modal-open',open)")&&modal.includes('body.plotao-modal-open{overflow:hidden;overscroll-behavior:none}'),'open modal must lock background page scrolling, including mobile overscroll');
 ok(modal.includes("new MutationObserver(()=>sync(modal)).observe(modal,{attributes:true,attributeFilter:['class']})"),'modal semantics and scroll lock must follow every open/close path');
 
-const a11yPos=manifest.indexOf('/assets/choice-accessibility-v1.js'),scrollPos=manifest.indexOf('/assets/step-scroll-v1.js');
+ok(segmentLimit.includes('const LIMIT=12'),'segment UI must expose the same maximum of 12 sections as lead/backend validation');
+ok(segmentLimit.includes('btn.disabled=full')&&segmentLimit.includes("btn.setAttribute('aria-disabled',full?'true':'false')"),'add-segment control must become genuinely disabled and accessible at the limit');
+ok(segmentLimit.includes("btn.textContent=full?'Maximum 12 úseků':'+ Přidat úsek'"),'segment limit must be visible instead of silently ignoring further clicks');
+ok(segmentLimit.includes("new MutationObserver(sync).observe(root,{childList:true})"),'segment limit control must re-enable automatically after a section is removed');
+ok(segmentLimit.includes("s.setAttribute('aria-live','polite')"),'segment limit explanation must be announced to assistive technology');
+
+const limitPos=manifest.indexOf('/assets/segment-limit-ui-v1.js'),a11yPos=manifest.indexOf('/assets/choice-accessibility-v1.js'),scrollPos=manifest.indexOf('/assets/step-scroll-v1.js');
+ok(limitPos>manifest.indexOf('/assets/ui-bootstrap-v1.js'),'production manifest must load segment limit UI after bootstrap creates the section controls');
 ok(a11yPos>=0&&scrollPos>a11yPos,'production manifest must load the accessibility synchronizer before step scrolling');
 
 if(fail.length){console.error('UX regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('UX regression checks OK: dynamic next-step scroll, modal behavior and calculator choice accessibility are protected');
+console.log('UX regression checks OK: dynamic next-step scroll, modal behavior, explicit segment limits and calculator choice accessibility are protected');
