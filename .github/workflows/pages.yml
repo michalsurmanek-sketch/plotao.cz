@@ -56,6 +56,7 @@ jobs:
           node scripts/concrete-material-scenario-check.mjs
           node scripts/price-total-scenario-check.mjs
           node scripts/lead-scenario-check.mjs
+          node scripts/lead-price-state-check.mjs
           node scripts/lead-option-integrity-check.mjs
           node scripts/modal-draft-isolation-check.mjs
           node scripts/modal-focus-containment-check.mjs
