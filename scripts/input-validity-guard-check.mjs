@@ -2,6 +2,7 @@ import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 const guard=read('assets/input-validity-guard-v1.js'),manifest=read('scripts/pages-manifest.mjs');
 
+ok(guard.includes("let blocked=false,lastCode=''"),'shared guard must track both blocked state and the current invalid reason code');
 ok(guard.includes("window.PLOTAO_INPUT_VALIDITY={current,invalid:()=>!!current(),blocked:()=>blocked}"),'shared input validity API must expose current(), invalid() and blocked()');
 ok(guard.includes("if(!ss.length)return{code:'segments'")&&guard.includes("if(ss.length>12)return{code:'segments-count'")&&guard.includes("const bad=ss.findIndex(x=>x<=0)")&&guard.includes("if(h<40||h>400)return{code:'height'")&&guard.includes("if(invalidOpenings(ss))return{code:'placement'")&&guard.includes("if(ss.reduce((a,b)=>a+b,0)>1000+.001)return{code:'segments-total'"),'shared validity must match calculator segment, height, placement and total-length limits');
 ok(guard.includes("function opening(kind)")&&guard.includes("window.PLOTAO_PLACEMENT?.[kind]")&&guard.includes("#gateWidth")&&guard.includes("#doorWidth"),'opening validity must derive synchronously from authoritative placement plus current opening widths');
@@ -15,8 +16,8 @@ ok(guard.includes("if(t==='panel')window.PLOTAO_PANEL_PRICE=v")&&guard.includes(
 ok(guard.includes("window.PLOTAO_GATE_PRICE={type:t,invalid:true,gate:null,door:null,inputCode:s.code}")&&guard.includes("window.PLOTAO_GATE_DRIVE={active:false,invalid:true,unsupported:true,price:0,inputCode:s.code}"),'invalid input must clear exact gate/wicket and drive structured prices');
 ok(guard.includes("neutralizeRow('vjezdová brána',s.note)")&&guard.includes("neutralizeRow('vstupní branka',s.note)")&&guard.includes("neutralizeRow('pohon brány',s.note)"),'invalid input must neutralize visible opening/drive rows');
 ok(guard.includes("function announce(valid,issue=null){document.dispatchEvent(new CustomEvent('plotao:input-validity',{detail:{valid,type:type(),issue}}))}"),'shared validity transitions must use one explicit event contract for invalid and recovery states');
-ok(guard.includes("function recover(){if(!blocked)return false;blocked=false;queueMicrotask(()=>{announce(true);")&&guard.includes("new CustomEvent('plotao:options-reset',{detail:{type:type(),reason:'input-recovery'}})"),'first invalid-to-valid transition must clear blocked state, announce recovery and trigger immediate repricing');
-ok(guard.includes("const s=current();if(!s)return recover();const entering=!blocked;blocked=true")&&guard.includes("if(entering)queueMicrotask(()=>announce(false,{...s}))"),'only the first valid-to-invalid transition must announce invalidity, preventing downstream pricing events from causing an event loop');
+ok(guard.includes("function recover(){if(!blocked)return false;blocked=false;lastCode='';queueMicrotask(()=>{announce(true);")&&guard.includes("new CustomEvent('plotao:options-reset',{detail:{type:type(),reason:'input-recovery'}})"),'invalid-to-valid transition must clear both blocked/code state, announce recovery and trigger immediate repricing');
+ok(guard.includes("const s=current();if(!s)return recover();const changed=!blocked||lastCode!==s.code;blocked=true;lastCode=s.code")&&guard.includes("if(changed)queueMicrotask(()=>announce(false,{...s}))"),'first invalid state and every invalid-reason change must announce exactly once while repeated downstream emissions of the same code stay silent');
 ok(guard.includes("#gate,#door,#gateWidth,#doorWidth,#gatePos,#doorPos,#gateSection,#doorSection")&&guard.includes("document.addEventListener('input',e=>{if(critical(e))apply()})")&&guard.includes("document.addEventListener('change',e=>{if(critical(e))apply()})"),'opening enablement, size, section and position must participate in synchronous validity checks');
 ok(guard.includes("queueMicrotask(apply)")&&guard.includes("'plotao:panel-price','plotao:mesh-price'")&&guard.includes("'plotao:gate-price','plotao:gate-drive'"),'guard must react synchronously to segment mutations and downstream pricing emissions');
 
@@ -24,4 +25,4 @@ const guardPos=manifest.indexOf('/assets/input-validity-guard-v1.js'),drivePos=m
 ok(guardPos>drivePos&&guardPos<scopePos&&guardPos<totalPos&&guardPos<bridgePos,'shared invalid-input guard must load after detail pricing but before scope/total/price bridges');
 
 if(fail.length){console.error('Input validity guard checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Input validity guard checks OK: invalid and recovery transitions are synchronous, single-shot and protected from stale opening placement');
+console.log('Input validity guard checks OK: invalid, invalid-reason-change and recovery transitions are synchronous and single-shot');
