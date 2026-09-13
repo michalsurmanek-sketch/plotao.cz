@@ -38,7 +38,7 @@ for(const file of pages){
 
 const landingType={"panelovy-plot.html":"panel","pletivovy-plot.html":"mesh","betonovy-plot.html":"concrete","hlinikovy-plot.html":"aluminium","plot-na-soukromi.html":"privacy","gabionovy-plot.html":"gabion","kovovy-plot.html":"metal","zdeny-plot.html":"masonry","mobilni-oploceni.html":"mobile","specialni-oploceni.html":"other"};
 for(const [file,type] of Object.entries(landingType)){
-  const html=fs.readFileSync(file,'utf8'),target='/?type='+type+'#kalkulator';
+  const html=fs.readFileSync(file,'utf8'),target='/?type='+type+(type==='mobile'?'&height=190':'')+'#kalkulator';
   ok(html.includes('href="'+target+'"'),`${file}: calculator CTA must preselect ${type} through ${target}`);
   ok(!/href=["']\/#calculator["']/i.test(html),`${file}: obsolete English calculator anchor must not return`);
 }
