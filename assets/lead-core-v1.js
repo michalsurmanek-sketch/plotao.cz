@@ -15,7 +15,7 @@
   function int(v,min=0,max=Number.MAX_SAFE_INTEGER,fallback=0){return Math.trunc(num(v,min,max,fallback))}
   function normalizePhone(v){const raw=text(v,80),plus=raw.startsWith('+'),digits=raw.replace(/\D/g,'').slice(0,32);return(plus?'+':'')+digits}
   function normalizeEmail(v){return text(v,320).toLowerCase()}
-  function normalizeSegments(items){return(Array.isArray(items)?items:[]).map((x,i)=>({name:text(x?.name,120)||('Úsek '+(i+1)),length:num(x?.length,0,1000,0),connection:i===0?'začátek':CONNECTIONS.has(x?.connection)?x.connection:'navazuje rohem'}))}
+  function normalizeSegments(items){return(Array.isArray(items)?items:[]).slice(0,12).map((x,i)=>({name:text(x?.name,120)||('Úsek '+(i+1)),length:num(x?.length,0,1000,0),connection:i===0?'začátek':CONNECTIONS.has(x?.connection)?x.connection:'navazuje rohem'}))}
   function normalizeOptions(items){const out=[];for(const item of Array.isArray(items)?items:[]){const v=text(item,160);if(v&&!out.includes(v))out.push(v);if(out.length>=40)break}return out}
 
   function normalizeLead(raw,now){
@@ -40,17 +40,20 @@
   function validateFence(d,errors){
     if(!d.fenceType)errors.push({field:'fenceType',code:'fence-type',message:'Vyberte typ plotu.'});
     if(d.height<40||d.height>400)errors.push({field:'height',code:'height',message:'Výška plotu musí být 40–400 cm.'});
-    if(!d.segments.some(x=>x.length>0))errors.push({field:'segments',code:'segments',message:'Zadejte alespoň jeden úsek s délkou větší než 0 m.'});
+    if(!d.segments.length)errors.push({field:'segments',code:'segments',message:'Zadejte alespoň jeden úsek oplocení.'});
+    const badSegment=d.segments.findIndex(x=>x.length<=0);if(badSegment>=0)errors.push({field:'segments',code:'segment-length',message:'Každý úsek musí mít délku větší než 0 m.'});
+    const totalLength=d.segments.reduce((sum,x)=>sum+x.length,0);if(totalLength>1000+.001)errors.push({field:'segments',code:'segments-total',message:'Celková délka oplocení může být maximálně 1000 m.'});
     if(d.priceKind==='neplatné zadání')errors.push({field:'configuration',code:'invalid-price',message:'Nejdřív opravte neplatné zadání kalkulátoru.'});
     if((d.scopeValue==='delivery'||d.scopeValue==='turnkey')&&!d.place)errors.push({field:'place',code:'place-required',message:'Pro dopravu nebo realizaci na klíč doplňte obec nebo PSČ.'});
     function opening(kind,on,section,pos,width){
-      if(!on)return;
+      if(!on)return false;
       const s=d.segments[section];
-      if(!s||s.length<=0){errors.push({field:kind,code:kind+'-section',message:(kind==='gate'?'Brána':'Branka')+' musí být umístěná v platném úseku.'});return}
-      if(width<=0||pos<0||pos+width>s.length+.02)errors.push({field:kind,code:kind+'-placement',message:(kind==='gate'?'Brána':'Branka')+' se musí celá vejít do zvoleného úseku.'});
+      if(!s||s.length<=0){errors.push({field:kind,code:kind+'-section',message:(kind==='gate'?'Brána':'Branka')+' musí být umístěná v platném úseku.'});return false}
+      if(width<=0||pos<0||pos+width>s.length+.02){errors.push({field:kind,code:kind+'-placement',message:(kind==='gate'?'Brána':'Branka')+' se musí celá vejít do zvoleného úseku.'});return false}
+      return true;
     }
-    opening('gate',d.gate,d.gateSection,d.gatePos,d.gateWidth);
-    opening('wicket',d.wicket,d.wicketSection,d.wicketPos,d.wicketWidth);
+    const gateOk=opening('gate',d.gate,d.gateSection,d.gatePos,d.gateWidth),wicketOk=opening('wicket',d.wicket,d.wicketSection,d.wicketPos,d.wicketWidth);
+    if(gateOk&&wicketOk&&d.gateSection===d.wicketSection){const left=Math.max(d.gatePos,d.wicketPos),right=Math.min(d.gatePos+d.gateWidth,d.wicketPos+d.wicketWidth);if(left<right-.02)errors.push({field:'configuration',code:'openings-overlap',message:'Brána a branka se ve stejném úseku nesmí překrývat.'})}
   }
 
   function validateLead(raw){
