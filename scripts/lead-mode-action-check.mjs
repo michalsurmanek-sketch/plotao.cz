@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-const src=fs.readFileSync('assets/lead-mode-ui-v1.js','utf8'),lead=fs.readFileSync('assets/lead-safety-v1.js','utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
+const src=fs.readFileSync('assets/lead-mode-ui-v1.js','utf8'),lead=fs.readFileSync('assets/lead-safety-v1.js','utf8'),core=fs.readFileSync('assets/lead-core-v1.js','utf8'),server=fs.readFileSync('supabase/functions/submit-lead/validation.mjs','utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 ok(src.includes("function transportReady(){try{return window.PLOTAO_LEAD_TRANSPORT?.available?.()===true}"),'mode UI must derive action wording from the real transport availability');
 ok(src.includes("return live?'Odeslat kontakt':'Zkontrolovat kontakt a zkopírovat'"),'partner action must distinguish live submission from clipboard fallback');
 ok(src.includes("return live?'Odeslat žádost':'Zkontrolovat žádost a zkopírovat'"),'help action must distinguish live submission from clipboard fallback');
@@ -7,5 +7,10 @@ ok(src.includes("return live?'Odeslat poptávku':'Zkontrolovat poptávku a zkop�
 ok(src.includes("send.title=transportReady()?'Bezpečně odeslat formulář PLOTAO':'Zkontrolovat a zkopírovat podklady bez serverového odeslání'"),'button tooltip must match transport state');
 ok(!src.includes("if(send)send.textContent='Zkontrolovat kontakt a zkopírovat'")&&!src.includes("if(send)send.textContent='Zkontrolovat žádost a zkopírovat'")&&!src.includes("if(send)send.textContent='Zkontrolovat poptávku a zkopírovat'"),'mode UI must not hard-code offline wording after transport activation');
 ok(lead.includes("send.textContent=live?'Odeslat':'Zkontrolovat a zkopírovat podklady'"),'lead safety bootstrap must still initialize a transport-aware generic action before mode-specific wording');
+ok(src.includes('name.maxLength=120')&&src.includes('email.maxLength=254')&&src.includes('place.maxLength=160')&&src.includes('note.maxLength=2000'),'contact form must expose the same client payload length bounds instead of silently truncating longer user input');
+ok(src.includes("place.required=true;place.minLength=2")&&src.includes("place.required=scope==='delivery'||scope==='turnkey';place.minLength=place.required?2:0"),'partner and delivery/turnkey place fields must require at least two characters');
+ok(src.includes("note.required=true;note.minLength=5")&&src.includes("note.required=false;note.minLength=0"),'help question must require five characters while optional notes must not keep a stale minlength constraint');
+ok(core.includes("(d.scopeValue==='delivery'||d.scopeValue==='turnkey')&&d.place.length<2")&&core.includes("mode==='partner'&&d.place.length<2"),'shared lead validation must enforce the same two-character required-place minimum as form UI');
+ok(server.includes("if(mode==='partner'&&place.length<2)errors.push('place')")&&server.includes("if((scopeValue==='delivery'||scopeValue==='turnkey')&&place.length<2)errors.push('place')"),'server validation must keep the same required-place minimum');
 if(fail.length){console.error('Lead mode action checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Lead mode action checks OK: mode-specific submit labels stay truthful in online and offline transport states');
+console.log('Lead mode action checks OK: submit wording and field length requirements stay truthful and aligned with backend validation');
