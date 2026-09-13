@@ -19,7 +19,7 @@ ok(mobile.includes("document.addEventListener('plotao:options-reset',()=>schedul
 
 ok(concrete.includes('function clearVolume()')&&concrete.includes("$('#concreteAmount').textContent='—'")&&concrete.includes("if(b)b.textContent='—'"),'inactive or invalid footing calculations must clear both visible concrete volume surfaces');
 ok(concrete.includes('function clearState(b){clearVolume();')&&concrete.includes('publish(null)'),'leaving panel/mesh or material scope must publish a cleared footing state');
-ok(concrete.includes("if(window.PLOTAO_PLACEMENT?.valid===false){clearVolume();"),'invalid opening geometry must hide stale concrete volume instead of showing the previous valid value');
+ok(concrete.includes("function invalidState(b,note){clearVolume();setRow(null,note,'Nezapočítáno')")&&concrete.includes("if(window.PLOTAO_PLACEMENT?.valid===false)return'opravte umístění brány/branky'"),'invalid opening geometry must hide stale concrete volume instead of showing the previous valid value');
 ok(concrete.includes("document.addEventListener('plotao:options-reset',()=>schedule(0))"),'footing material cleanup must run immediately on type-option reset');
 
 ok(geometry.includes("if(t.startsWith('Úseky oplocení'))bb.textContent=segmentCount+' ks · '+g.gross.toLocaleString('cs-CZ',{maximumFractionDigits:1})+' m trasy'"),'valid geometry must populate the material segment count and gross route length');
