@@ -10,6 +10,9 @@ ok(src.includes("if(err?.code==='segments-count'||err?.code==='segments-total')"
 ok(src.includes("if(err?.code==='segment-length')return $$('#segmentList input[type=number]').find(x=>+(x.value||0)<=0)||list"),'segment-length errors must focus the actual invalid section length');
 ok(src.includes("if(err?.code==='segments')return $('#addSegment')||list"),'missing-section errors must focus the add-section action');
 ok(src.includes("segments:segmentErrorTarget(first)"),'lead error routing must use the code-aware section target helper');
+ok(src.includes("function openingErrorTarget(err,kind){const section=kind==='gate'?$('#gateSection'):$('#doorSection'),pos=kind==='gate'?$('#gatePos'):$('#doorPos')"),'opening errors must use one code-aware target helper for gate and wicket controls');
+ok(src.includes("if(err?.code===kind+'-placement')return pos||section")&&src.includes("if(err?.code===kind+'-section')return section||pos"),'opening placement errors must focus position while invalid-section errors focus the section selector');
+ok(src.includes("gate:openingErrorTarget(first,'gate')")&&src.includes("wicket:openingErrorTarget(first,'wicket')"),'lead error routing must use precise gate/wicket targets');
 ok(src.includes("function configurationErrorTarget(){let target=window.PLOTAO_PLACEMENT?.valid===false?($('#placementInfo')||$('#placementBox')||$('.gate-grid')):$('#accuracyGuard')"),'invalid opening/configuration errors must route to the visible placement controls before falling back to the accuracy explanation');
 ok(src.includes("if(target&&!target.matches?.('input,select,button,textarea,a[href],[tabindex]'))target.tabIndex=-1"),'non-interactive configuration error targets must be programmatically focusable');
 ok(src.includes("configuration:configurationErrorTarget()"),'lead error routing must use the configuration-aware focus helper');
@@ -22,4 +25,4 @@ ok(src.includes("scope:includeFence?scopeLabel(scopeValue):''"),'snapshot must e
 ok(src.includes("displayedPrice:includeFence?(ps.kind==='neplatné zadání'?'Nelze spočítat':scopeValue==='material'?shown:'Individuální nabídka'):''"),'non-material snapshots must never carry a stale numeric price and invalid state must stay visibly invalid');
 ok(src.includes("ps=includeFence?priceStatus(scopeValue):{kind:'individuální nabídka',reason:''}"),'price state must be derived from selected scope plus current input validity, not only from the DOM');
 if(fail.length){console.error('Lead scope payload checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Lead scope payload checks OK: authoritative opening placement, geometry/section limits and precise section/configuration error focus are protected');
+console.log('Lead scope payload checks OK: authoritative opening placement, geometry/section limits and precise section/opening/configuration error focus are protected');
