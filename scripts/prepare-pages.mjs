@@ -12,16 +12,12 @@ const missingSource=sourceRequired.filter(token=>!html.includes(token));
 if(missingSource.length) throw new Error(`Pages build source missing current required content: ${JSON.stringify(missingSource)}`);
 
 if(!html.includes('</body>')) throw new Error('Pages build: </body> not found');
-// Source HTML may already contain some active modules. Remove every managed tag first,
-// then inject the complete manifest once so dependency order is deterministic.
-for(const src of activeScripts){
-  const escaped=src.replace(/[.*+?^${}()|[\]\\]/g,'\\for(const src of activeScripts){
-  const tag=`<script src="${src}"></script>`;
-  html=html.split(tag).join('');
-}
-const orderedScripts=activeScripts.map(src=>`<script src="${src}"></script>`).join('');');
-  html=html.replace(new RegExp(`<script\\\\b[^>]*\\\\bsrc=["']${escaped}(?:\\\\?[^"']*)?["'][^>]*><\\\\/script>`,'gi'),'');
-}
+// Remove every managed script tag, including a previously versioned one, and then
+// inject the complete manifest once in deterministic dependency order.
+html=html.replace(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*><\/script>/gi,(tag,src)=>{
+  const cleanSrc=src.split('?')[0];
+  return activeScripts.includes(cleanSrc)?'':tag;
+});
 const version=sha.slice(0,12);
 const orderedScripts=activeScripts.map(src=>`<script src="${src}?v=${version}"></script>`).join('');
 html=html.replace('</body>',orderedScripts+'</body>');
@@ -35,4 +31,4 @@ html=html.replace('</head>',`<meta name="plotao-deploy" content="${sha}"></head>
 
 fs.writeFileSync(path,html,'utf8');
 fs.writeFileSync('deploy-marker.txt',sha+'\n','utf8');
-console.log(`Pages build prepared from clean source: ${activeScripts.length} ordered modules, SHA ${sha}`);
+console.log(`Pages build prepared from clean source: ${activeScripts.length} ordered and versioned modules, SHA ${sha}`);
