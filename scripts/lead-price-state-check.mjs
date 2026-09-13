@@ -7,5 +7,15 @@ r=core.validateLead({...base,displayedPrice:'Nelze spočítat',priceKind:'neplat
 ok(!r.valid&&r.errors.some(e=>e.code==='invalid-price'&&e.message==='Nejdřív opravte neplatné zadání kalkulátoru.'),'genuinely invalid calculator state must keep the invalid-price validation path');
 r=core.validateLead(base);
 ok(r.valid,'ordinary verified material price must remain valid after pending-state specialization');
-if(fail.length){console.error('Lead price-state checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Lead price-state checks OK: pending, invalid and verified customer price states remain distinct');
+r=core.validateLead({...base,gate:true,gateSection:-1,gatePos:0,gateWidth:4});
+ok(!r.valid&&r.data.gateSection===-1&&r.errors.some(e=>e.code==='gate-section'),'negative gate section must remain invalid instead of being silently clamped to section 0');
+r=core.validateLead({...base,gate:true,gateSection:.9,gatePos:0,gateWidth:4});
+ok(!r.valid&&r.data.gateSection===-1&&r.errors.some(e=>e.code==='gate-section'),'fractional gate section must be rejected instead of truncated to an integer section');
+r=core.validateLead({...base,gate:true,gateSection:0,gatePos:-1,gateWidth:4});
+ok(!r.valid&&r.data.gatePos===-1&&r.errors.some(e=>e.code==='gate-placement'),'negative gate position must remain invalid instead of being clamped to zero');
+r=core.validateLead({...base,gate:true,gateSection:0,gatePos:0,gateWidth:21});
+ok(!r.valid&&r.data.gateWidth===-1&&r.errors.some(e=>e.code==='gate-placement'),'gate width above the 20m transport limit must be rejected instead of clamped to 20m');
+r=core.validateLead({...base,wicket:true,wicketSection:0,wicketPos:0,wicketWidth:11});
+ok(!r.valid&&r.data.wicketWidth===-1&&r.errors.some(e=>e.code==='wicket-placement'),'wicket width above the 10m transport limit must be rejected instead of clamped to 10m');
+if(fail.length){console.error('Lead price/opening state checks failed:\n- '+fail.join('\n- '));process.exit(1)}
+console.log('Lead price/opening state checks OK: pending price and malformed opening coordinates cannot be normalized into a false valid lead');
