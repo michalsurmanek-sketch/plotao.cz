@@ -9,10 +9,12 @@ const rawText=(v,max)=>typeof v==='string'?v.trim().slice(0,max):'';
 const tooLong=(v,max)=>typeof v==='string'&&v.trim().length>max;
 const bool=v=>v===true;
 const num=(v,min,max,def=0)=>Number.isFinite(Number(v))&&Number(v)>=min&&Number(v)<=max?Number(v):def;
+const integer=(v,min,max,def=-1)=>Number.isInteger(Number(v))&&Number(v)>=min&&Number(v)<=max?Number(v):def;
 const emailOk=v=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/u.test(v)&&v.length<=254;
 function phone(v){const s=String(v??'').trim();const plus=s.startsWith('+')?'+':'';const digits=s.replace(/\D/g,'');return digits.length>=9&&digits.length<=15?plus+digits:''}
-function cleanSegments(v){if(!Array.isArray(v)||v.length<1||v.length>100)return null;const out=[];for(let i=0;i<v.length;i++){const x=v[i];if(!isObj(x)||tooLong(x.name,100))return null;const length=num(x.length,.01,1000,-1);if(length<=0)return null;out.push({name:text(x.name||`Úsek ${i+1}`,100),length,connection:CONNECTIONS.has(x.connection)?x.connection:(i===0?'začátek':'navazuje rohem')})}return out}
+function cleanSegments(v){if(!Array.isArray(v)||v.length<1||v.length>12)return null;const out=[];let total=0;for(let i=0;i<v.length;i++){const x=v[i];if(!isObj(x)||tooLong(x.name,100))return null;const length=num(x.length,.01,1000,-1);if(length<=0)return null;total+=length;if(total>1000+.001)return null;out.push({name:text(x.name||`Úsek ${i+1}`,100),length,connection:CONNECTIONS.has(x.connection)?x.connection:(i===0?'začátek':'navazuje rohem')})}return out}
 function cleanOptions(v){if(!Array.isArray(v)||v.length>50||v.some(x=>typeof x!=='string'||tooLong(x,200)))return null;return v.map(x=>text(x,200)).filter(Boolean)}
+function validateOpening(errors,segments,label,on,section,pos,width){if(!on)return false;if(section<0||!segments?.[section]){errors.push(label+'Section');return false}const s=segments[section];if(width<=0||pos<0||pos+width>s.length+.02){errors.push(label+'Placement');return false}return true}
 export function validateEnvelope(input){
   const errors=[];
   if(!isObj(input))return{ok:false,errors:['body']};
@@ -45,13 +47,17 @@ export function validateEnvelope(input){
     if(tooLong(l.priceReason,500))errors.push('priceReason');
     if(tooLong(l.placeFromCalculator,200))errors.push('placeFromCalculator');
     const fenceType=text(l.fenceType,120),height=num(l.height,40,400,-1),segments=cleanSegments(l.segments),options=cleanOptions(l.options),scopeValue=SCOPES.has(l.scopeValue)?l.scopeValue:'material',priceKind=PRICE_KINDS.has(l.priceKind)?l.priceKind:'';
+    const gate=bool(l.gate),gateType=text(l.gateType,80),gateWidth=num(l.gateWidth,0,20,-1),gateDrive=text(l.gateDrive,80),gateSection=integer(l.gateSection,0,11,-1),gatePos=num(l.gatePos,0,1000,-1);
+    const wicket=bool(l.wicket),wicketWidth=num(l.wicketWidth,0,10,-1),wicketSection=integer(l.wicketSection,0,11,-1),wicketPos=num(l.wicketPos,0,1000,-1);
     if(!fenceType)errors.push('fenceType');
     if(height<40)errors.push('height');
     if(!segments)errors.push('segments');
     if(options===null)errors.push('options');
     if(!priceKind)errors.push('priceKind');
     if((scopeValue==='delivery'||scopeValue==='turnkey')&&place.length<2)errors.push('place');
-    Object.assign(lead,{savedAt:typeof l.savedAt==='string'&&Number.isFinite(Date.parse(l.savedAt))?new Date(l.savedAt).toISOString():'',fenceType,height,segments:segments||[],options:options||[],gate:bool(l.gate),gateType:text(l.gateType,80),gateWidth:num(l.gateWidth,0,20,0),gateDrive:text(l.gateDrive,80),gateSection:num(l.gateSection,0,100,0),gatePos:num(l.gatePos,0,1000,0),wicket:bool(l.wicket),wicketWidth:num(l.wicketWidth,0,10,0),wicketSection:num(l.wicketSection,0,100,0),wicketPos:num(l.wicketPos,0,1000,0),scopeValue,scope:text(l.scope,80),displayedPrice:text(l.displayedPrice,100),priceKind,priceReason:rawText(l.priceReason,500),placeFromCalculator:text(l.placeFromCalculator,200)});
+    const gateOk=validateOpening(errors,segments,'gate',gate,gateSection,gatePos,gateWidth),wicketOk=validateOpening(errors,segments,'wicket',wicket,wicketSection,wicketPos,wicketWidth);
+    if(gateOk&&wicketOk&&gateSection===wicketSection){const left=Math.max(gatePos,wicketPos),right=Math.min(gatePos+gateWidth,wicketPos+wicketWidth);if(left<right-.02)errors.push('openingsOverlap')}
+    Object.assign(lead,{savedAt:typeof l.savedAt==='string'&&Number.isFinite(Date.parse(l.savedAt))?new Date(l.savedAt).toISOString():'',fenceType,height,segments:segments||[],options:options||[],gate,gateType,gateWidth:Math.max(0,gateWidth),gateDrive,gateSection:Math.max(0,gateSection),gatePos:Math.max(0,gatePos),wicket,wicketWidth:Math.max(0,wicketWidth),wicketSection:Math.max(0,wicketSection),wicketPos:Math.max(0,wicketPos),scopeValue,scope:text(l.scope,80),displayedPrice:text(l.displayedPrice,100),priceKind,priceReason:rawText(l.priceReason,500),placeFromCalculator:text(l.placeFromCalculator,200)});
   }
   return errors.length?{ok:false,errors:[...new Set(errors)]}:{ok:true,submittedAt,lead};
 }
