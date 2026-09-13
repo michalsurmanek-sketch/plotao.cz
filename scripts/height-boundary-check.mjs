@@ -29,8 +29,8 @@ ok(metal.includes("const height=+($('#height')?.value||0);if(height<40||height>4
 ok(!metal.includes("h=Math.max(.4,+($('#height')"),'metal detail must not silently display 40cm for an invalid lower height');
 
 ok(gate.includes("function requestedH(){return +($('#height')?.value||0)}"),'gate adapter must keep the actual typed fence height');
-ok(gate.includes("function invalidHeight(){const h=requestedH();return h<40||h>400}"),'gate benchmark must share the calculator 40–400cm validity boundary');
-ok(gate.includes("if(invalidHeight()){invalidate(b,'opravte výšku plotu');return}"),'gate and wicket exact prices must be suppressed for invalid fence height');
+ok(gate.includes("function invalidIssue(){const shared=window.PLOTAO_INPUT_VALIDITY?.current?.();if(shared)return shared")&&gate.includes("const h=requestedH();if(h<40||h>400)return{code:'height',note:'opravte výšku plotu'}"),'gate benchmark must use shared validity and retain a 40–400cm startup fallback before the shared guard loads');
+ok(gate.includes("const issue=invalidIssue();if(issue){invalidate(b,issue.note);return}"),'gate and wicket exact prices must be suppressed whenever the shared validity reports an invalid height or other calculator input');
 ok(!gate.includes('function requestedH(){return Math.max(40'),'gate adapter must never pair an invalid sub-40cm request with a 40cm-equivalent product');
 
 ok(accuracy.includes("if(h<40)return{kind:'invalid'")&&accuracy.includes("if(h>400)return{kind:'invalid'"),'main accuracy guard must keep the same 40–400cm boundary');
