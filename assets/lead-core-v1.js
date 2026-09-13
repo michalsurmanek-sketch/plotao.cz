@@ -27,7 +27,7 @@
       fenceType:text(r.fenceType,120),height:num(r.height,0,10000,0),segments,options:normalizeOptions(r.options),
       gate:!!r.gate,gateType:text(r.gateType,40),gateWidth:num(r.gateWidth,0,20,0),gateDrive:text(r.gateDrive,40),gateSection:int(r.gateSection,0,999,0),gatePos:num(r.gatePos,0,1000,0),
       wicket:!!r.wicket,wicketWidth:num(r.wicketWidth,0,10,0),wicketSection:int(r.wicketSection,0,999,0),wicketPos:num(r.wicketPos,0,1000,0),
-      scopeValue,scope:text(r.scope,80),displayedPrice:text(r.displayedPrice,80),priceKind,priceReason:text(r.priceReason,1000),placeFromCalculator:text(r.placeFromCalculator,160)
+      scopeValue,scope:text(r.scope,80),displayedPrice:text(r.displayedPrice,80),priceKind,priceReason:text(r.priceReason,500),placeFromCalculator:text(r.placeFromCalculator,160)
     };
   }
 
