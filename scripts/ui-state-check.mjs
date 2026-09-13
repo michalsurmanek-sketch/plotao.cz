@@ -37,7 +37,7 @@ ok(core.includes('endpointHasFence'),'shared geometry core must inspect adjacent
 ok(index.includes('<script src="/assets/ui-bootstrap-v1.js"></script>'),'index must load the external UI bootstrap');
 ok(!index.includes('<script>const types=[')&&!index.includes('function calc(){'),'legacy inline calculator must not return to index');
 ok(ui.includes("['Plotová výplň','Podhrabové desky','Vjezdová brána','Vstupní branka','Montáž a zemní práce','Demontáž','Rohové napojení','Beton do patek','Doprava']"),'UI bootstrap must create the result rows used by pricing modules');
-ok(ui.includes("['Úseky oplocení','Plotová pole','Sloupky celkem','Průběžné sloupky','Koncové sloupky','Rohové sloupky','Bránové sloupky','Brankové sloupky','Rohové spoje','Podhrabové desky','Beton podle typu patek','Vjezdová brána','Branka']"),'UI bootstrap must create the material rows used by geometry/material modules');
+ok(ui.includes("['Úseky oplocení','Plotová pole','Sloupky celkem','Průběžné sloupky','Koncové sloupky','Rohové sloupky','Bránové sloupky','Brankové sloupky','Rohové spoje','Podhrabové desky','Beton podle typu patek','Vjezdová brána','Pohon brány','Branka']"),'UI bootstrap must create the material rows used by geometry/material modules, including the automatic gate drive');
 ok(ui.includes('renderTypes();renderOptions();renderSegments();syncToggles()'),'UI bootstrap must initialise type/options/segments/toggles before pricing modules run');
 ok(ui.includes("window.PLOTAO_UI_READY=true")&&ui.includes("new CustomEvent('plotao:ui-ready')"),'UI bootstrap must publish readiness');
 ok(!ui.includes('function calc(')&&!ui.includes('price:1680')&&!ui.includes('workRate=')&&!ui.includes('gatePrice('),'UI bootstrap must remain free of pricing formulas');
