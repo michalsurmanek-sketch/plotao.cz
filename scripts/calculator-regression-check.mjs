@@ -8,6 +8,7 @@ for(const f of assets){const s=read('assets/'+f);assert(!s.includes('setInterval
 const geometry=read('assets/geometry-v3.js'),core=read('assets/geometry-core-v1.js');
 assert(geometry.includes('PLOTAO_GEOMETRY_CORE')&&geometry.includes('solveGeometry'),'geometry-v3 must delegate to shared production geometry core');
 assert(geometry.includes("document.addEventListener('plotao:placement'")&&geometry.includes("document.addEventListener('plotao:segment-connections'"),'geometry adapter must react to placement and section connectivity');
+assert(geometry.includes('window.PLOTAO_PLACEMENT?.[kind]?.[key]')&&geometry.includes("s:placement('gate','section','#gateSection')")&&geometry.includes("p:placement('door','pos','#doorPos')"),'geometry adapter must prefer authoritative placement state over lagging opening controls');
 assert(core.includes('Math.floor(25/gap)*gap'),'geometry core tension sections must align to nominal bay');
 assert(core.includes('pa+gap*k'),'geometry core full fields must stay on nominal spacing');
 assert(core.includes('gateSides')&&core.includes('wicketSides')&&core.includes('endpointHasFence'),'geometry core must publish and resolve opening fence sides');
