@@ -75,6 +75,16 @@ for(const src of managedVersioned){
   if(actual!==expected) throw new Error(`Pages artifact script cache version mismatch for ${clean}: expected=${expected} actual=${actual}`);
 }
 
+const preloadSources=[...html.matchAll(/<link\b[^>]*\brel=["']preload["'][^>]*\bas=["']script["'][^>]*\bdata-plotao-critical=["']1["'][^>]*>/gi)].map(tag=>tag[0].match(/\bhref=["']([^"']+)["']/i)?.[1]||'');
+const expectedPreloads=activeScripts.slice(0,8).map(src=>{
+  const version=createHash('sha256').update(fs.readFileSync(root+src)).digest('hex').slice(0,12);
+  return `${src}?v=${version}`;
+});
+if(preloadSources.length!==expectedPreloads.length||preloadSources.some((src,index)=>src!==expectedPreloads[index])){
+  throw new Error(`Critical script preloads differ from the protected 8-script dependency prefix; expected=${JSON.stringify(expectedPreloads)} actual=${JSON.stringify(preloadSources)}`);
+}
+for(const src of preloadSources)if(!scriptSources.includes(src))throw new Error(`Critical preload does not match an executed script URL: ${src}`);
+
 const posGeo=html.indexOf('/assets/geometry-v3.js'),posGuard=html.indexOf('/assets/geometry-validity-v1.js'),posPanel=html.indexOf('/assets/panel-pricing-v5.js');
 if(!(posGeo>=0&&posGeo<posGuard&&posGuard<posPanel)) throw new Error('Geometry validity guard must load after geometry and before pricing modules');
-console.log(`Pages artifact integrity OK: ${marker}; strict public dist has ${topLevel.size} top-level entries, ${activeScripts.length} content-versioned modules, optimized logo (${logoSize} bytes) and favicon (${faviconSize} bytes)`);
+console.log(`Pages artifact integrity OK: ${marker}; strict public dist has ${topLevel.size} top-level entries, ${activeScripts.length} content-versioned modules, ${preloadSources.length} critical preloads, optimized logo (${logoSize} bytes) and favicon (${faviconSize} bytes)`);
