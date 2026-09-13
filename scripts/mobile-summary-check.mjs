@@ -9,9 +9,11 @@ ok(src.includes("if(p.startsWith('Od ')||p.includes('+ individuálně'))return{k
 ok(src.includes("return{kind:'price',label:'Cena materiálu',button:'Zobrazit rozpis →'}"),'verified totals must be described as material price');
 ok(src.includes("if(issue.code==='segments')return $('#addSegment')||$('#segmentList')")&&src.includes("if(issue.code==='segments-count')return $$('#segmentList [data-remove],#segmentList .remove').at(-1)")&&src.includes("if(issue.code==='segments-total')return $$('#segmentList input[type=number]').at(-1)||$('#segmentLimitStatus')"),'segment errors must route the mobile CTA to an actionable add/remove/length control and use the real segmentLimitStatus id');
 ok(!src.includes('segmentLimitMessage'),'mobile routing must not reference the nonexistent legacy segmentLimitMessage id');
-ok(src.includes("if(issue.code==='segment-length')return $$('#segmentList input[type=number]').find")&&src.includes("if(issue.code==='placement')return(issue.field?$('#'+issue.field):null)||$('#placementInfo')"),'invalid mobile CTA must prefer the exact bad segment/placement field over a generic warning block');
+ok(src.includes("if(issue.code==='segment-length')return $$('#segmentList input[type=number]').find(x=>+(x.value||0)<.01)||$('#segmentList')"),'invalid mobile CTA must route sub-0.01m segments to the exact bad length field');
+ok(src.includes("if(issue.code==='placement')return(issue.field?$('#'+issue.field):null)||$('#placementInfo')"),'invalid mobile CTA must prefer the exact bad placement field over a generic warning block');
 ok(src.includes("if(shared!==undefined)return shared||$('#kalkulator')||document.body"),'when shared validity is available and already valid, mobile routing must not fall back to a stale placement flag');
 ok(src.includes("if(segments.length>12)return $$('#segmentList [data-remove],#segmentList .remove').at(-1)")&&src.includes("if(total>1000+.001)return $$('#segmentList input[type=number]').at(-1)||$('#segmentLimitStatus')"),'startup fallback routing must also use actionable segment controls');
+ok(src.includes("const bad=$$('#segmentList input[type=number]').find(x=>+(x.value||0)<.01)"),'startup fallback must enforce the same 0.01m segment minimum');
 ok(src.includes("window.PLOTAO_PLACEMENT?.valid===false"),'legacy placement routing must remain only as a startup fallback when the shared API is unavailable');
 ok(src.includes("scroll(target,true)")&&src.includes("el.focus({preventScroll:true})"),'invalid CTA must scroll to and focus the concrete actionable control');
 ok(src.includes("sticky.setAttribute('aria-busy',s.kind==='pending'?'true':'false')")&&src.includes("button.disabled=s.kind==='pending'"),'mobile bar and CTA must expose and enforce the pending state accessibly');
@@ -35,4 +37,4 @@ ok(truthPos>=0&&statePos>truthPos,'state-aware mobile summary must load after th
 ok(safePos>statePos,'safe-area protection must load after the mobile summary layer');
 
 if(fail.length){console.error('Mobile summary regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Mobile summary regression checks OK: pending/invalid states and actionable segment/placement routing stay truthful, accessible and usable');
+console.log('Mobile summary regression checks OK: pending/invalid states and precise segment/placement routing stay truthful, accessible and usable');
