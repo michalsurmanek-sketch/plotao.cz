@@ -12,5 +12,6 @@ ok(src.includes("place.required=true;place.minLength=2")&&src.includes("place.re
 ok(src.includes("note.required=true;note.minLength=5")&&src.includes("note.required=false;note.minLength=0"),'help question must require five characters while optional notes must not keep a stale minlength constraint');
 ok(core.includes("(d.scopeValue==='delivery'||d.scopeValue==='turnkey')&&d.place.length<2")&&core.includes("mode==='partner'&&d.place.length<2"),'shared lead validation must enforce the same two-character required-place minimum as form UI');
 ok(server.includes("if(mode==='partner'&&place.length<2)errors.push('place')")&&server.includes("if((scopeValue==='delivery'||scopeValue==='turnkey')&&place.length<2)errors.push('place')"),'server validation must keep the same required-place minimum');
+ok(core.includes("priceReason:text(r.priceReason,500)")&&server.includes("if(tooLong(l.priceReason,500))errors.push('priceReason')")&&server.includes("priceReason:rawText(l.priceReason,500)"),'browser payload and server must share the same 500-character price-reason bound');
 if(fail.length){console.error('Lead mode action checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Lead mode action checks OK: submit wording and field length requirements stay truthful and aligned with backend validation');
+console.log('Lead mode action checks OK: submit wording and field/payload length requirements stay aligned with backend validation');
