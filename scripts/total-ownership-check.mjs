@@ -14,8 +14,9 @@ ok(mobile.includes("if(scope()!=='material'||window.PLOTAO_ACCURACY_BLOCK){clear
 ok(mobile.includes("function clear(){clearOwnedTotal();")&&mobile.includes("document.addEventListener('plotao:options-reset',()=>schedule(0))"),'leaving DOPS on a type reset must immediately schedule owned-total cleanup');
 
 ok(accuracy.includes("delete main.dataset.benchmarkTotal;delete main.dataset.mobileTotal;main.dataset.accuracyBlocked='1'"),'accuracy guard must take ownership away from both price bridges before showing an invalid or individual state');
+ok(accuracy.includes("function clearTotalBadges(){$('#benchmarkTotalNote')?.remove();$('#mobileTotalNote')?.remove()}")&&accuracy.includes('clearTotalBadges();if(sticky)sticky.textContent=headline'),'accuracy-owned invalid/individual headlines must remove both stale exact-total badges');
 ok(pending.includes("delete main.dataset.benchmarkTotal;delete main.dataset.mobileTotal"),'gate pending state must clear both total ownership markers before showing recalculation');
 ok(pending.includes("main.textContent='Přepočítávám…'")&&pending.includes("mobile.textContent='Přepočítávám…'"),'gate pending transition must keep desktop and sticky totals truthful');
 
 if(fail.length){console.error('Total ownership checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Total ownership checks OK: generic, DOPS, accuracy and gate-pending states cannot leak old price or range copy across transitions');
+console.log('Total ownership checks OK: generic, DOPS, accuracy and gate-pending states cannot leak old price, range copy or badges across transitions');
