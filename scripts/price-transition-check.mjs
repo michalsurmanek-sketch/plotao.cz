@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-const src=fs.readFileSync('assets/accuracy-guard.js','utf8'),gate=fs.readFileSync('assets/gate-pricing-v1.js','utf8'),drive=fs.readFileSync('assets/gate-drive-pricing-v1.js','utf8'),pending=fs.readFileSync('assets/gate-total-pending-v1.js','utf8'),bridge=fs.readFileSync('assets/price-bridge.js','utf8'),manifest=fs.readFileSync('scripts/pages-manifest.mjs','utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
+const src=fs.readFileSync('assets/accuracy-guard.js','utf8'),gate=fs.readFileSync('assets/gate-pricing-v1.js','utf8'),drive=fs.readFileSync('assets/gate-drive-pricing-v1.js','utf8'),pending=fs.readFileSync('assets/gate-total-pending-v1.js','utf8'),bridge=fs.readFileSync('assets/price-bridge.js','utf8'),mobileBridge=fs.readFileSync('assets/mobile-price-bridge.js','utf8'),manifest=fs.readFileSync('scripts/pages-manifest.mjs','utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 ok(src.includes("document.addEventListener('click',e=>schedule(e.target.closest?.('.type,#scope button')?0:140))"),'type and scope changes must run the accuracy guard immediately');
 ok(src.includes("document.addEventListener('plotao:options-reset',()=>schedule(0))"),'type option reset must immediately invalidate stale totals before slower pricing modules finish');
 ok(src.includes("function sharedInvalid(){const api=window.PLOTAO_INPUT_VALIDITY;if(!api?.current)return null")&&src.includes("const s=api.current();if(!s)return false"),'main accuracy state must prefer the shared synchronous validity API and distinguish valid from unavailable');
@@ -16,10 +16,12 @@ ok(drive.includes("if(e.target?.matches?.('#gateDrive')){resetPending();schedule
 ok(drive.includes("publish({active:false,pending:true,unsupported:true,price:0})"),'gate-drive pending state must zero the structured drive price immediately');
 ok(pending.includes("function pending(){return!!window.PLOTAO_GATE_PRICE?.pending||!!window.PLOTAO_GATE_DRIVE?.pending}"),'visible total guard must consider both gate/wicket pricing and gate-drive pending state');
 ok(pending.includes("main.textContent='Přepočítávám…'")&&pending.includes("mobile.textContent='Přepočítávám…'"),'pending opening pricing must replace both desktop and mobile exact totals with a truthful recalculating state');
-ok(pending.includes("delete main.dataset.benchmarkTotal")&&pending.includes("$('#benchmarkTotalNote')?.remove()"),'pending opening pricing must remove stale exact-total ownership and benchmark note');
+ok(pending.includes("delete main.dataset.benchmarkTotal")&&pending.includes("$('#benchmarkTotalNote')?.remove()")&&pending.includes("$('#mobileTotalNote')?.remove()"),'pending opening pricing must remove stale exact-total ownership plus desktop/mobile total notes');
 ok(pending.includes("['plotao:gate-price','plotao:gate-drive'].forEach")&&pending.includes("queueMicrotask(apply)"),'pending total guard must react synchronously to structured opening-price events and critical UI changes');
 ok(bridge.includes("'plotao:gate-price','plotao:gate-drive'"),'price bridge must recalculate the final total after fresh gate and drive prices arrive');
+ok(mobileBridge.includes("function openingPending(){return!!window.PLOTAO_GATE_PRICE?.pending||!!window.PLOTAO_GATE_DRIVE?.pending}")&&mobileBridge.includes("if(openingPending())return"),'mobile DOPS bridge must never overwrite the recalculating state while gate or drive pricing is pending');
+ok(mobileBridge.includes("'plotao:gate-price','plotao:gate-drive'"),'mobile DOPS bridge must rerun after fresh gate/drive pricing resolves');
 const bridgePos=manifest.indexOf('/assets/price-bridge.js'),pendingPos=manifest.indexOf('/assets/gate-total-pending-v1.js'),mobilePos=manifest.indexOf('/assets/mobile-price-bridge.js');
 ok(bridgePos>=0&&pendingPos>bridgePos&&mobilePos>pendingPos,'gate pending-total guard must load after price aggregation and before mobile bridge rendering');
 if(fail.length){console.error('Price transition checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Price transition checks OK: stale main, mobile, gate, wicket and drive prices are neutralized immediately across critical configuration changes');
+console.log('Price transition checks OK: stale main, mobile, gate, wicket and drive prices stay neutral while critical configuration changes are still pending');
