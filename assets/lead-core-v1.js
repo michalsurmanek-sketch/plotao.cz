@@ -45,7 +45,7 @@
     const badSegment=d.segments.findIndex(x=>x.length<.01);if(badSegment>=0)errors.push({field:'segments',code:'segment-length',message:'Každý úsek musí mít délku alespoň 0,01 m.'});
     const totalLength=d.segments.reduce((sum,x)=>sum+x.length,0);if(totalLength>1000+.001)errors.push({field:'segments',code:'segments-total',message:'Celková délka oplocení může být maximálně 1000 m.'});
     if(d.priceKind==='neplatné zadání')errors.push({field:'configuration',code:'invalid-price',message:'Nejdřív opravte neplatné zadání kalkulátoru.'});
-    if((d.scopeValue==='delivery'||d.scopeValue==='turnkey')&&!d.place)errors.push({field:'place',code:'place-required',message:'Pro dopravu nebo realizaci na klíč doplňte obec nebo PSČ.'});
+    if((d.scopeValue==='delivery'||d.scopeValue==='turnkey')&&d.place.length<2)errors.push({field:'place',code:'place-required',message:'Pro dopravu nebo realizaci na klíč doplňte obec nebo PSČ (alespoň 2 znaky).'});
     function opening(kind,on,section,pos,width){
       if(!on)return false;
       const s=d.segments[section];
@@ -61,7 +61,7 @@
     const d=normalizeLead(raw),errors=[];validateContact(d,errors);
     if(d.mode==='lead')validateFence(d,errors);
     else if(d.mode==='help'&&d.note.length<5)errors.push({field:'note',code:'help-question',message:'Napište prosím stručně, s čím potřebujete poradit.'});
-    else if(d.mode==='partner'&&!d.place)errors.push({field:'place',code:'partner-area',message:'Doplňte obec, okres nebo oblast působnosti.'});
+    else if(d.mode==='partner'&&d.place.length<2)errors.push({field:'place',code:'partner-area',message:'Doplňte obec, okres nebo oblast působnosti (alespoň 2 znaky).'});
     return{valid:errors.length===0,errors,data:d};
   }
 
