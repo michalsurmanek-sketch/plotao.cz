@@ -51,7 +51,7 @@ for(const [file,type] of Object.entries(landingType)){
   ok(!/href=["']\/#calculator["']/i.test(html),`${file}: obsolete English calculator anchor must not return`);
 }
 
-const socialPages=['plot-na-soukromi.html','gabionovy-plot.html','kovovy-plot.html'];
+const socialPages=['plot-na-soukromi.html','gabionovy-plot.html','kovovy-plot.html','zdeny-plot.html'];
 for(const file of socialPages){
   const html=fs.readFileSync(file,'utf8'),can=canonical(html);
   ok(metaBy(html,'property','og:title').length>=20,`${file}: upgraded landing must keep og:title`);
