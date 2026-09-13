@@ -48,15 +48,25 @@ html=html.replace('</body>',orderedScripts+'</body>');
 
 if(!html.includes('<main class="wrap" id="kalkulator">')) throw new Error('Pages build source missing calculator anchor');
 
+// Reserve the correct intrinsic aspect ratio for every brand logo to avoid layout shift.
+html=html.replace(/<img\b[^>]*\bsrc=["']\/assets\/logo-plotao\.svg["'][^>]*>/gi,tag=>{
+  const cleaned=tag.replace(/\swidth=["'][^"']*["']/i,'').replace(/\sheight=["'][^"']*["']/i,'');
+  return cleaned.replace(/>$/, ' width="2172" height="724">');
+});
+
 // Structured data is generated into the deploy artifact so crawlers always receive
 // the same canonical website/calculator identity as the visible production page.
 html=html.replace(/<script\s+type=["']application\/ld\+json["']\s+data-plotao-schema=["']1["']>[\s\S]*?<\/script>/gi,'');
 const schemaTag=`<script type="application/ld+json" data-plotao-schema="1">${JSON.stringify(structuredData)}</script>`;
 
+// Keep X/Twitter metadata deterministic even if the source template is edited later.
+html=html.replace(/<meta\s+name=["']twitter:(?:card|title|description)["'][^>]*>/gi,'');
+const socialMeta='<meta name="twitter:card" content="summary"><meta name="twitter:title" content="Kalkulátor ceny plotu a materiálu | PLOTAO.cz"><meta name="twitter:description" content="Ověřený materiálový rozpočet plotu podle typu, výšky, úseků a otvorů.">';
+
 // Deploy identity is generated per build and never persisted in the repository source.
 html=html.replace(/<meta name="plotao-deploy" content="[^"]*">/g,'');
 if(!html.includes('</head>')) throw new Error('Pages build: </head> not found');
-html=html.replace('</head>',schemaTag+`<meta name="plotao-deploy" content="${sha}"></head>`);
+html=html.replace('</head>',schemaTag+socialMeta+`<meta name="plotao-deploy" content="${sha}"></head>`);
 
 fs.writeFileSync(path,html,'utf8');
 fs.writeFileSync('deploy-marker.txt',sha+'\n','utf8');
