@@ -8,6 +8,7 @@
   function actualH(){if(type()==='panel')return +(window.PLOTAO_PANEL_PRICE?.height||requestedH());if(type()==='mesh')return +(window.PLOTAO_MESH_PRICE?.height||requestedH());return requestedH()}
   function gateOn(){return!!$('#gate')?.checked}
   function doorOn(){return!!$('#door')?.checked}
+  function invalidPlacement(){return window.PLOTAO_PLACEMENT?.valid===false}
   function gateWidth(){return+($('#gateWidth')?.value||4)}
   function doorWidth(){return+($('#doorWidth')?.value||1)}
   function gateType(){return $('#gateType')?.value||'double'}
@@ -38,9 +39,18 @@
   }
   function box(){let b=$('#gatePriceBox');if(!b){b=document.createElement('div');b.id='gatePriceBox';b.style.cssText='display:none;margin-top:14px;padding:14px;border:1px solid #ffffff26;border-radius:13px;background:#ffffff0d;color:#fff';($('#materialList')||$('.resultbody'))?.insertAdjacentElement('afterend',b)}return b}
   function verified(c,kind){return core.computeVerifiedGate(c,kind)}
+  function invalidate(b){
+    const note='opravte umístění brány/branky';
+    setRow('vjezdová brána',null,gateOn()?note:'brána není zvolena','Nezapočítáno');
+    setRow('vstupní branka',null,doorOn()?note:'branka není zvolena','Nezapočítáno');
+    b.style.display='none';
+    window.PLOTAO_GATE_PRICE={type:type(),invalid:true,gate:null,door:null};
+    document.dispatchEvent(new CustomEvent('plotao:gate-price',{detail:window.PLOTAO_GATE_PRICE}));
+  }
 
   function render(){
     const b=box();if(!b)return;
+    if(invalidPlacement()){invalidate(b);return}
     const c=config(),parts=[];
     if(gateOn()){
       const g=verified(c,'gate');
