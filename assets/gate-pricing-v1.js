@@ -51,6 +51,7 @@
     document.dispatchEvent(new CustomEvent('plotao:gate-price',{detail:window.PLOTAO_GATE_PRICE}));
   }
   function resetPending(){const b=box(),note='přepočítávám podle nové konfigurace';setRow('vjezdová brána',null,gateOn()?note:'brána není zvolena','Nezapočítáno');setRow('vstupní branka',null,doorOn()?note:'branka není zvolena','Nezapočítáno');setMaterial('vjezdová brána','—');setMaterial('branka','—');if(b)b.style.display='none';publish({type:type(),pending:true,gate:null,door:null});schedule(25)}
+  function criticalChange(e){return e.target?.matches?.('#gate,#door,#gateType,#gateWidth,#doorWidth')}
 
   function render(){
     const b=box();if(!b)return;
@@ -72,6 +73,6 @@
     publish({type:c.type,actualHeight:c.actualHeight,slab:{with:c.slabWith,height:c.slabHeight},gate:gateOn()?verified(c,'gate'):null,door:doorOn()?verified(c,'door'):null});
   }
   function schedule(delay=60){clearTimeout(schedule.t);schedule.t=setTimeout(render,delay)}
-  function init(){render();document.addEventListener('input',()=>schedule(60));document.addEventListener('change',()=>schedule(60));document.addEventListener('click',()=>schedule(100));document.addEventListener('plotao:panel-price',()=>schedule(40));document.addEventListener('plotao:mesh-price',()=>schedule(40));document.addEventListener('plotao:placement',()=>schedule(40));document.addEventListener('plotao:slab-price',()=>schedule(40));document.addEventListener('plotao:options-reset',resetPending);document.addEventListener('plotao:input-validity',()=>schedule(0))}
+  function init(){render();document.addEventListener('input',()=>schedule(60));document.addEventListener('change',e=>{if(criticalChange(e)){resetPending();return}schedule(60)});document.addEventListener('click',()=>schedule(100));document.addEventListener('plotao:panel-price',()=>schedule(40));document.addEventListener('plotao:mesh-price',()=>schedule(40));document.addEventListener('plotao:placement',()=>schedule(40));document.addEventListener('plotao:slab-price',()=>schedule(40));document.addEventListener('plotao:options-reset',resetPending);document.addEventListener('plotao:input-validity',()=>schedule(0))}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
