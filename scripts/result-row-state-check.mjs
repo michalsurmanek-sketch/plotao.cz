@@ -35,6 +35,10 @@ ok(gate.includes("setMaterial('vjezdová brána','individuálně')")&&gate.inclu
 ok(gate.includes("setMaterial('vjezdová brána','—');setMaterial('branka','—')"),'invalid or pending opening transitions must clear stale material products');
 ok(gate.includes('function resetPending()')&&gate.includes("note='přepočítávám podle nové konfigurace'")&&gate.includes("publish({type:type(),pending:true,gate:null,door:null})"),'gate and wicket rows must be neutralized immediately before a new type configuration is priced');
 ok(gate.includes("document.addEventListener('plotao:options-reset',resetPending)"),'gate pricing must use the immediate pending reset on type-option changes');
+ok(drive.includes("function materialRow(){return $$('#materialList .matline')")&&drive.includes("function setMaterial(text)"),'gate drive pricing must own a dedicated material summary line');
+ok(drive.includes('setMaterial(d.name)'),'a verified automatic drive must expose its exact NICE kit in the material summary');
+ok(drive.includes("setMaterial('individuálně')"),'unsupported active drive selection must stay explicitly individual in the material summary');
+ok(drive.includes("setMaterial('—')"),'inactive, invalid or pending drive states must clear any previous material kit');
 ok(drive.includes('function resetPending()')&&drive.includes("'přepočítávám pohon podle nové konfigurace'")&&drive.includes("publish({active:false,pending:true,unsupported:true,price:0})"),'gate drive row must drop the previous kit price while the new configuration is pending');
 ok(drive.includes("document.addEventListener('plotao:options-reset',resetPending)"),'gate drive pricing must use the immediate pending reset on type-option changes');
 
@@ -56,4 +60,4 @@ const pricePos=manifest.indexOf('/assets/price-bridge.js'),mobilePos=manifest.in
 ok(pricePos>=0&&mobilePos>pricePos,'mobile bridge must load after the generic price bridge so ownership handoff is deterministic');
 
 if(fail.length){console.error('Result row state checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Result row state checks OK: material geometry and opening summaries, price ownership and custom configuration states cannot leak across transitions');
+console.log('Result row state checks OK: material geometry, openings and drive summary, price ownership and custom configuration states cannot leak across transitions');
