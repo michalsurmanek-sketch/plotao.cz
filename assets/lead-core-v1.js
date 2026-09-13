@@ -12,7 +12,8 @@
   function text(v,max=500){return String(v??'').replace(/\s+/g,' ').trim().slice(0,max)}
   function multiline(v,max=2000){return String(v??'').replace(/\r\n?/g,'\n').trim().slice(0,max)}
   function num(v,min=0,max=Number.MAX_SAFE_INTEGER,fallback=0){const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback}
-  function int(v,min=0,max=Number.MAX_SAFE_INTEGER,fallback=0){return Math.trunc(num(v,min,max,fallback))}
+  function bounded(v,min,max,fallback=-1){const n=Number(v);return Number.isFinite(n)&&n>=min&&n<=max?n:fallback}
+  function int(v,min=0,max=Number.MAX_SAFE_INTEGER,fallback=-1){const n=Number(v);return Number.isInteger(n)&&n>=min&&n<=max?n:fallback}
   function normalizePhone(v){const raw=text(v,80),plus=raw.startsWith('+'),digits=raw.replace(/\D/g,'').slice(0,32);return(plus?'+':'')+digits}
   function normalizeEmail(v){return text(v,320).toLowerCase()}
   function normalizeSegments(items){return(Array.isArray(items)?items:[]).slice(0,100).map((x,i)=>({name:text(x?.name,100)||('Úsek '+(i+1)),length:num(x?.length,0,1000000,0),connection:i===0?'začátek':CONNECTIONS.has(x?.connection)?x.connection:'navazuje rohem'}))}
@@ -25,8 +26,8 @@
       savedAt:text(r.savedAt,40)||text(now,40)||new Date().toISOString(),
       name:text(r.name,120),phone:normalizePhone(r.phone),email:normalizeEmail(r.email),place:text(r.place,160),note:multiline(r.note,2000),
       fenceType:text(r.fenceType,120),height:num(r.height,0,10000,0),segments,options:normalizeOptions(r.options),
-      gate:!!r.gate,gateType:text(r.gateType,40),gateWidth:num(r.gateWidth,0,20,0),gateDrive:text(r.gateDrive,40),gateSection:int(r.gateSection,0,999,0),gatePos:num(r.gatePos,0,1000,0),
-      wicket:!!r.wicket,wicketWidth:num(r.wicketWidth,0,10,0),wicketSection:int(r.wicketSection,0,999,0),wicketPos:num(r.wicketPos,0,1000,0),
+      gate:!!r.gate,gateType:text(r.gateType,40),gateWidth:bounded(r.gateWidth,0,20,-1),gateDrive:text(r.gateDrive,40),gateSection:int(r.gateSection,0,11,-1),gatePos:bounded(r.gatePos,0,1000,-1),
+      wicket:!!r.wicket,wicketWidth:bounded(r.wicketWidth,0,10,-1),wicketSection:int(r.wicketSection,0,11,-1),wicketPos:bounded(r.wicketPos,0,1000,-1),
       scopeValue,scope:text(r.scope,80),displayedPrice:text(r.displayedPrice,80),priceKind,priceReason:text(r.priceReason,500),placeFromCalculator:text(r.placeFromCalculator,160)
     };
   }
@@ -49,8 +50,8 @@
     function opening(kind,on,section,pos,width){
       if(!on)return false;
       const s=d.segments[section];
-      if(!s||s.length<.01){errors.push({field:kind,code:kind+'-section',message:(kind==='gate'?'Brána':'Branka')+' musí být umístěná v platném úseku.'});return false}
-      if(width<=0||pos<0||pos+width>s.length+.02){errors.push({field:kind,code:kind+'-placement',message:(kind==='gate'?'Brána':'Branka')+' se musí celá vejít do zvoleného úseku.'});return false}
+      if(!Number.isInteger(section)||section<0||!s||s.length<.01){errors.push({field:kind,code:kind+'-section',message:(kind==='gate'?'Brána':'Branka')+' musí být umístěná v platném úseku.'});return false}
+      if(!Number.isFinite(width)||!Number.isFinite(pos)||width<=0||pos<0||pos+width>s.length+.02){errors.push({field:kind,code:kind+'-placement',message:(kind==='gate'?'Brána':'Branka')+' se musí celá vejít do zvoleného úseku.'});return false}
       return true;
     }
     const gateOk=opening('gate',d.gate,d.gateSection,d.gatePos,d.gateWidth),wicketOk=opening('wicket',d.wicket,d.wicketSection,d.wicketPos,d.wicketWidth);
