@@ -31,6 +31,12 @@ ok(optionPayload.options.at(-1)===longOption&&optionPayload.options.at(-1).lengt
 
 let v=core.validateLead(d);
 ok(v.valid===true&&v.errors.length===0,'complete ordinary material lead must validate');
+const overCountOptions=Array.from({length:51},(_,i)=>'Volba '+(i+1));
+v=core.validateLead({...base,options:overCountOptions});
+ok(v.valid===false&&v.errors.some(e=>e.code==='options-count')&&v.data.options.length===51,'51 unique options must remain visible and be rejected instead of being silently truncated to 50');
+const overLengthOption='Y'.repeat(201);
+v=core.validateLead({...base,options:[overLengthOption]});
+ok(v.valid===false&&v.errors.some(e=>e.code==='option-length')&&v.data.options[0].length===201,'201-character option must remain visible and be rejected instead of being silently truncated to 200');
 
 v=core.validateLead({...base,phone:'1234'});
 ok(v.valid===false&&v.errors.some(e=>e.code==='phone'),'short phone must be rejected');
@@ -97,4 +103,4 @@ const partnerOut=core.toText({...base,mode:'partner',place:'Zlínský kraj',plac
 ok(partnerOut.startsWith('PLOTAO.CZ – zájem montážní firmy')&&partnerOut.includes('Oblast působnosti: Zlínský kraj')&&!partnerOut.includes('Jiná obec')&&!partnerOut.includes('Plot:'),'partner export must use explicit service area only and exclude customer calculator payload');
 
 if(fail.length){console.error('Lead scenario checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Lead scenario checks OK: isolated drafts, backend-aligned option limits, geometry limits and mode-specific payloads are protected');
+console.log('Lead scenario checks OK: isolated drafts, visible option-limit failures, geometry limits and mode-specific payloads are protected');
