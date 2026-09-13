@@ -17,7 +17,7 @@
   function normalizePhone(v){const raw=text(v,80),plus=raw.startsWith('+'),digits=raw.replace(/\D/g,'').slice(0,32);return(plus?'+':'')+digits}
   function normalizeEmail(v){return text(v,320).toLowerCase()}
   function normalizeSegments(items){return(Array.isArray(items)?items:[]).slice(0,100).map((x,i)=>({name:text(x?.name,100)||('Úsek '+(i+1)),length:num(x?.length,0,1000000,0),connection:i===0?'začátek':CONNECTIONS.has(x?.connection)?x.connection:'navazuje rohem'}))}
-  function normalizeOptions(items){const out=[];for(const item of Array.isArray(items)?items:[]){const v=text(item,160);if(v&&!out.includes(v))out.push(v);if(out.length>=40)break}return out}
+  function normalizeOptions(items){const out=[];for(const item of Array.isArray(items)?items:[]){const v=text(item,200);if(v&&!out.includes(v))out.push(v);if(out.length>=50)break}return out}
 
   function normalizeLead(raw,now){
     const r=raw||{},segments=normalizeSegments(r.segments),priceKind=PRICE_KINDS.has(r.priceKind)?r.priceKind:'individuální nabídka',mode=MODES.has(r.mode)?r.mode:'lead',scopeValue=SCOPES.has(r.scopeValue)?r.scopeValue:'material';
