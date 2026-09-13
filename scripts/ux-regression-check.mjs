@@ -4,6 +4,7 @@ const scroll=read('assets/step-scroll-v1.js'),a11y=read('assets/choice-accessibi
 
 for(const [type,id] of Object.entries({privacy:'#privacyConfig',aluminium:'#aluminiumConfigBox',gabion:'#gabionOptionsBox',metal:'#metalConfig',concrete:'#concreteConfig',masonry:'#extraFenceConfig',mobile:'#extraFenceConfig',other:'#extraFenceConfig'}))ok(scroll.includes(type+":'"+id+"'")||scroll.includes(type+':"'+id+'"'),'next-step scroll must target the visible '+type+' configuration');
 ok(scroll.includes('scrollToEl(nextAfterType,180)'),'type scroll target must be resolved after dynamic configuration modules render');
+ok(scroll.includes("const $=s=>s?document.querySelector(s):null"),'step scrolling must never pass an empty selector to querySelector for types without a custom configuration');
 ok(scroll.includes("getComputedStyle(el).display!=='none'")&&scroll.includes('getClientRects().length>0'),'next-step scroll must ignore hidden configuration anchors');
 ok(scroll.includes("window.matchMedia?.('(prefers-reduced-motion: reduce)')"),'smooth scrolling must respect reduced-motion preference without assuming matchMedia exists');
 
