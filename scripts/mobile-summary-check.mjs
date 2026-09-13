@@ -11,9 +11,10 @@ ok(src.includes("e.stopImmediatePropagation()"),'state-aware mobile CTA must rep
 ok(src.includes("strong.setAttribute('aria-live','polite')")&&src.includes("strong.setAttribute('aria-atomic','true')"),'sticky price/status updates must be announced accessibly');
 ok(src.includes("new MutationObserver(()=>schedule(0)).observe(el")||src.includes("new MutationObserver(()=>schedule(0)).observe(el,"),'mobile summary must track asynchronous price/status mutations');
 ok(safe.includes("viewport-fit=cover"),'mobile viewport must opt into safe-area geometry');
-ok(safe.includes("body{padding-bottom:calc(92px + env(safe-area-inset-bottom))}"),'page bottom padding must include the device safe-area inset under the fixed price bar');
+ok(truth.includes('body{padding-bottom:86px!important}'),'regression test must model the legacy important mobile padding that safe-area protection overrides');
+ok(safe.includes("body{padding-bottom:calc(92px + env(safe-area-inset-bottom))!important}"),'page bottom padding must include the device safe-area inset and override the legacy important rule');
 ok(safe.includes("html{scroll-padding-bottom:calc(108px + env(safe-area-inset-bottom))}"),'scroll targets must reserve room for the fixed mobile bar plus safe area');
-ok(safe.includes(".mobile-price{padding-bottom:calc(12px + env(safe-area-inset-bottom))}"),'fixed mobile price bar must keep its own bottom safe-area padding');
+ok(safe.includes(".mobile-price{padding-bottom:calc(12px + env(safe-area-inset-bottom))!important}"),'fixed mobile price bar must keep its own bottom safe-area padding with sufficient CSS priority');
 ok(ui.includes("$('#continueBtn')?.addEventListener('click',()=>$('.result')?.scrollIntoView"),'legacy bootstrap still owns the generic scroll and therefore requires the capture override');
 ok(truth.includes("if(label)label.textContent='Odhad ceny'"),'truth redesign still sets the static fallback label before state sync');
 const truthPos=manifest.indexOf('/assets/ui-truth-v1.js'),statePos=manifest.indexOf('/assets/mobile-summary-state-v1.js'),safePos=manifest.indexOf('/assets/mobile-safe-area-v1.js');
