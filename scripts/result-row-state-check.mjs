@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
-const slab=read('assets/slab-pricing-v2.js'),price=read('assets/price-bridge.js'),mobile=read('assets/mobile-price-bridge.js'),concrete=read('assets/concrete-material-v1.js'),geometry=read('assets/geometry-v3.js'),gate=read('assets/gate-pricing-v1.js'),drive=read('assets/gate-drive-pricing-v1.js'),extraConfig=read('assets/extra-fence-config.js'),extraPrice=read('assets/extra-fence-pricing.js'),privacyConfig=read('assets/privacy-config.js'),concreteConfig=read('assets/concrete-config.js'),metalConfig=read('assets/metal-config.js'),aluminiumConfig=read('assets/aluminium-config.js'),gabionOptions=read('assets/gabion-options.js'),manifest=read('scripts/pages-manifest.mjs');
+const slab=read('assets/slab-pricing-v2.js'),price=read('assets/price-bridge.js'),mobile=read('assets/mobile-price-bridge.js'),concrete=read('assets/concrete-material-v1.js'),geometry=read('assets/geometry-v3.js'),validity=read('assets/geometry-validity-v1.js'),gate=read('assets/gate-pricing-v1.js'),drive=read('assets/gate-drive-pricing-v1.js'),extraConfig=read('assets/extra-fence-config.js'),extraPrice=read('assets/extra-fence-pricing.js'),privacyConfig=read('assets/privacy-config.js'),concreteConfig=read('assets/concrete-config.js'),metalConfig=read('assets/metal-config.js'),aluminiumConfig=read('assets/aluminium-config.js'),gabionOptions=read('assets/gabion-options.js'),manifest=read('scripts/pages-manifest.mjs');
 
 ok(slab.includes("if(!st.with){r.classList.add('off')")&&slab.includes("const small=r.querySelector('small');if(small)small.textContent=''"),'disabling slabs must clear the stale quantity/size note as well as the price');
 ok(price.includes('function clearBenchmarkFill()'),'generic price bridge must expose an owned fill-row cleanup path');
@@ -22,8 +22,12 @@ ok(concrete.includes('function clearState(b){clearVolume();')&&concrete.includes
 ok(concrete.includes("if(window.PLOTAO_PLACEMENT?.valid===false){clearVolume();"),'invalid opening geometry must hide stale concrete volume instead of showing the previous valid value');
 ok(concrete.includes("document.addEventListener('plotao:options-reset',()=>schedule(0))"),'footing material cleanup must run immediately on type-option reset');
 
+ok(geometry.includes("if(t.startsWith('Úseky oplocení'))bb.textContent=segmentCount+' ks · '+g.gross.toLocaleString('cs-CZ',{maximumFractionDigits:1})+' m trasy'"),'valid geometry must populate the material segment count and gross route length');
+ok(geometry.includes("else if(t.startsWith('Plotová pole'))bb.textContent=g.fields+' ks'"),'valid geometry must populate the material fence-field count');
 ok(geometry.includes("if(acc){if(type()==='mesh')")&&geometry.includes("else acc.innerHTML=''"),'mesh-specific accessory material rows must be cleared outside mesh type');
 ok(geometry.includes("document.addEventListener('plotao:options-reset',()=>schedule(0))"),'geometry material details must refresh immediately on type-option reset');
+ok(validity.includes("if(t.includes('úseky oplocení'))b.textContent=segments+' ks · '+total.toLocaleString('cs-CZ',{maximumFractionDigits:1})+' m trasy'"),'invalid placement may preserve only the still-known segment count and gross route length');
+ok(validity.includes("t.includes('plotová pole')||t.includes('plotova pole')||t.includes('sloup')||t.includes('rohové spoje')")&&validity.includes("b.textContent='—'"),'invalid placement must neutralize field/post/junction material counts instead of leaving the previous valid geometry');
 
 ok(gate.includes('function resetPending()')&&gate.includes("note='přepočítávám podle nové konfigurace'")&&gate.includes("publish({type:type(),pending:true,gate:null,door:null})"),'gate and wicket rows must be neutralized immediately before a new type configuration is priced');
 ok(gate.includes("document.addEventListener('plotao:options-reset',resetPending)"),'gate pricing must use the immediate pending reset on type-option changes');
@@ -48,4 +52,4 @@ const pricePos=manifest.indexOf('/assets/price-bridge.js'),mobilePos=manifest.in
 ok(pricePos>=0&&mobilePos>pricePos,'mobile bridge must load after the generic price bridge so ownership handoff is deterministic');
 
 if(fail.length){console.error('Result row state checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Result row state checks OK: slab notes, fill ownership, material-only details, opening prices, extra-fence states and custom config boxes cannot leak across configuration transitions');
+console.log('Result row state checks OK: material geometry summary, fill ownership, opening prices and custom configuration states cannot leak across transitions');
