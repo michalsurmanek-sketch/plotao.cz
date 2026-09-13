@@ -9,7 +9,7 @@ ok(accuracy.includes('if(sticky)sticky.textContent=headline'),'invalid/individua
 ok(accuracy.includes("if(lens.length>12)return{kind:'invalid'"),'accuracy guard must block totals beyond the supported 12-section limit');
 ok(accuracy.includes("if(h<40)return{kind:'invalid',msg:'Výška plotu musí být alespoň 40 cm.'}"),'accuracy guard must reject heights below the calculator 40cm minimum');
 ok(accuracy.includes("if(h>400)return{kind:'invalid'"),'accuracy guard must reject heights above the calculator 400cm limit');
-ok(mobileSummary.includes("segments.length>12")&&mobileSummary.includes("$('#segmentList')||$('#addSegment')"),'mobile error navigation must route an over-limit section state back to the section editor');
+ok(mobileSummary.includes("if(issue.code==='segments-count')return $$('#segmentList [data-remove],#segmentList .remove').at(-1)")&&mobileSummary.includes("if(issue.code==='segments-total')return $$('#segmentList input[type=number]').at(-1)||$('#segmentLimitStatus')"),'mobile error navigation must route section-count and total-length limit errors to actionable section controls');
 ok(mobileSummary.includes("hv<40||hv>400"),'mobile error navigation must treat the same 40–400cm height range as invalid');
 ok(accuracy.includes("e.unsupported&&e.reason==='height'"),'accuracy guard must block mobile DOPS totals when requested height differs from verified product height');
 ok(mobile.includes("if($('.price strong'))$('.price strong').textContent=text")&&mobile.includes("if($('.mobile-price strong'))$('.mobile-price strong').textContent=text"),'mobile fence benchmark must update desktop and sticky total together');
