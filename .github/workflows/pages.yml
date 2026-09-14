@@ -78,6 +78,9 @@ jobs:
       - name: Prepare production Pages artifact
         run: node scripts/prepare-pages.mjs
 
+      - name: Enrich production accessibility shell
+        run: node scripts/enrich-accessibility-shell.mjs
+
       - name: Sanitize production structured data
         run: node scripts/enrich-structured-data.mjs
 
