@@ -77,7 +77,16 @@ function optimizeEmbeddedPngSvg(file,label){
   const optimizedSvg=svg.replace(match[1],optimizedPng.toString('base64'));
   if(Buffer.byteLength(optimizedSvg)>=Buffer.byteLength(svg))throw new Error(`${label} optimization did not reduce the production asset`);
   fs.writeFileSync(file,optimizedSvg,'utf8');
-  return{before:Buffer.byteLength(svg),after:Buffer.byteLength(optimizedSvg),pngBefore:png.length,pngAfter:optimizedPng.length};
+  return{kind:'embedded-png',before:Buffer.byteLength(svg),after:Buffer.byteLength(optimizedSvg),pngBefore:png.length,pngAfter:optimizedPng.length};
+}
+function prepareMainLogo(file){
+  const svg=fs.readFileSync(file,'utf8'),size=Buffer.byteLength(svg);
+  if(/data:image\/png;base64,/i.test(svg))return optimizeEmbeddedPngSvg(file,'Logo');
+  if(!/viewBox=["']0 0 2172 724["']/i.test(svg))throw new Error('Logo validation: vector logo must preserve the 2172x724 canvas');
+  if(/<image\b/i.test(svg)||/data:image\//i.test(svg))throw new Error('Logo validation: vector logo must not embed raster images');
+  if(!svg.includes('#17202A')||!svg.includes('#F28817'))throw new Error('Logo validation: vector logo must preserve reviewed antracit/orange brand colors');
+  if(size>=10000)throw new Error(`Logo validation: vector logo is unexpectedly large: ${size} bytes`);
+  return{kind:'vector',before:size,after:size};
 }
 
 const legacy=forbiddenArtifact.filter(token=>html.includes(token));
@@ -102,7 +111,7 @@ html=html.replace(/<img\b[^>]*\bsrc=["']\/assets\/logo-plotao\.svg["'][^>]*>/gi,
   return cleaned.replace(/>$/, ' width="2172" height="724">');
 });
 
-const logoStats=optimizeEmbeddedPngSvg('assets/logo-plotao.svg','Logo');
+const logoStats=prepareMainLogo('assets/logo-plotao.svg');
 const faviconStats=optimizeEmbeddedPngSvg('assets/favicon.svg','Favicon');
 
 html=html.replace(/<script\s+type=["']application\/ld\+json["']\s+data-plotao-schema=["']1["']>[\s\S]*?<\/script>/gi,'');
@@ -112,7 +121,7 @@ const socialMeta='<meta name="twitter:card" content="summary"><meta name="twitte
 
 // Start only the small dependency-critical prefix early. Execution remains in the
 // original classic-script order at the end of body; preloads only remove download wait.
-html=html.replace(/<link\s+rel=["']preload["'][^>]*data-plotao-critical=["']1["'][^>]*>/gi,'');
+html=html.replace(/<link\s+rel=["']preload["'][^>]*data-plotao-critical=["'][^"']*["'][^>]*>/gi,'');
 const criticalScripts=activeScripts.slice(0,8);
 const criticalPreloads=criticalScripts.map(src=>`<link rel="preload" as="script" href="${versionedScript(src)}" data-plotao-critical="1">`).join('');
 
@@ -130,7 +139,8 @@ for(const file of fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort())fs.c
 for(const file of ['robots.txt','sitemap.xml','CNAME','deploy-marker.txt'])if(fs.existsSync(file))fs.copyFileSync(file,`${dist}/${file}`);
 fs.cpSync('assets',`${dist}/assets`,{recursive:true});
 
-console.log(`Logo optimized losslessly: ${logoStats.before} -> ${logoStats.after} bytes (embedded PNG ${logoStats.pngBefore} -> ${logoStats.pngAfter})`);
+if(logoStats.kind==='vector')console.log(`Logo vector validated: ${logoStats.after} bytes; no embedded raster payload`);
+else console.log(`Logo optimized losslessly: ${logoStats.before} -> ${logoStats.after} bytes (embedded PNG ${logoStats.pngBefore} -> ${logoStats.pngAfter})`);
 console.log(`Favicon optimized losslessly: ${faviconStats.before} -> ${faviconStats.after} bytes (embedded PNG ${faviconStats.pngBefore} -> ${faviconStats.pngAfter})`);
 console.log(`Critical script preload prepared: ${criticalScripts.length} versioned scripts; execution order unchanged`);
 console.log(`Public Pages tree prepared in ${dist}/ with ${fs.readdirSync(dist).length} top-level entries; repository internals excluded`);
