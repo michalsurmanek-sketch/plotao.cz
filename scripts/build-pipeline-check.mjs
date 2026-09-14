@@ -5,6 +5,9 @@ import {activeScripts} from './pages-manifest.mjs';
 const workflow=fs.readFileSync('.github/workflows/pages.yml','utf8');
 const smoke=fs.readFileSync('.github/workflows/live-smoke.yml','utf8');
 const browser=fs.readFileSync('scripts/browser-e2e.mjs','utf8');
+const privacyPath='scripts/enrich-privacy-ui.mjs';
+const privacy=fs.readFileSync(privacyPath,'utf8');
+const privacyPage=fs.readFileSync('ochrana-osobnich-udaju.html','utf8');
 const socialPath='scripts/enrich-social-meta.mjs';
 const social=fs.readFileSync(socialPath,'utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
@@ -12,10 +15,16 @@ const fail=[];
 const ok=(v,m)=>{if(!v)fail.push(m)};
 ok(fs.existsSync('scripts/public-link-integrity-check.mjs'),'public link integrity checker must exist and run from the build gate');
 ok(workflow.includes('node scripts/prepare-pages.mjs'),'Pages workflow must use prepare-pages.mjs');
+ok(fs.existsSync(privacyPath),'privacy UI enrichment script must exist');
+ok(fs.existsSync('ochrana-osobnich-udaju.html'),'public privacy information page must exist');
+ok(workflow.includes('- name: Enrich production privacy UI')&&workflow.includes(`node ${privacyPath}`),'Pages workflow must enrich the prepared artifact with privacy UI');
+ok(privacy.includes('/ochrana-osobnich-udaju.html')&&privacy.includes('data-plotao-privacy-notice="1"')&&privacy.includes('data-plotao-privacy-link="1"'),'privacy enrichment must publish both lead-form notice and footer link');
+ok(privacyPage.includes('AO Holding s.r.o.')&&privacyPage.includes('Ochrana osobních údajů')&&privacyPage.includes('Vyřízení poptávky a příprava nabídky')&&privacyPage.includes('Vaše práva'),'privacy page must identify the controller and explain purpose and data-subject rights');
+ok(!privacyPage.includes('souhlasím se zpracováním'),'necessary lead processing must not be misrepresented as a mandatory consent checkbox');
 ok(workflow.includes('- name: Enrich production social metadata')&&workflow.includes(`node ${socialPath}`),'Pages workflow must enrich social metadata on the prepared artifact');
 ok(workflow.includes('node scripts/verify-pages-artifact.mjs'),'Pages workflow must use verify-pages-artifact.mjs');
-const preparePos=workflow.indexOf('node scripts/prepare-pages.mjs'),socialPos=workflow.indexOf(`node ${socialPath}`),verifyPos=workflow.indexOf('node scripts/verify-pages-artifact.mjs'),browserPos=workflow.indexOf('- name: Run browser E2E on production artifact');
-ok(preparePos>=0&&preparePos<socialPos&&socialPos<verifyPos&&verifyPos<browserPos,'social metadata must be enriched after dist preparation and verified before browser E2E');
+const preparePos=workflow.indexOf('node scripts/prepare-pages.mjs'),privacyPos=workflow.indexOf(`node ${privacyPath}`),socialPos=workflow.indexOf(`node ${socialPath}`),verifyPos=workflow.indexOf('node scripts/verify-pages-artifact.mjs'),browserPos=workflow.indexOf('- name: Run browser E2E on production artifact');
+ok(preparePos>=0&&preparePos<privacyPos&&privacyPos<socialPos&&socialPos<verifyPos&&verifyPos<browserPos,'privacy and social enrichment must run after dist preparation and before artifact/browser verification');
 ok(fs.existsSync(socialPath),'social metadata enrichment script must exist');
 ok(social.includes('https://plotao.cz/assets/fence-types/panelovy-3d.webp'),'social metadata enrichment must reference the reviewed public Plotao image');
 ok(social.includes('summary_large_image')&&social.includes('og:image:width')&&social.includes('og:image:height'),'social metadata enrichment must publish large-card image dimensions');
@@ -61,4 +70,4 @@ for(const src of activeScripts){
   ok(fs.existsSync(file),`Pages manifest references missing asset: ${file}`);
 }
 if(fail.length){console.error('Build pipeline checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; public links, strict dist, protected social cards, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
+console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; public links, privacy information, strict dist, protected social cards, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
