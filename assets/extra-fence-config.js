@@ -1,6 +1,6 @@
 (()=>{
   const $=s=>document.querySelector(s);
-  const defaults={masonry:{variant:'blocks',finish:'standard'},mobile:{variant:'mesh'},other:{variant:'custom'}};
+  const defaults={masonry:{variant:'blocks',finish:'standard'},mobile:{variant:'mesh'},barrier:{variant:'standard'},other:{variant:'custom'}};
   let state=JSON.parse(JSON.stringify(defaults));
 
   function type(){return $('.type.on')?.dataset.id||''}
@@ -39,7 +39,7 @@
   function focusChoice(group,value){queueMicrotask(()=>{const target=$('#extraFenceConfig [data-eg="'+group+'"][data-ev="'+value+'"]');if(!target?.focus)return;try{target.focus({preventScroll:true})}catch{target.focus()}})}
 
   function publish(t){
-    if(!['masonry','mobile','other'].includes(t)){
+    if(!['masonry','mobile','barrier','other'].includes(t)){
       window.PLOTAO_EXTRA=null;
       document.dispatchEvent(new CustomEvent('plotao:extra',{detail:null}));
       return;
@@ -68,12 +68,19 @@
     return '<div class="mobile-product"><div class="mobile-product-head"><strong>Vybraný typ panelu</strong></div><div class="mobile-product-main"><img src="/assets/fence-types/category-mobile.webp" alt="Mobilní zábrana" loading="lazy" decoding="async"><div><h3>Mobilní zábrana</h3><p>Lehká přenosná zábrana pro řízení pohybu osob, krátkodobé uzávěry, akce a vymezení pracovních zón.</p></div></div>'+tip('Cena zábrany se určí podle rozměru, materiálu, typu spojování a počtu kusů.')+'</div>';
   }
 
+
+  function barrierProduct(s){
+    const title=s.variant==='reflex'?'Reflexní mobilní zábrana':s.variant==='plastic'?'Plastová mobilní zábrana':'Standardní mobilní zábrana';
+    const text=s.variant==='reflex'?'Pozinkovaná bezpečnostní zábrana doplněná reflexními prvky pro lepší viditelnost při uzávěrách a akcích.':s.variant==='plastic'?'Lehká přenosná varianta pro rychlé vymezení pracovních zón, průchodů a dočasných uzávěr.':'Univerzální řešení pro bezpečné oddělení prostor, stavby, akce a veřejných prostranství. Stabilní, odolná a snadno propojitelná.';
+    return '<div class="mobile-product"><div class="mobile-product-main"><img src="/assets/fence-types/mobile-barrier-main.webp" alt="'+title+'" loading="lazy" decoding="async"><div><h3>'+title+'</h3><p>'+text+'</p><ul style="margin:12px 0 0;padding:0;list-style:none;display:grid;gap:7px;color:#68786f;font-size:14px"><li>● Pozinkovaná ocel – dlouhá životnost</li><li>● Rychlá montáž a demontáž</li><li>● Snadné propojení do libovolné délky</li><li>● Stabilní stojany</li><li>● Vhodné pro akce, stavby i veřejné prostory</li></ul></div></div><div class="mobile-thumbs"><figure><img src="/assets/fence-types/mobile-barrier-detail.webp" alt="Detail svislé výplně mobilní zábrany" loading="lazy" decoding="async"><figcaption>Detail zábrany</figcaption></figure><figure><img src="/assets/fence-types/mobile-barrier-base.webp" alt="Stabilní stojan mobilní zábrany" loading="lazy" decoding="async"><figcaption>Stabilní stojan</figcaption></figure><figure><img src="/assets/fence-types/mobile-barrier-clamp.webp" alt="Spojovací prvek mobilních zábran" loading="lazy" decoding="async"><figcaption>Spojovací prvek</figcaption></figure><figure><img src="/assets/fence-types/mobile-barrier-installation.webp" alt="Ukázka propojené sestavy mobilních zábran" loading="lazy" decoding="async"><figcaption>Ukázka sestavy</figcaption></figure></div>'+tip('Ověřený kusový benchmark pro standardní mobilní zábranu. Jinou výšku nebo provedení vám připravíme jako individuální nabídku.')+'</div>';
+  }
+
   function render(){
     const b=ensure();
     if(!b)return;
     const t=type();
     b.dataset.type=t;
-    if(!['masonry','mobile','other'].includes(t)){
+    if(!['masonry','mobile','barrier','other'].includes(t)){
       b.style.display='none';
       b.innerHTML='';
       publish(t);
@@ -84,6 +91,10 @@
     if(t==='masonry'){
       const s=state.masonry;
       html='<h3 style="margin:0 0 10px">Konfigurace zděného plotu</h3><div style="font-size:12px;font-weight:800;margin:10px 0 6px">Konstrukce</div><div class="compact">'+btn('variant','blocks','Betonové tvárnice',s)+btn('variant','split','Štípané tvárnice',s)+btn('variant','brick','Cihla',s)+btn('variant','stone','Kámen',s)+btn('variant','combined','Zděné sloupky + výplň',s)+'</div><div style="font-size:12px;font-weight:800;margin:12px 0 6px">Povrch</div><div class="compact">'+btn('finish','standard','Standard',s)+btn('finish','premium','Prémiový / obklad',s)+'</div>';
+    }else if(t==='barrier'){
+      ensureStyle();
+      const s=state.barrier;
+      html='<div class="mobile-config-title"><span class="mobile-config-icon" aria-hidden="true">'+gearIcon()+'</span><div><h3>Konfigurace mobilní zábrany</h3><p>Vyberte typ zábrany a zobrazte dostupné varianty</p></div></div><div class="mobile-choices">'+mobileBtn('standard','Standardní zábrana','',s)+mobileBtn('reflex','Reflexní zábrana','',s)+mobileBtn('plastic','Plastová zábrana','',s)+'</div>'+barrierProduct(s);
     }else if(t==='mobile'){
       ensureStyle();
       const s=state.mobile;
