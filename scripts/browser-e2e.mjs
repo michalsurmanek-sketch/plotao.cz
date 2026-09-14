@@ -132,6 +132,7 @@ await runScenario('desktop',{width:1440,height:1000},async page=>{
   await page.locator('#plotRectApply').click();
   await page.waitForFunction(()=>window.PLOTAO_PLOT_SHAPE?.mode==='rectangle'&&window.PLOTAO_PLOT_SHAPE?.closed===true,null,{timeout:5000});
   await page.waitForFunction(()=>document.querySelectorAll('#segmentList .segment').length===4,null,{timeout:5000});
+  await page.waitForFunction(()=>window.PLOTAO_GEOMETRY?.closed===true&&window.PLOTAO_GEOMETRY?.corner===4&&window.PLOTAO_GEOMETRY?.end===0&&window.PLOTAO_GEOMETRY?.corners===4&&window.PLOTAO_GEOMETRY?.gross===70,null,{timeout:5000});
   const rectangle=await page.evaluate(()=>({
     names:[...document.querySelectorAll('#segmentList [data-segment-name]')].map(x=>x.value),
     lengths:[...document.querySelectorAll('#segmentList .segment input[type=number]')].map(x=>Number(x.value)),
