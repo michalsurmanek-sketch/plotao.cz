@@ -83,6 +83,9 @@ jobs:
       - name: Enrich production social metadata
         run: node scripts/enrich-social-meta.mjs
 
+      - name: Verify discovery social artifact
+        run: node scripts/social-artifact-check.mjs
+
       - name: Verify production artifact integrity
         run: node scripts/verify-pages-artifact.mjs
 
