@@ -4,11 +4,19 @@ import {activeScripts} from './pages-manifest.mjs';
 const workflow=fs.readFileSync('.github/workflows/pages.yml','utf8');
 const smoke=fs.readFileSync('.github/workflows/live-smoke.yml','utf8');
 const browser=fs.readFileSync('scripts/browser-e2e.mjs','utf8');
+const socialPath='scripts/enrich-social-meta.mjs';
+const social=fs.readFileSync(socialPath,'utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const fail=[];
 const ok=(v,m)=>{if(!v)fail.push(m)};
 ok(workflow.includes('node scripts/prepare-pages.mjs'),'Pages workflow must use prepare-pages.mjs');
+ok(workflow.includes('- name: Enrich production social metadata')&&workflow.includes(`node ${socialPath}`),'Pages workflow must enrich social metadata on the prepared artifact');
 ok(workflow.includes('node scripts/verify-pages-artifact.mjs'),'Pages workflow must use verify-pages-artifact.mjs');
+const preparePos=workflow.indexOf('node scripts/prepare-pages.mjs'),socialPos=workflow.indexOf(`node ${socialPath}`),verifyPos=workflow.indexOf('node scripts/verify-pages-artifact.mjs'),browserPos=workflow.indexOf('- name: Run browser E2E on production artifact');
+ok(preparePos>=0&&preparePos<socialPos&&socialPos<verifyPos&&verifyPos<browserPos,'social metadata must be enriched after dist preparation and verified before browser E2E');
+ok(fs.existsSync(socialPath),'social metadata enrichment script must exist');
+ok(social.includes('https://plotao.cz/assets/fence-types/panelovy-3d.webp'),'social metadata enrichment must reference the reviewed public Plotao image');
+ok(social.includes('summary_large_image')&&social.includes('og:image:width')&&social.includes('og:image:height'),'social metadata enrichment must publish large-card image dimensions');
 ok(workflow.includes('for file in assets/*.js scripts/*.mjs; do node --check "$file"; done'),'Pages workflow must syntax-check assets and build scripts');
 ok(workflow.includes('- name: Run browser E2E on production artifact'),'Pages workflow must browser-test the prepared production artifact before deployment');
 ok(workflow.includes('npm install --no-audit --no-fund --package-lock=false'),'browser E2E must install only the pinned repository tooling without mutating the lock state');
@@ -47,4 +55,4 @@ for(const src of activeScripts){
   ok(fs.existsSync(file),`Pages manifest references missing asset: ${file}`);
 }
 if(fail.length){console.error('Build pipeline checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; strict dist, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
+console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; strict dist, protected social cards, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
