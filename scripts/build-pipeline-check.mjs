@@ -3,6 +3,7 @@ import {activeScripts} from './pages-manifest.mjs';
 
 const workflow=fs.readFileSync('.github/workflows/pages.yml','utf8');
 const smoke=fs.readFileSync('.github/workflows/live-smoke.yml','utf8');
+const browser=fs.readFileSync('scripts/browser-e2e.mjs','utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const fail=[];
 const ok=(v,m)=>{if(!v)fail.push(m)};
@@ -17,7 +18,11 @@ ok(workflow.includes('PLOTAO_E2E_URL=http://127.0.0.1:4173 npm run browser:e2e')
 ok(fs.existsSync('scripts/browser-e2e.mjs'),'browser E2E smoke script must exist');
 ok(pkg?.private===true&&pkg?.scripts?.['browser:e2e']==='node scripts/browser-e2e.mjs','package.json must keep browser E2E tooling private and expose the expected smoke command');
 ok(pkg?.devDependencies?.playwright==='1.63.0','Playwright must stay pinned to the reviewed 1.63.0 version instead of floating latest');
+for(const type of ['panel','mesh','concrete','privacy','aluminium','gabion','metal','masonry','mobile','other'])ok(browser.includes(`selectType(page,'${type}'`),`browser E2E must exercise fence type ${type}`);
+ok(browser.includes("runScenario('desktop',{width:1440,height:1000}")&&browser.includes("runScenario('mobile-390',{width:390,height:844}"),'browser E2E must protect both desktop and 390px mobile flows');
 ok(workflow.includes('uses: actions/upload-pages-artifact@v3')&&workflow.includes('path: dist'),'Pages workflow must upload only the strict public dist directory');
+ok(workflow.includes('name: github-pages-${{ github.run_attempt }}'),'Pages artifact name must include run_attempt so a retry cannot create ambiguous duplicate github-pages artifacts');
+ok(workflow.includes('artifact_name: github-pages-${{ github.run_attempt }}'),'deploy-pages must select the same retry-safe run_attempt artifact name');
 ok(!/upload-pages-artifact@v3[\s\S]{0,200}path:\s*\./.test(workflow),'Pages workflow must never upload the repository root');
 for(const path of ['/scripts/seo-regression-check.mjs','/supabase/functions/submit-lead/index.ts','/docs/lead-backend-contract.md']){
   ok(workflow.includes(path),`Pages workflow must probe private path ${path}`);
@@ -42,4 +47,4 @@ for(const src of activeScripts){
   ok(fs.existsSync(file),`Pages manifest references missing asset: ${file}`);
 }
 if(fail.length){console.error('Build pipeline checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; strict dist, browser E2E and both live verification paths protect deploy identity and repository internals`);
+console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; strict dist, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
