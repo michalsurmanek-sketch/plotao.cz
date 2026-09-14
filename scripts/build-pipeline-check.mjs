@@ -47,6 +47,10 @@ ok(workflow.includes('name=\\"plotao-deploy\\" content=\\"${EXPECTED_SHA}\\"'),'
 ok(smoke.includes('deploy-marker.txt?sha=${EXPECTED_SHA}'),'standalone live smoke must verify deploy-marker.txt');
 ok(smoke.includes('https://plotao.cz/?sha=${EXPECTED_SHA}'),'standalone live smoke must verify main HTML with cache busting');
 ok(smoke.includes('name=\\"plotao-deploy\\" content=\\"${EXPECTED_SHA}\\"'),'standalone live smoke must require the exact deploy SHA meta tag in HTML');
+ok(smoke.includes('expected_og=')&&smoke.includes('property="og:image"')&&smoke.includes('panelovy-3d.webp'),'standalone live smoke must verify the reviewed Open Graph image on the live domain');
+ok(smoke.includes('expected_twitter=')&&smoke.includes('summary_large_image'),'standalone live smoke must verify the large Twitter card on the live domain');
+ok(smoke.includes('expected_twitter_image=')&&smoke.includes('name="twitter:image"'),'standalone live smoke must verify the Twitter image on the live domain');
+ok(smoke.includes('social_ok=0')&&smoke.includes('[ "$social_ok" = 1 ]'),'standalone live smoke must make social metadata a hard success condition');
 const unique=new Set(activeScripts);
 ok(unique.size===activeScripts.length,'Pages manifest must not contain duplicate script entries');
 for(const src of activeScripts){
