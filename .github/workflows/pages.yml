@@ -197,12 +197,12 @@ jobs:
           const config=page.locator('#extraFenceConfig[data-type="mobile"]');
           await config.waitFor({state:'visible',timeout:15000});
           await config.locator('[data-ev="solid"]').click();
-          await page.waitForFunction(()=>document.querySelector('#extraFenceConfig .mobile-product h3')?.textContent?.includes('Plný panel 3,5 × 1,9 m'),null,{timeout:15000});
+          await page.waitForFunction(()=>document.querySelector('#extraFenceConfig .mobile-product h3')?.textContent?.includes('Plný panel 2,8 × 2,0 m'),null,{timeout:15000});
           await config.scrollIntoViewIfNeeded();
           await page.waitForTimeout(800);
           await config.screenshot({path:'live-mobile-config.png'});
           const text=(await config.innerText()).trim();
-          if(!text.includes('Konfigurace mobilního oplocení')||!text.includes('Plný panel 3,5 × 1,9 m')||!text.includes('Více soukromí'))throw new Error('Live full-panel configurator content missing');
+          if(!text.includes('Konfigurace mobilního oplocení')||!text.includes('Plný panel 2,8 × 2,0 m')||!text.includes('Více soukromí'))throw new Error('Live full-panel configurator content missing');
           if(errors.length)throw new Error('Live browser page errors: '+errors.join(' | '));
           console.log('Live full-panel configurator screenshot captured from production');
           await browser.close();
