@@ -42,9 +42,9 @@ ok(drive.includes("setMaterial('—')"),'inactive, invalid or pending drive stat
 ok(drive.includes('function resetPending()')&&drive.includes("'přepočítávám pohon podle nové konfigurace'")&&drive.includes("publish({active:false,pending:true,unsupported:true,price:0})"),'gate drive row must drop the previous kit price while the new configuration is pending');
 ok(drive.includes("document.addEventListener('plotao:options-reset',resetPending)"),'gate drive pricing must use the immediate pending reset on type-option changes');
 
-ok(extraConfig.includes("window.PLOTAO_EXTRA=null;document.dispatchEvent(new CustomEvent('plotao:extra',{detail:null}))"),'leaving masonry/mobile/other must clear the stale extra-fence configuration global');
+ok(/window\.PLOTAO_EXTRA\s*=\s*null\s*;\s*document\.dispatchEvent\(new CustomEvent\('plotao:extra',\s*\{detail:null\}\)\)/.test(extraConfig),'leaving masonry/mobile/other must clear the stale extra-fence configuration global');
 ok(extraConfig.includes("document.addEventListener('plotao:options-reset',render)"),'extra fence configuration must publish the newly selected type synchronously on option reset');
-ok(extraConfig.includes("b.style.display='none';b.innerHTML='';publish(t);return"),'hidden extra configuration must also clear its stale DOM content');
+ok(/b\.style\.display\s*=\s*'none'\s*;\s*b\.innerHTML\s*=\s*''\s*;\s*publish\(t\)\s*;\s*return/.test(extraConfig),'hidden extra configuration must also clear its stale DOM content');
 ok(extraPrice.includes('function resetPending()')&&extraPrice.includes('clearBox(b);publish(null);schedule(0)'),'extra fence pricing must clear its stale box and global before recomputing the new type');
 ok(extraPrice.includes("document.addEventListener('plotao:options-reset',resetPending)"),'extra fence pricing must reset immediately on type-option changes');
 ok(extraPrice.includes("if(!['masonry','mobile','other'].includes(t)){clearBox(b);publish(null);return}"),'extra fence price state must stay cleared outside its supported types');
