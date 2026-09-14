@@ -17,8 +17,12 @@ ok(p.unsupported===true&&p.reason==='height'&&p.requiredHeight===1.9,'153cm requ
 p=computeExtraFencePrice({type:'mobile',config:{variant:'mesh'},runs:[10],length:10,height:250});
 ok(p.unsupported===true&&p.reason==='height','250cm request must not reuse the 190cm DOPS benchmark');
 
+p=computeExtraFencePrice({type:'mobile',config:{variant:'solid'},runs:[10],length:10,height:200});
+ok(!p.unsupported&&p.kind==='mobile-solid'&&p.panels===4&&p.feet===5&&p.connectors===3,'10m solid mobile run must use 4 panels, 5 feet and 3 connectors');
+ok(Math.round(p.panelCost)===10145&&p.feetCost===880&&p.connectorCost===234,'solid mobile component costs must stay tied to verified units');
+ok(Math.round(p.materialTotal)===11259,'10m solid mobile benchmark must stay 11,259 CZK');
 p=computeExtraFencePrice({type:'mobile',config:{variant:'solid'},runs:[10],length:10,height:190});
-ok(p.unsupported===true&&p.reason==='variant','unverified solid mobile system must remain individual');
+ok(p.unsupported===true&&p.reason==='height'&&p.requiredHeight===2,'solid panel must not reuse its price at a false 190cm height');
 
 p=computeExtraFencePrice({type:'masonry',config:{variant:'blocks',finish:'standard'},length:10,height:180});
 ok(!p.unsupported&&p.kind==='masonry-reference'&&p.low===60000&&p.high===110000,'10m masonry block reference must stay 60,000–110,000 CZK');

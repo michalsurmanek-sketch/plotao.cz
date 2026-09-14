@@ -165,9 +165,9 @@ await runScenario('mobile-390',{width:390,height:844},async page=>{
   await page.waitForFunction(()=>document.querySelector('#extraFenceConfig [data-ev="solid"]')?.getAttribute('aria-pressed')==='true',null,{timeout:5000});
   assert((await page.locator('#extraFenceConfig [data-ev="solid"]').getAttribute('aria-pressed'))==='true','mobile solid choice must expose selected state');
 
-  await page.waitForFunction(()=>document.querySelector('#height')?.value==='190'&&document.querySelector('#height')?.closest('label')?.hidden===true,null,{timeout:5000});
+  await page.waitForFunction(()=>document.querySelector('#height')?.value==='200'&&document.querySelector('#height')?.closest('label')?.hidden===true,null,{timeout:5000});
   assert(!(await page.locator('#height').isVisible()),'mobile height field must be hidden because subtype fixes the height');
-  assert((await page.locator('#height').inputValue())==='190','solid mobile panel must use its fixed 190 cm height');
+  assert((await page.locator('#height').inputValue())==='200','solid mobile panel must use its fixed 200 cm height');
   await page.locator('#extraFenceConfig [data-ev="barrier"]').click();
   await page.waitForFunction(()=>document.querySelector('#height')?.value==='110',null,{timeout:5000});
   assert((await page.locator('#height').inputValue())==='110','mobile barrier must use its fixed 110 cm height');

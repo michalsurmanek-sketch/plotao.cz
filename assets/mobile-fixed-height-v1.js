@@ -5,7 +5,7 @@ function selectedType(){return $('.type.on')?.dataset.id||''}
 function fixedHeight(){
  const c=window.PLOTAO_EXTRA;
  if(selectedType()!=='mobile'||c?.type!=='mobile')return null;
- return c.variant==='barrier'?110:190;
+ return c.variant==='barrier'?110:c.variant==='solid'?200:190;
 }
 function ensureNote(grid){
  let n=$('#mobileFixedHeightNote');
@@ -20,7 +20,7 @@ function sync(){
   if(previousHeight===null)previousHeight=height.value;
   label.hidden=true;
   height.value=String(value);
-  note.textContent=value===110?'Výška mobilní zábrany je daná zvoleným provedením: 110 cm.':'Výška mobilního panelu je daná zvoleným provedením: 190 cm.';
+  note.textContent=value===110?'Výška mobilní zábrany je daná zvoleným provedením: 110 cm.':value===200?'Výška plného mobilního panelu je daná zvoleným provedením: 200 cm.':'Výška síťového mobilního panelu je daná zvoleným provedením: 190 cm.';
   note.style.display='block';
   height.dispatchEvent(new Event('input',{bubbles:true}));
   height.dispatchEvent(new Event('change',{bubbles:true}));
