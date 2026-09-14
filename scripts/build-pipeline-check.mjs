@@ -10,6 +10,8 @@ const privacy=fs.readFileSync(privacyPath,'utf8');
 const privacyPage=fs.readFileSync('ochrana-osobnich-udaju.html','utf8');
 const socialPath='scripts/enrich-social-meta.mjs';
 const social=fs.readFileSync(socialPath,'utf8');
+const socialArtifactPath='scripts/social-artifact-check.mjs';
+const socialArtifact=fs.readFileSync(socialArtifactPath,'utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const socialPages=[
   ['index.html','/','panelovy-3d.webp'],
@@ -38,14 +40,18 @@ ok(privacy.includes('/ochrana-osobnich-udaju.html')&&privacy.includes('data-plot
 ok(privacyPage.includes('AO Holding s.r.o.')&&privacyPage.includes('Ochrana osobních údajů')&&privacyPage.includes('Vyřízení poptávky a příprava nabídky')&&privacyPage.includes('Vaše práva'),'privacy page must identify the controller and explain purpose and data-subject rights');
 ok(!privacyPage.includes('souhlasím se zpracováním'),'necessary lead processing must not be misrepresented as a mandatory consent checkbox');
 ok(workflow.includes('- name: Enrich production social metadata')&&workflow.includes(`node ${socialPath}`),'Pages workflow must enrich social metadata on the prepared artifact');
+ok(fs.existsSync(socialArtifactPath),'discovery social artifact checker must exist');
+ok(workflow.includes('- name: Verify discovery social artifact')&&workflow.includes(`node ${socialArtifactPath}`),'Pages workflow must verify every discovery social card after enrichment');
 ok(workflow.includes('node scripts/verify-pages-artifact.mjs'),'Pages workflow must use verify-pages-artifact.mjs');
-const preparePos=workflow.indexOf('node scripts/prepare-pages.mjs'),privacyPos=workflow.indexOf(`node ${privacyPath}`),socialPos=workflow.indexOf(`node ${socialPath}`),verifyPos=workflow.indexOf('node scripts/verify-pages-artifact.mjs'),browserPos=workflow.indexOf('- name: Run browser E2E on production artifact');
-ok(preparePos>=0&&preparePos<privacyPos&&privacyPos<socialPos&&socialPos<verifyPos&&verifyPos<browserPos,'privacy and social enrichment must run after dist preparation and before artifact/browser verification');
+const preparePos=workflow.indexOf('node scripts/prepare-pages.mjs'),privacyPos=workflow.indexOf(`node ${privacyPath}`),socialPos=workflow.indexOf(`node ${socialPath}`),socialArtifactPos=workflow.indexOf(`node ${socialArtifactPath}`),verifyPos=workflow.indexOf('node scripts/verify-pages-artifact.mjs'),browserPos=workflow.indexOf('- name: Run browser E2E on production artifact');
+ok(preparePos>=0&&preparePos<privacyPos&&privacyPos<socialPos&&socialPos<socialArtifactPos&&socialArtifactPos<verifyPos&&verifyPos<browserPos,'privacy/social enrichment and discovery social verification must run after dist preparation and before generic artifact/browser verification');
 ok(fs.existsSync(socialPath),'social metadata enrichment script must exist');
 ok(social.includes('summary_large_image')&&social.includes('og:image:width')&&social.includes('og:image:height')&&social.includes('og:image:secure_url'),'social metadata enrichment must publish complete large-card image metadata');
 ok(social.includes('if(width<300||height<180)'),'social metadata enrichment must reject undersized discovery-page card images');
+ok(socialArtifact.includes('exactly one')&&socialArtifact.includes('og:title')&&socialArtifact.includes('twitter:description'),'social artifact checker must reject duplicate image tags and incomplete title/description metadata');
 for(const [page,path,image] of socialPages){
   ok(social.includes(`'${page}':{image:'${image}'`),`social metadata enrichment must map ${page} to ${image}`);
+  ok(socialArtifact.includes(`'${page}':{image:'${image}'`),`social artifact checker must protect ${page} with ${image}`);
   ok(smoke.includes(`"${path}|${image}"`),`standalone live smoke must verify ${path} with ${image}`);
 }
 ok(smoke.includes('social_pages=(')&&smoke.includes('verify_social_pages()'),'standalone live smoke must iterate all discovery-page social previews');
@@ -96,4 +102,4 @@ for(const src of activeScripts){
   ok(fs.existsSync(file),`Pages manifest references missing asset: ${file}`);
 }
 if(fail.length){console.error('Build pipeline checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; Node 24 Pages actions, headless-only browser install, public links, browser/privacy information, strict dist, ${socialPages.length} protected discovery-page social cards, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
+console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; Node 24 Pages actions, headless-only browser install, public links, browser/privacy information, strict dist, ${socialPages.length} enriched + artifact-verified + live-verified discovery social cards, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
