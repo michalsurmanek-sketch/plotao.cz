@@ -70,6 +70,7 @@ for(const file of Object.keys(landingType)){
   ok(metaBy(html,'property','og:url')===can,`${file}: og:url must match canonical`);
   ok(metaBy(html,'name','twitter:card')==='summary',`${file}: landing must keep twitter:card=summary`);
   ok(flat.some(x=>x?.['@type']==='BreadcrumbList'),`${file}: landing must keep BreadcrumbList structured data`);
+  ok(!flat.some(x=>x?.['@type']==='FAQPage'),`${file}: deprecated FAQPage structured data must not return to source`);
 }
 
 {
@@ -101,4 +102,4 @@ ok(/User-agent:\s*\*/i.test(robots)&&/Allow:\s*\//i.test(robots),'robots.txt: pu
 ok(robots.includes('Sitemap: https://plotao.cz/sitemap.xml'),'robots.txt: canonical sitemap URL missing');
 
 if(fail.length){console.error('SEO regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`SEO regression checks OK: ${pages.length} public pages, ${expectedUrls.length} indexable discovery URLs; all fence landing metadata, breadcrumb structure, privacy noindex, overview ItemList and sitemap integrity protected`);
+console.log(`SEO regression checks OK: ${pages.length} public pages, ${expectedUrls.length} indexable discovery URLs; all fence landing metadata, source FAQPage exclusion, breadcrumb structure, privacy noindex, overview ItemList and sitemap integrity protected`);
