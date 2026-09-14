@@ -22,17 +22,20 @@ ok(!calc.includes("['gateWidth','doorWidth'].includes(e.target.id))seedOpening")
 ok(calc.includes("let placements={gate:{section:0,pos:5},door:{section:0,pos:12}},seeded={gate:false,door:false}")&&calc.includes("if(!go&&!doo){b.style.display='none';b.innerHTML='';publish();return}"),'hiding an empty placement UI must not erase stored gate/wicket positions or first-use state');
 
 ok(topview.includes("window.PLOTAO_SEGMENT_CONNECTIONS||[]")&&topview.includes("window.PLOTAO_PLACEMENT"),'top-view plan must use authoritative segment-connection and opening-placement state');
+ok(topview.includes("window.PLOTAO_SEGMENT_TURNS||[]")&&connections.includes('window.PLOTAO_SEGMENT_TURNS=[...turns]'),'free-route top view must use authoritative left/right corner direction state');
 ok(topview.includes("className='plotao-segment-mini'")&&topview.includes("box.dataset.segmentMini=String(seg.i)"),'every segment must receive its own dedicated mini drawing');
 ok(topview.includes("cap.textContent=rectActive()?'Pohled shora · uzavřený půdorys':'Pohled shora'"),'overall plan must render the reviewed top-view caption for free and closed modes');
 ok(topview.includes("aria-label=\"Celkový nákres plotu z pohledu shora")&&topview.includes("role=\"img\""),'top-view SVG must expose an accessible image description');
-ok(topview.includes("if(s.connected)")&&topview.includes("corners%2===0?1:3"),'successive connected free-mode segments must alternate 90-degree turns into a readable step-like top view');
-ok(topview.includes("else{x=0;y=groupBottom+")&&topview.includes("dir=0;corners=0"),'a disconnected free-mode segment must start as a separate top-view run instead of pretending to join the prior section');
+ok(topview.includes("if(s.connected)")&&topview.includes("dir=(dir+(s.turn==='left'?3:1))%4"),'successive connected free-mode segments must follow the explicit right/left corner direction');
+ok(!topview.includes('corners%2===0?1:3'),'legacy automatic right-left staircase top-view algorithm must stay removed');
+ok(topview.includes("else{x=0;y=groupBottom+")&&topview.includes("dir=0}"),'a disconnected free-mode segment must start as a separate top-view run instead of pretending to join the prior section');
 ok(topview.includes("data-shape-mode=\"rectangle\"")&&topview.includes("function applyRectangle()"),'segment UI must expose the rectangle/square mode and a dedicated four-side apply path');
 ok(topview.includes("window.PLOTAO_SET_SEGMENT_CONNECTIONS?.([false,true,true,true])")&&connections.includes('window.PLOTAO_SET_SEGMENT_CONNECTIONS=setConnections'),'rectangle mode must force all four sides into one closed connected run through the shared connection owner');
+ok(topview.includes("window.PLOTAO_SET_SEGMENT_TURNS?.([null,'right','right','right'])")&&connections.includes('window.PLOTAO_SET_SEGMENT_TURNS=setTurns'),'rectangle mode must force a deterministic clockwise turn direction through the shared turn owner');
 ok(topview.includes("plotShape={mode:'rectangle',closed:true,width:w,depth:d}")&&topview.includes("const vals=[w,d,w,d],names=['Strana A','Strana B','Strana C','Strana D']"),'rectangle mode must create opposite equal sides and publish a closed shape state');
 ok(topview.includes("if(rectActive()&&ss.length===4)")&&topview.includes('const dirs=[[1,0],[0,1],[-1,0],[0,-1]]'),'closed rectangles must use four orthogonal directions that return to the starting point');
 ok(topview.includes("stroke=\"#f07828\"")&&topview.includes("esc(o.label)"),'gate and wicket openings must remain visible and labelled in the new drawings');
-ok(topview.includes("document.addEventListener('plotao:segment-connections',()=>{syncShapeUi();schedule()})")&&topview.includes("document.addEventListener('plotao:placement',()=>schedule())"),'top-view drawings must rerender after connection and opening-placement changes');
+ok(topview.includes("document.addEventListener('plotao:segment-connections',()=>{syncShapeUi();schedule()})")&&topview.includes("document.addEventListener('plotao:segment-turns',()=>schedule())")&&topview.includes("document.addEventListener('plotao:placement',()=>schedule())"),'top-view drawings must rerender after connection, corner-direction and opening-placement changes');
 ok(topview.includes("if(e.target.closest?.('#addSegment,[data-remove],.remove'))schedule(90)"),'adding or removing a segment must regenerate both mini and total drawings');
 const calcPos=manifest.indexOf('/assets/calculator-v3.js'),topviewPos=manifest.indexOf('/assets/segment-plan-topview-v1.js'),geometryPos=manifest.indexOf('/assets/geometry-core-v1.js');
 ok(calcPos>=0&&topviewPos>calcPos&&geometryPos>topviewPos,'top-view enhancement must load after calculator placement state and before downstream geometry updates');
@@ -40,4 +43,4 @@ ok(!manifest.includes('/assets/plan-scroll-v1.js'),'obsolete horizontal plan scr
 ok(lead.includes("const p=window.PLOTAO_PLACEMENT?.[kind],v=p?.[keyName]"),'lead snapshot must keep authoritative opening placement');
 
 if(fail.length){console.error('Run placement integrity checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Run placement integrity checks OK: opening placement stays stable, every segment has a mini drawing, free top-view runs remain readable and closed rectangle/square mode is protected end-to-end');
+console.log('Run placement integrity checks OK: opening placement stays stable, free-route turns are explicit instead of stair-stepped, every segment has a mini drawing and closed rectangle/square mode is protected end-to-end');
