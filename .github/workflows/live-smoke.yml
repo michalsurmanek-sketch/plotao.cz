@@ -25,6 +25,8 @@ jobs:
           expected_privacy_href='href="/ochrana-osobnich-udaju.html"'
           expected_privacy_link='data-plotao-privacy-link="1"'
           expected_privacy_notice='data-plotao-privacy-notice="1"'
+          expected_controller_email='<a href="mailto:info@slevao.cz">info@slevao.cz</a>'
+          expected_form_boundary='Poptávkový formulář PLOTAO.cz není určen pro žádosti týkající se ochrany osobních údajů.'
           social_pages=(
             "/|panelovy-3d.webp"
             "/typy-plotu.html|panelovy-3d.webp"
@@ -97,18 +99,20 @@ jobs:
               && printf '%s' "$page" | grep -Fq "$expected_privacy_link" \
               && printf '%s' "$page" | grep -Fq "$expected_privacy_notice" \
               && printf '%s' "$privacy" | grep -Fq '<h1>Ochrana osobních údajů</h1>' \
-              && printf '%s' "$privacy" | grep -Fq 'AO Holding s.r.o.'; then
+              && printf '%s' "$privacy" | grep -Fq 'AO Holding s.r.o.' \
+              && printf '%s' "$privacy" | grep -Fq "$expected_controller_email" \
+              && printf '%s' "$privacy" | grep -Fq "$expected_form_boundary"; then
               privacy_ok=1
             fi
             if [ "$marker_ok" = 1 ] && [ "$html_ok" = 1 ] && [ "$privacy_ok" = 1 ]; then
               if verify_social_pages; then
                 verify_private_paths
-                echo "Live smoke confirms expected public deploy, privacy information on all discovery pages, social previews and private repository paths: $EXPECTED_SHA"
+                echo "Live smoke confirms expected public deploy, verified controller contact, privacy information on all discovery pages, social previews and private repository paths: $EXPECTED_SHA"
                 exit 0
               fi
             fi
             echo "Attempt $attempt: marker_ok=$marker_ok html_ok=$html_ok privacy_ok=$privacy_ok expected=$EXPECTED_SHA actual=${actual:-<empty>}"
             sleep 10
           done
-          echo "plotao.cz did not expose the expected deploy marker, HTML identity, privacy information and discovery-page social previews consistently"
+          echo "plotao.cz did not expose the expected deploy marker, HTML identity, verified controller contact, privacy information and discovery-page social previews consistently"
           exit 1
