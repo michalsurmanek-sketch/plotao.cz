@@ -1,0 +1,49 @@
+name: Verify live Plotao.cz accessibility shell
+
+on:
+  workflow_run:
+    workflows: ["Deploy Plotao.cz to Pages"]
+    types: [completed]
+
+permissions:
+  contents: read
+
+jobs:
+  verify-live-accessibility:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify live keyboard skip navigation shell
+        env:
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          marker_url="https://plotao.cz/deploy-marker.txt?sha=${EXPECTED_SHA}"
+          html_url="https://plotao.cz/?sha=${EXPECTED_SHA}"
+          expected_meta="<meta name=\"plotao-deploy\" content=\"${EXPECTED_SHA}\">"
+          expected_skip='data-plotao-skip-link="1" href="#kalkulator">Přejít na kalkulátor</a>'
+          contains() {
+            [[ "$1" == *"$2"* ]]
+          }
+          for attempt in $(seq 1 18); do
+            actual="$(curl -fsSL --connect-timeout 10 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$marker_url" 2>/dev/null | tr -d '\r\n' || true)"
+            page="$(curl -fsSL --connect-timeout 10 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$html_url" 2>/dev/null || true)"
+            marker_ok=0
+            html_ok=0
+            skip_ok=0
+            main_ok=0
+            [ "$actual" = "$EXPECTED_SHA" ] && marker_ok=1
+            contains "$page" "$expected_meta" && html_ok=1 || true
+            contains "$page" "$expected_skip" && skip_ok=1 || true
+            if [[ "$page" =~ \<main[^\>]*id=\"kalkulator\"[^\>]*tabindex=\"-1\"[^\>]*\> ]] || [[ "$page" =~ \<main[^\>]*tabindex=\"-1\"[^\>]*id=\"kalkulator\"[^\>]*\> ]]; then
+              main_ok=1
+            fi
+            if [ "$marker_ok" = 1 ] && [ "$html_ok" = 1 ] && [ "$skip_ok" = 1 ] && [ "$main_ok" = 1 ]; then
+              echo "Live accessibility shell OK: expected SHA, keyboard skip link and focusable calculator main are public: $EXPECTED_SHA"
+              exit 0
+            fi
+            echo "Attempt $attempt: marker_ok=$marker_ok html_ok=$html_ok skip_ok=$skip_ok main_ok=$main_ok expected=$EXPECTED_SHA actual=${actual:-<empty>}"
+            sleep 10
+          done
+          echo "plotao.cz did not expose the expected live keyboard accessibility shell consistently"
+          exit 1
