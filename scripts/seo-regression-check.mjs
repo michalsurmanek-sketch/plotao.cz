@@ -3,6 +3,7 @@ import fs from 'node:fs';
 const fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 const pages=fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort();
 const privacyPage='ochrana-osobnich-udaju.html';
+const buildCanonicalPages=new Set(['eshop.html']);
 const titles=new Map(),canonicals=new Map();
 
 function attr(html,tag,name,valueAttr='content'){
@@ -44,7 +45,8 @@ for(const file of pages){
   const description=descDirect?.match(/\bcontent=["']([^"']+)["']/i)?.[1]?.trim()||desc;
   ok(description.length>=70&&description.length<=200,`${file}: meta description should be 70–200 characters`);
   const can=canonical(html),expected=file==='index.html'?'https://plotao.cz/':`https://plotao.cz/${file}`;
-  ok(can===expected,`${file}: canonical must be ${expected}`);
+  if(buildCanonicalPages.has(file))ok(can===''||can===expected,`${file}: source canonical must be absent for production enrichment or equal ${expected}`);
+  else ok(can===expected,`${file}: canonical must be ${expected}`);
   if(can){ok(!canonicals.has(can),`${file}: duplicate canonical also used by ${canonicals.get(can)}`);canonicals.set(can,file)}
   const h1=(html.match(/<h1\b/gi)||[]).length;ok(h1===1,`${file}: expected exactly one H1, got ${h1}`);
   for(const img of html.match(/<img\b[^>]*>/gi)||[])ok(/\balt=["'][^"']*["']/i.test(img),`${file}: image missing alt attribute: ${img.slice(0,100)}`);
@@ -102,4 +104,4 @@ ok(/User-agent:\s*\*/i.test(robots)&&/Allow:\s*\//i.test(robots),'robots.txt: pu
 ok(robots.includes('Sitemap: https://plotao.cz/sitemap.xml'),'robots.txt: canonical sitemap URL missing');
 
 if(fail.length){console.error('SEO regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`SEO regression checks OK: ${pages.length} public pages, ${expectedUrls.length} indexable discovery URLs; all fence landing metadata, source FAQPage exclusion, breadcrumb structure, privacy noindex, overview ItemList and sitemap integrity protected`);
+console.log(`SEO regression checks OK: ${pages.length} public pages, ${expectedUrls.length} indexable discovery URLs; build-enriched e-shop canonical, all fence landing metadata, source FAQPage exclusion, breadcrumb structure, privacy noindex, overview ItemList and sitemap integrity protected`);
