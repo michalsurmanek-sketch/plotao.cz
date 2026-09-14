@@ -60,6 +60,18 @@ if(!logoTags.length||logoTags.some(tag=>!(/\bwidth=["']2172["']/i.test(tag)&&/\b
   throw new Error('Pages artifact logo images must expose their intrinsic 2172x724 dimensions to prevent layout shift');
 }
 
+function verifyVectorLogo(file){
+  const svg=fs.readFileSync(file,'utf8'),size=fs.statSync(file).size;
+  if(size>=10000)throw new Error(`Pages artifact main logo must stay lightweight vector; got ${size} bytes`);
+  if(!/viewBox=["']0 0 2172 724["']/i.test(svg))throw new Error('Pages artifact main logo must preserve its 2172x724 canvas');
+  if(/<image\b/i.test(svg)||/data:image\//i.test(svg))throw new Error('Pages artifact main logo must not embed raster image data');
+  if(!svg.includes('fill="#17202A"')||!svg.includes('fill="#F28817"'))throw new Error('Pages artifact main logo must preserve reviewed #17202A / #F28817 brand colors');
+  if(!svg.includes('transform="translate(-2.5185 34.8437) scale(2.394203 2.408047)"'))throw new Error('Pages artifact main logo geometry transform changed; review visual alignment before deploy');
+  const paths=(svg.match(/<path\b/g)||[]).length;
+  if(paths!==2)throw new Error(`Pages artifact main logo must keep the reviewed two-path vector geometry; got ${paths} paths`);
+  return size;
+}
+
 const PNG_SIGNATURE=Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]);
 function verifyEmbeddedPngSvg(file,label,maxSize){
   const svg=fs.readFileSync(file,'utf8'),size=fs.statSync(file).size;
@@ -78,7 +90,7 @@ function verifyEmbeddedPngSvg(file,label,maxSize){
   for(const requiredType of ['IHDR','IDAT','IEND'])if(!chunkTypes.includes(requiredType))throw new Error(`Pages artifact ${label} PNG is missing ${requiredType}`);
   return size;
 }
-const logoSize=verifyEmbeddedPngSvg(`${root}/assets/logo-plotao.svg`,'logo',500000);
+const logoSize=verifyVectorLogo(`${root}/assets/logo-plotao.svg`);
 const faviconSize=verifyEmbeddedPngSvg(`${root}/assets/favicon.svg`,'favicon',45763);
 
 const scriptSources=[...html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*><\/script>/gi)].map(match=>match[1]);
@@ -109,4 +121,4 @@ for(const src of preloadSources)if(!scriptSources.includes(src))throw new Error(
 
 const posGeo=html.indexOf('/assets/geometry-v3.js'),posGuard=html.indexOf('/assets/geometry-validity-v1.js'),posPanel=html.indexOf('/assets/panel-pricing-v5.js');
 if(!(posGeo>=0&&posGeo<posGuard&&posGuard<posPanel)) throw new Error('Geometry validity guard must load after geometry and before pricing modules');
-console.log(`Pages artifact integrity OK: ${marker}; strict public dist has ${topLevel.size} top-level entries, ${activeScripts.length} content-versioned modules, ${preloadSources.length} critical preloads, social image ${socialWidth}x${socialHeight}, optimized logo (${logoSize} bytes) and favicon (${faviconSize} bytes)`);
+console.log(`Pages artifact integrity OK: ${marker}; strict public dist has ${topLevel.size} top-level entries, ${activeScripts.length} content-versioned modules, ${preloadSources.length} critical preloads, social image ${socialWidth}x${socialHeight}, vector logo (${logoSize} bytes) and favicon (${faviconSize} bytes)`);
