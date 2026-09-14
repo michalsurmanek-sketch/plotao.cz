@@ -15,6 +15,14 @@ async function waitForReady(page){
   },null,{timeout:10000});
 }
 
+async function selectType(page,id,visibleSelector){
+  await page.locator(`.type[data-id="${id}"]`).click();
+  await page.waitForFunction(type=>document.querySelector(`.type[data-id="${type}"]`)?.getAttribute('aria-pressed')==='true',id,{timeout:5000});
+  await page.waitForFunction(type=>new URL(location.href).searchParams.get('type')===type,id,{timeout:5000});
+  await page.waitForFunction(type=>document.activeElement?.dataset?.id===type,id,{timeout:5000});
+  if(visibleSelector)await page.locator(visibleSelector).waitFor({state:'visible',timeout:5000});
+}
+
 async function runScenario(name,viewport,scenario){
   const browser=await chromium.launch({headless:true});
   const context=await browser.newContext({viewport});
@@ -41,9 +49,17 @@ await runScenario('desktop',{width:1440,height:1000},async page=>{
   assert((await page.locator('.type[data-id="panel"]').getAttribute('aria-pressed'))==='true','panel must be selected initially');
   assert((await text(page.locator('.price strong'))) !== '—','default panel price must be calculated');
 
-  await page.locator('.type[data-id="privacy"]').click();
-  await page.locator('#privacyConfig').waitFor({state:'visible'});
-  await page.waitForFunction(()=>document.activeElement?.dataset?.id==='privacy',null,{timeout:5000});
+  await selectType(page,'mesh','#options.show');
+  await page.locator('#options [data-mv="welded"]').click();
+  await page.waitForFunction(()=>document.activeElement?.dataset?.mv==='welded',null,{timeout:5000});
+  assert((await page.locator('#options [data-mv="welded"]').getAttribute('aria-pressed'))==='true','mesh welded choice must expose selected state');
+
+  await selectType(page,'concrete','#concreteConfig');
+  await page.locator('#concreteConfig [data-cv="both"]').click();
+  await page.waitForFunction(()=>document.activeElement?.dataset?.cv==='both',null,{timeout:5000});
+  await page.waitForFunction(()=>document.querySelector('#concreteConfig .compact')?.getAttribute('aria-label')==='Provedení betonových desek',null,{timeout:5000});
+
+  await selectType(page,'privacy','#privacyConfig');
   await page.waitForFunction(()=>document.querySelector('#privacyConfig .compact')?.getAttribute('aria-label')==='Materiál soukromého plotu',null,{timeout:5000});
   assert(await page.locator('#privacyConfig [role="group"][aria-label="Materiál soukromého plotu"]').count()===1,'privacy material group must be labelled');
   const gap=page.locator('#privacyGap');
@@ -52,18 +68,36 @@ await runScenario('desktop',{width:1440,height:1000},async page=>{
   await page.waitForFunction(()=>document.querySelector('#privacyGap')?.value==='100',null,{timeout:5000});
   assert((await gap.inputValue())==='100','privacy gap must display the bounded 100 mm value after commit');
 
-  await page.locator('.type[data-id="aluminium"]').click();
-  await page.locator('#aluminiumConfigBox').waitFor({state:'visible'});
+  await selectType(page,'aluminium','#aluminiumConfigBox');
   await page.locator('#aluColor').selectOption('ral');
   await page.waitForFunction(()=>document.activeElement?.id==='aluColor',null,{timeout:5000});
   assert(!(await page.locator('#aluRal').isDisabled()),'custom RAL input must enable after selecting another RAL');
 
-  await page.locator('.type[data-id="metal"]').click();
-  await page.locator('#metalConfig').waitFor({state:'visible'});
+  await selectType(page,'gabion','#gabionOptionsBox');
+  await page.locator('#gabionWidth').selectOption('0.50');
+  assert((await page.locator('#gabionWidth').inputValue())==='0.50','gabion width selection must remain visible');
+
+  await selectType(page,'metal','#metalConfig');
   await page.locator('#metalConfig [data-mv="laser"]').click();
   await page.waitForFunction(()=>document.activeElement?.dataset?.mv==='laser',null,{timeout:5000});
   await page.waitForFunction(()=>document.querySelector('#metalConfig .compact')?.getAttribute('aria-label')==='Typ kovové výplně',null,{timeout:5000});
   assert(await page.locator('#metalConfig [role="group"][aria-label="Typ kovové výplně"]').count()===1,'metal variant group must be labelled');
+
+  await selectType(page,'masonry','#extraFenceConfig');
+  await page.locator('#extraFenceConfig [data-ev="split"]').click();
+  await page.waitForFunction(()=>document.activeElement?.dataset?.ev==='split',null,{timeout:5000});
+  await page.waitForFunction(()=>document.querySelector('#extraFenceConfig .compact')?.getAttribute('aria-label')==='Konstrukce zděného plotu',null,{timeout:5000});
+
+  await selectType(page,'mobile','#extraFenceConfig .mobile-choices');
+  assert(await page.locator('#extraFenceConfig [data-ev="mesh"]').count()===1,'mobile configurator must expose its mesh variant');
+
+  await selectType(page,'other','#extraFenceConfig');
+  assert((await text(page.locator('#extraFenceConfig'))).includes('Atypické oplocení'),'atypical branch must render its individual-offer explanation');
+
+  await selectType(page,'panel','#options.show');
+  await page.locator('#options [data-pv="2d"]').click();
+  await page.waitForFunction(()=>document.activeElement?.dataset?.pv==='2d',null,{timeout:5000});
+  assert((await page.locator('#options [data-pv="2d"]').getAttribute('aria-pressed'))==='true','panel 2D choice must expose selected state');
 
   const before=await page.locator('#segmentList .segment').count();
   await page.locator('#addSegment').click();
@@ -73,9 +107,7 @@ await runScenario('desktop',{width:1440,height:1000},async page=>{
 
 await runScenario('mobile-390',{width:390,height:844},async page=>{
   assert(await page.locator('.mobile-price').isVisible(),'mobile sticky price bar must be visible at 390px');
-  await page.locator('.type[data-id="mobile"]').click();
-  await page.locator('#extraFenceConfig .mobile-choices').waitFor({state:'visible'});
-  await page.waitForFunction(()=>document.activeElement?.dataset?.id==='mobile',null,{timeout:5000});
+  await selectType(page,'mobile','#extraFenceConfig .mobile-choices');
   await page.locator('#extraFenceConfig [data-ev="solid"]').click();
   await page.waitForFunction(()=>document.activeElement?.dataset?.ev==='solid',null,{timeout:5000});
   await page.waitForFunction(()=>document.querySelector('#extraFenceConfig [data-ev="solid"]')?.getAttribute('aria-pressed')==='true',null,{timeout:5000});
@@ -102,4 +134,4 @@ if(failures.length){
   console.error('Browser E2E failed:\n- '+failures.join('\n- '));
   process.exit(1);
 }
-console.log('Browser E2E OK: desktop and 390px mobile flows passed without browser-console or same-origin request failures');
+console.log('Browser E2E OK: all 10 fence types plus desktop and 390px mobile flows passed without browser-console or same-origin request failures');
