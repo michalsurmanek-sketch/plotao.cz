@@ -81,6 +81,9 @@ jobs:
       - name: Sanitize production structured data
         run: node scripts/enrich-structured-data.mjs
 
+      - name: Verify production structured data
+        run: node scripts/structured-data-artifact-check.mjs
+
       - name: Enrich production privacy UI
         run: node scripts/enrich-privacy-ui.mjs
 
