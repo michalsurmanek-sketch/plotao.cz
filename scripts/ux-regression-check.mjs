@@ -27,6 +27,7 @@ ok(extra.includes("function focusChoice(group,value){queueMicrotask(()=>{const t
 ok(extra.includes('s[group]=value;render();focusChoice(group,value)'),'extra fence option click must restore focus to the same logical choice after render');
 ok((extra.match(/loading=\"lazy\" decoding=\"async\"/g)||[]).length>=3,'mobile product imagery must decode asynchronously and stay lazy-loaded below the fold');
 ok(privacy.includes("function focusChoice(group,value){queueMicrotask(()=>{const target=$('#privacyConfig [data-pg=\"'+group+'\"][data-pv=\"'+value+'\"]')")&&privacy.includes('sync();focusChoice(g,v)'),'privacy choices must restore focus after their configuration rerender');
+ok(privacy.includes('function clampGap(value)')&&privacy.includes('Math.max(0,Math.min(100,n))')&&privacy.includes("gap?.addEventListener('change',e=>{state.gap=clampGap(e.target.value);e.target.value=String(state.gap);publish()})"),'privacy gap input must display the same bounded value that pricing actually receives after the edit is committed');
 ok(aluminium.includes("function focusField(id){queueMicrotask(()=>{const target=$('#'+id)")&&aluminium.includes('sync(true);focusField(id)'),'aluminium selects must restore focus after their forced configuration rerender');
 ok(metal.includes("function focusChoice(group,value){queueMicrotask(()=>{const target=$('#metalConfig [data-mg=\"'+group+'\"][data-mv=\"'+value+'\"]')")&&metal.includes('sync();focusChoice(group,value)'),'metal choices must restore focus after their configuration rerender');
 ok(concrete.includes("function focusChoice(group,value){queueMicrotask(()=>{const target=$('#concreteConfig [data-cg=\"'+group+'\"][data-cv=\"'+value+'\"]')")&&concrete.includes('sync();focusChoice(group,value)'),'concrete choices must restore focus after their configuration rerender');
@@ -58,4 +59,4 @@ ok(limitPos>manifest.indexOf('/assets/ui-bootstrap-v1.js'),'production manifest 
 ok(a11yPos>=0&&scrollPos>a11yPos,'production manifest must load the accessibility synchronizer before step scrolling');
 
 if(fail.length){console.error('UX regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('UX regression checks OK: dynamic next-step scroll, focus restoration and labelled groups across core/extra/privacy/aluminium/metal/concrete choices, modal behavior, explicit segment/length limits, lazy mobile imagery, mobile lead inputs and calculator accessibility are protected');
+console.log('UX regression checks OK: dynamic next-step scroll, focus restoration and labelled groups across core/extra/privacy/aluminium/metal/concrete choices, truthful privacy gap input, modal behavior, explicit segment/length limits, lazy mobile imagery, mobile lead inputs and calculator accessibility are protected');
