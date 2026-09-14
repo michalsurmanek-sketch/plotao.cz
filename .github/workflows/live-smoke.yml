@@ -22,11 +22,22 @@ jobs:
           html_url="https://plotao.cz/?sha=${EXPECTED_SHA}"
           privacy_url="https://plotao.cz/ochrana-osobnich-udaju.html?sha=${EXPECTED_SHA}"
           expected_meta="<meta name=\"plotao-deploy\" content=\"${EXPECTED_SHA}\">"
-          expected_og='<meta property="og:image" content="https://plotao.cz/assets/fence-types/panelovy-3d.webp">'
-          expected_twitter='<meta name="twitter:card" content="summary_large_image">'
-          expected_twitter_image='<meta name="twitter:image" content="https://plotao.cz/assets/fence-types/panelovy-3d.webp">'
           expected_privacy_link='href="/ochrana-osobnich-udaju.html"'
           expected_privacy_notice='data-plotao-privacy-notice="1"'
+          social_pages=(
+            "/|panelovy-3d.webp"
+            "/typy-plotu.html|panelovy-3d.webp"
+            "/panelovy-plot.html|panelovy-3d.webp"
+            "/pletivovy-plot.html|pletivovy.webp"
+            "/betonovy-plot.html|betonovy.webp"
+            "/hlinikovy-plot.html|hlinikovy.webp"
+            "/plot-na-soukromi.html|soukromi-lamely.webp"
+            "/gabionovy-plot.html|gabionovy.webp"
+            "/kovovy-plot.html|category-metal.webp"
+            "/zdeny-plot.html|category-masonry.webp"
+            "/mobilni-oploceni.html|category-mobile.webp"
+            "/specialni-oploceni.html|category-other.webp"
+          )
           private_paths=(
             "/scripts/seo-regression-check.mjs"
             "/supabase/functions/submit-lead/index.ts"
@@ -42,34 +53,55 @@ jobs:
               echo "Internal source path correctly returns 404: $path"
             done
           }
+          verify_social_pages() {
+            local entry path image page image_url expected_og expected_secure expected_twitter expected_twitter_image
+            for entry in "${social_pages[@]}"; do
+              path="${entry%%|*}"
+              image="${entry##*|}"
+              page="$(curl -fsSL --connect-timeout 10 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "https://plotao.cz${path}?sha=${EXPECTED_SHA}" 2>/dev/null || true)"
+              image_url="https://plotao.cz/assets/fence-types/${image}"
+              expected_og="<meta property=\"og:image\" content=\"${image_url}\">"
+              expected_secure="<meta property=\"og:image:secure_url\" content=\"${image_url}\">"
+              expected_twitter='<meta name="twitter:card" content="summary_large_image">'
+              expected_twitter_image="<meta name=\"twitter:image\" content=\"${image_url}\">"
+              if ! printf '%s' "$page" | grep -Fq "$expected_og" \
+                || ! printf '%s' "$page" | grep -Fq "$expected_secure" \
+                || ! printf '%s' "$page" | grep -Fq "$expected_twitter" \
+                || ! printf '%s' "$page" | grep -Fq "$expected_twitter_image"; then
+                echo "Social preview metadata mismatch: path=$path image=$image"
+                return 1
+              fi
+              if ! curl -fsS --connect-timeout 10 --max-time 20 -o /dev/null -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "${image_url}?sha=${EXPECTED_SHA}"; then
+                echo "Social preview image is not publicly reachable: $image_url"
+                return 1
+              fi
+              echo "Social preview OK: $path -> $image"
+            done
+          }
           for attempt in $(seq 1 18); do
             actual="$(curl -fsSL --connect-timeout 10 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$marker_url" 2>/dev/null | tr -d '\r\n' || true)"
             page="$(curl -fsSL --connect-timeout 10 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$html_url" 2>/dev/null || true)"
             privacy="$(curl -fsSL --connect-timeout 10 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$privacy_url" 2>/dev/null || true)"
             marker_ok=0
             html_ok=0
-            social_ok=0
             privacy_ok=0
             [ "$actual" = "$EXPECTED_SHA" ] && marker_ok=1
             printf '%s' "$page" | grep -Fq "$expected_meta" && html_ok=1 || true
-            if printf '%s' "$page" | grep -Fq "$expected_og" \
-              && printf '%s' "$page" | grep -Fq "$expected_twitter" \
-              && printf '%s' "$page" | grep -Fq "$expected_twitter_image"; then
-              social_ok=1
-            fi
             if printf '%s' "$page" | grep -Fq "$expected_privacy_link" \
               && printf '%s' "$page" | grep -Fq "$expected_privacy_notice" \
               && printf '%s' "$privacy" | grep -Fq '<h1>Ochrana osobních údajů</h1>' \
               && printf '%s' "$privacy" | grep -Fq 'AO Holding s.r.o.'; then
               privacy_ok=1
             fi
-            if [ "$marker_ok" = 1 ] && [ "$html_ok" = 1 ] && [ "$social_ok" = 1 ] && [ "$privacy_ok" = 1 ]; then
-              verify_private_paths
-              echo "Live smoke confirms expected public deploy, privacy information, social metadata and private repository paths: $EXPECTED_SHA"
-              exit 0
+            if [ "$marker_ok" = 1 ] && [ "$html_ok" = 1 ] && [ "$privacy_ok" = 1 ]; then
+              if verify_social_pages; then
+                verify_private_paths
+                echo "Live smoke confirms expected public deploy, privacy information, all discovery-page social previews and private repository paths: $EXPECTED_SHA"
+                exit 0
+              fi
             fi
-            echo "Attempt $attempt: marker_ok=$marker_ok html_ok=$html_ok social_ok=$social_ok privacy_ok=$privacy_ok expected=$EXPECTED_SHA actual=${actual:-<empty>}"
+            echo "Attempt $attempt: marker_ok=$marker_ok html_ok=$html_ok privacy_ok=$privacy_ok expected=$EXPECTED_SHA actual=${actual:-<empty>}"
             sleep 10
           done
-          echo "plotao.cz did not expose the expected deploy marker, HTML identity, privacy information and social metadata consistently"
+          echo "plotao.cz did not expose the expected deploy marker, HTML identity, privacy information and discovery-page social previews consistently"
           exit 1
