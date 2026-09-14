@@ -2,6 +2,7 @@ import fs from 'node:fs';
 
 const fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 const pages=fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort();
+const privacyPage='ochrana-osobnich-udaju.html';
 const titles=new Map(),canonicals=new Map();
 
 function attr(html,tag,name,valueAttr='content'){
@@ -49,6 +50,11 @@ for(const file of pages){
   for(const img of html.match(/<img\b[^>]*>/gi)||[])ok(/\balt=["'][^"']*["']/i.test(img),`${file}: image missing alt attribute: ${img.slice(0,100)}`);
 }
 
+{
+  const html=fs.readFileSync(privacyPage,'utf8');
+  ok(metaBy(html,'name','robots').toLowerCase()==='noindex,follow',`${privacyPage}: utility/legal page must stay noindex,follow while remaining crawlable through internal links`);
+}
+
 const landingType={"panelovy-plot.html":"panel","pletivovy-plot.html":"mesh","betonovy-plot.html":"concrete","hlinikovy-plot.html":"aluminium","plot-na-soukromi.html":"privacy","gabionovy-plot.html":"gabion","kovovy-plot.html":"metal","zdeny-plot.html":"masonry","mobilni-oploceni.html":"mobile","specialni-oploceni.html":"other"};
 for(const [file,type] of Object.entries(landingType)){
   const html=fs.readFileSync(file,'utf8'),target='/?type='+type+(type==='mobile'?'&height=190':'')+'#kalkulator';
@@ -81,9 +87,11 @@ for(const file of Object.keys(landingType)){
 
 const sitemap=fs.readFileSync('sitemap.xml','utf8');
 const urls=[...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1].trim());
-const expectedUrls=pages.map(f=>f==='index.html'?'https://plotao.cz/':`https://plotao.cz/${f}`);
-for(const u of expectedUrls)ok(urls.includes(u),`sitemap.xml: missing ${u}`);
-for(const u of urls){ok(u.startsWith('https://plotao.cz/'),`sitemap.xml: foreign/non-HTTPS URL ${u}`);ok(expectedUrls.includes(u),`sitemap.xml: URL has no matching public HTML page: ${u}`)}
+const indexablePages=pages.filter(f=>f!==privacyPage);
+const expectedUrls=indexablePages.map(f=>f==='index.html'?'https://plotao.cz/':`https://plotao.cz/${f}`);
+for(const u of expectedUrls)ok(urls.includes(u),`sitemap.xml: missing indexable URL ${u}`);
+ok(!urls.includes(`https://plotao.cz/${privacyPage}`),`sitemap.xml: noindex privacy page must stay excluded`);
+for(const u of urls){ok(u.startsWith('https://plotao.cz/'),`sitemap.xml: foreign/non-HTTPS URL ${u}`);ok(expectedUrls.includes(u),`sitemap.xml: URL is not an indexable public discovery page: ${u}`)}
 ok(new Set(urls).size===urls.length,'sitemap.xml: duplicate URL');
 const lastmods=[...sitemap.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map(m=>m[1]);
 ok(lastmods.length===urls.length,'sitemap.xml: every URL must have lastmod');
@@ -94,4 +102,4 @@ ok(/User-agent:\s*\*/i.test(robots)&&/Allow:\s*\//i.test(robots),'robots.txt: pu
 ok(robots.includes('Sitemap: https://plotao.cz/sitemap.xml'),'robots.txt: canonical sitemap URL missing');
 
 if(fail.length){console.error('SEO regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`SEO regression checks OK: ${pages.length} public pages; all fence landing metadata, overview ItemList and sitemap integrity protected`);
+console.log(`SEO regression checks OK: ${pages.length} public pages, ${expectedUrls.length} indexable discovery URLs; all fence landing metadata, privacy noindex, overview ItemList and sitemap integrity protected`);
