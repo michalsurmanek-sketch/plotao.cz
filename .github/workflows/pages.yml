@@ -133,6 +133,9 @@ jobs:
             "/supabase/functions/submit-lead/index.ts"
             "/docs/lead-backend-contract.md"
           )
+          contains() {
+            [[ "$1" == *"$2"* ]]
+          }
           verify_private_paths() {
             for path in "${private_paths[@]}"; do
               code="$(curl -sSL --connect-timeout 10 --max-time 20 -o /dev/null -w '%{http_code}' -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "https://plotao.cz${path}?sha=${EXPECTED_SHA}" || true)"
@@ -149,7 +152,7 @@ jobs:
             marker_ok=0
             html_ok=0
             [ "$actual" = "$EXPECTED_SHA" ] && marker_ok=1
-            printf '%s' "$page" | grep -Fq "$expected_meta" && html_ok=1 || true
+            contains "$page" "$expected_meta" && html_ok=1 || true
             if [ "$marker_ok" = 1 ] && [ "$html_ok" = 1 ]; then
               verify_private_paths
               echo "Live custom domain serves expected public deploy and keeps repository internals unpublished: $EXPECTED_SHA"
