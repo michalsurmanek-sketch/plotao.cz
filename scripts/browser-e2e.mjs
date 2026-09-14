@@ -8,11 +8,11 @@ const text=async locator=>(await locator.textContent()||'').trim();
 
 async function waitForReady(page){
   await page.goto(baseUrl+'/?e2e=1',{waitUntil:'networkidle'});
-  await page.waitForFunction(()=>window.PLOTAO_UI_READY===true,{timeout:10000});
+  await page.waitForFunction(()=>window.PLOTAO_UI_READY===true,null,{timeout:10000});
   await page.waitForFunction(()=>{
     const value=document.querySelector('.price strong')?.textContent?.trim();
     return Boolean(value&&value!=='—'&&!value.includes('NaN'));
-  },{timeout:10000});
+  },null,{timeout:10000});
 }
 
 async function runScenario(name,viewport,scenario){
@@ -43,27 +43,31 @@ await runScenario('desktop',{width:1440,height:1000},async page=>{
 
   await page.locator('.type[data-id="privacy"]').click();
   await page.locator('#privacyConfig').waitFor({state:'visible'});
-  await page.waitForFunction(()=>document.activeElement?.dataset?.id==='privacy');
+  await page.waitForFunction(()=>document.activeElement?.dataset?.id==='privacy',null,{timeout:5000});
+  await page.waitForFunction(()=>document.querySelector('#privacyConfig .compact')?.getAttribute('aria-label')==='Materiál soukromého plotu',null,{timeout:5000});
   assert(await page.locator('#privacyConfig [role="group"][aria-label="Materiál soukromého plotu"]').count()===1,'privacy material group must be labelled');
   const gap=page.locator('#privacyGap');
   await gap.fill('150');
   await gap.press('Tab');
+  await page.waitForFunction(()=>document.querySelector('#privacyGap')?.value==='100',null,{timeout:5000});
   assert((await gap.inputValue())==='100','privacy gap must display the bounded 100 mm value after commit');
 
   await page.locator('.type[data-id="aluminium"]').click();
   await page.locator('#aluminiumConfigBox').waitFor({state:'visible'});
   await page.locator('#aluColor').selectOption('ral');
-  await page.waitForFunction(()=>document.activeElement?.id==='aluColor');
+  await page.waitForFunction(()=>document.activeElement?.id==='aluColor',null,{timeout:5000});
   assert(!(await page.locator('#aluRal').isDisabled()),'custom RAL input must enable after selecting another RAL');
 
   await page.locator('.type[data-id="metal"]').click();
   await page.locator('#metalConfig').waitFor({state:'visible'});
   await page.locator('#metalConfig [data-mv="laser"]').click();
-  await page.waitForFunction(()=>document.activeElement?.dataset?.mv==='laser');
+  await page.waitForFunction(()=>document.activeElement?.dataset?.mv==='laser',null,{timeout:5000});
+  await page.waitForFunction(()=>document.querySelector('#metalConfig .compact')?.getAttribute('aria-label')==='Typ kovové výplně',null,{timeout:5000});
   assert(await page.locator('#metalConfig [role="group"][aria-label="Typ kovové výplně"]').count()===1,'metal variant group must be labelled');
 
   const before=await page.locator('#segmentList .segment').count();
   await page.locator('#addSegment').click();
+  await page.waitForFunction(expected=>document.querySelectorAll('#segmentList .segment').length===expected,before+1,{timeout:5000});
   assert(await page.locator('#segmentList .segment').count()===before+1,'add segment must create exactly one new section');
 });
 
@@ -71,18 +75,20 @@ await runScenario('mobile-390',{width:390,height:844},async page=>{
   assert(await page.locator('.mobile-price').isVisible(),'mobile sticky price bar must be visible at 390px');
   await page.locator('.type[data-id="mobile"]').click();
   await page.locator('#extraFenceConfig .mobile-choices').waitFor({state:'visible'});
-  await page.waitForFunction(()=>document.activeElement?.dataset?.id==='mobile');
+  await page.waitForFunction(()=>document.activeElement?.dataset?.id==='mobile',null,{timeout:5000});
   await page.locator('#extraFenceConfig [data-ev="solid"]').click();
-  await page.waitForFunction(()=>document.activeElement?.dataset?.ev==='solid');
+  await page.waitForFunction(()=>document.activeElement?.dataset?.ev==='solid',null,{timeout:5000});
+  await page.waitForFunction(()=>document.querySelector('#extraFenceConfig [data-ev="solid"]')?.getAttribute('aria-pressed')==='true',null,{timeout:5000});
   assert((await page.locator('#extraFenceConfig [data-ev="solid"]').getAttribute('aria-pressed'))==='true','mobile solid choice must expose selected state');
 
   await page.locator('#height').fill('180');
-  await page.waitForFunction(()=>new URL(location.href).searchParams.get('height')==='180');
+  await page.waitForFunction(()=>new URL(location.href).searchParams.get('height')==='180',null,{timeout:5000});
   assert((await page.locator('#height').inputValue())==='180','mobile height field must accept a valid value');
 
   await page.locator('#lead').click();
   const modal=page.locator('#modal');
   await modal.waitFor({state:'visible'});
+  await page.waitForFunction(()=>document.querySelector('#modal')?.getAttribute('role')==='dialog'&&document.querySelector('#modal')?.getAttribute('aria-modal')==='true',null,{timeout:5000});
   assert((await modal.getAttribute('role'))==='dialog','lead modal must expose dialog role');
   assert((await modal.getAttribute('aria-modal'))==='true','lead modal must expose aria-modal=true');
   await page.keyboard.press('Escape');
