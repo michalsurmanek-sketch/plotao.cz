@@ -46,6 +46,9 @@ jobs:
             "/supabase/functions/submit-lead/index.ts"
             "/docs/lead-backend-contract.md"
           )
+          contains() {
+            [[ "$1" == *"$2"* ]]
+          }
           verify_private_paths() {
             for path in "${private_paths[@]}"; do
               code="$(curl -sSL --connect-timeout 10 --max-time 20 -o /dev/null -w '%{http_code}' -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "https://plotao.cz${path}?sha=${EXPECTED_SHA}" || true)"
@@ -67,15 +70,15 @@ jobs:
               expected_secure="<meta property=\"og:image:secure_url\" content=\"${image_url}\">"
               expected_twitter='<meta name="twitter:card" content="summary_large_image">'
               expected_twitter_image="<meta name=\"twitter:image\" content=\"${image_url}\">"
-              if ! printf '%s' "$page" | grep -Fq "$expected_og" \
-                || ! printf '%s' "$page" | grep -Fq "$expected_secure" \
-                || ! printf '%s' "$page" | grep -Fq "$expected_twitter" \
-                || ! printf '%s' "$page" | grep -Fq "$expected_twitter_image"; then
+              if ! contains "$page" "$expected_og" \
+                || ! contains "$page" "$expected_secure" \
+                || ! contains "$page" "$expected_twitter" \
+                || ! contains "$page" "$expected_twitter_image"; then
                 echo "Social preview metadata mismatch: path=$path image=$image"
                 return 1
               fi
-              if ! printf '%s' "$page" | grep -Fq "$expected_privacy_link" \
-                || ! printf '%s' "$page" | grep -Fq "$expected_privacy_href"; then
+              if ! contains "$page" "$expected_privacy_link" \
+                || ! contains "$page" "$expected_privacy_href"; then
                 echo "Public footer privacy link missing: path=$path"
                 return 1
               fi
@@ -93,15 +96,29 @@ jobs:
             marker_ok=0
             html_ok=0
             privacy_ok=0
+            home_privacy_href_ok=0
+            home_privacy_link_ok=0
+            home_privacy_notice_ok=0
+            privacy_h1_ok=0
+            privacy_controller_ok=0
+            privacy_email_ok=0
+            privacy_boundary_ok=0
             [ "$actual" = "$EXPECTED_SHA" ] && marker_ok=1
-            printf '%s' "$page" | grep -Fq "$expected_meta" && html_ok=1 || true
-            if printf '%s' "$page" | grep -Fq "$expected_privacy_href" \
-              && printf '%s' "$page" | grep -Fq "$expected_privacy_link" \
-              && printf '%s' "$page" | grep -Fq "$expected_privacy_notice" \
-              && printf '%s' "$privacy" | grep -Fq '<h1>Ochrana osobních údajů</h1>' \
-              && printf '%s' "$privacy" | grep -Fq 'AO Holding s.r.o.' \
-              && printf '%s' "$privacy" | grep -Fq "$expected_controller_email" \
-              && printf '%s' "$privacy" | grep -Fq "$expected_form_boundary"; then
+            contains "$page" "$expected_meta" && html_ok=1 || true
+            contains "$page" "$expected_privacy_href" && home_privacy_href_ok=1 || true
+            contains "$page" "$expected_privacy_link" && home_privacy_link_ok=1 || true
+            contains "$page" "$expected_privacy_notice" && home_privacy_notice_ok=1 || true
+            contains "$privacy" '<h1>Ochrana osobních údajů</h1>' && privacy_h1_ok=1 || true
+            contains "$privacy" 'AO Holding s.r.o.' && privacy_controller_ok=1 || true
+            contains "$privacy" "$expected_controller_email" && privacy_email_ok=1 || true
+            contains "$privacy" "$expected_form_boundary" && privacy_boundary_ok=1 || true
+            if [ "$home_privacy_href_ok" = 1 ] \
+              && [ "$home_privacy_link_ok" = 1 ] \
+              && [ "$home_privacy_notice_ok" = 1 ] \
+              && [ "$privacy_h1_ok" = 1 ] \
+              && [ "$privacy_controller_ok" = 1 ] \
+              && [ "$privacy_email_ok" = 1 ] \
+              && [ "$privacy_boundary_ok" = 1 ]; then
               privacy_ok=1
             fi
             if [ "$marker_ok" = 1 ] && [ "$html_ok" = 1 ] && [ "$privacy_ok" = 1 ]; then
@@ -111,7 +128,7 @@ jobs:
                 exit 0
               fi
             fi
-            echo "Attempt $attempt: marker_ok=$marker_ok html_ok=$html_ok privacy_ok=$privacy_ok expected=$EXPECTED_SHA actual=${actual:-<empty>}"
+            echo "Attempt $attempt: marker_ok=$marker_ok html_ok=$html_ok privacy_ok=$privacy_ok home_href=$home_privacy_href_ok home_link=$home_privacy_link_ok home_notice=$home_privacy_notice_ok privacy_h1=$privacy_h1_ok privacy_controller=$privacy_controller_ok privacy_email=$privacy_email_ok privacy_boundary=$privacy_boundary_ok expected=$EXPECTED_SHA actual=${actual:-<empty>}"
             sleep 10
           done
           echo "plotao.cz did not expose the expected deploy marker, HTML identity, verified controller contact, privacy information and discovery-page social previews consistently"
