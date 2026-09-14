@@ -3,7 +3,7 @@ export const activeScripts=[
 ];
 
 export const requiredArtifact=[
-  'name="plotao-deploy"','/assets/ui-bootstrap-v1.js','data-v="material" class="on"','Ceník aktualizován 12. 9. 2026','<input id="gate" type="checkbox">','<input id="door" type="checkbox">','<title>Kalkulátor ceny plotu a materiálu | PLOTAO.cz</title>','<h1>Spočítejte materiál na celý plot. Hned.</h1>','Spočítejte ověřený materiálový rozpočet plotu podle typu','Ověřený materiál spočítáme hned.','terén, podloží a přístup slouží jako podklady pro individuální realizační nabídku.'
+  'name="plotao-deploy"','/assets/ui-bootstrap-v1.js','data-v="material" class="on"','Ceník aktualizován 12. 9. 2026','<input id="gate" type="checkbox">','<input id="door" type="checkbox">','<title>Kalkulátor ceny plotu a materiálu | PLOTAO.cz</title>','<h1>Spočítejte materiál na celý plot. Hned.</h1>','Spočítejte ověřený materiálový rozpočet plotu podle typu','Ověřený materiál spočítáme hned.','terén, podloží a přístup slouží jako podklady pro individuální realizační nabídku.','data-plotao-privacy-notice="1"','data-plotao-privacy-link="1"','href="/ochrana-osobnich-udaju.html"'
 ];
 
 export const forbiddenArtifact=[
