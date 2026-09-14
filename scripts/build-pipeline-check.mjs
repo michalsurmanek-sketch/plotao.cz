@@ -41,6 +41,7 @@ ok(privacy.includes('public page has no supported footer for privacy link')&&pri
 ok(privacy.includes('linkedPages.length!==expectedLinked.length')&&privacy.includes('privacy footer link on ${linkedPages.length}/${expectedLinked.length} public pages'),'privacy enrichment must verify complete public-page footer coverage after injection');
 ok(privacyPage.includes('AO Holding s.r.o.')&&privacyPage.includes('Ochrana osobních údajů')&&privacyPage.includes('Vyřízení poptávky a příprava nabídky')&&privacyPage.includes('Vaše práva'),'privacy page must identify the controller and explain purpose and data-subject rights');
 ok(privacyPage.includes('href="mailto:info@slevao.cz"')&&privacyPage.includes('>info@slevao.cz</a>'),'privacy page must expose the verified AO Holding contact email as a clickable mailto link');
+ok(privacyPage.includes('<!--email_off-->')&&privacyPage.includes('<!--/email_off-->'),'privacy controller mailto must be protected from Cloudflare email-obfuscation rewriting');
 ok(privacyPage.includes('Poptávkový formulář PLOTAO.cz není určen pro žádosti týkající se ochrany osobních údajů.'),'privacy page must not route data-subject requests through the disabled lead transport');
 ok(!privacyPage.includes('můžete použít poptávkový formulář na PLOTAO.cz')&&!privacyPage.includes('Po doplnění samostatného kontaktního e-mailu'),'privacy page must not advertise an inactive privacy-request channel or placeholder contact');
 ok(!privacyPage.includes('souhlasím se zpracováním'),'necessary lead processing must not be misrepresented as a mandatory consent checkbox');
@@ -63,6 +64,8 @@ ok(smoke.includes('social_pages=(')&&smoke.includes('verify_social_pages()'),'st
 ok(smoke.includes('Social preview metadata mismatch')&&smoke.includes('Social preview image is not publicly reachable'),'standalone live smoke must fail on wrong metadata or unreachable social images');
 ok(smoke.includes('Public footer privacy link missing')&&smoke.includes('privacy footer'),'standalone live smoke must verify the privacy footer on every discovery page');
 ok(smoke.includes('summary_large_image')&&smoke.includes('og:image:secure_url'),'standalone live smoke must require large Twitter cards and secure Open Graph image URLs');
+ok(smoke.includes('contains() {')&&smoke.includes('[[ "$1" == *"$2"* ]]'),'standalone live smoke must use pipefail-safe in-memory HTML matching');
+ok(!smoke.includes("printf '%s' \"$privacy\" | grep -Fq"),'standalone live smoke must not regress to grep -q pipelines for privacy HTML under pipefail');
 ok(workflow.includes('for file in assets/*.js scripts/*.mjs; do node --check "$file"; done'),'Pages workflow must syntax-check assets and build scripts');
 ok(workflow.includes('- name: Run browser E2E on production artifact'),'Pages workflow must browser-test the prepared production artifact before deployment');
 ok(workflow.includes('npm install --no-audit --no-fund --package-lock=false'),'browser E2E must install only the pinned repository tooling without mutating the lock state');
