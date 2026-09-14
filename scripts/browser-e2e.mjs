@@ -52,6 +52,12 @@ await runScenario('desktop',{width:1440,height:1000},async page=>{
   assert((await page.locator('#kalkulator').getAttribute('tabindex'))==='-1','calculator main must be programmatically focusable for skip navigation');
   await skip.focus();
   await page.waitForFunction(()=>document.activeElement?.getAttribute('data-plotao-skip-link')==='1',null,{timeout:5000});
+  await page.waitForFunction(()=>{
+    const el=document.querySelector('[data-plotao-skip-link="1"]');
+    if(!el)return false;
+    const box=el.getBoundingClientRect();
+    return box.top>=0&&box.top<100&&box.bottom>0;
+  },null,{timeout:2000});
   const skipBox=await skip.boundingBox();
   assert(Boolean(skipBox&&skipBox.y>=0&&skipBox.y<100),'focused skip link must become visible near the top of the viewport');
   await skip.press('Enter');
