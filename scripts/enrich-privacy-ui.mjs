@@ -4,17 +4,25 @@ import path from 'node:path';
 const root='dist';
 if(!fs.existsSync(root))throw new Error('Privacy UI: dist/ is missing');
 
+const privacyPage='ochrana-osobnich-udaju.html';
 const privacyHref='/ochrana-osobnich-udaju.html';
 const footerLink=`<a data-plotao-privacy-link="1" href="${privacyHref}">Ochrana osobních údajů</a>`;
-let footerCount=0;
+const publicHtml=fs.readdirSync(root).filter(name=>name.endsWith('.html')).sort();
+let injectedCount=0;
 
-for(const file of fs.readdirSync(root).filter(name=>name.endsWith('.html'))){
+for(const file of publicHtml){
   const full=path.join(root,file);
   let html=fs.readFileSync(full,'utf8');
-  if(file!=='ochrana-osobnich-udaju.html'&&html.includes('class="foot-bottom"')&&!html.includes('data-plotao-privacy-link="1"')){
-    html=html.replace(/(<div class="foot-bottom">\s*<span>[^<]*<\/span>)/i,`$1${footerLink}`);
+  if(file!==privacyPage&&!html.includes('data-plotao-privacy-link="1"')){
+    if(html.includes('class="foot-bottom"')){
+      html=html.replace(/(<div class="foot-bottom">\s*<span>[^<]*<\/span>)/i,`$1${footerLink}`);
+    }else if(/<footer\b[^>]*>[\s\S]*?<\/footer>/i.test(html)){
+      html=html.replace(/<\/footer>/i,` · ${footerLink}</footer>`);
+    }else{
+      throw new Error(`Privacy UI: public page has no supported footer for privacy link: ${file}`);
+    }
     if(!html.includes('data-plotao-privacy-link="1"'))throw new Error(`Privacy UI: could not inject footer link into ${file}`);
-    footerCount++;
+    injectedCount++;
   }
   fs.writeFileSync(full,html,'utf8');
 }
@@ -32,5 +40,13 @@ if(!index.includes('data-plotao-privacy-style="1"')){
 }
 fs.writeFileSync(indexFile,index,'utf8');
 
-if(!fs.existsSync(path.join(root,'ochrana-osobnich-udaju.html')))throw new Error('Privacy UI: public privacy page is missing from dist');
-console.log(`Privacy UI prepared: lead notice + privacy page + ${footerCount} footer link(s)`);
+const privacyFile=path.join(root,privacyPage);
+if(!fs.existsSync(privacyFile))throw new Error('Privacy UI: public privacy page is missing from dist');
+const linkedPages=publicHtml.filter(file=>file!==privacyPage&&fs.readFileSync(path.join(root,file),'utf8').includes('data-plotao-privacy-link="1"'));
+const expectedLinked=publicHtml.filter(file=>file!==privacyPage);
+if(linkedPages.length!==expectedLinked.length){
+  const missing=expectedLinked.filter(file=>!linkedPages.includes(file));
+  throw new Error(`Privacy UI: public pages missing privacy footer link: ${missing.join(', ')}`);
+}
+
+console.log(`Privacy UI prepared: lead notice + privacy page + privacy footer link on ${linkedPages.length}/${expectedLinked.length} public pages (${injectedCount} injected this build)`);
