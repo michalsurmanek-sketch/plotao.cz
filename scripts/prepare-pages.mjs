@@ -141,6 +141,16 @@ for(const file of fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort())fs.c
 for(const file of ['robots.txt','sitemap.xml','CNAME','deploy-marker.txt'])if(fs.existsSync(file))fs.copyFileSync(file,`${dist}/${file}`);
 fs.cpSync('assets',`${dist}/assets`,{recursive:true});
 
+const eshopFile=`${dist}/eshop.html`;
+if(fs.existsSync(eshopFile)){
+  let eshop=fs.readFileSync(eshopFile,'utf8');
+  eshop=eshop.replace(/<link\b[^>]*\brel=["']canonical["'][^>]*>/gi,'');
+  if(!eshop.includes('</head>'))throw new Error('E-shop build: </head> not found');
+  eshop=eshop.replace('</head>','<link rel="canonical" href="https://plotao.cz/eshop.html"></head>');
+  fs.writeFileSync(eshopFile,eshop,'utf8');
+  if(!eshop.includes('<link rel="canonical" href="https://plotao.cz/eshop.html">'))throw new Error('E-shop build: canonical injection failed');
+}
+
 if(logoStats.kind==='vector')console.log(`Logo vector validated: ${logoStats.after} bytes; no embedded raster payload`);
 else console.log(`Logo optimized losslessly: ${logoStats.before} -> ${logoStats.after} bytes (embedded PNG ${logoStats.pngBefore} -> ${logoStats.pngAfter})`);
 console.log(`Favicon optimized losslessly: ${faviconStats.before} -> ${faviconStats.after} bytes (embedded PNG ${faviconStats.pngBefore} -> ${faviconStats.pngAfter})`);
