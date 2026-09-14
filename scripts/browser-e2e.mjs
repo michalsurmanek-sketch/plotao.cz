@@ -92,7 +92,8 @@ await runScenario('desktop',{width:1440,height:1000},async page=>{
   assert(await page.locator('#extraFenceConfig [data-ev="mesh"]').count()===1,'mobile configurator must expose its mesh variant');
 
   await selectType(page,'other','#extraFenceConfig');
-  assert((await text(page.locator('#extraFenceConfig'))).includes('Atypické oplocení'),'atypical branch must render its individual-offer explanation');
+  await page.waitForFunction(()=>document.querySelector('#extraFenceConfig')?.textContent?.includes('Atypické oplocení'),null,{timeout:5000});
+  assert((await text(page.locator('#extraFenceConfig'))).includes('individuální nabídku'),'atypical branch must render its individual-offer explanation');
 
   await selectType(page,'panel','#options.show');
   await page.locator('#options [data-pv="2d"]').click();
