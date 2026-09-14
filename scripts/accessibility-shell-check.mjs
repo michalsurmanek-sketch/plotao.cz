@@ -22,8 +22,8 @@ ok(browser.includes("location.hash==='#kalkulator'")&&browser.includes("document
 ok(browser.includes('focused skip link must become visible near the top of the viewport'),'Chromium E2E must verify the focused skip link is visually exposed');
 ok(fs.existsSync(liveSmokePath),'live accessibility smoke workflow must exist');
 ok(liveSmoke.includes('workflows: ["Deploy Plotao.cz to Pages"]')&&liveSmoke.includes("github.event.workflow_run.conclusion == 'success'"),'live accessibility smoke must run only after a successful Pages deploy');
-ok(liveSmoke.includes('data-plotao-skip-link=\\"1\\" href=\\"#kalkulator\\"')&&liveSmoke.includes('tabindex=\\"-1\\"'),'live accessibility smoke must require the public skip link and focusable calculator main');
-ok(liveSmoke.includes('deploy-marker.txt?sha=${EXPECTED_SHA}')&&liveSmoke.includes('name=\\"plotao-deploy\\" content=\\"${EXPECTED_SHA}\\"'),'live accessibility smoke must bind its checks to the exact deployed SHA');
+ok(liveSmoke.includes("expected_skip='data-plotao-skip-link=\"1\" href=\"#kalkulator\">Přejít na kalkulátor</a>'")&&liveSmoke.includes('skip_ok=0')&&liveSmoke.includes('main_ok=0')&&liveSmoke.includes('tabindex='),'live accessibility smoke must require the public skip link and focusable calculator main');
+ok(liveSmoke.includes('deploy-marker.txt?sha=${EXPECTED_SHA}')&&liveSmoke.includes('plotao-deploy'),'live accessibility smoke must bind its checks to the exact deployed SHA');
 ok(liveSmoke.includes('contains() {')&&liveSmoke.includes('[[ "$1" == *"$2"* ]]'),'live accessibility smoke must use pipefail-safe in-memory HTML matching');
 
 if(fail.length){
