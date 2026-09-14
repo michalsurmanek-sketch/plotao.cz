@@ -102,7 +102,9 @@ html=html.replace(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*><\/script>/gi,(tag,
 });
 const assetVersion=src=>createHash('sha256').update(fs.readFileSync('.'+src)).digest('hex').slice(0,12);
 const versionedScript=src=>`${src}?v=${assetVersion(src)}`;
-const orderedScripts=activeScripts.map(src=>`<script src="${versionedScript(src)}"></script>`).join('');
+// Classic defer scripts download without blocking HTML parsing, execute in manifest
+// order, and still complete before DOMContentLoaded. This preserves global dependencies.
+const orderedScripts=activeScripts.map(src=>`<script defer src="${versionedScript(src)}"></script>`).join('');
 html=html.replace('</body>',orderedScripts+'</body>');
 
 if(!html.includes('<main class="wrap" id="kalkulator">')) throw new Error('Pages build source missing calculator anchor');
@@ -119,8 +121,8 @@ const schemaTag=`<script type="application/ld+json" data-plotao-schema="1">${JSO
 html=html.replace(/<meta\s+name=["']twitter:(?:card|title|description)["'][^>]*>/gi,'');
 const socialMeta='<meta name="twitter:card" content="summary"><meta name="twitter:title" content="Kalkulátor ceny plotu a materiálu | PLOTAO.cz"><meta name="twitter:description" content="Ověřený materiálový rozpočet plotu podle typu, výšky, úseků a otvorů.">';
 
-// Start only the small dependency-critical prefix early. Execution remains in the
-// original classic-script order at the end of body; preloads only remove download wait.
+// Start only the small dependency-critical prefix early. Deferred execution remains
+// in manifest order; preloads only remove download wait for the dependency prefix.
 html=html.replace(/<link\s+rel=["']preload["'][^>]*data-plotao-critical=["'][^"']*["'][^>]*>/gi,'');
 const criticalScripts=activeScripts.slice(0,8);
 const criticalPreloads=criticalScripts.map(src=>`<link rel="preload" as="script" href="${versionedScript(src)}" data-plotao-critical="1">`).join('');
@@ -142,6 +144,6 @@ fs.cpSync('assets',`${dist}/assets`,{recursive:true});
 if(logoStats.kind==='vector')console.log(`Logo vector validated: ${logoStats.after} bytes; no embedded raster payload`);
 else console.log(`Logo optimized losslessly: ${logoStats.before} -> ${logoStats.after} bytes (embedded PNG ${logoStats.pngBefore} -> ${logoStats.pngAfter})`);
 console.log(`Favicon optimized losslessly: ${faviconStats.before} -> ${faviconStats.after} bytes (embedded PNG ${faviconStats.pngBefore} -> ${faviconStats.pngAfter})`);
-console.log(`Critical script preload prepared: ${criticalScripts.length} versioned scripts; execution order unchanged`);
+console.log(`Deferred script execution prepared: ${activeScripts.length} content-versioned modules; ${criticalScripts.length} critical preloads; manifest order preserved`);
 console.log(`Public Pages tree prepared in ${dist}/ with ${fs.readdirSync(dist).length} top-level entries; repository internals excluded`);
 console.log(`Pages build prepared from clean source: ${activeScripts.length} content-versioned modules, SHA ${sha}`);
