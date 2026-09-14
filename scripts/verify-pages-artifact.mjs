@@ -93,7 +93,8 @@ function verifyEmbeddedPngSvg(file,label,maxSize){
 const logoSize=verifyVectorLogo(`${root}/assets/logo-plotao.svg`);
 const faviconSize=verifyEmbeddedPngSvg(`${root}/assets/favicon.svg`,'favicon',45763);
 
-const scriptSources=[...html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*><\/script>/gi)].map(match=>match[1]);
+const scriptTags=[...html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*><\/script>/gi)].map(match=>({tag:match[0],src:match[1]}));
+const scriptSources=scriptTags.map(item=>item.src);
 const normalizedSources=scriptSources.map(src=>src.split('?')[0]);
 const managedSources=normalizedSources.filter(src=>activeScripts.includes(src));
 const duplicateSources=managedSources.filter((src,index)=>managedSources.indexOf(src)!==index);
@@ -101,6 +102,8 @@ if(duplicateSources.length) throw new Error(`Pages artifact contains duplicate m
 if(managedSources.length!==activeScripts.length||managedSources.some((src,index)=>src!==activeScripts[index])){
   throw new Error(`Pages artifact script order differs from manifest; expected=${JSON.stringify(activeScripts)} actual=${JSON.stringify(managedSources)}`);
 }
+const blockingManaged=scriptTags.filter(({src,tag})=>activeScripts.includes(src.split('?')[0])&&!/\bdefer\b/i.test(tag));
+if(blockingManaged.length)throw new Error(`Pages artifact managed scripts must all be deferred: ${JSON.stringify(blockingManaged.map(item=>item.src))}`);
 const managedVersioned=scriptSources.filter(src=>activeScripts.includes(src.split('?')[0]));
 for(const src of managedVersioned){
   const [clean,query='']=src.split('?');
@@ -121,4 +124,4 @@ for(const src of preloadSources)if(!scriptSources.includes(src))throw new Error(
 
 const posGeo=html.indexOf('/assets/geometry-v3.js'),posGuard=html.indexOf('/assets/geometry-validity-v1.js'),posPanel=html.indexOf('/assets/panel-pricing-v5.js');
 if(!(posGeo>=0&&posGeo<posGuard&&posGuard<posPanel)) throw new Error('Geometry validity guard must load after geometry and before pricing modules');
-console.log(`Pages artifact integrity OK: ${marker}; strict public dist has ${topLevel.size} top-level entries, ${activeScripts.length} content-versioned modules, ${preloadSources.length} critical preloads, social image ${socialWidth}x${socialHeight}, vector logo (${logoSize} bytes) and favicon (${faviconSize} bytes)`);
+console.log(`Pages artifact integrity OK: ${marker}; strict public dist has ${topLevel.size} top-level entries, ${activeScripts.length} deferred content-versioned modules, ${preloadSources.length} critical preloads, social image ${socialWidth}x${socialHeight}, vector logo (${logoSize} bytes) and favicon (${faviconSize} bytes)`);
