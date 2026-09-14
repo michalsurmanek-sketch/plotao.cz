@@ -77,6 +77,9 @@ jobs:
       - name: Prepare production Pages artifact
         run: node scripts/prepare-pages.mjs
 
+      - name: Enrich production privacy UI
+        run: node scripts/enrich-privacy-ui.mjs
+
       - name: Enrich production social metadata
         run: node scripts/enrich-social-meta.mjs
 
