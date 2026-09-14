@@ -69,7 +69,9 @@ await runScenario('desktop',{width:1440,height:1000},async page=>{
   assert((await gap.inputValue())==='100','privacy gap must display the bounded 100 mm value after commit');
 
   await selectType(page,'aluminium','#aluminiumConfigBox');
-  await page.locator('#aluColor').selectOption('ral');
+  const aluColor=page.locator('#aluColor');
+  await aluColor.focus();
+  await aluColor.selectOption('ral');
   await page.waitForFunction(()=>document.activeElement?.id==='aluColor',null,{timeout:5000});
   assert(!(await page.locator('#aluRal').isDisabled()),'custom RAL input must enable after selecting another RAL');
 
