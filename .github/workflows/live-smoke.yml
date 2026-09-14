@@ -13,7 +13,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Verify deployed marker, HTML, privacy, social metadata and private paths on custom domain
+      - name: Verify deployed marker, HTML, privacy, structured data, social metadata and private paths on custom domain
         env:
           EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
@@ -42,6 +42,18 @@ jobs:
             "/zdeny-plot.html|category-masonry.webp"
             "/mobilni-oploceni.html|category-mobile.webp"
             "/specialni-oploceni.html|category-other.webp"
+          )
+          structured_pages=(
+            "/panelovy-plot.html"
+            "/pletivovy-plot.html"
+            "/betonovy-plot.html"
+            "/hlinikovy-plot.html"
+            "/plot-na-soukromi.html"
+            "/gabionovy-plot.html"
+            "/kovovy-plot.html"
+            "/zdeny-plot.html"
+            "/mobilni-oploceni.html"
+            "/specialni-oploceni.html"
           )
           private_paths=(
             "/scripts/seo-regression-check.mjs"
@@ -111,6 +123,21 @@ jobs:
               echo "Discovery page OK: $path -> $image + privacy footer"
             done
           }
+          verify_structured_data_pages() {
+            local path page
+            for path in "${structured_pages[@]}"; do
+              page="$(curl -fsSL --connect-timeout 10 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "https://plotao.cz${path}?sha=${EXPECTED_SHA}" 2>/dev/null || true)"
+              if ! contains "$page" '"@type":"BreadcrumbList"'; then
+                echo "Live landing page missing BreadcrumbList structured data: $path"
+                return 1
+              fi
+              if contains "$page" '"@type":"FAQPage"'; then
+                echo "Deprecated FAQPage structured data returned on live landing page: $path"
+                return 1
+              fi
+              echo "Structured data OK: $path -> BreadcrumbList, no FAQPage"
+            done
+          }
           for attempt in $(seq 1 18); do
             actual="$(curl -fsSL --connect-timeout 10 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$marker_url" 2>/dev/null | tr -d '\r\n' || true)"
             page="$(curl -fsSL --connect-timeout 10 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$html_url" 2>/dev/null || true)"
@@ -148,14 +175,14 @@ jobs:
               privacy_ok=1
             fi
             if [ "$marker_ok" = 1 ] && [ "$html_ok" = 1 ] && [ "$privacy_ok" = 1 ]; then
-              if verify_sitemap "$sitemap" && verify_social_pages; then
+              if verify_sitemap "$sitemap" && verify_social_pages && verify_structured_data_pages; then
                 verify_private_paths
-                echo "Live smoke confirms expected public deploy, privacy noindex + sitemap exclusion, verified controller contact, privacy information on all discovery pages, social previews and private repository paths: $EXPECTED_SHA"
+                echo "Live smoke confirms expected public deploy, privacy noindex + sitemap exclusion, verified controller contact, privacy information, social previews, sanitized structured data and private repository paths: $EXPECTED_SHA"
                 exit 0
               fi
             fi
             echo "Attempt $attempt: marker_ok=$marker_ok html_ok=$html_ok privacy_ok=$privacy_ok home_href=$home_privacy_href_ok home_link=$home_privacy_link_ok home_notice=$home_privacy_notice_ok privacy_h1=$privacy_h1_ok privacy_controller=$privacy_controller_ok privacy_email=$privacy_email_ok privacy_boundary=$privacy_boundary_ok privacy_robots=$privacy_robots_ok expected=$EXPECTED_SHA actual=${actual:-<empty>}"
             sleep 10
           done
-          echo "plotao.cz did not expose the expected deploy marker, HTML identity, privacy noindex/sitemap state, verified controller contact, privacy information and discovery-page social previews consistently"
+          echo "plotao.cz did not expose the expected deploy marker, HTML identity, privacy noindex/sitemap state, verified controller contact, privacy information, social previews and sanitized landing structured data consistently"
           exit 1
