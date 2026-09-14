@@ -3,9 +3,9 @@ const $=s=>document.querySelector(s);
 let previousHeight=null;
 function selectedType(){return $('.type.on')?.dataset.id||''}
 function fixedHeight(){
- const c=window.PLOTAO_EXTRA;
- if(selectedType()!=='mobile'||c?.type!=='mobile')return null;
- return c.variant==='barrier'?110:c.variant==='solid'?200:190;
+ if(selectedType()!=='mobile')return null;
+ const variant=$('#extraFenceConfig [data-eg="variant"].on')?.dataset.ev||window.PLOTAO_EXTRA?.variant||'mesh';
+ return variant==='barrier'?110:variant==='solid'?200:190;
 }
 function ensureNote(grid){
  let n=$('#mobileFixedHeightNote');
