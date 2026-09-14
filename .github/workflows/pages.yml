@@ -78,6 +78,9 @@ jobs:
       - name: Prepare production Pages artifact
         run: node scripts/prepare-pages.mjs
 
+      - name: Sanitize production structured data
+        run: node scripts/enrich-structured-data.mjs
+
       - name: Enrich production privacy UI
         run: node scripts/enrich-privacy-ui.mjs
 
