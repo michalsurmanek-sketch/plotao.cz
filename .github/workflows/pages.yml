@@ -34,6 +34,7 @@ jobs:
           for file in assets/*.js scripts/*.mjs; do node --check "$file"; done
           node scripts/build-pipeline-check.mjs
           node scripts/accessibility-shell-check.mjs
+          node scripts/semantic-structure-check.mjs
           node scripts/source-boundary-check.mjs
           node scripts/calculator-regression-check.mjs
           node scripts/panel-pricing-scenario-check.mjs
