@@ -8,6 +8,10 @@ const browser=fs.readFileSync('scripts/browser-e2e.mjs','utf8');
 const privacyPath='scripts/enrich-privacy-ui.mjs';
 const privacy=fs.readFileSync(privacyPath,'utf8');
 const privacyPage=fs.readFileSync('ochrana-osobnich-udaju.html','utf8');
+const structuredPath='scripts/enrich-structured-data.mjs';
+const structured=fs.readFileSync(structuredPath,'utf8');
+const structuredArtifactPath='scripts/structured-data-artifact-check.mjs';
+const structuredArtifact=fs.readFileSync(structuredArtifactPath,'utf8');
 const socialPath='scripts/enrich-social-meta.mjs';
 const social=fs.readFileSync(socialPath,'utf8');
 const socialArtifactPath='scripts/social-artifact-check.mjs';
@@ -29,6 +33,10 @@ const socialPages=[
   ['mobilni-oploceni.html','/mobilni-oploceni.html','category-mobile.webp'],
   ['specialni-oploceni.html','/specialni-oploceni.html','category-other.webp']
 ];
+const structuredPages=[
+  '/panelovy-plot.html','/pletivovy-plot.html','/betonovy-plot.html','/hlinikovy-plot.html','/plot-na-soukromi.html',
+  '/gabionovy-plot.html','/kovovy-plot.html','/zdeny-plot.html','/mobilni-oploceni.html','/specialni-oploceni.html'
+];
 const fail=[];
 const ok=(v,m)=>{if(!v)fail.push(m)};
 ok(fs.existsSync('scripts/public-link-integrity-check.mjs'),'public link integrity checker must exist and run from the build gate');
@@ -47,12 +55,29 @@ ok(privacyPage.includes('<!--email_off-->')&&privacyPage.includes('<!--/email_of
 ok(privacyPage.includes('Poptávkový formulář PLOTAO.cz není určen pro žádosti týkající se ochrany osobních údajů.'),'privacy page must not route data-subject requests through the disabled lead transport');
 ok(!privacyPage.includes('můžete použít poptávkový formulář na PLOTAO.cz')&&!privacyPage.includes('Po doplnění samostatného kontaktního e-mailu'),'privacy page must not advertise an inactive privacy-request channel or placeholder contact');
 ok(!privacyPage.includes('souhlasím se zpracováním'),'necessary lead processing must not be misrepresented as a mandatory consent checkbox');
+
+ok(fs.existsSync(structuredPath),'production structured-data sanitizer must exist');
+ok(fs.existsSync(structuredArtifactPath),'production structured-data artifact checker must exist');
+ok(workflow.includes('- name: Sanitize production structured data')&&workflow.includes(`node ${structuredPath}`),'Pages workflow must sanitize landing structured data after dist preparation');
+ok(workflow.includes('- name: Verify production structured data')&&workflow.includes(`node ${structuredArtifactPath}`),'Pages workflow must verify sanitized landing structured data before deploy');
+ok(structured.includes("'FAQPage'")&&structured.includes("'BreadcrumbList'")&&structured.includes('landingPages'),'structured-data sanitizer must remove FAQPage and preserve BreadcrumbList across the reviewed landing pages');
+ok(structuredArtifact.includes('deprecated FAQPage remained')&&structuredArtifact.includes('BreadcrumbList missing'),'structured-data artifact checker must reject FAQPage and missing BreadcrumbList in production');
+for(const path of structuredPages){
+  const file=path.slice(1);
+  ok(structured.includes(`'${file}'`),`structured-data sanitizer must include ${file}`);
+  ok(structuredArtifact.includes(`'${file}'`),`structured-data artifact checker must include ${file}`);
+  ok(smoke.includes(`"${path}"`),`standalone live smoke must include structured-data landing ${path}`);
+}
+ok(smoke.includes('structured_pages=(')&&smoke.includes('verify_structured_data_pages()'),'standalone live smoke must iterate all 10 structured-data landing pages');
+ok(smoke.includes('Live landing page missing BreadcrumbList structured data')&&smoke.includes('Deprecated FAQPage structured data returned on live landing page'),'standalone live smoke must fail if BreadcrumbList disappears or FAQPage returns');
+ok(smoke.includes('verify_structured_data_pages'),'standalone live smoke must make structured-data verification part of live success');
+
 ok(workflow.includes('- name: Enrich production social metadata')&&workflow.includes(`node ${socialPath}`),'Pages workflow must enrich social metadata on the prepared artifact');
 ok(fs.existsSync(socialArtifactPath),'discovery social artifact checker must exist');
 ok(workflow.includes('- name: Verify discovery social artifact')&&workflow.includes(`node ${socialArtifactPath}`),'Pages workflow must verify every discovery social card after enrichment');
 ok(workflow.includes('node scripts/verify-pages-artifact.mjs'),'Pages workflow must use verify-pages-artifact.mjs');
-const preparePos=workflow.indexOf('node scripts/prepare-pages.mjs'),privacyPos=workflow.indexOf(`node ${privacyPath}`),socialPos=workflow.indexOf(`node ${socialPath}`),socialArtifactPos=workflow.indexOf(`node ${socialArtifactPath}`),verifyPos=workflow.indexOf('node scripts/verify-pages-artifact.mjs'),browserPos=workflow.indexOf('- name: Run browser E2E on production artifact');
-ok(preparePos>=0&&preparePos<privacyPos&&privacyPos<socialPos&&socialPos<socialArtifactPos&&socialArtifactPos<verifyPos&&verifyPos<browserPos,'privacy/social enrichment and discovery social verification must run after dist preparation and before generic artifact/browser verification');
+const preparePos=workflow.indexOf('node scripts/prepare-pages.mjs'),structuredPos=workflow.indexOf(`node ${structuredPath}`),structuredArtifactPos=workflow.indexOf(`node ${structuredArtifactPath}`),privacyPos=workflow.indexOf(`node ${privacyPath}`),socialPos=workflow.indexOf(`node ${socialPath}`),socialArtifactPos=workflow.indexOf(`node ${socialArtifactPath}`),verifyPos=workflow.indexOf('node scripts/verify-pages-artifact.mjs'),browserPos=workflow.indexOf('- name: Run browser E2E on production artifact');
+ok(preparePos>=0&&preparePos<structuredPos&&structuredPos<structuredArtifactPos&&structuredArtifactPos<privacyPos&&privacyPos<socialPos&&socialPos<socialArtifactPos&&socialArtifactPos<verifyPos&&verifyPos<browserPos,'structured-data sanitization/verification plus privacy/social enrichment must run after dist preparation and before generic artifact/browser verification');
 ok(fs.existsSync(socialPath),'social metadata enrichment script must exist');
 ok(social.includes('summary_large_image')&&social.includes('og:image:width')&&social.includes('og:image:height')&&social.includes('og:image:secure_url'),'social metadata enrichment must publish complete large-card image metadata');
 ok(social.includes('if(width<300||height<180)'),'social metadata enrichment must reject undersized discovery-page card images');
@@ -119,4 +144,4 @@ for(const src of activeScripts){
   ok(fs.existsSync(file),`Pages manifest references missing asset: ${file}`);
 }
 if(fail.length){console.error('Build pipeline checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; Node 24 Pages actions, headless-only browser install, verified privacy controller contact, public links, browser/privacy information, all public-page privacy footers, strict dist, ${socialPages.length} enriched + artifact-verified + live-verified discovery social cards, all 10 browser-tested fence types, reviewed homepage performance budget, retry-safe Pages artifacts and both pipefail-safe live verification paths protect deployment`);
+console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; Node 24 Pages actions, headless-only browser install, verified privacy controller contact, public links, browser/privacy information, all public-page privacy footers, strict dist, ${socialPages.length} enriched + artifact-verified + live-verified discovery social cards, ${structuredPages.length} sanitized + artifact-verified + live-verified landing schemas, all 10 browser-tested fence types, reviewed homepage performance budget, retry-safe Pages artifacts and both pipefail-safe live verification paths protect deployment`);
