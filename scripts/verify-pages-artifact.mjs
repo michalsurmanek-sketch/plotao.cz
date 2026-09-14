@@ -30,9 +30,31 @@ if(schema?.['@context']!=='https://schema.org'||website?.url!=='https://plotao.c
   throw new Error('Pages artifact structured data does not match the public Plotao website/calculator contract');
 }
 
-for(const token of ['<meta name="twitter:card" content="summary">','<meta name="twitter:title" content="Kalkulátor ceny plotu a materiálu | PLOTAO.cz">','<meta name="twitter:description" content="Ověřený materiálový rozpočet plotu podle typu, výšky, úseků a otvorů.">']){
-  if(!html.includes(token))throw new Error(`Pages artifact missing social metadata: ${token}`);
-}
+const socialImageUrl='https://plotao.cz/assets/fence-types/panelovy-3d.webp';
+const socialImageAlt='Panelový 3D plot – ukázka typu oplocení v kalkulátoru PLOTAO.cz';
+const socialTokens=[
+  '<meta property="og:locale" content="cs_CZ">',
+  '<meta property="og:site_name" content="PLOTAO.cz">',
+  `<meta property="og:image" content="${socialImageUrl}">`,
+  `<meta property="og:image:secure_url" content="${socialImageUrl}">`,
+  '<meta property="og:image:type" content="image/webp">',
+  '<meta property="og:image:width" content="480">',
+  '<meta property="og:image:height" content="300">',
+  `<meta property="og:image:alt" content="${socialImageAlt}">`,
+  '<meta name="twitter:card" content="summary_large_image">',
+  '<meta name="twitter:title" content="Kalkulátor ceny plotu a materiálu | PLOTAO.cz">',
+  '<meta name="twitter:description" content="Ověřený materiálový rozpočet plotu podle typu, výšky, úseků a otvorů.">',
+  `<meta name="twitter:image" content="${socialImageUrl}">`,
+  `<meta name="twitter:image:alt" content="${socialImageAlt}">`
+];
+for(const token of socialTokens)if(!html.includes(token))throw new Error(`Pages artifact missing social metadata: ${token}`);
+const socialImageFile=`${root}/assets/fence-types/panelovy-3d.webp`;
+if(!fs.existsSync(socialImageFile))throw new Error('Pages artifact social image is missing');
+const webp=fs.readFileSync(socialImageFile);
+if(webp.length<30||webp.toString('ascii',0,4)!=='RIFF'||webp.toString('ascii',8,12)!=='WEBP'||webp.toString('ascii',12,16)!=='VP8X')throw new Error('Pages artifact social image is not the reviewed VP8X WebP');
+const socialWidth=1+webp.readUIntLE(24,3),socialHeight=1+webp.readUIntLE(27,3);
+if(socialWidth!==480||socialHeight!==300)throw new Error(`Pages artifact social image dimensions changed: ${socialWidth}x${socialHeight}`);
+
 const logoTags=[...html.matchAll(/<img\b[^>]*\bsrc=["']\/assets\/logo-plotao\.svg["'][^>]*>/gi)].map(m=>m[0]);
 if(!logoTags.length||logoTags.some(tag=>!(/\bwidth=["']2172["']/i.test(tag)&&/\bheight=["']724["']/i.test(tag)))){
   throw new Error('Pages artifact logo images must expose their intrinsic 2172x724 dimensions to prevent layout shift');
@@ -87,4 +109,4 @@ for(const src of preloadSources)if(!scriptSources.includes(src))throw new Error(
 
 const posGeo=html.indexOf('/assets/geometry-v3.js'),posGuard=html.indexOf('/assets/geometry-validity-v1.js'),posPanel=html.indexOf('/assets/panel-pricing-v5.js');
 if(!(posGeo>=0&&posGeo<posGuard&&posGuard<posPanel)) throw new Error('Geometry validity guard must load after geometry and before pricing modules');
-console.log(`Pages artifact integrity OK: ${marker}; strict public dist has ${topLevel.size} top-level entries, ${activeScripts.length} content-versioned modules, ${preloadSources.length} critical preloads, optimized logo (${logoSize} bytes) and favicon (${faviconSize} bytes)`);
+console.log(`Pages artifact integrity OK: ${marker}; strict public dist has ${topLevel.size} top-level entries, ${activeScripts.length} content-versioned modules, ${preloadSources.length} critical preloads, social image ${socialWidth}x${socialHeight}, optimized logo (${logoSize} bytes) and favicon (${faviconSize} bytes)`);
