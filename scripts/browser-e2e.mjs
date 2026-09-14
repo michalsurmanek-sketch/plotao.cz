@@ -140,7 +140,12 @@ await runScenario('mobile-390',{width:390,height:844},async page=>{
   const privacyH1=page.locator('h1');
   assert(await privacyH1.isVisible(),'privacy page H1 must be visible in browser');
   assert((await text(privacyH1))==='Ochrana osobních údajů','privacy page must expose the expected H1');
-  assert((await text(page.locator('body'))).includes('AO Holding s.r.o.'),'privacy page must identify AO Holding s.r.o. as controller');
+  const privacyBody=await text(page.locator('body'));
+  assert(privacyBody.includes('AO Holding s.r.o.'),'privacy page must identify AO Holding s.r.o. as controller');
+  const controllerEmail=page.locator('a[href="mailto:info@slevao.cz"]');
+  assert(await controllerEmail.isVisible(),'privacy page must expose a visible verified controller email');
+  assert((await text(controllerEmail))==='info@slevao.cz','privacy controller email text must match the verified address');
+  assert(privacyBody.includes('Poptávkový formulář PLOTAO.cz není určen pro žádosti týkající se ochrany osobních údajů.'),'privacy page must not route data-subject requests into the disabled lead form');
   assert(await page.locator('a[href="/#kalkulator"]').first().isVisible(),'privacy page must offer a visible route back to the calculator');
 });
 
