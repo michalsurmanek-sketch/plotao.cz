@@ -124,6 +124,36 @@ await runScenario('desktop',{width:1440,height:1000},async page=>{
   await page.locator('#addSegment').click();
   await page.waitForFunction(expected=>document.querySelectorAll('#segmentList .segment').length===expected,before+1,{timeout:5000});
   assert(await page.locator('#segmentList .segment').count()===before+1,'add segment must create exactly one new section');
+
+  await page.locator('[data-shape-mode="rectangle"]').click();
+  await page.locator('#plotRectFields').waitFor({state:'visible'});
+  await page.locator('#plotRectWidth').fill('20');
+  await page.locator('#plotRectDepth').fill('15');
+  await page.locator('#plotRectApply').click();
+  await page.waitForFunction(()=>window.PLOTAO_PLOT_SHAPE?.mode==='rectangle'&&window.PLOTAO_PLOT_SHAPE?.closed===true,null,{timeout:5000});
+  await page.waitForFunction(()=>document.querySelectorAll('#segmentList .segment').length===4,null,{timeout:5000});
+  const rectangle=await page.evaluate(()=>({
+    names:[...document.querySelectorAll('#segmentList [data-segment-name]')].map(x=>x.value),
+    lengths:[...document.querySelectorAll('#segmentList .segment input[type=number]')].map(x=>Number(x.value)),
+    links:window.PLOTAO_SEGMENT_CONNECTIONS,
+    shape:window.PLOTAO_PLOT_SHAPE,
+    geometry:window.PLOTAO_GEOMETRY
+  }));
+  assert(JSON.stringify(rectangle.names)===JSON.stringify(['Strana A','Strana B','Strana C','Strana D']),'rectangle mode must name its four sides A–D');
+  assert(JSON.stringify(rectangle.lengths)===JSON.stringify([20,15,20,15]),'20 × 15 rectangle must create 20/15/20/15 m sides');
+  assert(JSON.stringify(rectangle.links)===JSON.stringify([false,true,true,true]),'rectangle sides B–D must connect by corners');
+  assert(rectangle.geometry?.closed===true&&rectangle.geometry?.corner===4&&rectangle.geometry?.end===0&&rectangle.geometry?.corners===4,'closed rectangle material geometry must have 4 corners and 0 end posts');
+  assert(rectangle.geometry?.gross===70,'20 × 15 rectangle perimeter must equal 70 m');
+  assert((await text(page.locator('#plotRectStatus'))).includes('4 rohy'),'rectangle status must explain the four closed corners');
+  assert(await page.locator('.plotao-segment-mini').count()===4,'rectangle mode must render one mini drawing per side');
+  assert((await page.locator('#planLines svg').getAttribute('aria-label'))?.includes('uzavřený obdélník'),'top-view SVG must identify the closed rectangle');
+  assert(await page.locator('#addSegment').isDisabled(),'closed rectangle must lock adding a fifth side');
+
+  await page.locator('#plotRectWidth').fill('12');
+  await page.locator('#plotSquareApply').click();
+  await page.waitForFunction(()=>window.PLOTAO_GEOMETRY?.closed===true&&window.PLOTAO_GEOMETRY?.gross===48&&window.PLOTAO_GEOMETRY?.corner===4,null,{timeout:5000});
+  assert((await page.locator('#plotRectDepth').inputValue())==='12','square shortcut must copy width into depth');
+  assert((await text(page.locator('#plotRectStatus'))).includes('Uzavřený čtverec'),'equal sides must be described as a closed square');
 });
 
 await runScenario('mobile-390',{width:390,height:844},async page=>{
@@ -173,4 +203,4 @@ if(failures.length){
   console.error('Browser E2E failed:\n- '+failures.join('\n- '));
   process.exit(1);
 }
-console.log('Browser E2E OK: all 10 fence types plus desktop, 390px mobile, keyboard skip navigation and privacy flows passed without browser-console or same-origin request failures');
+console.log('Browser E2E OK: all 10 fence types plus desktop, 390px mobile, closed rectangle/square plot mode, keyboard skip navigation and privacy flows passed without browser-console or same-origin request failures');
