@@ -90,7 +90,7 @@ jobs:
         run: |
           set -euo pipefail
           npm install --no-audit --no-fund --package-lock=false
-          npx playwright install --with-deps chromium
+          npx playwright install --with-deps --only-shell chromium
           python3 -m http.server 4173 --directory dist >/tmp/plotao-e2e-http.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid" >/dev/null 2>&1 || true' EXIT
