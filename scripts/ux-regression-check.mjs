@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8'),fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
-const scroll=read('assets/step-scroll-v1.js'),accuracy=read('assets/accuracy-guard.js'),a11y=read('assets/choice-accessibility-v1.js'),modal=read('assets/modal-accessibility-v1.js'),segmentLimit=read('assets/segment-limit-ui-v1.js'),leadMode=read('assets/lead-mode-ui-v1.js'),ui=read('assets/ui-bootstrap-v1.js'),extra=read('assets/extra-fence-config.js'),manifest=read('scripts/pages-manifest.mjs');
+const scroll=read('assets/step-scroll-v1.js'),accuracy=read('assets/accuracy-guard.js'),a11y=read('assets/choice-accessibility-v1.js'),modal=read('assets/modal-accessibility-v1.js'),segmentLimit=read('assets/segment-limit-ui-v1.js'),leadMode=read('assets/lead-mode-ui-v1.js'),ui=read('assets/ui-bootstrap-v1.js'),extra=read('assets/extra-fence-config.js'),privacy=read('assets/privacy-config.js'),aluminium=read('assets/aluminium-config.js'),metal=read('assets/metal-config.js'),concrete=read('assets/concrete-config.js'),manifest=read('scripts/pages-manifest.mjs');
 
 for(const [type,id] of Object.entries({privacy:'#privacyConfig',aluminium:'#aluminiumConfigBox',gabion:'#gabionOptionsBox',metal:'#metalConfig',concrete:'#concreteConfig',masonry:'#extraFenceConfig',mobile:'#extraFenceConfig',other:'#extraFenceConfig'}))ok(scroll.includes(type+":'"+id+"'")||scroll.includes(type+':"'+id+'"'),'next-step scroll must target the visible '+type+' configuration');
 ok(scroll.includes('scrollToEl(nextAfterType,180)'),'type scroll target must be resolved after dynamic configuration modules render');
@@ -21,6 +21,10 @@ ok(ui.includes("state.type=value;syncUrlType(value);renderTypes();renderOptions(
 ok(extra.includes("function focusChoice(group,value){queueMicrotask(()=>{const target=$('#extraFenceConfig [data-eg=\"'+group+'\"][data-ev=\"'+value+'\"]')")&&extra.includes('target.focus({preventScroll:true})'),'masonry/mobile dynamic choices must restore focus after their configuration rerender');
 ok(extra.includes('s[group]=value;render();focusChoice(group,value)'),'extra fence option click must restore focus to the same logical choice after render');
 ok((extra.match(/loading=\"lazy\" decoding=\"async\"/g)||[]).length>=3,'mobile product imagery must decode asynchronously and stay lazy-loaded below the fold');
+ok(privacy.includes("function focusChoice(group,value){queueMicrotask(()=>{const target=$('#privacyConfig [data-pg=\"'+group+'\"][data-pv=\"'+value+'\"]')")&&privacy.includes('sync();focusChoice(g,v)'),'privacy choices must restore focus after their configuration rerender');
+ok(aluminium.includes("function focusField(id){queueMicrotask(()=>{const target=$('#'+id)")&&aluminium.includes('sync(true);focusField(id)'),'aluminium selects must restore focus after their forced configuration rerender');
+ok(metal.includes("function focusChoice(group,value){queueMicrotask(()=>{const target=$('#metalConfig [data-mg=\"'+group+'\"][data-mv=\"'+value+'\"]')")&&metal.includes('sync();focusChoice(group,value)'),'metal choices must restore focus after their configuration rerender');
+ok(concrete.includes("function focusChoice(group,value){queueMicrotask(()=>{const target=$('#concreteConfig [data-cg=\"'+group+'\"][data-cv=\"'+value+'\"]')")&&concrete.includes('sync();focusChoice(group,value)'),'concrete choices must restore focus after their configuration rerender');
 
 ok(modal.includes("modal.setAttribute('role','dialog')")&&modal.includes("modal.setAttribute('aria-modal','true')"),'lead modal must expose true modal-dialog semantics');
 ok(modal.includes("modal.setAttribute('aria-hidden',open?'false':'true')"),'lead modal must keep aria-hidden synchronized with visual open state');
@@ -49,4 +53,4 @@ ok(limitPos>manifest.indexOf('/assets/ui-bootstrap-v1.js'),'production manifest 
 ok(a11yPos>=0&&scrollPos>a11yPos,'production manifest must load the accessibility synchronizer before step scrolling');
 
 if(fail.length){console.error('UX regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('UX regression checks OK: dynamic next-step scroll, focus restoration across core/extra choices, modal behavior, explicit segment/length limits, lazy mobile imagery, mobile lead inputs and calculator accessibility are protected');
+console.log('UX regression checks OK: dynamic next-step scroll, focus restoration across core/extra/privacy/aluminium/metal/concrete choices, modal behavior, explicit segment/length limits, lazy mobile imagery, mobile lead inputs and calculator accessibility are protected');
