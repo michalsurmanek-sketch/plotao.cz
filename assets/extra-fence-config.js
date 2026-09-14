@@ -69,12 +69,6 @@
   }
 
 
-  function barrierProduct(s){
-    const title=s.variant==='reflex'?'Reflexní mobilní zábrana':s.variant==='plastic'?'Plastová mobilní zábrana':'Standardní mobilní zábrana';
-    const text=s.variant==='reflex'?'Pozinkovaná bezpečnostní zábrana doplněná reflexními prvky pro lepší viditelnost při uzávěrách a akcích.':s.variant==='plastic'?'Lehká přenosná varianta pro rychlé vymezení pracovních zón, průchodů a dočasných uzávěr.':'Univerzální řešení pro bezpečné oddělení prostor, stavby, akce a veřejných prostranství. Stabilní, odolná a snadno propojitelná.';
-    return '<div class="mobile-product"><div class="mobile-product-main"><img src="/assets/fence-types/mobile-barrier-main.webp" alt="'+title+'" loading="lazy" decoding="async"><div><h3>'+title+'</h3><p>'+text+'</p><ul style="margin:12px 0 0;padding:0;list-style:none;display:grid;gap:7px;color:#68786f;font-size:14px"><li>● Pozinkovaná ocel – dlouhá životnost</li><li>● Rychlá montáž a demontáž</li><li>● Snadné propojení do libovolné délky</li><li>● Stabilní stojany</li><li>● Vhodné pro akce, stavby i veřejné prostory</li></ul></div></div><div class="mobile-thumbs"><figure><img src="/assets/fence-types/mobile-barrier-detail.webp" alt="Detail svislé výplně mobilní zábrany" loading="lazy" decoding="async"><figcaption>Detail zábrany</figcaption></figure><figure><img src="/assets/fence-types/mobile-barrier-base.webp" alt="Stabilní stojan mobilní zábrany" loading="lazy" decoding="async"><figcaption>Stabilní stojan</figcaption></figure><figure><img src="/assets/fence-types/mobile-barrier-clamp.webp" alt="Spojovací prvek mobilních zábran" loading="lazy" decoding="async"><figcaption>Spojovací prvek</figcaption></figure><figure><img src="/assets/fence-types/mobile-barrier-installation.webp" alt="Ukázka propojené sestavy mobilních zábran" loading="lazy" decoding="async"><figcaption>Ukázka sestavy</figcaption></figure></div>'+tip('Ověřený kusový benchmark pro standardní mobilní zábranu. Jinou výšku nebo provedení vám připravíme jako individuální nabídku.')+'</div>';
-  }
-
   function render(){
     const b=ensure();
     if(!b)return;
@@ -94,7 +88,7 @@
     }else if(t==='barrier'){
       ensureStyle();
       const s=state.barrier;
-      html='<div class="mobile-config-title"><span class="mobile-config-icon" aria-hidden="true">'+gearIcon()+'</span><div><h3>Konfigurace mobilní zábrany</h3><p>Vyberte typ zábrany a zobrazte dostupné varianty</p></div></div><div class="mobile-choices">'+mobileBtn('standard','Standardní zábrana','',s)+mobileBtn('reflex','Reflexní zábrana','',s)+mobileBtn('plastic','Plastová zábrana','',s)+'</div>'+barrierProduct(s);
+      html='<div class="mobile-config-title"><span class="mobile-config-icon" aria-hidden="true">'+gearIcon()+'</span><div><h3>Konfigurace mobilní zábrany</h3><p>Vyberte typ zábrany a zobrazte dostupné varianty</p></div></div><div class="mobile-choices">'+mobileBtn('standard','Standardní zábrana','',s)+mobileBtn('reflex','Reflexní zábrana','',s)+mobileBtn('plastic','Plastová zábrana','',s)+'</div>'+window.PLOTAO_BARRIER_PRODUCT(s,tip);
     }else if(t==='mobile'){
       ensureStyle();
       const s=state.mobile;
