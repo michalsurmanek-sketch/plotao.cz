@@ -12,6 +12,8 @@ const socialPath='scripts/enrich-social-meta.mjs';
 const social=fs.readFileSync(socialPath,'utf8');
 const socialArtifactPath='scripts/social-artifact-check.mjs';
 const socialArtifact=fs.readFileSync(socialArtifactPath,'utf8');
+const performancePath='scripts/performance-budget-check.mjs';
+const performance=fs.readFileSync(performancePath,'utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const socialPages=[
   ['index.html','/','panelovy-3d.webp'],
@@ -66,6 +68,11 @@ ok(smoke.includes('Public footer privacy link missing')&&smoke.includes('privacy
 ok(smoke.includes('summary_large_image')&&smoke.includes('og:image:secure_url'),'standalone live smoke must require large Twitter cards and secure Open Graph image URLs');
 ok(smoke.includes('contains() {')&&smoke.includes('[[ "$1" == *"$2"* ]]'),'standalone live smoke must use pipefail-safe in-memory HTML matching');
 ok(!smoke.includes("printf '%s' \"$privacy\" | grep -Fq"),'standalone live smoke must not regress to grep -q pipelines for privacy HTML under pipefail');
+ok(workflow.includes('contains() {')&&workflow.includes('[[ "$1" == *"$2"* ]]'),'main live custom-domain verification must use pipefail-safe in-memory HTML matching');
+ok(!workflow.includes("printf '%s' \"$page\" | grep -Fq"),'main live custom-domain verification must not regress to grep -q pipelines under pipefail');
+ok(fs.existsSync(performancePath),'homepage performance budget checker must exist');
+ok(workflow.includes(`node ${performancePath}`),'Pages source gate must enforce the homepage performance budget before artifact preparation');
+ok(performance.includes('const MAX_SCRIPT_COUNT=59;')&&performance.includes('const MAX_TOTAL_BYTES=280*1024;')&&performance.includes('const MAX_SINGLE_BYTES=16*1024;'),'homepage performance budget must stay at the reviewed 59-script / 280 KiB total / 16 KiB single-module limits unless explicitly re-reviewed');
 ok(workflow.includes('for file in assets/*.js scripts/*.mjs; do node --check "$file"; done'),'Pages workflow must syntax-check assets and build scripts');
 ok(workflow.includes('- name: Run browser E2E on production artifact'),'Pages workflow must browser-test the prepared production artifact before deployment');
 ok(workflow.includes('npm install --no-audit --no-fund --package-lock=false'),'browser E2E must install only the pinned repository tooling without mutating the lock state');
@@ -112,4 +119,4 @@ for(const src of activeScripts){
   ok(fs.existsSync(file),`Pages manifest references missing asset: ${file}`);
 }
 if(fail.length){console.error('Build pipeline checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; Node 24 Pages actions, headless-only browser install, verified privacy controller contact, public links, browser/privacy information, all public-page privacy footers, strict dist, ${socialPages.length} enriched + artifact-verified + live-verified discovery social cards, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
+console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; Node 24 Pages actions, headless-only browser install, verified privacy controller contact, public links, browser/privacy information, all public-page privacy footers, strict dist, ${socialPages.length} enriched + artifact-verified + live-verified discovery social cards, all 10 browser-tested fence types, reviewed homepage performance budget, retry-safe Pages artifacts and both pipefail-safe live verification paths protect deployment`);
