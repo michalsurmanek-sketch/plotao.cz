@@ -22,7 +22,8 @@ jobs:
           html_url="https://plotao.cz/?sha=${EXPECTED_SHA}"
           privacy_url="https://plotao.cz/ochrana-osobnich-udaju.html?sha=${EXPECTED_SHA}"
           expected_meta="<meta name=\"plotao-deploy\" content=\"${EXPECTED_SHA}\">"
-          expected_privacy_link='href="/ochrana-osobnich-udaju.html"'
+          expected_privacy_href='href="/ochrana-osobnich-udaju.html"'
+          expected_privacy_link='data-plotao-privacy-link="1"'
           expected_privacy_notice='data-plotao-privacy-notice="1"'
           social_pages=(
             "/|panelovy-3d.webp"
@@ -71,11 +72,16 @@ jobs:
                 echo "Social preview metadata mismatch: path=$path image=$image"
                 return 1
               fi
+              if ! printf '%s' "$page" | grep -Fq "$expected_privacy_link" \
+                || ! printf '%s' "$page" | grep -Fq "$expected_privacy_href"; then
+                echo "Public footer privacy link missing: path=$path"
+                return 1
+              fi
               if ! curl -fsS --connect-timeout 10 --max-time 20 -o /dev/null -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "${image_url}?sha=${EXPECTED_SHA}"; then
                 echo "Social preview image is not publicly reachable: $image_url"
                 return 1
               fi
-              echo "Social preview OK: $path -> $image"
+              echo "Discovery page OK: $path -> $image + privacy footer"
             done
           }
           for attempt in $(seq 1 18); do
@@ -87,7 +93,8 @@ jobs:
             privacy_ok=0
             [ "$actual" = "$EXPECTED_SHA" ] && marker_ok=1
             printf '%s' "$page" | grep -Fq "$expected_meta" && html_ok=1 || true
-            if printf '%s' "$page" | grep -Fq "$expected_privacy_link" \
+            if printf '%s' "$page" | grep -Fq "$expected_privacy_href" \
+              && printf '%s' "$page" | grep -Fq "$expected_privacy_link" \
               && printf '%s' "$page" | grep -Fq "$expected_privacy_notice" \
               && printf '%s' "$privacy" | grep -Fq '<h1>Ochrana osobních údajů</h1>' \
               && printf '%s' "$privacy" | grep -Fq 'AO Holding s.r.o.'; then
@@ -96,7 +103,7 @@ jobs:
             if [ "$marker_ok" = 1 ] && [ "$html_ok" = 1 ] && [ "$privacy_ok" = 1 ]; then
               if verify_social_pages; then
                 verify_private_paths
-                echo "Live smoke confirms expected public deploy, privacy information, all discovery-page social previews and private repository paths: $EXPECTED_SHA"
+                echo "Live smoke confirms expected public deploy, privacy information on all discovery pages, social previews and private repository paths: $EXPECTED_SHA"
                 exit 0
               fi
             fi
