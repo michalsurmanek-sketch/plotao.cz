@@ -47,6 +47,7 @@ jobs:
           node scripts/structural-pricing-scenario-check.mjs
           node scripts/extra-fence-pricing-scenario-check.mjs
           node scripts/run-placement-integrity-check.mjs
+          node scripts/closed-plot-geometry-check.mjs
           node scripts/material-validity-check.mjs
           node scripts/input-validity-guard-check.mjs
           node scripts/input-field-accessibility-check.mjs
