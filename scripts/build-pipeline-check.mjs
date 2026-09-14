@@ -11,6 +11,20 @@ const privacyPage=fs.readFileSync('ochrana-osobnich-udaju.html','utf8');
 const socialPath='scripts/enrich-social-meta.mjs';
 const social=fs.readFileSync(socialPath,'utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
+const socialPages=[
+  ['index.html','/','panelovy-3d.webp'],
+  ['typy-plotu.html','/typy-plotu.html','panelovy-3d.webp'],
+  ['panelovy-plot.html','/panelovy-plot.html','panelovy-3d.webp'],
+  ['pletivovy-plot.html','/pletivovy-plot.html','pletivovy.webp'],
+  ['betonovy-plot.html','/betonovy-plot.html','betonovy.webp'],
+  ['hlinikovy-plot.html','/hlinikovy-plot.html','hlinikovy.webp'],
+  ['plot-na-soukromi.html','/plot-na-soukromi.html','soukromi-lamely.webp'],
+  ['gabionovy-plot.html','/gabionovy-plot.html','gabionovy.webp'],
+  ['kovovy-plot.html','/kovovy-plot.html','category-metal.webp'],
+  ['zdeny-plot.html','/zdeny-plot.html','category-masonry.webp'],
+  ['mobilni-oploceni.html','/mobilni-oploceni.html','category-mobile.webp'],
+  ['specialni-oploceni.html','/specialni-oploceni.html','category-other.webp']
+];
 const fail=[];
 const ok=(v,m)=>{if(!v)fail.push(m)};
 ok(fs.existsSync('scripts/public-link-integrity-check.mjs'),'public link integrity checker must exist and run from the build gate');
@@ -28,8 +42,15 @@ ok(workflow.includes('node scripts/verify-pages-artifact.mjs'),'Pages workflow m
 const preparePos=workflow.indexOf('node scripts/prepare-pages.mjs'),privacyPos=workflow.indexOf(`node ${privacyPath}`),socialPos=workflow.indexOf(`node ${socialPath}`),verifyPos=workflow.indexOf('node scripts/verify-pages-artifact.mjs'),browserPos=workflow.indexOf('- name: Run browser E2E on production artifact');
 ok(preparePos>=0&&preparePos<privacyPos&&privacyPos<socialPos&&socialPos<verifyPos&&verifyPos<browserPos,'privacy and social enrichment must run after dist preparation and before artifact/browser verification');
 ok(fs.existsSync(socialPath),'social metadata enrichment script must exist');
-ok(social.includes('https://plotao.cz/assets/fence-types/panelovy-3d.webp'),'social metadata enrichment must reference the reviewed public Plotao image');
-ok(social.includes('summary_large_image')&&social.includes('og:image:width')&&social.includes('og:image:height'),'social metadata enrichment must publish large-card image dimensions');
+ok(social.includes('summary_large_image')&&social.includes('og:image:width')&&social.includes('og:image:height')&&social.includes('og:image:secure_url'),'social metadata enrichment must publish complete large-card image metadata');
+ok(social.includes('if(width<300||height<180)'),'social metadata enrichment must reject undersized discovery-page card images');
+for(const [page,path,image] of socialPages){
+  ok(social.includes(`'${page}':{image:'${image}'`),`social metadata enrichment must map ${page} to ${image}`);
+  ok(smoke.includes(`"${path}|${image}"`),`standalone live smoke must verify ${path} with ${image}`);
+}
+ok(smoke.includes('social_pages=(')&&smoke.includes('verify_social_pages()'),'standalone live smoke must iterate all discovery-page social previews');
+ok(smoke.includes('Social preview metadata mismatch')&&smoke.includes('Social preview image is not publicly reachable'),'standalone live smoke must fail on wrong metadata or unreachable social images');
+ok(smoke.includes('summary_large_image')&&smoke.includes('og:image:secure_url'),'standalone live smoke must require large Twitter cards and secure Open Graph image URLs');
 ok(workflow.includes('for file in assets/*.js scripts/*.mjs; do node --check "$file"; done'),'Pages workflow must syntax-check assets and build scripts');
 ok(workflow.includes('- name: Run browser E2E on production artifact'),'Pages workflow must browser-test the prepared production artifact before deployment');
 ok(workflow.includes('npm install --no-audit --no-fund --package-lock=false'),'browser E2E must install only the pinned repository tooling without mutating the lock state');
@@ -67,10 +88,6 @@ ok(smoke.includes('privacy_url="https://plotao.cz/ochrana-osobnich-udaju.html?sh
 ok(smoke.includes('expected_privacy_link=')&&smoke.includes('expected_privacy_notice='),'standalone live smoke must verify the privacy link and lead-form notice on the live homepage');
 ok(smoke.includes('<h1>Ochrana osobních údajů</h1>')&&smoke.includes('AO Holding s.r.o.'),'standalone live smoke must verify privacy page identity and controller');
 ok(smoke.includes('privacy_ok=0')&&smoke.includes('[ "$privacy_ok" = 1 ]'),'standalone live smoke must make privacy information a hard success condition');
-ok(smoke.includes('expected_og=')&&smoke.includes('property="og:image"')&&smoke.includes('panelovy-3d.webp'),'standalone live smoke must verify the reviewed Open Graph image on the live domain');
-ok(smoke.includes('expected_twitter=')&&smoke.includes('summary_large_image'),'standalone live smoke must verify the large Twitter card on the live domain');
-ok(smoke.includes('expected_twitter_image=')&&smoke.includes('name="twitter:image"'),'standalone live smoke must verify the Twitter image on the live domain');
-ok(smoke.includes('social_ok=0')&&smoke.includes('[ "$social_ok" = 1 ]'),'standalone live smoke must make social metadata a hard success condition');
 const unique=new Set(activeScripts);
 ok(unique.size===activeScripts.length,'Pages manifest must not contain duplicate script entries');
 for(const src of activeScripts){
@@ -79,4 +96,4 @@ for(const src of activeScripts){
   ok(fs.existsSync(file),`Pages manifest references missing asset: ${file}`);
 }
 if(fail.length){console.error('Build pipeline checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; Node 24 Pages actions, headless-only browser install, public links, browser/privacy information, strict dist, protected social cards, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
+console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; Node 24 Pages actions, headless-only browser install, public links, browser/privacy information, strict dist, ${socialPages.length} protected discovery-page social cards, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
