@@ -21,10 +21,12 @@ jobs:
           marker_url="https://plotao.cz/deploy-marker.txt?sha=${EXPECTED_SHA}"
           html_url="https://plotao.cz/?sha=${EXPECTED_SHA}"
           privacy_url="https://plotao.cz/ochrana-osobnich-udaju.html?sha=${EXPECTED_SHA}"
+          sitemap_url="https://plotao.cz/sitemap.xml?sha=${EXPECTED_SHA}"
           expected_meta="<meta name=\"plotao-deploy\" content=\"${EXPECTED_SHA}\">"
           expected_privacy_href='href="/ochrana-osobnich-udaju.html"'
           expected_privacy_link='data-plotao-privacy-link="1"'
           expected_privacy_notice='data-plotao-privacy-notice="1"'
+          expected_privacy_robots='<meta name="robots" content="noindex,follow">'
           expected_controller_email='<a href="mailto:info@slevao.cz">info@slevao.cz</a>'
           expected_form_boundary='Poptávkový formulář PLOTAO.cz není určen pro žádosti týkající se ochrany osobních údajů.'
           social_pages=(
@@ -58,6 +60,26 @@ jobs:
               fi
               echo "Internal source path correctly returns 404: $path"
             done
+          }
+          verify_sitemap() {
+            local sitemap="$1" entry path loc
+            if contains "$sitemap" '<loc>https://plotao.cz/ochrana-osobnich-udaju.html</loc>'; then
+              echo "Noindex privacy page must stay excluded from live sitemap"
+              return 1
+            fi
+            for entry in "${social_pages[@]}"; do
+              path="${entry%%|*}"
+              if [ "$path" = "/" ]; then
+                loc='<loc>https://plotao.cz/</loc>'
+              else
+                loc="<loc>https://plotao.cz${path}</loc>"
+              fi
+              if ! contains "$sitemap" "$loc"; then
+                echo "Live sitemap missing discovery URL: $path"
+                return 1
+              fi
+            done
+            echo "Live sitemap OK: all 12 discovery URLs present; privacy page excluded"
           }
           verify_social_pages() {
             local entry path image page image_url expected_og expected_secure expected_twitter expected_twitter_image
@@ -93,6 +115,7 @@ jobs:
             actual="$(curl -fsSL --connect-timeout 10 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$marker_url" 2>/dev/null | tr -d '\r\n' || true)"
             page="$(curl -fsSL --connect-timeout 10 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$html_url" 2>/dev/null || true)"
             privacy="$(curl -fsSL --connect-timeout 10 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$privacy_url" 2>/dev/null || true)"
+            sitemap="$(curl -fsSL --connect-timeout 10 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$sitemap_url" 2>/dev/null || true)"
             marker_ok=0
             html_ok=0
             privacy_ok=0
@@ -103,6 +126,7 @@ jobs:
             privacy_controller_ok=0
             privacy_email_ok=0
             privacy_boundary_ok=0
+            privacy_robots_ok=0
             [ "$actual" = "$EXPECTED_SHA" ] && marker_ok=1
             contains "$page" "$expected_meta" && html_ok=1 || true
             contains "$page" "$expected_privacy_href" && home_privacy_href_ok=1 || true
@@ -112,24 +136,26 @@ jobs:
             contains "$privacy" 'AO Holding s.r.o.' && privacy_controller_ok=1 || true
             contains "$privacy" "$expected_controller_email" && privacy_email_ok=1 || true
             contains "$privacy" "$expected_form_boundary" && privacy_boundary_ok=1 || true
+            contains "$privacy" "$expected_privacy_robots" && privacy_robots_ok=1 || true
             if [ "$home_privacy_href_ok" = 1 ] \
               && [ "$home_privacy_link_ok" = 1 ] \
               && [ "$home_privacy_notice_ok" = 1 ] \
               && [ "$privacy_h1_ok" = 1 ] \
               && [ "$privacy_controller_ok" = 1 ] \
               && [ "$privacy_email_ok" = 1 ] \
-              && [ "$privacy_boundary_ok" = 1 ]; then
+              && [ "$privacy_boundary_ok" = 1 ] \
+              && [ "$privacy_robots_ok" = 1 ]; then
               privacy_ok=1
             fi
             if [ "$marker_ok" = 1 ] && [ "$html_ok" = 1 ] && [ "$privacy_ok" = 1 ]; then
-              if verify_social_pages; then
+              if verify_sitemap "$sitemap" && verify_social_pages; then
                 verify_private_paths
-                echo "Live smoke confirms expected public deploy, verified controller contact, privacy information on all discovery pages, social previews and private repository paths: $EXPECTED_SHA"
+                echo "Live smoke confirms expected public deploy, privacy noindex + sitemap exclusion, verified controller contact, privacy information on all discovery pages, social previews and private repository paths: $EXPECTED_SHA"
                 exit 0
               fi
             fi
-            echo "Attempt $attempt: marker_ok=$marker_ok html_ok=$html_ok privacy_ok=$privacy_ok home_href=$home_privacy_href_ok home_link=$home_privacy_link_ok home_notice=$home_privacy_notice_ok privacy_h1=$privacy_h1_ok privacy_controller=$privacy_controller_ok privacy_email=$privacy_email_ok privacy_boundary=$privacy_boundary_ok expected=$EXPECTED_SHA actual=${actual:-<empty>}"
+            echo "Attempt $attempt: marker_ok=$marker_ok html_ok=$html_ok privacy_ok=$privacy_ok home_href=$home_privacy_href_ok home_link=$home_privacy_link_ok home_notice=$home_privacy_notice_ok privacy_h1=$privacy_h1_ok privacy_controller=$privacy_controller_ok privacy_email=$privacy_email_ok privacy_boundary=$privacy_boundary_ok privacy_robots=$privacy_robots_ok expected=$EXPECTED_SHA actual=${actual:-<empty>}"
             sleep 10
           done
-          echo "plotao.cz did not expose the expected deploy marker, HTML identity, verified controller contact, privacy information and discovery-page social previews consistently"
+          echo "plotao.cz did not expose the expected deploy marker, HTML identity, privacy noindex/sitemap state, verified controller contact, privacy information and discovery-page social previews consistently"
           exit 1
