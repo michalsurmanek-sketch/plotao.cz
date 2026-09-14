@@ -40,6 +40,9 @@ ok(privacy.includes('/ochrana-osobnich-udaju.html')&&privacy.includes('data-plot
 ok(privacy.includes('public page has no supported footer for privacy link')&&privacy.includes('public pages missing privacy footer link'),'privacy enrichment must hard-fail when any public HTML page cannot expose the footer privacy link');
 ok(privacy.includes('linkedPages.length!==expectedLinked.length')&&privacy.includes('privacy footer link on ${linkedPages.length}/${expectedLinked.length} public pages'),'privacy enrichment must verify complete public-page footer coverage after injection');
 ok(privacyPage.includes('AO Holding s.r.o.')&&privacyPage.includes('Ochrana osobních údajů')&&privacyPage.includes('Vyřízení poptávky a příprava nabídky')&&privacyPage.includes('Vaše práva'),'privacy page must identify the controller and explain purpose and data-subject rights');
+ok(privacyPage.includes('href="mailto:info@slevao.cz"')&&privacyPage.includes('>info@slevao.cz</a>'),'privacy page must expose the verified AO Holding contact email as a clickable mailto link');
+ok(privacyPage.includes('Poptávkový formulář PLOTAO.cz není určen pro žádosti týkající se ochrany osobních údajů.'),'privacy page must not route data-subject requests through the disabled lead transport');
+ok(!privacyPage.includes('můžete použít poptávkový formulář na PLOTAO.cz')&&!privacyPage.includes('Po doplnění samostatného kontaktního e-mailu'),'privacy page must not advertise an inactive privacy-request channel or placeholder contact');
 ok(!privacyPage.includes('souhlasím se zpracováním'),'necessary lead processing must not be misrepresented as a mandatory consent checkbox');
 ok(workflow.includes('- name: Enrich production social metadata')&&workflow.includes(`node ${socialPath}`),'Pages workflow must enrich social metadata on the prepared artifact');
 ok(fs.existsSync(socialArtifactPath),'discovery social artifact checker must exist');
@@ -72,7 +75,7 @@ ok(pkg?.private===true&&pkg?.scripts?.['browser:e2e']==='node scripts/browser-e2
 ok(pkg?.devDependencies?.playwright==='1.63.0','Playwright must stay pinned to the reviewed 1.63.0 version instead of floating latest');
 for(const type of ['panel','mesh','concrete','privacy','aluminium','gabion','metal','masonry','mobile','other'])ok(browser.includes(`selectType(page,'${type}'`),`browser E2E must exercise fence type ${type}`);
 ok(browser.includes("runScenario('desktop',{width:1440,height:1000}")&&browser.includes("runScenario('mobile-390',{width:390,height:844}"),'browser E2E must protect both desktop and 390px mobile flows');
-ok(browser.includes('data-plotao-privacy-notice=')&&browser.includes('/ochrana-osobnich-udaju.html')&&browser.includes('AO Holding s.r.o.'),'browser E2E must verify the privacy notice, privacy link and controller page');
+ok(browser.includes('data-plotao-privacy-notice=')&&browser.includes('/ochrana-osobnich-udaju.html')&&browser.includes('AO Holding s.r.o.')&&browser.includes('mailto:info@slevao.cz')&&browser.includes('Poptávkový formulář PLOTAO.cz není určen'),'browser E2E must verify the privacy notice, controller, verified email and disabled-form boundary');
 ok(workflow.includes('uses: actions/upload-pages-artifact@v5')&&workflow.includes('path: dist'),'Pages workflow must upload only the strict public dist directory with the Node 24 Pages artifact action');
 ok(workflow.includes('uses: actions/deploy-pages@v5'),'Pages workflow must deploy with the Node 24 deploy-pages major');
 ok(workflow.includes('name: github-pages-${{ github.run_attempt }}'),'Pages artifact name must include run_attempt so a retry cannot create ambiguous duplicate github-pages artifacts');
@@ -95,6 +98,7 @@ ok(smoke.includes('https://plotao.cz/?sha=${EXPECTED_SHA}'),'standalone live smo
 ok(smoke.includes('name=\\"plotao-deploy\\" content=\\"${EXPECTED_SHA}\\"'),'standalone live smoke must require the exact deploy SHA meta tag in HTML');
 ok(smoke.includes('privacy_url="https://plotao.cz/ochrana-osobnich-udaju.html?sha=${EXPECTED_SHA}"'),'standalone live smoke must fetch the public privacy page with cache busting');
 ok(smoke.includes('expected_privacy_href=')&&smoke.includes('expected_privacy_link=')&&smoke.includes('expected_privacy_notice='),'standalone live smoke must verify privacy href, footer marker and lead-form notice on the live homepage');
+ok(smoke.includes('expected_controller_email=')&&smoke.includes('mailto:info@slevao.cz')&&smoke.includes('expected_form_boundary='),'standalone live smoke must require the verified controller email and disabled-form privacy boundary');
 ok(smoke.includes('<h1>Ochrana osobních údajů</h1>')&&smoke.includes('AO Holding s.r.o.'),'standalone live smoke must verify privacy page identity and controller');
 ok(smoke.includes('privacy_ok=0')&&smoke.includes('[ "$privacy_ok" = 1 ]'),'standalone live smoke must make privacy information a hard success condition');
 const unique=new Set(activeScripts);
@@ -105,4 +109,4 @@ for(const src of activeScripts){
   ok(fs.existsSync(file),`Pages manifest references missing asset: ${file}`);
 }
 if(fail.length){console.error('Build pipeline checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; Node 24 Pages actions, headless-only browser install, public links, browser/privacy information, all public-page privacy footers, strict dist, ${socialPages.length} enriched + artifact-verified + live-verified discovery social cards, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
+console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; Node 24 Pages actions, headless-only browser install, verified privacy controller contact, public links, browser/privacy information, all public-page privacy footers, strict dist, ${socialPages.length} enriched + artifact-verified + live-verified discovery social cards, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
