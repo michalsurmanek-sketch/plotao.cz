@@ -48,6 +48,7 @@ jobs:
           node scripts/extra-fence-pricing-scenario-check.mjs
           node scripts/run-placement-integrity-check.mjs
           node scripts/closed-plot-geometry-check.mjs
+          node scripts/rectangle-mode-source-check.mjs
           node scripts/material-validity-check.mjs
           node scripts/input-validity-guard-check.mjs
           node scripts/input-field-accessibility-check.mjs
