@@ -33,7 +33,8 @@ ok(social.includes('summary_large_image')&&social.includes('og:image:width')&&so
 ok(workflow.includes('for file in assets/*.js scripts/*.mjs; do node --check "$file"; done'),'Pages workflow must syntax-check assets and build scripts');
 ok(workflow.includes('- name: Run browser E2E on production artifact'),'Pages workflow must browser-test the prepared production artifact before deployment');
 ok(workflow.includes('npm install --no-audit --no-fund --package-lock=false'),'browser E2E must install only the pinned repository tooling without mutating the lock state');
-ok(workflow.includes('npx playwright install --with-deps chromium'),'browser E2E must provision Chromium explicitly');
+ok(workflow.includes('npx playwright install --with-deps --only-shell chromium'),'browser E2E must install only the Chromium headless shell required by the headless smoke test');
+ok(!workflow.includes('npx playwright install --with-deps chromium'),'browser E2E must not regress to downloading full Chromium when only headless shell is used');
 ok(workflow.includes('python3 -m http.server 4173 --directory dist'),'browser E2E must run against the exact prepared dist directory');
 ok(workflow.includes('PLOTAO_E2E_URL=http://127.0.0.1:4173 npm run browser:e2e'),'browser E2E must execute the repository smoke script against local dist');
 ok(fs.existsSync('scripts/browser-e2e.mjs'),'browser E2E smoke script must exist');
@@ -78,4 +79,4 @@ for(const src of activeScripts){
   ok(fs.existsSync(file),`Pages manifest references missing asset: ${file}`);
 }
 if(fail.length){console.error('Build pipeline checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; Node 24 Pages actions, public links, browser/privacy information, strict dist, protected social cards, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
+console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; Node 24 Pages actions, headless-only browser install, public links, browser/privacy information, strict dist, protected social cards, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
