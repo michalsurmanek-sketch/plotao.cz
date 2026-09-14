@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import './public-link-integrity-check.mjs';
 import {activeScripts} from './pages-manifest.mjs';
 
 const workflow=fs.readFileSync('.github/workflows/pages.yml','utf8');
@@ -9,6 +10,7 @@ const social=fs.readFileSync(socialPath,'utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const fail=[];
 const ok=(v,m)=>{if(!v)fail.push(m)};
+ok(fs.existsSync('scripts/public-link-integrity-check.mjs'),'public link integrity checker must exist and run from the build gate');
 ok(workflow.includes('node scripts/prepare-pages.mjs'),'Pages workflow must use prepare-pages.mjs');
 ok(workflow.includes('- name: Enrich production social metadata')&&workflow.includes(`node ${socialPath}`),'Pages workflow must enrich social metadata on the prepared artifact');
 ok(workflow.includes('node scripts/verify-pages-artifact.mjs'),'Pages workflow must use verify-pages-artifact.mjs');
@@ -59,4 +61,4 @@ for(const src of activeScripts){
   ok(fs.existsSync(file),`Pages manifest references missing asset: ${file}`);
 }
 if(fail.length){console.error('Build pipeline checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; strict dist, protected social cards, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
+console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; public links, strict dist, protected social cards, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
