@@ -13,7 +13,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Verify deployed marker, HTML and private paths on custom domain
+      - name: Verify deployed marker, HTML, social metadata and private paths on custom domain
         env:
           EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
@@ -21,6 +21,9 @@ jobs:
           marker_url="https://plotao.cz/deploy-marker.txt?sha=${EXPECTED_SHA}"
           html_url="https://plotao.cz/?sha=${EXPECTED_SHA}"
           expected_meta="<meta name=\"plotao-deploy\" content=\"${EXPECTED_SHA}\">"
+          expected_og='<meta property="og:image" content="https://plotao.cz/assets/fence-types/panelovy-3d.webp">'
+          expected_twitter='<meta name="twitter:card" content="summary_large_image">'
+          expected_twitter_image='<meta name="twitter:image" content="https://plotao.cz/assets/fence-types/panelovy-3d.webp">'
           private_paths=(
             "/scripts/seo-regression-check.mjs"
             "/supabase/functions/submit-lead/index.ts"
@@ -41,15 +44,21 @@ jobs:
             page="$(curl -fsSL --connect-timeout 10 --max-time 20 -H 'Cache-Control: no-cache' -H 'Pragma: no-cache' "$html_url" 2>/dev/null || true)"
             marker_ok=0
             html_ok=0
+            social_ok=0
             [ "$actual" = "$EXPECTED_SHA" ] && marker_ok=1
             printf '%s' "$page" | grep -Fq "$expected_meta" && html_ok=1 || true
-            if [ "$marker_ok" = 1 ] && [ "$html_ok" = 1 ]; then
+            if printf '%s' "$page" | grep -Fq "$expected_og" \
+              && printf '%s' "$page" | grep -Fq "$expected_twitter" \
+              && printf '%s' "$page" | grep -Fq "$expected_twitter_image"; then
+              social_ok=1
+            fi
+            if [ "$marker_ok" = 1 ] && [ "$html_ok" = 1 ] && [ "$social_ok" = 1 ]; then
               verify_private_paths
-              echo "Live smoke confirms expected public deploy and private repository paths: $EXPECTED_SHA"
+              echo "Live smoke confirms expected public deploy, social metadata and private repository paths: $EXPECTED_SHA"
               exit 0
             fi
-            echo "Attempt $attempt: marker_ok=$marker_ok html_ok=$html_ok expected=$EXPECTED_SHA actual=${actual:-<empty>}"
+            echo "Attempt $attempt: marker_ok=$marker_ok html_ok=$html_ok social_ok=$social_ok expected=$EXPECTED_SHA actual=${actual:-<empty>}"
             sleep 10
           done
-          echo "plotao.cz did not expose the expected deploy marker consistently in both marker file and HTML"
+          echo "plotao.cz did not expose the expected deploy marker, HTML identity and social metadata consistently"
           exit 1
