@@ -15,7 +15,7 @@ ok(src.includes("links.splice(i,1)")&&src.includes("if(links.length)links[0]=fal
 ok(src.includes("if(i>0&&i<links.length)links[i]=false;expose()}schedule(60);exposeTurns()"),'adjusted connection and turn indices must be visible before the delayed visual rerender');
 ok(src.includes("const add=e.target.closest('#addSegment');if(add){const count=$$('#segmentList .segment').length;if(count<12)"),'add-section capture path must respect the same 12-section UI limit before exposing provisional topology');
 ok(src.includes("links.push(true);turns.push('right')")&&src.includes("if(links.length)links[0]=false;if(turns.length)turns[0]=null;expose()"),'new section must be exposed synchronously as connected with a default right turn');
-ok(src.includes("expose();document.dispatchEvent(new CustomEvent('plotao:segment-connections'")&&src.includes("document.dispatchEvent(new CustomEvent('plotao:segment-turns'"),'connection and turn events must be emitted after DOM and topology settle');
+ok(src.includes("expose();exposeTurns();document.dispatchEvent(new CustomEvent('plotao:segment-connections'")&&src.includes("document.dispatchEvent(new CustomEvent('plotao:segment-turns'"),'connection and turn events must be emitted after both authoritative states are exposed');
 ok(plan.includes("const links=window.PLOTAO_SEGMENT_CONNECTIONS||[],turns=window.PLOTAO_SEGMENT_TURNS||[]"),'top-view plan must consume both connection and turn state');
 ok(plan.includes("dir=(dir+(s.turn==='left'?3:1))%4"),'free-route top view must turn according to the explicit left/right choice');
 ok(!plan.includes('corners%2===0?1:3'),'legacy alternating right/left staircase algorithm must stay removed');
