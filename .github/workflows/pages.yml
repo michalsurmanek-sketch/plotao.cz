@@ -80,6 +80,21 @@ jobs:
       - name: Verify production artifact integrity
         run: node scripts/verify-pages-artifact.mjs
 
+      - name: Run browser E2E on production artifact
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund --package-lock=false
+          npx playwright install --with-deps chromium
+          python3 -m http.server 4173 --directory dist >/tmp/plotao-e2e-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" >/dev/null 2>&1 || true' EXIT
+          for attempt in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:4173/ >/dev/null
+          PLOTAO_E2E_URL=http://127.0.0.1:4173 npm run browser:e2e
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
