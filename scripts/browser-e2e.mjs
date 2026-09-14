@@ -124,15 +124,28 @@ await runScenario('mobile-390',{width:390,height:844},async page=>{
   await page.waitForFunction(()=>document.querySelector('#modal')?.getAttribute('role')==='dialog'&&document.querySelector('#modal')?.getAttribute('aria-modal')==='true',null,{timeout:5000});
   assert((await modal.getAttribute('role'))==='dialog','lead modal must expose dialog role');
   assert((await modal.getAttribute('aria-modal'))==='true','lead modal must expose aria-modal=true');
+  const privacyNotice=modal.locator('[data-plotao-privacy-notice="1"]');
+  assert(await privacyNotice.isVisible(),'lead modal must show the privacy information notice before submission');
+  assert((await text(privacyNotice)).includes('Údaje použijeme k vyřízení poptávky'),'lead privacy notice must explain why contact data are used');
+  const privacyLink=privacyNotice.locator('a[href="/ochrana-osobnich-udaju.html"]');
+  assert(await privacyLink.isVisible(),'lead privacy notice must expose a visible privacy-page link');
+  assert((await privacyLink.getAttribute('href'))==='/ochrana-osobnich-udaju.html','lead privacy link must target the canonical privacy page');
   await page.keyboard.press('Escape');
   await modal.waitFor({state:'hidden'});
 
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-window.innerWidth);
   assert(overflow<=1,`page must not create horizontal viewport overflow at 390px (overflow ${overflow}px)`);
+
+  await page.goto(baseUrl+'/ochrana-osobnich-udaju.html',{waitUntil:'networkidle'});
+  const privacyH1=page.locator('h1');
+  assert(await privacyH1.isVisible(),'privacy page H1 must be visible in browser');
+  assert((await text(privacyH1))==='Ochrana osobních údajů','privacy page must expose the expected H1');
+  assert((await text(page.locator('body'))).includes('AO Holding s.r.o.'),'privacy page must identify AO Holding s.r.o. as controller');
+  assert(await page.locator('a[href="/#kalkulator"]').first().isVisible(),'privacy page must offer a visible route back to the calculator');
 });
 
 if(failures.length){
   console.error('Browser E2E failed:\n- '+failures.join('\n- '));
   process.exit(1);
 }
-console.log('Browser E2E OK: all 10 fence types plus desktop and 390px mobile flows passed without browser-console or same-origin request failures');
+console.log('Browser E2E OK: all 10 fence types plus desktop, 390px mobile and privacy flows passed without browser-console or same-origin request failures');
