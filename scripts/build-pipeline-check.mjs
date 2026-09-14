@@ -14,6 +14,8 @@ const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const fail=[];
 const ok=(v,m)=>{if(!v)fail.push(m)};
 ok(fs.existsSync('scripts/public-link-integrity-check.mjs'),'public link integrity checker must exist and run from the build gate');
+ok(workflow.includes('uses: actions/checkout@v7'),'Pages workflow must use the Node 24 checkout major');
+ok(workflow.includes('uses: actions/configure-pages@v6'),'Pages workflow must use the Node 24 configure-pages major');
 ok(workflow.includes('node scripts/prepare-pages.mjs'),'Pages workflow must use prepare-pages.mjs');
 ok(fs.existsSync(privacyPath),'privacy UI enrichment script must exist');
 ok(fs.existsSync('ochrana-osobnich-udaju.html'),'public privacy information page must exist');
@@ -39,10 +41,12 @@ ok(pkg?.private===true&&pkg?.scripts?.['browser:e2e']==='node scripts/browser-e2
 ok(pkg?.devDependencies?.playwright==='1.63.0','Playwright must stay pinned to the reviewed 1.63.0 version instead of floating latest');
 for(const type of ['panel','mesh','concrete','privacy','aluminium','gabion','metal','masonry','mobile','other'])ok(browser.includes(`selectType(page,'${type}'`),`browser E2E must exercise fence type ${type}`);
 ok(browser.includes("runScenario('desktop',{width:1440,height:1000}")&&browser.includes("runScenario('mobile-390',{width:390,height:844}"),'browser E2E must protect both desktop and 390px mobile flows');
-ok(workflow.includes('uses: actions/upload-pages-artifact@v3')&&workflow.includes('path: dist'),'Pages workflow must upload only the strict public dist directory');
+ok(browser.includes('data-plotao-privacy-notice=')&&browser.includes('/ochrana-osobnich-udaju.html')&&browser.includes('AO Holding s.r.o.'),'browser E2E must verify the privacy notice, privacy link and controller page');
+ok(workflow.includes('uses: actions/upload-pages-artifact@v5')&&workflow.includes('path: dist'),'Pages workflow must upload only the strict public dist directory with the Node 24 Pages artifact action');
+ok(workflow.includes('uses: actions/deploy-pages@v5'),'Pages workflow must deploy with the Node 24 deploy-pages major');
 ok(workflow.includes('name: github-pages-${{ github.run_attempt }}'),'Pages artifact name must include run_attempt so a retry cannot create ambiguous duplicate github-pages artifacts');
 ok(workflow.includes('artifact_name: github-pages-${{ github.run_attempt }}'),'deploy-pages must select the same retry-safe run_attempt artifact name');
-ok(!/upload-pages-artifact@v3[\s\S]{0,200}path:\s*\./.test(workflow),'Pages workflow must never upload the repository root');
+ok(!/upload-pages-artifact@v\d+[\s\S]{0,200}path:\s*\./.test(workflow),'Pages workflow must never upload the repository root');
 for(const path of ['/scripts/seo-regression-check.mjs','/supabase/functions/submit-lead/index.ts','/docs/lead-backend-contract.md']){
   ok(workflow.includes(path),`Pages workflow must probe private path ${path}`);
   ok(smoke.includes(path),`standalone live smoke must probe private path ${path}`);
@@ -74,4 +78,4 @@ for(const src of activeScripts){
   ok(fs.existsSync(file),`Pages manifest references missing asset: ${file}`);
 }
 if(fail.length){console.error('Build pipeline checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; public links, privacy information, strict dist, protected social cards, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
+console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; Node 24 Pages actions, public links, browser/privacy information, strict dist, protected social cards, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
