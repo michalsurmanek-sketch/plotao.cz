@@ -37,6 +37,8 @@ ok(fs.existsSync(privacyPath),'privacy UI enrichment script must exist');
 ok(fs.existsSync('ochrana-osobnich-udaju.html'),'public privacy information page must exist');
 ok(workflow.includes('- name: Enrich production privacy UI')&&workflow.includes(`node ${privacyPath}`),'Pages workflow must enrich the prepared artifact with privacy UI');
 ok(privacy.includes('/ochrana-osobnich-udaju.html')&&privacy.includes('data-plotao-privacy-notice="1"')&&privacy.includes('data-plotao-privacy-link="1"'),'privacy enrichment must publish both lead-form notice and footer link');
+ok(privacy.includes('public page has no supported footer for privacy link')&&privacy.includes('public pages missing privacy footer link'),'privacy enrichment must hard-fail when any public HTML page cannot expose the footer privacy link');
+ok(privacy.includes('linkedPages.length!==expectedLinked.length')&&privacy.includes('privacy footer link on ${linkedPages.length}/${expectedLinked.length} public pages'),'privacy enrichment must verify complete public-page footer coverage after injection');
 ok(privacyPage.includes('AO Holding s.r.o.')&&privacyPage.includes('Ochrana osobních údajů')&&privacyPage.includes('Vyřízení poptávky a příprava nabídky')&&privacyPage.includes('Vaše práva'),'privacy page must identify the controller and explain purpose and data-subject rights');
 ok(!privacyPage.includes('souhlasím se zpracováním'),'necessary lead processing must not be misrepresented as a mandatory consent checkbox');
 ok(workflow.includes('- name: Enrich production social metadata')&&workflow.includes(`node ${socialPath}`),'Pages workflow must enrich social metadata on the prepared artifact');
@@ -56,6 +58,7 @@ for(const [page,path,image] of socialPages){
 }
 ok(smoke.includes('social_pages=(')&&smoke.includes('verify_social_pages()'),'standalone live smoke must iterate all discovery-page social previews');
 ok(smoke.includes('Social preview metadata mismatch')&&smoke.includes('Social preview image is not publicly reachable'),'standalone live smoke must fail on wrong metadata or unreachable social images');
+ok(smoke.includes('Public footer privacy link missing')&&smoke.includes('privacy footer'),'standalone live smoke must verify the privacy footer on every discovery page');
 ok(smoke.includes('summary_large_image')&&smoke.includes('og:image:secure_url'),'standalone live smoke must require large Twitter cards and secure Open Graph image URLs');
 ok(workflow.includes('for file in assets/*.js scripts/*.mjs; do node --check "$file"; done'),'Pages workflow must syntax-check assets and build scripts');
 ok(workflow.includes('- name: Run browser E2E on production artifact'),'Pages workflow must browser-test the prepared production artifact before deployment');
@@ -91,7 +94,7 @@ ok(smoke.includes('deploy-marker.txt?sha=${EXPECTED_SHA}'),'standalone live smok
 ok(smoke.includes('https://plotao.cz/?sha=${EXPECTED_SHA}'),'standalone live smoke must verify main HTML with cache busting');
 ok(smoke.includes('name=\\"plotao-deploy\\" content=\\"${EXPECTED_SHA}\\"'),'standalone live smoke must require the exact deploy SHA meta tag in HTML');
 ok(smoke.includes('privacy_url="https://plotao.cz/ochrana-osobnich-udaju.html?sha=${EXPECTED_SHA}"'),'standalone live smoke must fetch the public privacy page with cache busting');
-ok(smoke.includes('expected_privacy_link=')&&smoke.includes('expected_privacy_notice='),'standalone live smoke must verify the privacy link and lead-form notice on the live homepage');
+ok(smoke.includes('expected_privacy_href=')&&smoke.includes('expected_privacy_link=')&&smoke.includes('expected_privacy_notice='),'standalone live smoke must verify privacy href, footer marker and lead-form notice on the live homepage');
 ok(smoke.includes('<h1>Ochrana osobních údajů</h1>')&&smoke.includes('AO Holding s.r.o.'),'standalone live smoke must verify privacy page identity and controller');
 ok(smoke.includes('privacy_ok=0')&&smoke.includes('[ "$privacy_ok" = 1 ]'),'standalone live smoke must make privacy information a hard success condition');
 const unique=new Set(activeScripts);
@@ -102,4 +105,4 @@ for(const src of activeScripts){
   ok(fs.existsSync(file),`Pages manifest references missing asset: ${file}`);
 }
 if(fail.length){console.error('Build pipeline checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; Node 24 Pages actions, headless-only browser install, public links, browser/privacy information, strict dist, ${socialPages.length} enriched + artifact-verified + live-verified discovery social cards, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
+console.log(`Build pipeline checks OK: ${activeScripts.length} unique active assets exist; Node 24 Pages actions, headless-only browser install, public links, browser/privacy information, all public-page privacy footers, strict dist, ${socialPages.length} enriched + artifact-verified + live-verified discovery social cards, all 10 browser-tested fence types, retry-safe Pages artifacts and both live verification paths protect deployment`);
