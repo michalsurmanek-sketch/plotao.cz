@@ -10,6 +10,11 @@ ok(scroll.includes("window.matchMedia?.('(prefers-reduced-motion: reduce)')"),'s
 
 ok(a11y.includes("setAttribute('aria-pressed'")&&a11y.includes("classList.contains('on')"),'choice buttons must expose selected state through aria-pressed');
 ok(a11y.includes("#extraFenceConfig [data-eg]")&&a11y.includes("$$('.mobile-choices').forEach")&&a11y.includes("setAttribute('aria-label','Varianta mobilního oplocení')"),'specialized mobile fence choices must expose grouped aria semantics and selected state');
+ok(a11y.includes("function labelGroups(root,labels)")&&a11y.includes("group.setAttribute('role','group')")&&a11y.includes("group.setAttribute('aria-label',label)"),'dynamic compact option groups must expose a reusable accessible group label');
+ok(a11y.includes("labelGroups('#privacyConfig',['Materiál soukromého plotu','Míra soukromí','Směr výplně','Barva nebo dekor'])"),'privacy option groups must have explicit accessible names');
+ok(a11y.includes("labelGroups('#metalConfig',['Typ kovové výplně','Průhlednost kovového plotu','Povrch kovového plotu'])"),'metal option groups must have explicit accessible names');
+ok(a11y.includes("labelGroups('#concreteConfig',['Provedení betonových desek','Typ betonových sloupků','Barva betonového plotu'])"),'concrete option groups must have explicit accessible names');
+ok(a11y.includes("if($('.type.on')?.dataset.id==='masonry')labelGroups('#extraFenceConfig',['Konstrukce zděného plotu','Povrch zděného plotu'])"),'masonry option groups must be labelled only when that shared extra configurator represents masonry');
 ok(a11y.includes("setAttribute('aria-label','Odebrat úsek '")&&a11y.includes("setAttribute('title','Odebrat úsek '"),'segment remove buttons must have a meaningful accessible name');
 ok(a11y.includes("$$('.type img').forEach(img=>img.setAttribute('alt',''))"),'decorative type images must not duplicate the button label for screen readers');
 ok(a11y.includes("$$('.type .check').forEach(x=>x.setAttribute('aria-hidden','true'))"),'visual selection checkmarks must stay hidden from assistive technology');
@@ -53,4 +58,4 @@ ok(limitPos>manifest.indexOf('/assets/ui-bootstrap-v1.js'),'production manifest 
 ok(a11yPos>=0&&scrollPos>a11yPos,'production manifest must load the accessibility synchronizer before step scrolling');
 
 if(fail.length){console.error('UX regression checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('UX regression checks OK: dynamic next-step scroll, focus restoration across core/extra/privacy/aluminium/metal/concrete choices, modal behavior, explicit segment/length limits, lazy mobile imagery, mobile lead inputs and calculator accessibility are protected');
+console.log('UX regression checks OK: dynamic next-step scroll, focus restoration and labelled groups across core/extra/privacy/aluminium/metal/concrete choices, modal behavior, explicit segment/length limits, lazy mobile imagery, mobile lead inputs and calculator accessibility are protected');
