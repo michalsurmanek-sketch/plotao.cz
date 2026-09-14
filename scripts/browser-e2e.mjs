@@ -46,6 +46,18 @@ async function runScenario(name,viewport,scenario){
 
 await runScenario('desktop',{width:1440,height:1000},async page=>{
   assert(await page.locator('h1').isVisible(),'desktop H1 must be visible');
+  const skip=page.locator('[data-plotao-skip-link="1"]');
+  assert(await skip.count()===1,'desktop must expose exactly one keyboard skip link');
+  assert((await skip.getAttribute('href'))==='#kalkulator','skip link must target the calculator main landmark');
+  assert((await page.locator('#kalkulator').getAttribute('tabindex'))==='-1','calculator main must be programmatically focusable for skip navigation');
+  await skip.focus();
+  await page.waitForFunction(()=>document.activeElement?.getAttribute('data-plotao-skip-link')==='1',null,{timeout:5000});
+  const skipBox=await skip.boundingBox();
+  assert(Boolean(skipBox&&skipBox.y>=0&&skipBox.y<100),'focused skip link must become visible near the top of the viewport');
+  await skip.press('Enter');
+  await page.waitForFunction(()=>location.hash==='#kalkulator'&&document.activeElement?.id==='kalkulator',null,{timeout:5000});
+  assert((await page.evaluate(()=>document.activeElement?.id))==='kalkulator','activating skip link must move keyboard focus to the calculator main landmark');
+
   assert((await page.locator('.type[data-id="panel"]').getAttribute('aria-pressed'))==='true','panel must be selected initially');
   assert((await text(page.locator('.price strong'))) !== '—','default panel price must be calculated');
 
@@ -155,4 +167,4 @@ if(failures.length){
   console.error('Browser E2E failed:\n- '+failures.join('\n- '));
   process.exit(1);
 }
-console.log('Browser E2E OK: all 10 fence types plus desktop, 390px mobile and privacy flows passed without browser-console or same-origin request failures');
+console.log('Browser E2E OK: all 10 fence types plus desktop, 390px mobile, keyboard skip navigation and privacy flows passed without browser-console or same-origin request failures');
