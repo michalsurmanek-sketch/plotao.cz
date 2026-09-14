@@ -58,6 +58,10 @@ ok(workflow.includes('name=\\"plotao-deploy\\" content=\\"${EXPECTED_SHA}\\"'),'
 ok(smoke.includes('deploy-marker.txt?sha=${EXPECTED_SHA}'),'standalone live smoke must verify deploy-marker.txt');
 ok(smoke.includes('https://plotao.cz/?sha=${EXPECTED_SHA}'),'standalone live smoke must verify main HTML with cache busting');
 ok(smoke.includes('name=\\"plotao-deploy\\" content=\\"${EXPECTED_SHA}\\"'),'standalone live smoke must require the exact deploy SHA meta tag in HTML');
+ok(smoke.includes('privacy_url="https://plotao.cz/ochrana-osobnich-udaju.html?sha=${EXPECTED_SHA}"'),'standalone live smoke must fetch the public privacy page with cache busting');
+ok(smoke.includes('expected_privacy_link=')&&smoke.includes('expected_privacy_notice='),'standalone live smoke must verify the privacy link and lead-form notice on the live homepage');
+ok(smoke.includes('<h1>Ochrana osobních údajů</h1>')&&smoke.includes('AO Holding s.r.o.'),'standalone live smoke must verify privacy page identity and controller');
+ok(smoke.includes('privacy_ok=0')&&smoke.includes('[ "$privacy_ok" = 1 ]'),'standalone live smoke must make privacy information a hard success condition');
 ok(smoke.includes('expected_og=')&&smoke.includes('property="og:image"')&&smoke.includes('panelovy-3d.webp'),'standalone live smoke must verify the reviewed Open Graph image on the live domain');
 ok(smoke.includes('expected_twitter=')&&smoke.includes('summary_large_image'),'standalone live smoke must verify the large Twitter card on the live domain');
 ok(smoke.includes('expected_twitter_image=')&&smoke.includes('name="twitter:image"'),'standalone live smoke must verify the Twitter image on the live domain');
