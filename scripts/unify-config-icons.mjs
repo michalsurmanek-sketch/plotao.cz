@@ -14,13 +14,15 @@ const badge=`background-color:#dff4e8!important;background-image:${icon}!importa
 
 const css=`<style data-plotao-config-icons="1">
 /* One shared configurator badge: exact mobile-fence gear icon everywhere. */
-.mobile-config-icon,.config-intro-icon,.config-header-icon,.config-hero__icon,.mesh-config-icon,.panel-config-icon{${badge}}
-.mobile-config-icon>svg,.config-intro-icon>svg,.config-header-icon>svg,.config-hero__icon>svg,.mesh-config-icon>svg,.panel-config-icon>svg{visibility:hidden!important}
-#aluminiumConfigBox>.mobile-config-title:before,#metalConfig>h3:before,#concreteConfig>h3:before,#extraFenceConfig[data-type="other"]>.atyp-head:before{content:""!important;${badge}}
-@media(max-width:680px){.mobile-config-icon,.config-intro-icon,.config-header-icon,.config-hero__icon,.mesh-config-icon,.panel-config-icon,#aluminiumConfigBox>.mobile-config-title:before,#metalConfig>h3:before,#concreteConfig>h3:before,#extraFenceConfig[data-type="other"]>.atyp-head:before{background-size:31px 31px!important}}
+.mobile-config-icon,.config-intro-icon,.config-header-icon,.config-hero__icon,.mesh-config-icon,.panel-config-icon,.pc-ico{${badge}}
+.mobile-config-icon>svg,.config-intro-icon>svg,.config-header-icon>svg,.config-hero__icon>svg,.mesh-config-icon>svg,.panel-config-icon>svg,.pc-ico>svg{visibility:hidden!important}
+#aluminiumConfigBox>.mobile-config-title:before,#metalConfig>h3:before,#concreteConfig>h3:before,#extraFenceConfig[data-type="other"]>.atyp-head:before,#privacyConfig>h3:before{content:""!important;${badge}}
+#privacyConfig>h3{position:relative!important;min-height:68px!important;padding-left:88px!important;display:flex!important;align-items:center!important}
+#privacyConfig>h3:before{position:absolute!important;left:0!important;top:0!important;width:68px!important;height:68px!important;border-radius:50%!important;display:block!important}
+@media(max-width:680px){.mobile-config-icon,.config-intro-icon,.config-header-icon,.config-hero__icon,.mesh-config-icon,.panel-config-icon,.pc-ico,#aluminiumConfigBox>.mobile-config-title:before,#metalConfig>h3:before,#concreteConfig>h3:before,#extraFenceConfig[data-type="other"]>.atyp-head:before,#privacyConfig>h3:before{background-size:31px 31px!important}#privacyConfig>h3{min-height:64px!important;padding-left:80px!important}#privacyConfig>h3:before{width:64px!important;height:64px!important}}
 </style>`;
 
 html=html.replace('</head>',css+'</head>');
 fs.writeFileSync(file,html,'utf8');
-if(!html.includes('data-plotao-config-icons="1"')||!html.includes('stroke-dasharray'))throw new Error('Configurator icon unification missing');
-console.log('Configurator icons unified to the exact mobile-fence gear badge');
+for(const token of ['data-plotao-config-icons="1"','.pc-ico','#privacyConfig>h3:before','stroke-dasharray'])if(!html.includes(token))throw new Error('Configurator icon unification missing: '+token);
+console.log('Configurator icons unified everywhere to the exact mobile-fence gear badge, including panel, mesh and privacy');
