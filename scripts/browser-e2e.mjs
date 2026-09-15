@@ -104,9 +104,12 @@ await runScenario('desktop',{width:1440,height:1000},async page=>{
   assert(await page.locator('#metalConfig [role="group"][aria-label="Typ kovové výplně"]').count()===1,'metal variant group must be labelled');
 
   await selectType(page,'masonry','#extraFenceConfig');
+  await page.waitForFunction(()=>document.querySelector('#extraFenceConfig .mobile-product h3')?.textContent==='Betonové tvárnice',null,{timeout:5000});
+  assert(await page.locator('#extraFenceConfig img[src*="masonry-blocks-main.webp"]').isVisible(),'masonry configurator must show the generated main product image');
+  assert(await page.locator('#extraFenceConfig .mobile-thumbs img').count()===4,'masonry concrete-block variant must show four generated detail images');
   await page.locator('#extraFenceConfig [data-ev="split"]').click();
   await page.waitForFunction(()=>document.activeElement?.dataset?.ev==='split',null,{timeout:5000});
-  await page.waitForFunction(()=>document.querySelector('#extraFenceConfig .compact')?.getAttribute('aria-label')==='Konstrukce zděného plotu',null,{timeout:5000});
+  await page.waitForFunction(()=>document.querySelector('#extraFenceConfig .mobile-choices')?.getAttribute('aria-label')==='Konstrukce zděného plotu'&&document.querySelector('#extraFenceConfig .compact')?.getAttribute('aria-label')==='Povrch zděného plotu',null,{timeout:5000});
 
   await selectType(page,'mobile','#extraFenceConfig .mobile-choices');
   assert(await page.locator('#extraFenceConfig [data-ev="mesh"]').count()===1,'mobile configurator must expose its mesh variant');
