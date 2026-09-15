@@ -43,3 +43,4 @@ for(const file of landingPages){
 }
 
 console.log(`Structured data sanitized: removed ${removed} deprecated FAQPage node(s) from ${landingPages.length} discovery landing pages; BreadcrumbList preserved`);
+await import('./enrich-config-headers.mjs');
