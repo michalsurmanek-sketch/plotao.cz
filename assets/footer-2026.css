@@ -44,3 +44,7 @@
 /* Exact divider alignment. */
 #plotaoFooter2026:after{height:281px!important}
 @media(max-width:680px){#plotaoFooter2026:after{height:293px!important}}
+
+/* Unified green tint over the artwork, ending at the divider. */
+#plotaoFooter2026:after{background-image:linear-gradient(rgba(6,52,40,.48),rgba(6,52,40,.66)),url('/assets/footer-bg.webp?v=53b8742')!important;background-position:right top!important;background-size:cover!important;background-repeat:no-repeat!important}
+@media(max-width:680px){#plotaoFooter2026:after{background-position:72% top!important;background-size:auto 100%!important}}
