@@ -85,6 +85,9 @@ jobs:
       - name: Enrich production accessibility shell
         run: node scripts/enrich-accessibility-shell.mjs
 
+      - name: Enrich metal configurator UI
+        run: node scripts/enrich-metal-ui.mjs
+
       - name: Sanitize production structured data
         run: node scripts/enrich-structured-data.mjs
 
