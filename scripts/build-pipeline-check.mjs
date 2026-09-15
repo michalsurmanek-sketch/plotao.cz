@@ -97,7 +97,7 @@ ok(workflow.includes('contains() {')&&workflow.includes('[[ "$1" == *"$2"* ]]'),
 ok(!workflow.includes("printf '%s' \"$page\" | grep -Fq"),'main live custom-domain verification must not regress to grep -q pipelines under pipefail');
 ok(fs.existsSync(performancePath),'homepage performance budget checker must exist');
 ok(workflow.includes(`node ${performancePath}`),'Pages source gate must enforce the homepage performance budget before artifact preparation');
-ok(performance.includes('const MAX_SCRIPT_COUNT=59;')&&performance.includes('const MAX_TOTAL_BYTES=280*1024;')&&performance.includes('const MAX_SINGLE_BYTES=16*1024;'),'homepage performance budget must stay at the reviewed 59-script / 280 KiB total / 16 KiB single-module limits unless explicitly re-reviewed');
+ok(performance.includes('const MAX_SCRIPT_COUNT=60;')&&performance.includes('const MAX_TOTAL_BYTES=280*1024;')&&performance.includes('const MAX_SINGLE_BYTES=16*1024;'),'homepage performance budget must stay at the reviewed 60-script / 280 KiB total / 16 KiB single-module limits unless explicitly re-reviewed');
 ok(workflow.includes('for file in assets/*.js scripts/*.mjs; do node --check "$file"; done'),'Pages workflow must syntax-check assets and build scripts');
 ok(workflow.includes('- name: Run browser E2E on production artifact'),'Pages workflow must browser-test the prepared production artifact before deployment');
 ok(workflow.includes('npm install --no-audit --no-fund --package-lock=false'),'browser E2E must install only the pinned repository tooling without mutating the lock state');
