@@ -107,8 +107,10 @@ await runScenario('desktop',{width:1440,height:1000},async page=>{
   await page.waitForFunction(()=>document.querySelector('#extraFenceConfig .mobile-product h3')?.textContent==='Betonové tvárnice',null,{timeout:5000});
   assert(await page.locator('#extraFenceConfig img[src*="masonry-blocks-main.webp"]').isVisible(),'masonry configurator must show the generated main product image');
   assert(await page.locator('#extraFenceConfig .mobile-thumbs img').count()===4,'masonry concrete-block variant must show four generated detail images');
+  assert(await page.locator('#extraFenceConfig .masonry-finish').count()===1,'surface choice must be visible for concrete blocks');
   await page.locator('#extraFenceConfig [data-ev="brick"]').click();
   await page.waitForFunction(()=>document.querySelector('#extraFenceConfig .mobile-product h3')?.textContent==='Cihlový plot',null,{timeout:5000});
+  assert(await page.locator('#extraFenceConfig .masonry-finish').count()===0,'surface choice must be hidden for brick and non-block masonry variants');
   assert(await page.locator('#extraFenceConfig img[src*="masonry-brick-main.webp"]').isVisible(),'brick variant must show the generated main product image');
   assert(await page.locator('#extraFenceConfig .mobile-thumbs img').count()===4,'brick variant must show four generated detail images');
   await page.locator('#extraFenceConfig [data-ev="stone"]').click();
