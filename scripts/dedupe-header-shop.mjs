@@ -7,16 +7,22 @@ const headerMatch=html.match(/<header class="head">[\s\S]*?<\/header>/i);
 if(!headerMatch)throw new Error('Header E-shop dedupe: homepage header missing');
 let header=headerMatch[0];
 
-// Keep the canonical build-injected E-shop link and remove any legacy/header control
-// (button or secondary link) that also renders E-shop text. This is structural,
-// not a CSS hide, so the duplicate cannot remain focusable or clickable.
+// Rebuild the shop control from one canonical source. Remove every existing
+// shop link/button first, then inject exactly one canonical link after the logo.
+// This is a structural DOM fix, not CSS hiding.
+header=header.replace(/<a\b[^>]*href=["']\/eshop\.html["'][^>]*>[\s\S]*?<\/a>/gi,'');
+header=header.replace(/<button\b[^>]*(?:aria-label=["'][^"']*e-?shop[^"']*["'])[^>]*>[\s\S]*?<\/button>/gi,'');
 header=header.replace(/<button\b[^>]*>[\s\S]*?E-shop[\s\S]*?<\/button>/gi,'');
-header=header.replace(/<a\b(?![^>]*data-plotao-shop-link=["']1["'])[^>]*>[\s\S]*?E-shop[\s\S]*?<\/a>/gi,'');
+const shop='<a class="shop-link" data-plotao-shop-link="1" href="/eshop.html" aria-label="Otevřít e-shop PLOTAO">E-shop</a>';
+const logo=/(<a class="logo" href="\/">[\s\S]*?<\/a>)/i;
+if(!logo.test(header))throw new Error('Header E-shop dedupe: homepage logo anchor missing');
+header=header.replace(logo,`$1${shop}`);
 
-const canonical=(header.match(/<a\b[^>]*data-plotao-shop-link=["']1["'][^>]*href=["']\/eshop\.html["'][^>]*>[\s\S]*?<\/a>/gi)||[]).length;
-const visible=(header.match(/E-shop/gi)||[]).length;
-if(canonical!==1||visible!==1)throw new Error(`Header E-shop dedupe: expected one canonical visible E-shop control, got canonical=${canonical}, visible=${visible}`);
+const canonical=(header.match(/data-plotao-shop-link=["']1["']/gi)||[]).length;
+const links=(header.match(/href=["']\/eshop\.html["']/gi)||[]).length;
+const visible=(header.match(/>\s*E-shop\s*</gi)||[]).length;
+if(canonical!==1||links!==1||visible!==1)throw new Error(`Header E-shop dedupe: expected exactly one canonical shop control, got canonical=${canonical}, links=${links}, visible=${visible}`);
 
 html=html.replace(headerMatch[0],header);
 fs.writeFileSync(file,html,'utf8');
-console.log('Homepage header E-shop permanently deduplicated: one canonical control, no hidden/overlaid duplicate');
+console.log('Homepage header E-shop rebuilt structurally: exactly one canonical control remains');
