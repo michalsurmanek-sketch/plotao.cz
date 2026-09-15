@@ -1,7 +1,9 @@
 import fs from 'node:fs';
 
 const file='dist/index.html';
+const truthFile='dist/assets/ui-truth-v1.js';
 if(!fs.existsSync(file))throw new Error('Header E-shop dedupe: production artifact is missing');
+if(!fs.existsSync(truthFile))throw new Error('Header E-shop dedupe: ui-truth runtime is missing');
 let html=fs.readFileSync(file,'utf8');
 const headerMatch=html.match(/<header class="head">[\s\S]*?<\/header>/i);
 if(!headerMatch)throw new Error('Header E-shop dedupe: homepage header missing');
@@ -23,6 +25,11 @@ const links=(header.match(/href=["']\/eshop\.html["']/gi)||[]).length;
 const visible=(header.match(/>\s*E-shop\s*</gi)||[]).length;
 if(canonical!==1||links!==1||visible!==1)throw new Error(`Header E-shop dedupe: expected exactly one canonical shop control, got canonical=${canonical}, links=${links}, visible=${visible}`);
 
+// Permanent regression guard: the header E-shop is build-owned. Runtime JS must
+// never inject another shop control after DOMContentLoaded.
+const truth=fs.readFileSync(truthFile,'utf8');
+if(/addShopEntry|plotao-shop-link|plotaoShopEntryStyle|🛒/.test(truth))throw new Error('Header E-shop dedupe: runtime E-shop injector detected in ui-truth-v1.js');
+
 html=html.replace(headerMatch[0],header);
 fs.writeFileSync(file,html,'utf8');
-console.log('Homepage header E-shop rebuilt structurally: exactly one canonical control remains');
+console.log('Homepage header E-shop rebuilt structurally and runtime reinjection is blocked');
