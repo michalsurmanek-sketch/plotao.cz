@@ -121,7 +121,7 @@ await runScenario('desktop',{width:1440,height:1000},async page=>{
   await page.waitForFunction(()=>document.activeElement?.dataset?.ev==='split',null,{timeout:5000});
   await page.waitForFunction(()=>document.querySelector('#extraFenceConfig .mobile-choices')?.getAttribute('aria-label')==='Konstrukce zděného plotu'&&!document.querySelector('#extraFenceConfig .masonry-finish'),null,{timeout:5000});
 
-  await selectType(page,'mobile','#extraFenceConfig .mobile-choices');
+  await selectType(page,'mobile','#extraFenceConfig [data-ev="mesh"]');
   assert(await page.locator('#extraFenceConfig [data-ev="mesh"]').count()===1,'mobile configurator must expose its mesh variant');
 
   await selectType(page,'other','#extraFenceConfig');
@@ -172,7 +172,7 @@ await runScenario('desktop',{width:1440,height:1000},async page=>{
 
 await runScenario('mobile-390',{width:390,height:844},async page=>{
   assert(await page.locator('.mobile-price').isVisible(),'mobile sticky price bar must be visible at 390px');
-  await selectType(page,'mobile','#extraFenceConfig .mobile-choices');
+  await selectType(page,'mobile','#extraFenceConfig [data-ev="mesh"]');
   await page.locator('#extraFenceConfig [data-ev="solid"]').click();
   await page.waitForFunction(()=>document.activeElement?.dataset?.ev==='solid',null,{timeout:5000});
   await page.waitForFunction(()=>document.querySelector('#extraFenceConfig [data-ev="solid"]')?.getAttribute('aria-pressed')==='true',null,{timeout:5000});
