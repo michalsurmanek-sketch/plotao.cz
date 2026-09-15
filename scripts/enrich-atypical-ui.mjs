@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import {createHash} from 'node:crypto';
 
 const htmlFile='dist/index.html';
 const jsFile='dist/assets/extra-fence-config.js';
@@ -28,9 +29,13 @@ const bindAnchor="b.innerHTML=html;\n    const s=state[t];";
 if(!js.includes(bindAnchor))throw new Error('Atypical UI enrichment: binding anchor missing');
 js=js.replace(bindAnchor,"b.innerHTML=html;\n    const s=state[t];\n    b.querySelectorAll('[data-eg]').forEach(x=>x.classList.toggle('on',s[x.dataset.eg]===x.dataset.ev));");
 
-fs.writeFileSync(htmlFile,html,'utf8');
 fs.writeFileSync(jsFile,js,'utf8');
+const version=createHash('sha256').update(fs.readFileSync(jsFile)).digest('hex').slice(0,12);
+const scriptRe=/(<script\b[^>]*\bsrc=["'])\/assets\/extra-fence-config\.js(?:\?[^"']*)?(["'][^>]*><\/script>)/i;
+if(!scriptRe.test(html))throw new Error('Atypical UI enrichment: versioned script tag missing');
+html=html.replace(scriptRe,`$1/assets/extra-fence-config.js?v=${version}$2`);
+fs.writeFileSync(htmlFile,html,'utf8');
 
 for(const text of ['Protihlukové oplocení','Bezpečnostní oplocení','Bazénové oplocení','Chovatelské oplocení','Sportovní / vysoké oplocení','Atypické řešení na míru'])if(!html.includes(text))throw new Error('Atypical UI enrichment missing: '+text);
 if((html.match(/id="otherFenceTpl"/g)||[]).length!==1||(html.match(/data-plotao-atypical-style="1"/g)||[]).length!==1)throw new Error('Atypical UI enrichment duplicated');
-console.log('Atypical configurator UI enriched with six selectable visual categories');
+console.log('Atypical configurator UI enriched with six selectable visual categories and refreshed script cache version');
