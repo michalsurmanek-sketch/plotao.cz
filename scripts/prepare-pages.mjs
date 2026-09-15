@@ -113,6 +113,13 @@ html=html.replace(/<img\b[^>]*\bsrc=["']\/assets\/logo-plotao\.svg["'][^>]*>/gi,
   return cleaned.replace(/>$/, ' width="2172" height="724">');
 });
 
+const shopLink='<a class="shop-link" data-plotao-shop-link="1" href="/eshop.html" aria-label="Otevřít e-shop PLOTAO">E-shop</a>';
+if(!html.includes('data-plotao-shop-link="1"')){
+  html=html.replace(/(<header class="head">[\s\S]*?<a class="logo" href="\/">[\s\S]*?<\/a>)/i,`$1${shopLink}`);
+}
+if(!html.includes('data-plotao-shop-link="1"'))throw new Error('Pages build: homepage E-shop link injection failed');
+const shopCss='<style data-plotao-shop-link-style="1">.head .shop-link{height:42px;display:inline-flex;align-items:center;justify-content:center;margin-left:auto;margin-right:8px;padding:0 16px;border-radius:999px;background:var(--o);color:#fff;text-decoration:none;font-weight:900;box-shadow:0 8px 20px #f0782833;white-space:nowrap}.head .shop-link:hover,.head .shop-link:focus-visible{filter:brightness(.97);outline:3px solid #f0782844;outline-offset:2px}@media(max-width:680px){.head .logo img{width:145px}.head .shop-link{height:40px;padding:0 10px;margin-right:6px;font-size:13px}.head .help{padding:8px 10px;font-size:12px;white-space:nowrap}}@media(max-width:430px){.head{gap:6px}.head .logo img{width:130px}.head .shop-link{height:38px;padding:0 9px;margin-right:0}.head .help{height:38px;padding:0 9px}}</style>';
+
 const logoStats=prepareMainLogo('assets/logo-plotao.svg');
 const faviconStats=optimizeEmbeddedPngSvg('assets/favicon.svg','Favicon');
 
@@ -129,7 +136,7 @@ const criticalPreloads=criticalScripts.map(src=>`<link rel="preload" as="script"
 
 html=html.replace(/<meta name="plotao-deploy" content="[^"]*">/g,'');
 if(!html.includes('</head>')) throw new Error('Pages build: </head> not found');
-html=html.replace('</head>',criticalPreloads+schemaTag+socialMeta+`<meta name="plotao-deploy" content="${sha}"></head>`);
+html=html.replace('</head>',criticalPreloads+schemaTag+socialMeta+shopCss+`<meta name="plotao-deploy" content="${sha}"></head>`);
 
 fs.writeFileSync(path,html,'utf8');
 fs.writeFileSync('deploy-marker.txt',sha+'\n','utf8');
