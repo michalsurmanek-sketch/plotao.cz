@@ -1,56 +1,24 @@
 import fs from 'node:fs';
 import path from 'node:path';
-
 const root='dist';
 if(!fs.existsSync(root))throw new Error('Privacy UI: dist/ is missing');
-
 const privacyPage='ochrana-osobnich-udaju.html';
 const privacyHref='/ochrana-osobnich-udaju.html';
 const footerLink=`<a data-plotao-privacy-link="1" href="${privacyHref}">Ochrana osobních údajů</a>`;
 const publicHtml=fs.readdirSync(root).filter(name=>name.endsWith('.html')).sort();
 let injectedCount=0;
-
-for(const file of publicHtml){
-  const full=path.join(root,file);
-  let html=fs.readFileSync(full,'utf8');
-  if(file!==privacyPage&&!html.includes('data-plotao-privacy-link="1"')){
-    if(html.includes('class="foot-bottom"')){
-      html=html.replace(/(<div class="foot-bottom">\s*<span>[^<]*<\/span>)/i,`$1${footerLink}`);
-    }else if(/<footer\b[^>]*>[\s\S]*?<\/footer>/i.test(html)){
-      html=html.replace(/<\/footer>/i,` · ${footerLink}</footer>`);
-    }else{
-      throw new Error(`Privacy UI: public page has no supported footer for privacy link: ${file}`);
-    }
-    if(!html.includes('data-plotao-privacy-link="1"'))throw new Error(`Privacy UI: could not inject footer link into ${file}`);
-    injectedCount++;
-  }
-  fs.writeFileSync(full,html,'utf8');
-}
-
-const indexFile=path.join(root,'index.html');
-let index=fs.readFileSync(indexFile,'utf8');
+for(const file of publicHtml){const full=path.join(root,file);let html=fs.readFileSync(full,'utf8');if(file!==privacyPage&&!html.includes('data-plotao-privacy-link="1"')){if(html.includes('class="foot-bottom"'))html=html.replace(/(<div class="foot-bottom">\s*<span>[^<]*<\/span>)/i,`$1${footerLink}`);else if(/<footer\b[^>]*>[\s\S]*?<\/footer>/i.test(html))html=html.replace(/<\/footer>/i,` · ${footerLink}</footer>`);else throw new Error(`Privacy UI: public page has no supported footer for privacy link: ${file}`);if(!html.includes('data-plotao-privacy-link="1"'))throw new Error(`Privacy UI: could not inject footer link into ${file}`);injectedCount++}fs.writeFileSync(full,html,'utf8')}
+const indexFile=path.join(root,'index.html');let index=fs.readFileSync(indexFile,'utf8');
 const notice='<p class="privacy-note" data-plotao-privacy-notice="1">Údaje použijeme k vyřízení poptávky a přípravě nabídky. <a href="/ochrana-osobnich-udaju.html">Jak chráníme osobní údaje</a>.</p>';
-if(!index.includes('data-plotao-privacy-notice="1"')){
-  index=index.replace('<button class="send" type="submit">Připravit poptávku</button>',`${notice}<button class="send" type="submit">Připravit poptávku</button>`);
-}
+if(!index.includes('data-plotao-privacy-notice="1"'))index=index.replace('<button class="send" type="submit">Připravit poptávku</button>',`${notice}<button class="send" type="submit">Připravit poptávku</button>`);
 if(!index.includes('data-plotao-privacy-notice="1"'))throw new Error('Privacy UI: lead-form privacy notice could not be injected');
-if(!index.includes('data-plotao-privacy-style="1"')){
-  const css='<style data-plotao-privacy-style="1">.privacy-note{margin:2px 0 12px;color:#5d6f65;font-size:12px;line-height:1.45}.privacy-note a{color:#087443;font-weight:800}.foot-bottom>[data-plotao-privacy-link="1"]{color:#d9e7df;text-decoration:underline;text-underline-offset:3px}</style>';
-  index=index.replace('</head>',`${css}</head>`);
-}
-if(!index.includes('data-plotao-footer-bg="1"')){
-  const footerCss='<style data-plotao-footer-bg="1">footer{position:relative;isolation:isolate;background:#073c2d url("/assets/footer-bg.webp") center center/cover no-repeat!important;color:#dce9e2}footer:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(4,48,36,.96) 0%,rgba(4,48,36,.90) 42%,rgba(4,48,36,.72) 70%,rgba(4,48,36,.66) 100%)}footer .foot{position:relative;z-index:1}@media(max-width:680px){footer{background-position:62% center!important}footer:before{background:linear-gradient(90deg,rgba(4,48,36,.97) 0%,rgba(4,48,36,.91) 58%,rgba(4,48,36,.76) 100%)}}</style>';
-  index=index.replace('</head>',`${footerCss}</head>`);
-}
+if(!index.includes('data-plotao-privacy-style="1"'))index=index.replace('</head>','<style data-plotao-privacy-style="1">.privacy-note{margin:2px 0 12px;color:#5d6f65;font-size:12px;line-height:1.45}.privacy-note a{color:#087443;font-weight:800}</style></head>');
+const footer=`<footer id="plotaoFooter2026"><div class="pf"><div class="pf-top"><div class="pf-brand"><a class="pf-logo" href="/"><img src="/assets/logo-plotao-inverse.svg" alt="PLOTAO.CZ"></a><div class="pf-sub">Kalkulátor plotů pro celou ČR</div><p>Spočítejte potřebný materiál a orientační cenu oplocení. Přesnou nabídku doladíme podle terénu, přístupu a místa realizace.</p></div><div class="pf-slogan">Lepší<br>ploty pro<br>lepší domov<i></i></div></div><div class="pf-rule"></div><div class="pf-nav"><nav><h3>Druhy oplocení</h3><a href="/panelovy-plot.html"><span class="thumb panel"></span><span>Panelové ploty<br>2D a 3D</span><em>›</em></a><a href="/pletivovy-plot.html"><span class="thumb mesh"></span><span>Pletivové ploty</span><em>›</em></a><a href="/betonovy-plot.html"><span class="thumb concrete"></span><span>Betonové ploty</span><em>›</em></a><a href="/gabionovy-plot.html"><span class="thumb gabion"></span><span>Gabionové ploty</span><em>›</em></a><a href="/hlinikovy-plot.html"><span class="thumb alu"></span><span>Hliníkové ploty</span><em>›</em></a></nav><nav><h3>Další možnosti</h3><a href="#kalkulator"><span class="ico">▦</span><span>Kalkulátor plotu</span><em>›</em></a><a href="#partner"><span class="ico">⚙</span><span>Montáž a služby</span><em>›</em></a><a href="#partner"><span class="ico">▱</span><span>Doprava</span><em>›</em></a><a href="/typy-plotu.html"><span class="ico">▤</span><span>Návody a rady</span><em>›</em></a><a href="/ochrana-osobnich-udaju.html"><span class="ico">♢</span><span>Ochrana osobních údajů</span><em>›</em></a><a href="#partner"><span class="ico">✉</span><span>Kontakt</span><em>›</em></a><a href="/"><span class="ico">ⓘ</span><span>O nás</span><em>›</em></a></nav></div><div class="pf-benefits"><div><b>♜</b><span>Rychlá<br>kalkulace</span></div><div><b>♢</b><span>Ověřené<br>produkty</span></div><div><b>⌖</b><span>Dodání<br>po celé ČR</span></div></div><div class="pf-rule"></div><div class="pf-news"><div class="news-title"><b>✉</b><span><strong>Novinky a slevy</strong><small>Buďte první, kdo ví o akcích</small></span></div><form onsubmit="return false"><input type="email" aria-label="Váš e-mail" placeholder="Váš e-mail"><button type="submit">Přihlásit se</button></form></div><div class="pf-rule"></div><div class="pf-bottom"><div class="social"><a href="#" aria-label="Facebook">f</a><a href="#" aria-label="Instagram">◎</a><a href="#" aria-label="YouTube">▶</a></div><div>© 2026 Plotao.cz<br>Kalkulátor plotů pro celou ČR</div></div></div></footer>`;
+index=index.replace(/<footer\b[^>]*>[\s\S]*?<\/footer>/i,footer);
+if(!index.includes('id="plotaoFooter2026"'))throw new Error('Footer 2026 injection failed');
+if(!index.includes('data-plotao-footer-2026-css="1"'))index=index.replace('</head>','<link data-plotao-footer-2026-css="1" rel="stylesheet" href="/assets/footer-2026.css"></head>');
+index=index.replace('<span>Orientačně</span><strong id="stickyTotal">—</strong>','<span>Cena materiálu</span><strong id="stickyTotal">—</strong>').replace('<button id="continueBtn">Výsledek →</button>','<button id="continueBtn">Zobrazit rozpis →</button>');
 fs.writeFileSync(indexFile,index,'utf8');
-
-const privacyFile=path.join(root,privacyPage);
-if(!fs.existsSync(privacyFile))throw new Error('Privacy UI: public privacy page is missing from dist');
-const linkedPages=publicHtml.filter(file=>file!==privacyPage&&fs.readFileSync(path.join(root,file),'utf8').includes('data-plotao-privacy-link="1"'));
-const expectedLinked=publicHtml.filter(file=>file!==privacyPage);
-if(linkedPages.length!==expectedLinked.length){
-  const missing=expectedLinked.filter(file=>!linkedPages.includes(file));
-  throw new Error(`Privacy UI: public pages missing privacy footer link: ${missing.join(', ')}`);
-}
-
-console.log(`Privacy UI prepared: lead notice + privacy page + privacy footer link on ${linkedPages.length}/${expectedLinked.length} public pages (${injectedCount} injected this build)`);
+const privacyFile=path.join(root,privacyPage);if(!fs.existsSync(privacyFile))throw new Error('Privacy UI: public privacy page is missing from dist');
+const linkedPages=publicHtml.filter(file=>file!==privacyPage&&fs.readFileSync(path.join(root,file),'utf8').includes('data-plotao-privacy-link="1"'));const expectedLinked=publicHtml.filter(file=>file!==privacyPage);if(linkedPages.length!==expectedLinked.length){const missing=expectedLinked.filter(file=>!linkedPages.includes(file));throw new Error(`Privacy UI: public pages missing privacy footer link: ${missing.join(', ')}`)}
+console.log(`Privacy UI + approved footer prepared; privacy links ${linkedPages.length}/${expectedLinked.length} (${injectedCount} injected)`);
