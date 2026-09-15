@@ -40,9 +40,11 @@ function applyMobilePartnerArtwork(){
  const partner=document.querySelector('.partner');
  if(!partner)return;
  const mobile=window.matchMedia('(max-width:760px)').matches;
+ const cta=partner.querySelector('#partner');
  if(mobile){
   Array.from(partner.children).forEach(el=>el.style.setProperty('display','none','important'));
   partner.style.setProperty('display','block','important');
+  partner.style.setProperty('position','relative','important');
   partner.style.setProperty('width','100%','important');
   partner.style.setProperty('aspect-ratio','3 / 2','important');
   partner.style.setProperty('min-height','0','important');
@@ -56,9 +58,29 @@ function applyMobilePartnerArtwork(){
   partner.style.setProperty('background-position','center','important');
   partner.style.setProperty('background-repeat','no-repeat','important');
   partner.style.setProperty('background-color','#063428','important');
+  if(cta){
+   cta.style.setProperty('display','block','important');
+   cta.style.setProperty('position','absolute','important');
+   cta.style.setProperty('z-index','5','important');
+   cta.style.setProperty('left','5.2%','important');
+   cta.style.setProperty('top','72%','important');
+   cta.style.setProperty('width','34%','important');
+   cta.style.setProperty('height','12%','important');
+   cta.style.setProperty('min-height','0','important');
+   cta.style.setProperty('padding','0','important');
+   cta.style.setProperty('margin','0','important');
+   cta.style.setProperty('border','0','important');
+   cta.style.setProperty('border-radius','12px','important');
+   cta.style.setProperty('background','transparent','important');
+   cta.style.setProperty('color','transparent','important');
+   cta.style.setProperty('box-shadow','none','important');
+   cta.style.setProperty('cursor','pointer','important');
+   cta.style.setProperty('opacity','1','important');
+  }
  }else{
   Array.from(partner.children).forEach(el=>el.style.removeProperty('display'));
-  ['display','width','aspect-ratio','min-height','height','padding','border','border-radius','overflow','background-image','background-size','background-position','background-repeat','background-color'].forEach(p=>partner.style.removeProperty(p));
+  ['display','position','width','aspect-ratio','min-height','height','padding','border','border-radius','overflow','background-image','background-size','background-position','background-repeat','background-color'].forEach(p=>partner.style.removeProperty(p));
+  if(cta)['display','position','z-index','left','top','width','height','min-height','padding','margin','border','border-radius','background','color','box-shadow','cursor','opacity'].forEach(p=>cta.style.removeProperty(p));
  }
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',applyMobilePartnerArtwork);else applyMobilePartnerArtwork();
