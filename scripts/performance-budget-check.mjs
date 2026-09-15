@@ -1,11 +1,11 @@
 import fs from 'node:fs';
 import {activeScripts} from './pages-manifest.mjs';
 
-// Keep the homepage calculator from growing silently. These limits leave modest
-// headroom above the measured baseline (60 scripts / 296000 bytes / 11835-byte
-// largest module) while forcing an explicit review before meaningful growth.
+// Keep the homepage calculator from growing silently. The footer redesign was
+// explicitly reviewed in September 2026; allow only a small 4 KiB increase
+// while retaining the deployment guard against future unreviewed growth.
 const MAX_SCRIPT_COUNT=60;
-const MAX_TOTAL_BYTES=300*1024;
+const MAX_TOTAL_BYTES=304*1024;
 const MAX_SINGLE_BYTES=16*1024;
 const fail=[];
 const ok=(value,message)=>{if(!value)fail.push(message)};
