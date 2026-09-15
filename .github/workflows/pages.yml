@@ -88,6 +88,9 @@ jobs:
       - name: Enrich metal configurator UI
         run: node scripts/enrich-metal-ui.mjs
 
+      - name: Enrich atypical configurator UI
+        run: node scripts/enrich-atypical-ui.mjs
+
       - name: Sanitize production structured data
         run: node scripts/enrich-structured-data.mjs
 
