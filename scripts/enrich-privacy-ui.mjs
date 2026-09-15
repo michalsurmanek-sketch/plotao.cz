@@ -21,4 +21,4 @@ index=index.replace('<span>Orientačně</span><strong id="stickyTotal">—</stro
 fs.writeFileSync(indexFile,index,'utf8');
 const privacyFile=path.join(root,privacyPage);if(!fs.existsSync(privacyFile))throw new Error('Privacy UI: public privacy page is missing from dist');
 const linkedPages=publicHtml.filter(file=>file!==privacyPage&&fs.readFileSync(path.join(root,file),'utf8').includes('data-plotao-privacy-link="1"'));const expectedLinked=publicHtml.filter(file=>file!==privacyPage);if(linkedPages.length!==expectedLinked.length){const missing=expectedLinked.filter(file=>!linkedPages.includes(file));throw new Error(`Privacy UI: public pages missing privacy footer link: ${missing.join(', ')}`)}
-console.log(`Privacy UI + approved footer prepared; privacy links ${linkedPages.length}/${expectedLinked.length} (${injectedCount} injected)`);
+console.log(`Privacy UI + approved footer prepared; privacy footer link on ${linkedPages.length}/${expectedLinked.length} public pages (${injectedCount} injected)`);
