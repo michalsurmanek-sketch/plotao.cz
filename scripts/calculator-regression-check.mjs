@@ -55,7 +55,8 @@ assert(structuralCore.includes('density:1.7')&&structuralCore.includes('construc
 const extraAdapter=read('assets/extra-fence-pricing.js'),extraCore=read('assets/extra-fence-pricing-core-v1.js');
 assert(extraAdapter.includes('PLOTAO_EXTRA_FENCE_PRICING_CORE')&&extraAdapter.includes('computeExtraFencePrice'),'extra-fence browser adapter must delegate mobile/masonry pricing to shared core');
 assert(extraCore.includes('panelLength:3.5')&&extraCore.includes('panelUnit:1286')&&extraCore.includes('footUnit:176')&&extraCore.includes('connectorUnit:78'),'mobile fence verified DOPS units must stay in shared core');
-assert(extraCore.includes("const spec=config.variant==='solid'?mobile.solid:mobile")&&extraCore.includes('counts=runs.map(x=>Math.ceil(x/spec.panelLength))'),'mobile fence core must select subtype dimensions and count panels independently per run');
+assert(extraCore.includes("config.variant==='barrier'?mobile.barrier:mobile")&&extraCore.includes('counts=runs.map(x=>Math.ceil(x/spec.panelLength))'),'mobile fence core must select subtype dimensions and count panels independently per run');
+assert(extraCore.includes('integratedHardware:true')&&extraCore.includes("kind:config.variant==='solid'?'mobile-solid':config.variant==='barrier'?'mobile-barrier':'mobile-mesh'"),'mobile barrier must use integrated hardware and its own verified pricing kind');
 assert(extraCore.includes("kind:'masonry-reference'")&&extraCore.includes('length*6000')&&extraCore.includes('length*11000'),'masonry reference range must stay explicit and separate from exact totals');
 
 const slabAdapter=read('assets/slab-pricing-v2.js'),slabCore=read('assets/slab-pricing-core-v1.js');
