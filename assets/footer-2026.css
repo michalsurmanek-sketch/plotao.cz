@@ -28,3 +28,9 @@
 #plotaoFooter2026:after{content:"";position:absolute;z-index:0;top:0;right:0;width:58%;height:430px;background:url('/assets/footer-bg.webp?v=53b8742') right top/cover no-repeat;pointer-events:none}
 #plotaoFooter2026 .pf{position:relative;z-index:1}
 @media(max-width:680px){#plotaoFooter2026:after{width:62%;height:360px;background-position:right top;background-size:cover}}
+
+/* Continuous footer artwork: one background over the whole footer, no rectangular layer. */
+#plotaoFooter2026{background-color:#063428!important;background-image:url('/assets/footer-bg.webp?v=53b8742')!important;background-position:right top!important;background-size:cover!important;background-repeat:no-repeat!important;overflow:hidden}
+#plotaoFooter2026:after{display:none!important;content:none!important}
+#plotaoFooter2026:before{background:transparent!important}
+@media(max-width:680px){#plotaoFooter2026{background-position:72% top!important;background-size:auto 100%!important}}
