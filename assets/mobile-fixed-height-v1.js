@@ -35,4 +35,32 @@ document.addEventListener('plotao:extra',schedule);
 document.addEventListener('plotao:ui-ready',schedule);
 document.addEventListener('click',e=>{if(e.target.closest('.type,[data-eg="variant"]'))schedule()});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule);else schedule();
+
+function applyMobilePartnerArtwork(){
+ const partner=document.querySelector('.partner');
+ if(!partner)return;
+ const mobile=window.matchMedia('(max-width:760px)').matches;
+ if(mobile){
+  Array.from(partner.children).forEach(el=>el.style.setProperty('display','none','important'));
+  partner.style.setProperty('display','block','important');
+  partner.style.setProperty('width','100%','important');
+  partner.style.setProperty('aspect-ratio','3 / 2','important');
+  partner.style.setProperty('min-height','0','important');
+  partner.style.setProperty('height','auto','important');
+  partner.style.setProperty('padding','0','important');
+  partner.style.setProperty('border','0','important');
+  partner.style.setProperty('border-radius','22px','important');
+  partner.style.setProperty('overflow','hidden','important');
+  partner.style.setProperty('background-image',"url('/assets/images/pro-vyrobce-bg.png?v=7601917')",'important');
+  partner.style.setProperty('background-size','contain','important');
+  partner.style.setProperty('background-position','center','important');
+  partner.style.setProperty('background-repeat','no-repeat','important');
+  partner.style.setProperty('background-color','#063428','important');
+ }else{
+  Array.from(partner.children).forEach(el=>el.style.removeProperty('display'));
+  ['display','width','aspect-ratio','min-height','height','padding','border','border-radius','overflow','background-image','background-size','background-position','background-repeat','background-color'].forEach(p=>partner.style.removeProperty(p));
+ }
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',applyMobilePartnerArtwork);else applyMobilePartnerArtwork();
+window.addEventListener('resize',applyMobilePartnerArtwork);
 })();
