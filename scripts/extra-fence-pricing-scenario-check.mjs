@@ -24,6 +24,13 @@ ok(Math.round(p.materialTotal)===11259,'10m solid mobile benchmark must stay 11,
 p=computeExtraFencePrice({type:'mobile',config:{variant:'solid'},runs:[10],length:10,height:190});
 ok(p.unsupported===true&&p.reason==='height'&&p.requiredHeight===2,'solid panel must not reuse its price at a false 190cm height');
 
+p=computeExtraFencePrice({type:'mobile',config:{variant:'barrier'},runs:[10],length:10,height:110});
+ok(!p.unsupported&&p.kind==='mobile-barrier'&&p.panels===5,'10m mobile barrier run must use 5 independent 2.17m barriers');
+ok(p.feet===0&&p.connectors===0,'mobile barrier must not add separate feet or connectors');
+ok(Math.round(p.materialTotal)===11247,'10m mobile barrier benchmark must stay 11,247 CZK');
+p=computeExtraFencePrice({type:'mobile',config:{variant:'barrier'},runs:[10],length:10,height:190});
+ok(p.unsupported===true&&p.reason==='height'&&p.requiredHeight===1.1,'mobile barrier must stay tied to fixed 110cm height');
+
 p=computeExtraFencePrice({type:'masonry',config:{variant:'blocks',finish:'standard'},length:10,height:180});
 ok(!p.unsupported&&p.kind==='masonry-reference'&&p.low===60000&&p.high===110000,'10m masonry block reference must stay 60,000–110,000 CZK');
 p=computeExtraFencePrice({type:'masonry',config:{variant:'blocks',finish:'premium'},length:10,height:180});
