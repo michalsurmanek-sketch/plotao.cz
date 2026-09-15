@@ -18,3 +18,7 @@
 }
 
 @media(max-width:680px){#plotaoFooter2026{background-position:72% top!important;background-size:auto 560px!important;background-repeat:no-repeat!important;background-color:#063428!important}}
+
+/* Background artwork must remain fully visible; no color veil. */
+#plotaoFooter2026:before{background:transparent!important}
+@media(max-width:680px){#plotaoFooter2026:before{background:transparent!important}}
