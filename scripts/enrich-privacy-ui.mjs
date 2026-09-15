@@ -38,6 +38,10 @@ if(!index.includes('data-plotao-privacy-style="1"')){
   const css='<style data-plotao-privacy-style="1">.privacy-note{margin:2px 0 12px;color:#5d6f65;font-size:12px;line-height:1.45}.privacy-note a{color:#087443;font-weight:800}.foot-bottom>[data-plotao-privacy-link="1"]{color:#d9e7df;text-decoration:underline;text-underline-offset:3px}</style>';
   index=index.replace('</head>',`${css}</head>`);
 }
+if(!index.includes('data-plotao-footer-bg="1"')){
+  const footerCss='<style data-plotao-footer-bg="1">footer{position:relative;isolation:isolate;background:#073c2d url("/assets/footer-bg.webp") center center/cover no-repeat!important;color:#dce9e2}footer:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(4,48,36,.96) 0%,rgba(4,48,36,.90) 42%,rgba(4,48,36,.72) 70%,rgba(4,48,36,.66) 100%)}footer .foot{position:relative;z-index:1}@media(max-width:680px){footer{background-position:62% center!important}footer:before{background:linear-gradient(90deg,rgba(4,48,36,.97) 0%,rgba(4,48,36,.91) 58%,rgba(4,48,36,.76) 100%)}}</style>';
+  index=index.replace('</head>',`${footerCss}</head>`);
+}
 fs.writeFileSync(indexFile,index,'utf8');
 
 const privacyFile=path.join(root,privacyPage);
