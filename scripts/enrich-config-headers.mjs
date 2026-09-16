@@ -22,19 +22,10 @@ gabion=gabion.replace(gabionAnchor,gabionIntro);
 fs.writeFileSync(gabionFile,gabion,'utf8');
 refresh('/assets/gabion-options.js',gabionFile);
 
+// Mobile summary must reflect the calculator's real price state. Do not replace
+// "Individuální nabídka" with a fabricated "Doplňte parametry" state here.
+// Validation and pricing modules are the source of truth for missing inputs.
 let summary=fs.readFileSync(summaryFile,'utf8');
-const oldState="if(p==='Individuální nabídka')return{kind:'individual',label:'Stav kalkulace',button:'Zobrazit podklady →'};";
-const newState="if(p==='Individuální nabídka'){const c=$('.type.on')?.dataset.id==='other'&&window.PLOTAO_EXTRA?.variant==='custom';return c?{kind:'individual',label:'Stav poptávky',button:'Doplnit podklady →',value:p}:{kind:'individual',label:'Další krok',button:'Pokračovat v zadání ↑',value:'Doplňte parametry'}};";
-if(!summary.includes(oldState))throw new Error('Configurator UI enrichment: mobile individual-state anchor missing');
-summary=summary.replace(oldState,newState);
-const strongAnchor="if(strong){strong.setAttribute('aria-live','polite');";
-if(!summary.includes(strongAnchor))throw new Error('Configurator UI enrichment: mobile summary value anchor missing');
-summary=summary.replace(strongAnchor,"if(strong){if(s.value)strong.textContent=s.value;strong.setAttribute('aria-live','polite');");
-const handleAnchor="if(s.kind==='invalid'){const target=invalidTarget();scroll(target,true);return}scroll($('.result')||$('#kalkulator'))";
-const handleReplacement="if(s.kind==='invalid'){const target=invalidTarget();scroll(target,true);return}if(s.kind==='individual'){const c=$('.type.on')?.dataset.id==='other'&&window.PLOTAO_EXTRA?.variant==='custom';scroll(c?$('[data-atyp-detail]'):$('.type.on'));return}scroll($('.result')||$('#kalkulator'))";
-if(summary.includes(handleAnchor))summary=summary.replace(handleAnchor,handleReplacement);
-else if(!summary.includes(handleReplacement)&&!summary.includes('scrollResult()'))throw new Error('Configurator UI enrichment: mobile summary click anchor missing');
-fs.writeFileSync(summaryFile,summary,'utf8');
 refresh('/assets/mobile-summary-state-v1.js',summaryFile);
 
 html=html.replace(/<style\b[^>]*data-plotao-config-headers=["']1["'][^>]*>[\s\S]*?<\/style>/gi,'');
@@ -75,5 +66,5 @@ const css=`<style data-plotao-config-headers="1">
 </style>`;
 html=html.replace('</head>',css+'</head>');
 fs.writeFileSync(file,html,'utf8');
-for(const token of ['data-plotao-config-headers="1"','Konfigurace gabionového plotu','Doplňte parametry'])if(!html.includes(token)&&!gabion.includes(token)&&!summary.includes(token))throw new Error('Configurator UI enrichment missing: '+token);
-console.log('Configurator headers flow safely; gabion title no longer overlaps and mobile individual state points to the next actionable input');
+for(const token of ['data-plotao-config-headers="1"','Konfigurace gabionového plotu'])if(!html.includes(token)&&!gabion.includes(token)&&!summary.includes(token))throw new Error('Configurator UI enrichment missing: '+token);
+console.log('Configurator headers flow safely; mobile summary keeps the real calculator state');
