@@ -7,7 +7,7 @@
     narrow:{width:30,lengths:{2:{std:276,ral:552},2.5:{std:345,ral:690},3:{std:414,ral:828}}},
     standard:{width:60,lengths:{2:{std:428,ral:859},2.5:{std:536,ral:1074},3:{std:643,ral:1289}}},
     wide90:{width:90,lengths:{2:{std:612,ral:1222},2.5:{std:766,ral:1528},3:{std:918,ral:1833}}},
-    wide:{width:120,lengths:{2:{std:748,ral:1498},2.5:{std:935,ral:1873},3:{std:1122,ral:2247}}}
+    wide:{width:120,lengths:{2:{std:750,ral:1498},2.5:{std:935,ral:1873},3:{std:1122,ral:2247}}}
   };
   function privacyGap(p,w){if(p==='full')return 8;if(p==='airy')return Math.max(35,Math.round(w*.65));return Math.max(20,Math.round(w*.35))}
   function chooseLength(u,heightM){const ks=Object.keys(u.lengths||{}).map(Number).sort((a,b)=>a-b),k=ks.find(x=>x>=heightM);return k==null?null:{length:k,prices:u.lengths[k]}}
