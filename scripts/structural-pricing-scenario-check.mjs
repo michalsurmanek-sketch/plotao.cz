@@ -20,7 +20,7 @@ ok(p.unsupported===true&&p.reason==='height','concrete above 300cm verified mate
 p=computeConcretePrice({requestedHeight:153,config:{side:'one',post:'smooth',color:'sand'},geometry});
 ok(!p.unsupported&&p.u50===540&&p.u25===408&&p.lineUnit===670&&p.endUnit===725&&p.materialTotal===27760,'sand concrete must use protected market-average color premiums');
 p=computeConcretePrice({requestedHeight:153,config:{side:'one',post:'smooth',color:'anthracite'},geometry});
-ok(!p.unsupported&&p.u50===585&&p.u25===442&&p.lineUnit===722&&p.endUnit===781&&p.materialTotal===30030,'anthracite concrete must use protected market-average color premiums');
+ok(!p.unsupported&&p.u50===585&&p.u25===442&&p.lineUnit===723&&p.endUnit===781&&p.materialTotal===30039,'anthracite concrete must use protected market-average color premiums with JavaScript half-up rounding');
 p=computeConcretePrice({requestedHeight:153,config:{side:'one',post:'design',color:'anthracite'},geometry});
 ok(!p.unsupported&&p.lineUnit===867&&p.endUnit===938&&p.materialTotal===31649,'design concrete posts must include protected market-average design premium');
 
