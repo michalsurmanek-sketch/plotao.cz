@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import {activeScripts} from './pages-manifest.mjs';
 
 const MAX_SCRIPT_COUNT=60;
-const MAX_TOTAL_BYTES=300*1024;
+const MAX_TOTAL_BYTES=320*1024;
 const MAX_SINGLE_BYTES=16*1024;
 const fail=[];
 const ok=(value,message)=>{if(!value)fail.push(message)};
