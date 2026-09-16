@@ -17,10 +17,12 @@ ok(p.materialHeight===200&&p.b50===40&&p.b25===0,'176cm request must step to 200
 
 p=computeConcretePrice({requestedHeight:301,config:{side:'one',post:'smooth',color:'gray'},geometry});
 ok(p.unsupported===true&&p.reason==='height','concrete above 300cm verified material height must remain individual');
-p=computeConcretePrice({requestedHeight:150,config:{side:'one',post:'smooth',color:'anthracite'},geometry});
-ok(p.unsupported===true&&p.reason==='color','unverified concrete color must remain individual');
-p=computeConcretePrice({requestedHeight:150,config:{side:'one',post:'design',color:'gray'},geometry});
-ok(p.unsupported===true&&p.reason==='post-style','design concrete posts must remain individual');
+p=computeConcretePrice({requestedHeight:153,config:{side:'one',post:'smooth',color:'sand'},geometry});
+ok(!p.unsupported&&p.u50===540&&p.u25===408&&p.lineUnit===670&&p.endUnit===725&&p.materialTotal===27760,'sand concrete must use protected market-average color premiums');
+p=computeConcretePrice({requestedHeight:153,config:{side:'one',post:'smooth',color:'anthracite'},geometry});
+ok(!p.unsupported&&p.u50===585&&p.u25===442&&p.lineUnit===722&&p.endUnit===781&&p.materialTotal===30030,'anthracite concrete must use protected market-average color premiums');
+p=computeConcretePrice({requestedHeight:153,config:{side:'one',post:'design',color:'anthracite'},geometry});
+ok(!p.unsupported&&p.lineUnit===867&&p.endUnit===938&&p.materialTotal===31649,'design concrete posts must include protected market-average design premium');
 
 let g=computeGabionPrice({height:153,fence:10,width:.30,kind:'quarry'});
 ok(close(g.volume,4.59)&&close(g.tons,7.803),'10m × 1.53m × 0.30m gabion must be 4.59m3 / 7.803t');
@@ -31,4 +33,4 @@ ok(close(g.low,28733.4)&&close(g.high,48883.5),'display-stone gabion range must 
 ok(g.density===1.7,'gabion stone density benchmark must stay 1.7 t/m3');
 
 if(fail.length){console.error('Structural pricing scenario checks failed:\n- '+fail.join('\n- '));process.exit(1)}
-console.log('Structural pricing scenario checks OK: concrete rounding/components and gabion volume/ranges protected');
+console.log('Structural pricing scenario checks OK: concrete rounding/components/colors/design and gabion volume/ranges protected');
