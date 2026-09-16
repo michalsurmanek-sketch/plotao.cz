@@ -4,8 +4,8 @@
   if(root)root.PLOTAO_PRIVACY_PRICING_CORE=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   const refs={
-    wpcBrown:{width:.071,length:1.8,unit:208,label:'WPC Original Wood 71×11×1800'},
-    wpcGray:{width:.071,length:1.8,unit:160,label:'WPC šedé 71×11×1800'},
+    wpcBrown:{width:.071,length:1.8,unit:170,label:'WPC Original Wood 71×11×1800 · tržní benchmark'},
+    wpcGray:{width:.071,length:1.8,unit:165,label:'WPC šedé 71×11×1800 · tržní benchmark'},
     aluStd:{width:.12,lengths:{2:748,2.5:935,3:1122},label:'ALcentrum Lamela 120'},
     aluCustom:{width:.12,lengths:{2:1498,2.5:1873,3:2247},label:'ALcentrum Lamela 120 · zakázkový RAL'}
   };
