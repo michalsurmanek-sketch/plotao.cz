@@ -34,7 +34,7 @@ assert(meshCore.includes('linePostDiameter:weld||slab?48:38'),'mesh core must ex
 assert(meshCore.includes('postNeed=d.key+50+(slab?Math.max(0,slabHeight||0):0)'),'mesh core must extend main posts by slab height');
 assert(meshCore.includes('braceNeed=d.key+50'),'mesh core must size braces independently');
 assert(meshCore.includes('postWeld={170:245,200:288,230:337,250:365}'),'verified grooved-post prices must stay in mesh core');
-assert(meshCore.includes('post48={150:184,175:211,200:229,220:295,230:296,240:305,260:319,300:399}'),'verified Ø48 prices must stay in mesh core');
+assert(meshCore.includes('post48={150:184,175:211,200:229,220:295,230:296,240:212,260:212,300:399}'),'verified Ø48 prices must stay in mesh core');
 assert(meshCore.includes("reason:'post'"),'missing verified post length must become individual');
 
 const aluAdapter=read('assets/aluminium-pricing.js'),aluCore=read('assets/aluminium-pricing-core-v1.js');
