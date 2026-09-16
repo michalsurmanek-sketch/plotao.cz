@@ -4,14 +4,14 @@ const fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 
 let p=computePrivacyPrice({material:'wpc',layout:'horizontal',color:'brown',gap:5,height:180,runs:[10]});
 ok(!p.unsupported&&p.rows===24&&p.stockPer===6&&p.count===144,'10m horizontal WPC must use 24 rows × 6 stock pieces');
-ok(p.materialTotal===29952,'10m horizontal brown WPC benchmark must stay 29,952 CZK');
+ok(p.materialTotal===24480,'10m horizontal brown WPC benchmark must stay 24,480 CZK');
 
 p=computePrivacyPrice({material:'wpc',layout:'horizontal',color:'brown',gap:5,height:180,runs:[1.9,1.9]});
 ok(p.stockPer===4,'privacy stock must be counted per separate run, not from pooled total length');
-ok(p.count===96&&p.materialTotal===19968,'two 1.9m runs must preserve per-run offcut loss');
+ok(p.count===96&&p.materialTotal===16320,'two 1.9m runs must preserve per-run offcut loss');
 
 p=computePrivacyPrice({material:'wpc',layout:'vertical',color:'brown',gap:5,height:180,runs:[10]});
-ok(p.visible===132&&p.stockLength===1.8&&p.materialTotal===27456,'10m vertical WPC at 180cm must use 132 full 1.8m boards');
+ok(p.visible===132&&p.stockLength===1.8&&p.materialTotal===22440,'10m vertical WPC at 180cm must use 132 full 1.8m boards');
 p=computePrivacyPrice({material:'wpc',layout:'vertical',color:'brown',gap:5,height:181,runs:[10]});
 ok(p.unsupported===true&&p.reason==='height','vertical WPC above 1.8m must remain individual');
 
