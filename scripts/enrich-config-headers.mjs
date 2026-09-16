@@ -31,8 +31,9 @@ const strongAnchor="if(strong){strong.setAttribute('aria-live','polite');";
 if(!summary.includes(strongAnchor))throw new Error('Configurator UI enrichment: mobile summary value anchor missing');
 summary=summary.replace(strongAnchor,"if(strong){if(s.value)strong.textContent=s.value;strong.setAttribute('aria-live','polite');");
 const handleAnchor="if(s.kind==='invalid'){const target=invalidTarget();scroll(target,true);return}scroll($('.result')||$('#kalkulator'))";
-if(!summary.includes(handleAnchor))throw new Error('Configurator UI enrichment: mobile summary click anchor missing');
-summary=summary.replace(handleAnchor,"if(s.kind==='invalid'){const target=invalidTarget();scroll(target,true);return}if(s.kind==='individual'){const c=$('.type.on')?.dataset.id==='other'&&window.PLOTAO_EXTRA?.variant==='custom';scroll(c?$('[data-atyp-detail]'):$('.type.on'));return}scroll($('.result')||$('#kalkulator'))");
+const handleReplacement="if(s.kind==='invalid'){const target=invalidTarget();scroll(target,true);return}if(s.kind==='individual'){const c=$('.type.on')?.dataset.id==='other'&&window.PLOTAO_EXTRA?.variant==='custom';scroll(c?$('[data-atyp-detail]'):$('.type.on'));return}scroll($('.result')||$('#kalkulator'))";
+if(summary.includes(handleAnchor))summary=summary.replace(handleAnchor,handleReplacement);
+else if(!summary.includes(handleReplacement))throw new Error('Configurator UI enrichment: mobile summary click anchor missing');
 fs.writeFileSync(summaryFile,summary,'utf8');
 refresh('/assets/mobile-summary-state-v1.js',summaryFile);
 
