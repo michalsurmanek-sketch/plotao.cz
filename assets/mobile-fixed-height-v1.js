@@ -36,6 +36,16 @@ document.addEventListener('plotao:ui-ready',schedule);
 document.addEventListener('click',e=>{if(e.target.closest('.type,[data-eg="variant"]'))schedule()});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule);else schedule();
 
+let desktopPartnerBgPromise=null;
+function desktopPartnerBg(){
+ if(!desktopPartnerBgPromise){
+  const files=[1,2,3,4].map(n=>`/assets/images/partner-desktop-bg-${n}.txt?v=20260916`);
+  desktopPartnerBgPromise=Promise.all(files.map(url=>fetch(url,{cache:'force-cache'}).then(r=>{if(!r.ok)throw new Error('partner-bg');return r.text()})))
+   .then(parts=>'data:image/webp;base64,'+parts.join(''));
+ }
+ return desktopPartnerBgPromise;
+}
+
 function applyMobilePartnerArtwork(){
  const partner=document.querySelector('.partner');
  if(!partner)return;
@@ -79,7 +89,17 @@ function applyMobilePartnerArtwork(){
   }
  }else{
   Array.from(partner.children).forEach(el=>el.style.removeProperty('display'));
-  ['display','position','width','aspect-ratio','min-height','height','padding','border','border-radius','overflow','background-image','background-size','background-position','background-repeat','background-color'].forEach(p=>partner.style.removeProperty(p));
+  ['display','position','width','aspect-ratio','height','padding','border','border-radius','overflow'].forEach(p=>partner.style.removeProperty(p));
+  partner.style.setProperty('min-height','360px','important');
+  partner.style.setProperty('background-size','cover','important');
+  partner.style.setProperty('background-position','center','important');
+  partner.style.setProperty('background-repeat','no-repeat','important');
+  partner.style.setProperty('background-color','#063428','important');
+  desktopPartnerBg().then(bg=>{
+   if(window.matchMedia('(min-width:761px)').matches&&partner.isConnected){
+    partner.style.setProperty('background-image','url("'+bg+'")','important');
+   }
+  }).catch(()=>{});
   if(cta)['display','position','z-index','left','top','width','height','min-height','padding','margin','border','border-radius','background','color','box-shadow','cursor','opacity'].forEach(p=>cta.style.removeProperty(p));
  }
 }
