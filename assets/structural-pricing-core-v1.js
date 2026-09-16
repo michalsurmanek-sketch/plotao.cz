@@ -4,7 +4,7 @@
   if(root)root.PLOTAO_STRUCTURAL_PRICING_CORE=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   const concrete={b50one:450,b50both:515,b25one:340,b25both:390,posts:{50:[420,434,481],75:[457,481,516],100:[492,516,564],125:[530,564,578],150:[552,578,601],175:[578,625,674],200:[601,648,696],225:[648,696,842],250:[901,961,1082],275:[1381,1442,1682],300:[1562,1622,1802]}};
-  const gabion={cLo:1200,cHi:2600,stoneQ:[1800,3200],stoneD:[2800,4500],density:1.7};
+  const gabion={cLo:1500,cHi:3000,stoneQ:[1400,2500],stoneD:[2800,4500],density:1.7};
   function postUnit(materialH,role){const arr=concrete.posts[materialH];if(!arr)return null;const idx=role==='corner'?2:role==='end'?1:0;return arr[idx]}
   function computeConcretePrice(input={}){
     const requested=Math.max(40,+input.requestedHeight||153),materialH=Math.max(50,Math.ceil(requested/25)*25),cfg={side:'one',post:'smooth',color:'gray',...(input.config||{})},g=input.geometry||{};
