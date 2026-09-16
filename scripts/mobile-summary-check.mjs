@@ -15,7 +15,7 @@ ok(src.includes("if(shared!==undefined)return shared||$('#kalkulator')||document
 ok(src.includes("if(segments.length>12)return $$('#segmentList [data-remove],#segmentList .remove').at(-1)")&&src.includes("if(total>1000+.001)return $$('#segmentList input[type=number]').at(-1)||$('#segmentLimitStatus')"),'startup fallback routing must also use actionable segment controls');
 ok(src.includes("const bad=$$('#segmentList input[type=number]').find(x=>+(x.value||0)<.01)"),'startup fallback must enforce the same 0.01m segment minimum');
 ok(src.includes("window.PLOTAO_PLACEMENT?.valid===false"),'legacy placement routing must remain only as a startup fallback when the shared API is unavailable');
-ok(src.includes("scroll(target,true)")&&src.includes("el.focus({preventScroll:true})"),'invalid CTA must scroll to and focus the concrete actionable control');
+ok(src.includes("scroll(invalidTarget(),true)")&&src.includes("el.focus({preventScroll:true})"),'invalid CTA must scroll to and focus the concrete actionable control');
 ok(src.includes("sticky.setAttribute('aria-busy',s.kind==='pending'?'true':'false')")&&src.includes("button.disabled=s.kind==='pending'"),'mobile bar and CTA must expose and enforce the pending state accessibly');
 ok(src.includes("s.kind==='pending'?'Čekám na dokončení přepočtu ceny'")&&src.includes("if(s.kind==='pending')return"),'pending mobile CTA must explain why it is disabled and must not navigate to a stale result');
 ok(src.includes("e.stopImmediatePropagation()"),'state-aware mobile CTA must replace the legacy unconditional result scroll');
