@@ -58,7 +58,8 @@
         let matches=0;
         searchable.forEach(item=>{const visible=!query||item.text.includes(query);item.element.hidden=!visible;if(visible&&query)matches++});
         empty.hidden=!query||matches>0;
-        status.textContent=query?(matches?`Nalezeno ${matches} výsledků.`:'Nebyl nalezen žádný výsledek.'):'Zobrazeny všechny produkty a kategorie.';
+        const resultText=matches===1?'Nalezen 1 výsledek.':matches>=2&&matches<=4?`Nalezeny ${matches} výsledky.`:`Nalezeno ${matches} výsledků.`;
+        status.textContent=query?(matches?resultText:'Nebyl nalezen žádný výsledek.'):'Zobrazeny všechny produkty a kategorie.';
       };
       input.addEventListener('input',run);
       input.addEventListener('keydown',event=>{if(event.key==='Escape'){input.value='';run();input.blur()}if(event.key==='Enter'){event.preventDefault();const target=document.querySelector('.cat-card:not([hidden]),.product:not([hidden])');if(target)target.scrollIntoView({behavior:'smooth',block:'center'})}});
