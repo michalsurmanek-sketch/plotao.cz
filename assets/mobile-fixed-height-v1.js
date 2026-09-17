@@ -41,6 +41,13 @@ document.addEventListener('plotao:ui-ready',schedule);
 document.addEventListener('click',e=>{if(e.target.closest('.type,[data-eg="variant"]'))schedule()});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',schedule);else schedule();
 
+function ensurePartnerLayerStyle(){
+ if(document.getElementById('partnerStableLayerStyle'))return;
+ const style=document.createElement('style');
+ style.id='partnerStableLayerStyle';
+ style.textContent='@media(min-width:761px){.more .partner.partner-bg-layered:after{content:"";position:absolute;inset:0;z-index:0;background-image:var(--partner-desktop-bg,none);background-size:cover;background-position:center;background-repeat:no-repeat;opacity:0;transition:opacity .22s ease-out;pointer-events:none}.more .partner.partner-bg-layered.partner-bg-ready:after{opacity:1}.more .partner.partner-bg-layered>div,.more .partner.partner-bg-layered>button{position:relative;z-index:1}}@media(prefers-reduced-motion:reduce){.more .partner.partner-bg-layered:after{transition:none}}';
+ document.head.appendChild(style);
+}
 let desktopPartnerBgPromise=null;
 function desktopPartnerBg(){
  if(!desktopPartnerBgPromise){
@@ -50,6 +57,20 @@ function desktopPartnerBg(){
  }
  return desktopPartnerBgPromise;
 }
+function revealDesktopPartnerBg(partner,bg){
+ if(!window.matchMedia('(min-width:761px)').matches||!partner.isConnected)return;
+ const reveal=()=>{
+  if(!window.matchMedia('(min-width:761px)').matches||!partner.isConnected)return;
+  partner.style.setProperty('--partner-desktop-bg',`url("${bg}")`);
+  partner.classList.add('partner-bg-layered');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>partner.classList.add('partner-bg-ready')));
+ };
+ const image=new Image();
+ image.src=bg;
+ if(typeof image.decode==='function')image.decode().then(reveal).catch(reveal);
+ else if(image.complete)reveal();
+ else image.addEventListener('load',reveal,{once:true});
+}
 
 function applyMobilePartnerArtwork(){
  const partner=document.querySelector('.partner');
@@ -57,6 +78,8 @@ function applyMobilePartnerArtwork(){
  const mobile=window.matchMedia('(max-width:760px)').matches;
  const cta=partner.querySelector('#partner');
  if(mobile){
+  partner.classList.remove('partner-bg-ready','partner-bg-layered');
+  partner.style.removeProperty('--partner-desktop-bg');
   Array.from(partner.children).forEach(el=>el.style.setProperty('display','none','important'));
   partner.style.setProperty('display','block','important');
   partner.style.setProperty('position','relative','important');
@@ -93,18 +116,15 @@ function applyMobilePartnerArtwork(){
    cta.style.setProperty('opacity','1','important');
   }
  }else{
+  ensurePartnerLayerStyle();
   Array.from(partner.children).forEach(el=>el.style.removeProperty('display'));
-  ['display','position','width','aspect-ratio','height','padding','border','border-radius','overflow'].forEach(p=>partner.style.removeProperty(p));
+  ['display','position','width','aspect-ratio','height','padding','border','border-radius','overflow','background-image'].forEach(p=>partner.style.removeProperty(p));
   partner.style.setProperty('min-height','360px','important');
   partner.style.setProperty('background-size','cover','important');
   partner.style.setProperty('background-position','center','important');
   partner.style.setProperty('background-repeat','no-repeat','important');
   partner.style.setProperty('background-color','#063428','important');
-  desktopPartnerBg().then(bg=>{
-   if(window.matchMedia('(min-width:761px)').matches&&partner.isConnected){
-    partner.style.setProperty('background-image','url("'+bg+'")','important');
-   }
-  }).catch(()=>{});
+  desktopPartnerBg().then(bg=>revealDesktopPartnerBg(partner,bg)).catch(()=>{});
   if(cta)['display','position','z-index','left','top','width','height','min-height','padding','margin','border','border-radius','background','color','box-shadow','cursor','opacity'].forEach(p=>cta.style.removeProperty(p));
  }
 }
