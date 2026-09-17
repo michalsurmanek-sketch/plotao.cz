@@ -1,0 +1,1 @@
+(()=>{window.PLOTAO_MESH_SHOWCASE_VERSION='2026-09-17';})();
