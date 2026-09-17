@@ -30,7 +30,12 @@ function sync(){
   if(previousHeight!==null){height.value=previousHeight;previousHeight=null;height.dispatchEvent(new Event('input',{bubbles:true}));height.dispatchEvent(new Event('change',{bubbles:true}))}
  }
 }
-function schedule(){clearTimeout(schedule.t);schedule.t=setTimeout(sync,30)}
+let syncPending=false;
+function schedule(){
+ if(syncPending)return;
+ syncPending=true;
+ queueMicrotask(()=>{syncPending=false;sync()});
+}
 document.addEventListener('plotao:extra',schedule);
 document.addEventListener('plotao:ui-ready',schedule);
 document.addEventListener('click',e=>{if(e.target.closest('.type,[data-eg="variant"]'))schedule()});
