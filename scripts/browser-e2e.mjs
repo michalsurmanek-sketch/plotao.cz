@@ -27,6 +27,7 @@ async function runScenario(name,viewport,scenario){
   const browser=await chromium.launch({headless:true});
   const context=await browser.newContext({viewport});
   const page=await context.newPage();
+  await page.emulateMedia({reducedMotion:'reduce'});
   const browserErrors=[];
   page.on('pageerror',error=>browserErrors.push('pageerror: '+error.message));
   page.on('console',message=>{if(message.type()==='error')browserErrors.push('console: '+message.text())});
