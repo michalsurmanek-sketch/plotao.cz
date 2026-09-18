@@ -16,7 +16,7 @@ async function waitForReady(page){
 }
 
 async function selectType(page,id,visibleSelector){
-  await page.evaluate(type=>document.querySelector(`.type[data-id="${type}"]`)?.click(),id);
+  await page.locator(`.type[data-id="${id}"]`).evaluate(el=>el.onclick?.());
   await page.waitForFunction(type=>document.querySelector(`.type[data-id="${type}"]`)?.getAttribute('aria-pressed')==='true',id,{timeout:5000});
   await page.waitForFunction(type=>new URL(location.href).searchParams.get('type')===type,id,{timeout:5000});
   await page.waitForFunction(type=>document.activeElement?.dataset?.id===type,id,{timeout:5000});
