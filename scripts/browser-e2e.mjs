@@ -68,7 +68,7 @@ await runScenario('desktop',{width:1440,height:1000},async page=>{
   assert((await page.locator('.type[data-id="panel"]').getAttribute('aria-pressed'))==='true','panel must be selected initially');
   assert((await text(page.locator('.price strong'))) !== '—','default panel price must be calculated');
 
-  await selectType(page,'mesh','#options.show');
+  await selectType(page,'mesh','#fenceVisualRoot[data-type="mesh"]');
   await page.locator('#options [data-mv="welded"]').click();
   await page.waitForFunction(()=>document.activeElement?.dataset?.mv==='welded',null,{timeout:5000});
   assert((await page.locator('#options [data-mv="welded"]').getAttribute('aria-pressed'))==='true','mesh welded choice must expose selected state');
@@ -129,7 +129,7 @@ await runScenario('desktop',{width:1440,height:1000},async page=>{
   await page.waitForFunction(()=>document.querySelector('#extraFenceConfig')?.textContent?.includes('Atypické oplocení'),null,{timeout:5000});
   assert((await text(page.locator('#extraFenceConfig'))).includes('individuální nabídku'),'atypical branch must render its individual-offer explanation');
 
-  await selectType(page,'panel','#options.show');
+  await selectType(page,'panel','#fenceVisualRoot[data-type="panel"]');
   await page.locator('#options [data-pv="2d"]').click();
   await page.waitForFunction(()=>document.activeElement?.dataset?.pv==='2d',null,{timeout:5000});
   assert((await page.locator('#options [data-pv="2d"]').getAttribute('aria-pressed'))==='true','panel 2D choice must expose selected state');
