@@ -186,6 +186,16 @@ await runScenario('mobile-390',{width:390,height:844},async page=>{
   await page.waitForFunction(()=>document.querySelector('#height')?.value==='110',null,{timeout:5000});
   assert((await page.locator('#height').inputValue())==='110','mobile barrier must use its fixed 110 cm height');
   assert((await text(page.locator('#mobileFixedHeightNote'))).includes('110 cm'),'mobile UI must explain the fixed barrier height');
+  const fixedHeightEvents=await page.evaluate(async()=>{
+    const h=document.querySelector('#height');let inputs=0,changes=0;
+    h.addEventListener('input',()=>inputs++);h.addEventListener('change',()=>changes++);
+    document.dispatchEvent(new CustomEvent('plotao:extra',{detail:window.PLOTAO_EXTRA}));
+    document.dispatchEvent(new CustomEvent('plotao:extra',{detail:window.PLOTAO_EXTRA}));
+    await new Promise(resolve=>setTimeout(resolve,0));
+    return{inputs,changes,value:h.value};
+  });
+  assert(fixedHeightEvents.value==='110','redundant mobile sync must preserve the fixed barrier height');
+  assert(fixedHeightEvents.inputs===0&&fixedHeightEvents.changes===0,'redundant mobile sync must not emit input/change and restart the pricing chain');
 
   await page.locator('#lead').click();
   const modal=page.locator('#modal');
