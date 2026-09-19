@@ -72,13 +72,13 @@ await runScenario('desktop',{width:1440,height:1000},async page=>{
   const plastic=page.locator('#fenceVisualRoot[data-type="mesh"] .mesh-hero [data-mv="classic"]');
   await plastic.click();
   await page.waitForFunction(()=>document.querySelector('#fenceVisualRoot[data-type="mesh"] .mesh-hero [data-mv="classic"]')?.getAttribute('aria-pressed')==='true',null,{timeout:5000});
-  assert(!(await page.locator('#fenceVisualRoot[data-type="mesh"] [data-g="c"] [data-ms="zinc"]').isVisible()),'plastic-coated mesh must not offer zinc as a surface choice');
+  assert((await page.locator('#fenceVisualRoot[data-type="mesh"] [data-g="c"]').count())===0,'mesh must not render a legacy surface control');
   const zincProduct=page.locator('#fenceVisualRoot[data-type="mesh"] [data-mesh-zinc]');
   assert(await zincProduct.isVisible(),'zinc mesh must remain a separate product choice');
   await page.locator('#options [data-mv="welded"]').click();
   await page.waitForFunction(()=>document.activeElement?.dataset?.mv==='welded',null,{timeout:5000});
   assert((await page.locator('#options [data-mv="welded"]').getAttribute('aria-pressed'))==='true','mesh welded choice must expose selected state');
-  assert(!(await page.locator('#fenceVisualRoot[data-type="mesh"] [data-g="c"] [data-ms="zinc"]').isVisible()),'welded mesh must not expose the legacy zinc surface selector');
+  assert((await page.locator('#fenceVisualRoot[data-type="mesh"] [data-g="c"]').count())===0,'welded mesh must not render a legacy surface control');
 
   await selectType(page,'concrete','#concreteConfig');
   await page.locator('#concreteConfig [data-cv="both"]').click();
