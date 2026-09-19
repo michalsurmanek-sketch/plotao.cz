@@ -19,11 +19,14 @@ function sync(){
  if(value!==null){
   if(previousHeight===null)previousHeight=height.value;
   label.hidden=true;
+  const changed=height.value!==String(value);
   height.value=String(value);
   note.textContent=value===110?'Výška mobilní zábrany je daná zvoleným provedením: 110 cm.':value===200?'Výška plného mobilního panelu je daná zvoleným provedením: 200 cm.':'Výška síťového mobilního panelu je daná zvoleným provedením: 190 cm.';
   note.style.display='block';
-  height.dispatchEvent(new Event('input',{bubbles:true}));
-  height.dispatchEvent(new Event('change',{bubbles:true}));
+  if(changed){
+   height.dispatchEvent(new Event('input',{bubbles:true}));
+   height.dispatchEvent(new Event('change',{bubbles:true}));
+  }
  }else{
   label.hidden=false;
   note.style.display='none';
