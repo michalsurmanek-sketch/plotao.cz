@@ -38,7 +38,7 @@ async function runScenario(name,viewport,scenario){
     if(browserErrors.length)throw new Error(browserErrors.join('\n'));
     console.log(`Browser E2E ${name} OK`);
   }catch(error){
-    failures.push(`${name}: ${error.stack||error.message||error}`);
+    failures.push(`${name}: ${error.stack||error.message||error}\n${browserErrors.join('\n')}`);
   }finally{
     await context.close();
     await browser.close();
