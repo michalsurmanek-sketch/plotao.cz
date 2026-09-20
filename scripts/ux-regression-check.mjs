@@ -9,7 +9,7 @@ ok(scroll.includes("getComputedStyle(el).display!=='none'")&&scroll.includes('ge
 ok(scroll.includes("window.matchMedia?.('(prefers-reduced-motion: reduce)')"),'smooth scrolling must respect reduced-motion preference without assuming matchMedia exists');
 
 ok(a11y.includes("setAttribute('aria-pressed'")&&a11y.includes("classList.contains('on')"),'choice buttons must expose selected state through aria-pressed');
-ok(a11y.includes("#extraFenceConfig [data-eg]")&&a11y.includes("$$('.mobile-choices').forEach")&&a11y.includes("'Konstrukce zděného plotu':'Varianta mobilního oplocení'"),'specialized mobile fence choices must expose grouped aria semantics and selected state');
+ok(a11y.includes("#extraFenceConfig [data-eg]")&&a11y.includes("$$('.mobile-choices').forEach")&&a11y.includes("'Konstrukce zděného plotu':group.closest('#extraFenceConfig')?.dataset.type==='hedge'?'Varianta živého plotu':'Varianta mobilního oplocení'"),'specialized mobile fence choices must expose grouped aria semantics and selected state');
 ok(a11y.includes("function labelGroups(root,labels)")&&a11y.includes("group.setAttribute('role','group')")&&a11y.includes("group.setAttribute('aria-label',label)"),'dynamic compact option groups must expose a reusable accessible group label');
 ok(a11y.includes("labelGroups('#privacyConfig',['Materiál soukromého plotu','Míra soukromí','Směr výplně','Barva nebo dekor'])"),'privacy option groups must have explicit accessible names');
 ok(a11y.includes("labelGroups('#metalConfig',['Typ kovové výplně','Průhlednost kovového plotu','Povrch kovového plotu'])"),'metal option groups must have explicit accessible names');
