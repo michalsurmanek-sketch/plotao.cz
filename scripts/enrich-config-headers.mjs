@@ -15,8 +15,8 @@ const refresh=(src,path)=>{
 };
 
 let gabion=fs.readFileSync(gabionFile,'utf8');
-const gabionAnchor='b.innerHTML=\'<div class="title"><b>1</b>';
-const gabionIntro='b.innerHTML=\'<div class="config-intro"><span class="config-intro-icon" aria-hidden="true">⚙</span><div><h3>Konfigurace gabionového plotu</h3><p>Vyberte typ systému, rozměr konstrukce a kamennou výplň.</p></div></div><div class="title"><b>1</b>';
+const gabionAnchor='b.innerHTML=\'<small class="ai-visual">✧ AI vizualizace</small><div class="title"><b>1</b>';
+const gabionIntro='b.innerHTML=\'<small class="ai-visual">✧ AI vizualizace</small><div class="config-intro"><span class="config-intro-icon" aria-hidden="true">⚙</span><div><h3>Konfigurace gabionového plotu</h3><p>Vyberte typ systému, rozměr konstrukce a kamennou výplň.</p></div></div><div class="title"><b>1</b>';
 if(!gabion.includes(gabionAnchor))throw new Error('Configurator UI enrichment: gabion render anchor missing');
 gabion=gabion.replace(gabionAnchor,gabionIntro);
 fs.writeFileSync(gabionFile,gabion,'utf8');
