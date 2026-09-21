@@ -40,5 +40,21 @@ ok(p.unsupported===true&&p.reason==='post','200cm welded mesh +20cm slab must be
 p=computeMeshPrice({geometry:geom(3,[{len:20,connected:false}]),variant:'classic',surface:'anthracite',requestedHeight:150,withSlab:false,slabHeight:0});
 ok(p.unsupported===true&&p.reason==='surface','complete anthracite classic mesh system must remain individual until matching accessories/posts are verified');
 
+
+g=geom(2.5,[{len:30,connected:false}]);
+p=computeMeshPrice({geometry:g,surface:'zinc',requestedHeight:150});
+ok(!p.unsupported&&p.meshCost===2820&&p.lineCost===2240&&p.termCost===672&&p.braceCost===664,'zinc must use matching galvanized mesh, 48mm posts and braces');
+ok(p.tensioners===12&&p.accessoryCost===440&&p.materialTotal===6836,'zinc 150cm must tension all three wires and buy one middle-wire roll');
+for(const height of [100,125,150,160,180,200]){
+ const z=computeMeshPrice({geometry:g,surface:'zinc',requestedHeight:height,withSlab:true,slabHeight:30});
+ ok(!z.unsupported&&z.linePostDiameter===48&&z.linePostLength>=height+80,'zinc slab assembly must cover height '+height);
+}
+p=computeMeshPrice({geometry:g,surface:'zinc',requestedHeight:100});
+ok(p.wireRolls===0&&p.tensioners===8&&p.accessoryCost===152,'100cm zinc uses included upper/lower wire with eight tensioners');
+g=geom(3,[{len:10,connected:false},{len:10,connected:true}],[{kind:'gate',s:1,p:0,w:4}]);
+p=computeMeshPrice({geometry:g,surface:'zinc',requestedHeight:150});
+ok(p.openingSides===2&&p.braces===4&&p.tensioners===12,'zinc opening must tension all wires on actual fence sides');
+p=computeMeshPrice({geometry:g,surface:'zinc',requestedHeight:201});
+ok(p.unsupported&&p.reason==='height','unavailable zinc height must not silently price shorter mesh');
 if(fail.length){console.error('Mesh pricing scenario checks failed:\n- '+fail.join('\n- '));process.exit(1)}
 console.log('Mesh pricing scenario checks OK: production geometry + production mesh pricing core');
