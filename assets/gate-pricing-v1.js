@@ -1,5 +1,5 @@
 (()=>{
-  const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],money=n=>Math.round(n).toLocaleString('cs-CZ')+' Kč';
+  const $=s=>document.querySelector(s),all=s=>[...document.querySelectorAll(s)],money=n=>Math.round(n).toLocaleString('cs-CZ')+' Kč';
   const core=window.PLOTAO_GATE_PRICING_CORE;
   if(!core){console.error('PLOTAO gate pricing core is missing');return}
 
@@ -29,8 +29,8 @@
     return{with:false,height:0};
   }
   function config(){const sb=slab();return{type:type(),actualHeight:actualH(),gateWidth:gateWidth(),doorWidth:doorWidth(),gateType:gateType(),slabWith:sb.with,slabHeight:sb.height,panelSurface:panelSurface(),panelVariant:panelVariant(),meshSurface:meshSurface(),meshVariant:meshVariant()}}
-  function rowByLabel(label){return $$('.resultbody .row').find(r=>(r.querySelector('span')?.childNodes?.[0]?.textContent||r.querySelector('span')?.textContent||'').trim().toLowerCase().includes(label))||null}
-  function matByLabel(label){return $$('#materialList .matline').find(r=>(r.querySelector('span')?.textContent||'').trim().toLowerCase().includes(label))||null}
+  function rowByLabel(label){return all('.resultbody .row').find(r=>(r.querySelector('span')?.childNodes?.[0]?.textContent||r.querySelector('span')?.textContent||'').trim().toLowerCase().includes(label))||null}
+  function matByLabel(label){return all('#materialList .matline').find(r=>(r.querySelector('span')?.textContent||'').trim().toLowerCase().includes(label))||null}
   function setMaterial(label,text){const r=matByLabel(label),b=r?.querySelector('b');if(b)b.textContent=text||'—'}
   function setRow(label,val,note,offText='Individuální nabídka'){
     const r=rowByLabel(label);if(!r)return;
