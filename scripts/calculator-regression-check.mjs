@@ -30,7 +30,7 @@ assert(meshAdapter.includes('PLOTAO_MESH_PRICING_CORE')&&meshAdapter.includes('c
 assert(meshCore.includes('openingSides')&&meshCore.includes('strain*2+openingSides'),'mesh core must size braces from actual opening sides');
 assert(meshCore.includes('g.fenceLen'),'mesh core must use validated net fence length');
 assert(meshCore.includes('slab?post48:post38'),'mesh slab systems must use Ø48 line posts');
-assert(meshCore.includes('linePostDiameter:weld||secure||slab?48:38'),'mesh core must export line-post diameter');
+assert(meshCore.includes('linePostDiameter:weld||secure||slab||zinc?48:38'),'mesh core must export line-post diameter including zinc Ø48 posts');
 assert(meshCore.includes('postNeed=d.key+50+(slab?Math.max(0,slabHeight||0):0)'),'mesh core must extend main posts by slab height');
 assert(meshCore.includes('braceNeed=d.key+50'),'mesh core must size braces independently');
 assert(meshCore.includes('postWeld={170:245,200:288,230:337,250:365}'),'verified grooved-post prices must stay in mesh core');
