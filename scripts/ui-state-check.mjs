@@ -39,7 +39,7 @@ ok(!validity.includes('locked=true')&&!validity.includes('invalidLock'),'validit
 ok(geometry.includes('PLOTAO_GEOMETRY_CORE')&&geometry.includes('solveGeometry'),'browser geometry must delegate to the shared production solver');
 ok(core.includes('endpointHasFence'),'shared geometry core must inspect adjacent connected sections at opening boundaries');
 
-ok(index.includes('<script src="/assets/ui-bootstrap-v1.js"></script>'),'index must load the external UI bootstrap');
+ok(/<script src="\/assets\/ui-bootstrap-v1\.js(?:\?[^\"]+)?"><\/script>/.test(index),'index must load the external UI bootstrap');
 ok(index.includes('<script src="/assets/modal-accessibility-v1.js"></script>'),'index must load the verified keyboard and focus behavior for the lead dialog');
 ok(!index.includes('<script>const types=[')&&!index.includes('function calc(){'),'legacy inline calculator must not return to index');
 ok(ui.includes("['Plotová výplň','Podhrabové desky','Vjezdová brána','Vstupní branka','Montáž a zemní práce','Demontáž','Rohové napojení','Beton do patek','Doprava']"),'UI bootstrap must create the result rows used by pricing modules');
