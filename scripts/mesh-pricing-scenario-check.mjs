@@ -38,7 +38,7 @@ ok(p.tensioners===4,'separate gate tensioners must follow three ends + one local
 p=computeMeshPrice({geometry:geom(3,[{len:20,connected:false}]),variant:'welded',surface:'green',requestedHeight:200,withSlab:true,slabHeight:20});
 ok(p.unsupported===true&&p.reason==='post','200cm welded mesh +20cm slab must become individual without verified 270cm grooved post');
 p=computeMeshPrice({geometry:geom(3,[{len:20,connected:false}]),variant:'classic',surface:'anthracite',requestedHeight:150,withSlab:false,slabHeight:0});
-ok(p.unsupported===true&&p.reason==='surface','complete anthracite classic mesh system must remain individual until matching accessories/posts are verified');
+ok(!p.unsupported&&p.surface==='anthracite'&&p.materialTotal>0,'anthracite classic mesh must have its own calculated material price');
 
 
 g=geom(2.5,[{len:30,connected:false}]);
