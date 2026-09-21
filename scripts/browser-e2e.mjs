@@ -69,6 +69,11 @@ await runScenario('desktop',{width:1440,height:1000},async page=>{
   assert((await text(page.locator('.price strong'))) !== '—','default panel price must be calculated');
 
   await selectType(page,'mesh','#fenceVisualRoot[data-type="mesh"]');
+  const classicTotal=await page.evaluate(()=>window.PLOTAO_MESH_PRICE?.materialTotal||null);
+  await page.locator('[data-mesh-zinc]').click();
+  await page.waitForFunction(()=>window.PLOTAO_MESH_SELECTION?.variant==='classic'&&window.PLOTAO_MESH_SELECTION?.surface==='zinc'&&window.PLOTAO_MESH_PRICE?.unsupported===false,null,{timeout:5000});
+  const zincTotal=await page.evaluate(()=>window.PLOTAO_MESH_PRICE?.materialTotal||null);
+  assert(zincTotal&&zincTotal!==classicTotal,'zinc mesh must recalculate to a different material total');
   await page.locator('#options [data-mv="welded"]').click();
   await page.waitForFunction(()=>document.activeElement?.dataset?.mv==='welded',null,{timeout:5000});
   assert((await page.locator('#options [data-mv="welded"]').getAttribute('aria-pressed'))==='true','mesh welded choice must expose selected state');
