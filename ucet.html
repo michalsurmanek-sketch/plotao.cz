@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Můj účet | PLOTAO.cz</title>
+  <meta name="description" content="Přihlášení a registrace zákaznického účtu PLOTAO.cz.">
+  <link rel="icon" href="/assets/favicon.svg">
+  <link rel="canonical" href="https://plotao.cz/ucet.html">
+  <style>
+    :root{--green:#005440;--deep:#003f31;--mint:#d8faee;--orange:#ff6900;--ink:#071d18;--line:#dce7e3;--soft:#f5f8f7;--muted:#64756f}
+    *{box-sizing:border-box}html{color-scheme:light}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:linear-gradient(135deg,#eef7f3 0%,#fff 48%,#f7faf9 100%);min-height:100vh}
+    a{color:inherit}.top{background:linear-gradient(105deg,#075b47,#003b2e);color:#fff}.top .wrap{width:min(1180px,calc(100% - 40px));min-height:84px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:24px}.logo{width:235px;display:block}.back{display:inline-flex;align-items:center;gap:8px;color:#fff;text-decoration:none;font-weight:800;font-size:14px;padding:12px 16px;border:1px solid #ffffff52;border-radius:8px;background:#ffffff0d}.back:hover,.back:focus-visible{background:#ffffff1c;outline:3px solid #ffffff33;outline-offset:2px}
+    main{width:min(1080px,calc(100% - 40px));margin:48px auto 70px;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(360px,.95fr);gap:44px;align-items:start}.intro{padding:48px 22px 0 0}.eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--green);font-weight:900;font-size:13px;text-transform:uppercase;letter-spacing:.08em}.eyebrow span{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--mint);font-size:15px}.intro h1{font-size:52px;line-height:1.01;letter-spacing:-2px;margin:18px 0 18px}.intro p{font-size:19px;line-height:1.55;color:#40564f;max-width:600px;margin:0 0 28px}.benefits{display:grid;gap:14px;margin-top:34px}.benefit{display:flex;align-items:flex-start;gap:12px;font-weight:700}.benefit i{font-style:normal;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:#e7f8f1;color:var(--green);flex:0 0 auto}
+    .card{background:#fff;border:1px solid #dfe9e5;border-radius:16px;box-shadow:0 20px 60px #003f3117;padding:30px}.tabs{display:grid;grid-template-columns:1fr 1fr;background:#f1f6f4;border-radius:10px;padding:4px;margin-bottom:24px}.tab{border:0;background:transparent;padding:12px;border-radius:8px;font:inherit;font-weight:800;color:#577069;cursor:pointer}.tab[aria-selected="true"]{background:#fff;color:var(--green);box-shadow:0 2px 9px #003f3116}.panel[hidden]{display:none}.panel h2{margin:0 0 7px;font-size:27px}.panel .sub{margin:0 0 23px;color:var(--muted);font-size:14px;line-height:1.45}.field{display:grid;gap:7px;margin-bottom:15px}.field label{font-size:13px;font-weight:800}.field input{width:100%;height:48px;border:1px solid #cfdcd7;border-radius:8px;padding:0 13px;font:inherit;background:#fff}.field input:focus{outline:3px solid #00544022;border-color:var(--green)}.btn{width:100%;height:50px;border:0;border-radius:8px;background:var(--orange);color:#fff;font-weight:900;font-size:15px;cursor:pointer;margin-top:5px}.btn:hover,.btn:focus-visible{filter:brightness(.97);outline:3px solid #ff690033;outline-offset:2px}.forgot{display:block;text-align:right;color:var(--green);font-size:13px;font-weight:800;margin:-3px 0 15px;text-decoration:none}.auth-note{margin-top:20px;padding:14px 15px;border-radius:9px;background:#fff8ef;border:1px solid #ffd8b9;color:#70411f;font-size:13px;line-height:1.45}.auth-note strong{display:block;margin-bottom:4px}.status{min-height:20px;margin:12px 0 0;font-size:13px;font-weight:700;color:#7b3b13}.legal{margin:16px 0 0;color:#78847f;font-size:11px;line-height:1.5;text-align:center}.legal a{color:var(--green)}
+    @media(max-width:820px){main{grid-template-columns:1fr;gap:24px;margin-top:28px}.intro{padding:12px 4px}.intro h1{font-size:39px}.intro p{font-size:16px}.benefits{display:none}.card{padding:24px}}
+    @media(max-width:520px){.top .wrap{min-height:72px;width:calc(100% - 28px)}.logo{width:165px}.back{padding:9px 10px;font-size:12px}main{width:calc(100% - 28px);margin:22px auto 40px}.intro{padding:0}.eyebrow{font-size:11px}.intro h1{font-size:34px;margin:12px 0}.intro p{font-size:14px;margin-bottom:8px}.card{border-radius:12px;padding:18px}.panel h2{font-size:24px}}
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a href="/eshop.html" aria-label="PLOTAO.cz e-shop"><img class="logo" src="/assets/logo-plotao-inverse.svg" alt="PLOTAO.cz"></a>
+      <a class="back" href="/eshop.html" aria-label="Zpět do e-shopu">← Zpět do e-shopu</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="accountTitle">
+      <div class="eyebrow"><span>♙</span> Zákaznický účet</div>
+      <h1 id="accountTitle">Mějte svůj plot<br>pod kontrolou.</h1>
+      <p>Přihlášení zákazníci tu budou mít objednávky, uložené konfigurace, poptávky a kontaktní údaje na jednom místě.</p>
+      <div class="benefits" aria-label="Výhody účtu">
+        <div class="benefit"><i>✓</i><span>Uložené konfigurace plotu bez opakovaného zadávání.</span></div>
+        <div class="benefit"><i>✓</i><span>Přehled objednávek a stavu vyřízení.</span></div>
+        <div class="benefit"><i>✓</i><span>Rychlejší další nákup a poptávka montáže.</span></div>
+      </div>
+    </section>
+
+    <section class="card" aria-label="Přihlášení a registrace">
+      <div class="tabs" role="tablist" aria-label="Účet">
+        <button class="tab" id="loginTab" type="button" role="tab" aria-selected="true" aria-controls="loginPanel">Přihlášení</button>
+        <button class="tab" id="registerTab" type="button" role="tab" aria-selected="false" aria-controls="registerPanel">Registrace</button>
+      </div>
+
+      <div class="panel" id="loginPanel" role="tabpanel" aria-labelledby="loginTab">
+        <h2>Přihlášení</h2>
+        <p class="sub">Přihlaste se e-mailem a heslem ke svému zákaznickému účtu.</p>
+        <form id="loginForm" novalidate>
+          <div class="field"><label for="loginEmail">E-mail</label><input id="loginEmail" type="email" autocomplete="email" required placeholder="vas@email.cz"></div>
+          <div class="field"><label for="loginPassword">Heslo</label><input id="loginPassword" type="password" autocomplete="current-password" required minlength="8" placeholder="••••••••"></div>
+          <a class="forgot" href="#" id="forgotPassword">Zapomenuté heslo?</a>
+          <button class="btn" type="submit">Přihlásit se</button>
+          <p class="status" id="loginStatus" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <div class="panel" id="registerPanel" role="tabpanel" aria-labelledby="registerTab" hidden>
+        <h2>Vytvořit účet</h2>
+        <p class="sub">Registrace bude sloužit pro objednávky, uložené návrhy a rychlejší další nákup.</p>
+        <form id="registerForm" novalidate>
+          <div class="field"><label for="registerEmail">E-mail</label><input id="registerEmail" type="email" autocomplete="email" required placeholder="vas@email.cz"></div>
+          <div class="field"><label for="registerPassword">Heslo</label><input id="registerPassword" type="password" autocomplete="new-password" required minlength="8" placeholder="Alespoň 8 znaků"></div>
+          <button class="btn" type="submit">Vytvořit účet</button>
+          <p class="status" id="registerStatus" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <div class="auth-note">
+        <strong>Bezpečné přihlášení se právě připravuje.</strong>
+        Formulář zatím neposílá heslo nikam a žádné přihlašovací údaje se neukládají do prohlížeče. Aktivuje se až po připojení samostatného PLOTAO Auth backendu.
+      </div>
+      <p class="legal">Používáním účtu budete souhlasit s <a href="/ochrana-osobnich-udaju.html">ochranou osobních údajů</a>.</p>
+    </section>
+  </main>
+
+  <script>
+    (()=> {
+      const loginTab=document.querySelector('#loginTab');
+      const registerTab=document.querySelector('#registerTab');
+      const loginPanel=document.querySelector('#loginPanel');
+      const registerPanel=document.querySelector('#registerPanel');
+      const show=(name)=>{
+        const login=name==='login';
+        loginTab.setAttribute('aria-selected',String(login));
+        registerTab.setAttribute('aria-selected',String(!login));
+        loginPanel.hidden=!login;
+        registerPanel.hidden=login;
+        (login?document.querySelector('#loginEmail'):document.querySelector('#registerEmail'))?.focus();
+      };
+      loginTab.addEventListener('click',()=>show('login'));
+      registerTab.addEventListener('click',()=>show('register'));
+      const unavailable=(form,status)=>{
+        form.addEventListener('submit',event=>{
+          event.preventDefault();
+          if(!form.reportValidity())return;
+          status.textContent='Účet zatím není napojený na bezpečný PLOTAO Auth backend. Vaše heslo nebylo odesláno ani uloženo.';
+        });
+      };
+      unavailable(document.querySelector('#loginForm'),document.querySelector('#loginStatus'));
+      unavailable(document.querySelector('#registerForm'),document.querySelector('#registerStatus'));
+      document.querySelector('#forgotPassword').addEventListener('click',event=>{
+        event.preventDefault();
+        document.querySelector('#loginStatus').textContent='Obnova hesla se zpřístupní současně s aktivací zákaznických účtů.';
+      });
+    })();
+  </script>
+</body>
+</html>
