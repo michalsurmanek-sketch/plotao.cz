@@ -128,6 +128,7 @@ jobs:
           PLOTAO_E2E_URL=http://127.0.0.1:4173 node scripts/focus-visible-browser-check.mjs
           PLOTAO_E2E_URL=http://127.0.0.1:4173 node scripts/mesh-scroll-browser-check.mjs
           PLOTAO_E2E_URL=http://127.0.0.1:4173 node scripts/price-idle-click-browser-check.mjs
+          PLOTAO_E2E_URL=http://127.0.0.1:4173 node scripts/mesh-variants-browser-check.mjs
 
       - name: Configure Pages
         uses: actions/configure-pages@v6
