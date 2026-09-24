@@ -19,5 +19,6 @@
     const height=Math.max(.4,(+input.height||153)/100),fence=Math.max(0,+input.fence||0),width=Math.max(0,+input.width||.30),kind=input.kind==='display'?'display':'quarry',sp=kind==='display'?gabion.stoneD:gabion.stoneQ,volume=fence*height*width,tons=volume*gabion.density,constructionLow=volume*gabion.cLo,constructionHigh=volume*gabion.cHi,stoneLow=tons*sp[0],stoneHigh=tons*sp[1],low=constructionLow+stoneLow,high=constructionHigh+stoneHigh;
     return{unsupported:false,low,high,volume,tons,height,fence,width,kind,constructionLow,constructionHigh,stoneLow,stoneHigh,density:gabion.density};
   }
-  return{concrete,gabion,postUnit,computeConcretePrice,computeGabionPrice};
+  function computeGabion2DPrice(input={}){const height=Math.max(.4,(+input.height||153)/100),fence=Math.max(0,+input.fence||0),width=.19,kind=input.kind==='display'?'display':'quarry',sp=kind==='display'?gabion.stoneD:gabion.stoneQ,volume=fence*height*width,tons=volume*gabion.density,constructionLow=fence*1400*(height/1.03),constructionHigh=fence*1900*(height/1.03),stoneLow=tons*sp[0],stoneHigh=tons*sp[1];return{unsupported:false,low:constructionLow+stoneLow,high:constructionHigh+stoneHigh,volume,tons,height,fence,width,kind,constructionLow,constructionHigh,stoneLow,stoneHigh,density:gabion.density};}
+  return{concrete,gabion,postUnit,computeConcretePrice,computeGabionPrice,computeGabion2DPrice};
 });
