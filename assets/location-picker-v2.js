@@ -5,7 +5,7 @@
   const q = s => document.querySelector(s);
   const input = q('#locationInput'), suggestions = q('#locationSuggestions');
   const confirm = q('#locationConfirm'), next = q('#locationNext');
-  const svg = q('.cz-regions-map'), marker = q('#locationMarker'), label = q('#locationLabel');
+  const svg = q('.cz-regions-map'), marker = q('#locationMarker'), label = q('#locationLabel'), progressLocation = q('#progressLocation');
   if (!input || !svg) return;
   const regions = [...svg.querySelectorAll('.region')];
   const normalize = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
@@ -33,6 +33,7 @@
     confirm.classList.toggle('show', !!selected);
     label.hidden = !selected;
     label.textContent = selected ? selected.label.split(',')[0] : '';
+    if (progressLocation) { progressLocation.textContent = selected ? selected.label.split(',')[0] : ''; progressLocation.hidden = !selected; }
     marker.setAttribute('visibility', 'hidden');
     if (selected) {
       input.value = selected.label;
