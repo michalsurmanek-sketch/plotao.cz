@@ -33,7 +33,7 @@
     confirm.classList.toggle('show', !!selected);
     label.hidden = !selected;
     label.textContent = selected ? selected.label.split(',')[0] : '';
-    if (progressLocation) { progressLocation.textContent = selected ? selected.label.split(',')[0] : ''; progressLocation.hidden = !selected; }
+    if (progressLocation) { progressLocation.textContent = selected ? selected.label.split(',')[0] : ''; progressLocation.hidden = !selected; progressLocation.style.display = selected ? 'block' : 'none'; }
     marker.setAttribute('visibility', 'hidden');
     if (selected) {
       input.value = selected.label;
