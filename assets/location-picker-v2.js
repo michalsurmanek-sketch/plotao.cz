@@ -59,8 +59,22 @@
     suggestions.classList.toggle('show', !!items.length || !!message);
   }
   function cancel() { clearTimeout(timer); request++; if (controller) controller.abort(); }
+  function scrollAfterRegionPick() {
+    if (!window.matchMedia('(max-width: 760px)').matches) return;
+    const anchor = q('.updated') || q('.progress') || q('#locationStep');
+    if (!anchor) return;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const top = Math.max(0, window.scrollY + anchor.getBoundingClientRect().top - 10);
+      window.scrollTo({ top, behavior: 'smooth' });
+    }));
+  }
   regions.forEach(path => {
-    const choose = () => { cancel(); pick({ label: path.dataset.region, region: path.dataset.region, kind: 'region' }); render([]); };
+    const choose = () => {
+      cancel();
+      pick({ label: path.dataset.region, region: path.dataset.region, kind: 'region' });
+      render([]);
+      scrollAfterRegionPick();
+    };
     path.addEventListener('click', choose);
     path.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); choose(); } });
   });
