@@ -65,8 +65,13 @@ await runScenario('desktop',{width:1440,height:1000},async page=>{
   await page.waitForFunction(()=>location.hash==='#kalkulator'&&document.activeElement?.id==='kalkulator',null,{timeout:5000});
   assert((await page.evaluate(()=>document.activeElement?.id))==='kalkulator','activating skip link must move keyboard focus to the calculator main landmark');
 
-  assert((await page.locator('.type[data-id="panel"]').getAttribute('aria-pressed'))==='true','panel must be selected initially');
-  assert((await text(page.locator('.price strong'))) !== '—','default panel price must be calculated');
+  assert((await page.locator('.type.on').count())===0,'no fence type must be selected before the user chooses one');
+  assert((await page.locator('.type[data-id="panel"]').getAttribute('aria-pressed'))==='false','panel must not be preselected');
+  assert((await text(page.locator('.price strong'))) === '—','price must stay empty until a fence type is selected');
+
+  await selectType(page,'panel','#fenceVisualRoot[data-type="panel"]');
+  assert((await page.locator('.type[data-id="panel"]').getAttribute('aria-pressed'))==='true','panel must become selected only after user choice');
+  assert((await text(page.locator('.price strong'))) !== '—','panel price must calculate after selection');
 
   await selectType(page,'mesh','#fenceVisualRoot[data-type="mesh"]');
   const classicTotal=await page.evaluate(()=>window.PLOTAO_MESH_PRICE?.materialTotal||null);
