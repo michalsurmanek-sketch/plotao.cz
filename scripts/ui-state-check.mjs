@@ -13,7 +13,7 @@ ok(mobileSummary.includes("if(issue.code==='segments-count')return $$('#segmentL
 ok(mobileSummary.includes("hv<40||hv>400"),'mobile error navigation must treat the same 40–400cm height range as invalid');
 ok(accuracy.includes("e.unsupported&&e.reason==='height'"),'accuracy guard must block mobile DOPS totals when requested height differs from verified product height');
 ok(mobile.includes("const total=material+extras,partial=hasUnpriced(),text=partial?'Od '+money(total)+' + individuálně':money(total),main=$('.price strong'),sticky=$('.mobile-price strong')")&&mobile.includes("if(main){main.textContent=text;main.dataset.mobileTotal='1';delete main.dataset.benchmarkTotal}")&&mobile.includes("if(sticky)sticky.textContent=text"),'mobile fence benchmark must update desktop and sticky total together under explicit mobile ownership');
-ok(truth.includes('Ověřený materiál spočítáme hned'),'intro must clearly distinguish verified material from services');
+ok(truth.includes('Materiál a orientační cenu spočítáme hned.')&&truth.includes('Dopravu a montáž upřesníme podle místa realizace.'),'intro must clearly distinguish verified material from services');
 ok(truth.includes('Doprava a Na klíč = individuální doplnění'),'scope explanation must disclose individual delivery/turnkey pricing');
 ok(truth.includes("id='scopeTruthNote'")||truth.includes("n.id='scopeTruthNote'"),'scope truth note must have a stable id and avoid duplicates');
 ok(truth.includes('Ověřené položky počítáme z aktuálních cenových podkladů; individuální položky jsou označené zvlášť.'),'result note must distinguish verified pricing inputs from individual items');
