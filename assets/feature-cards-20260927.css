@@ -1,0 +1,43 @@
+/* Supplied feature artwork, matched to the approved four-row reference. */
+#more>.section:first-child{padding:0;border:0;background:transparent;box-shadow:none}
+#more .feature-cards{grid-template-columns:1fr;gap:22px}
+#more .feature-card{position:relative;isolation:isolate;overflow:hidden;grid-template-columns:100px minmax(0,1fr) 66px;gap:24px;min-height:210px;padding:30px!important;border-radius:26px!important;background-color:#fff;background-size:cover;background-position:center right;box-shadow:0 7px 22px #1237260d}
+#more .feature-card:nth-child(1){background-image:url('/assets/images/feature-types-20260927.webp');border-color:#91c4a6!important}
+#more .feature-card:nth-child(2){background-image:url('/assets/images/feature-segments-20260927.webp')}
+#more .feature-card:nth-child(3){background-image:url('/assets/images/feature-materials-20260927.webp')}
+#more .feature-card:nth-child(4){background-image:url('/assets/images/feature-installation-20260927.webp')}
+#more .feature-card:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#fffffff5 0%,#fffffff2 40%,#ffffffb8 54%,transparent 73%)}
+#more .feature-card.featured:before{background:linear-gradient(90deg,#eef9f1f5 0%,#eef9f1ef 40%,#eef9f1b8 54%,transparent 73%)}
+#more .feature-icon{width:100px;height:100px;border-radius:25px;background:#dcf0e1de}
+#more .feature-icon svg{width:66px;height:66px}
+#more .feature-copy{max-width:450px;min-width:0}
+#more .feature-copy h3{font-size:30px;line-height:1.15;letter-spacing:-.6px;margin:0 0 12px;color:#0b1820}
+#more .feature-copy p{font-size:22px;line-height:1.4;color:#515b61}
+#more .feature-copy a{font-size:23px;margin-top:18px}
+#more .feature-arrow{width:66px;height:66px;background:#fffffff5;color:#07553a;font-size:54px}
+#more .featured .feature-arrow{background:#218647e8;color:#fff;box-shadow:0 0 0 5px #ffffff99}
+#more .feature-arrow:focus-visible,#more #partner:focus-visible{outline:3px solid #f07828;outline-offset:-4px}
+/* The supplied reference includes the approved partner banner. Preserve its existing action. */
+#more .partner.partner-reference{display:block;min-height:0!important;aspect-ratio:964/276;padding:0!important;border-radius:26px!important;background-image:url('/assets/images/feature-reference-20260927.jpg')!important;background-size:106.224% auto!important;background-position:50% 98%!important;margin-top:22px}
+#more .partner.partner-reference:after{display:none!important}
+#more .partner.partner-reference>div{position:absolute!important;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+#more .partner.partner-reference>button{position:absolute!important;inset:0;width:100%!important;height:100%;opacity:0;min-height:0!important;border-radius:26px}
+#more .partner.partner-reference:focus-within{outline:3px solid #f07828;outline-offset:3px}
+@media(min-width:1100px){#more{max-width:1100px}}
+@media(max-width:680px){
+ #more{padding:0 13px 32px}
+ #more .feature-cards{gap:12px}
+ #more .feature-card{grid-template-columns:48px minmax(0,1fr) 34px;gap:12px;min-height:134px;padding:16px 12px!important;border-radius:18px!important}
+ #more .feature-icon{width:48px;height:52px;border-radius:14px}
+ #more .feature-icon svg{width:35px;height:35px;stroke-width:3.5}
+ #more .feature-copy{max-width:225px}
+ #more .feature-copy h3{font-size:18px;letter-spacing:-.5px;margin-bottom:7px}
+ #more .feature-copy p{font-size:14px;line-height:1.4}
+ #more .feature-copy a{font-size:14px;margin-top:11px}
+ #more .feature-arrow{width:34px;height:34px;font-size:32px}
+ #more .featured .feature-arrow{box-shadow:0 0 0 3px #ffffff99}
+ #more .feature-card:before{background:linear-gradient(90deg,#fffffffa 0%,#fffffff0 46%,#ffffffa6 64%,transparent 88%)}
+ #more .feature-card.featured:before{background:linear-gradient(90deg,#eef9f1fa 0%,#eef9f1f0 46%,#eef9f1a6 64%,transparent 88%)}
+ #more .partner.partner-reference{border-radius:18px!important;margin-top:12px}
+}
+@media(prefers-reduced-motion:no-preference){#more .feature-arrow{transition:transform .15s}#more a.feature-arrow:hover{transform:translateX(3px)}}
