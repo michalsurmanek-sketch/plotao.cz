@@ -142,13 +142,56 @@
       } catch (_) {}
     }, () => { if (token === request) render([], 'Polohu se nepodařilo získat. Zadejte obec nebo vyberte kraj.'); }, { timeout: 10000 });
   });
-  next.addEventListener('click', () => {
-    if (!selected) return;
-    q('.mobile-price')?.classList.remove('location-blocked');
-    q('#locationStep').classList.add('step-hidden'); q('#configArea').classList.remove('step-hidden');
-    const steps = document.querySelectorAll('.progress b'); steps[0].classList.remove('on'); steps[1].classList.add('on');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  let step = 1;
+  const activeType = () => q('.type.on');
+  function syncType() {
+    const card = activeType(), name = card?.querySelector('strong')?.textContent || '';
+    q('#parametersNext').disabled = !card;
+    const progress = q('#progressType');
+    if (progress) { progress.textContent = name; progress.hidden = !name; }
+    q('#selectedFenceName').textContent = name;
+    const image = q('#selectedFenceImage'), source = card?.querySelector('img');
+    if (source) { image.src = source.src; image.alt = name; }
+    updateProgress();
+  }
+  function updateProgress() {
+    document.querySelectorAll('.progress-location').forEach((item, i) => {
+      const number = i + 1, allowed = number === 1 || (!!selected && (number === 2 || !!activeType()));
+      item.setAttribute('role', 'button'); item.tabIndex = allowed ? 0 : -1;
+      item.setAttribute('aria-disabled', String(!allowed));
+      if (number === step) item.setAttribute('aria-current', 'step'); else item.removeAttribute('aria-current');
+      const badge = item.querySelector('b');
+      badge.classList.toggle('on', number === step); badge.classList.toggle('done', number < step);
+      badge.textContent = number < step ? '✓' : String(number);
+    });
+  }
+  function showStep(value, focus = true) {
+    if (value > 1 && !selected || value === 3 && !activeType()) return;
+    step = value; document.body.dataset.wizardStep = String(step);
+    q('#locationStep').classList.toggle('step-hidden', step !== 1);
+    q('#typeStep').classList.toggle('step-hidden', step !== 2);
+    q('#parameterIntro').classList.toggle('step-hidden', step !== 3);
+    q('#configArea').classList.toggle('step-hidden', step !== 3);
+    q('.mobile-price')?.classList.toggle('location-blocked', step !== 3);
+    syncType();
+    if (focus) {
+      const heading = step === 1 ? q('#locationStep h2') : q(step === 2 ? '#typeStepTitle' : '#parameterTitle');
+      heading?.setAttribute('tabindex', '-1'); heading?.focus({ preventScroll: true });
+      const anchor = q('.progress');
+      window.scrollTo({ top: Math.max(0, window.scrollY + anchor.getBoundingClientRect().top - 16), behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    }
+  }
+  next.addEventListener('click', () => showStep(2));
+  q('#parametersNext').addEventListener('click', () => showStep(3));
+  document.querySelectorAll('[data-step]').forEach(button => button.addEventListener('click', () => showStep(Number(button.dataset.step))));
+  document.querySelectorAll('.progress-location').forEach((item, i) => {
+    item.addEventListener('click', () => showStep(i + 1));
+    item.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); showStep(i + 1); } });
   });
+  document.addEventListener('click', event => { if (event.target.closest('.type')) setTimeout(syncType, 0); });
+  document.addEventListener('plotao:location-change', updateProgress);
+  document.addEventListener('plotao:ui-ready', syncType);
   q('.mobile-price')?.classList.add('location-blocked');
   try { const saved = JSON.parse(localStorage.getItem(key) || 'null'); pick(saved && typeof saved.label === 'string' ? saved : null); } catch (_) { pick(null); }
+  showStep(1, false);
 })();
