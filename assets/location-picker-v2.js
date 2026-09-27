@@ -5,7 +5,7 @@
   const q = s => document.querySelector(s);
   const input = q('#locationInput'), suggestions = q('#locationSuggestions');
   const confirm = q('#locationConfirm'), next = q('#locationNext');
-  const svg = q('.cz-regions-map'), marker = q('#locationMarker'), label = q('#locationLabel'), progressLocation = q('#progressLocation');
+  const svg = q('.cz-regions-map'), marker = q('#locationMarker'), progressLocation = q('#progressLocation');
   if (!input || !svg) return;
   const regions = [...svg.querySelectorAll('.region')];
   const normalize = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
@@ -29,14 +29,13 @@
       path.classList.toggle('on', on); path.setAttribute('aria-pressed', String(on));
     });
     next.disabled = !selected;
-    confirm.textContent = selected ? '✓ Vybráno: ' + selected.label : '';
-    confirm.classList.toggle('show', !!selected);
-    label.hidden = !selected;
-    label.textContent = selected ? selected.label.split(',')[0] : '';
-    if (progressLocation) { progressLocation.textContent = selected ? selected.label.split(',')[0] : ''; progressLocation.hidden = !selected; progressLocation.style.display = selected ? 'block' : 'none'; }
+    confirm.hidden = !selected;
+    q('#locationSelectedName').textContent = selected ? selected.label.split(',')[0] : '';
+    q('#locationSelectedKind').textContent = selected?.kind === 'city' ? 'Vybraná obec' : 'Vybraný kraj';
+    if (progressLocation) { progressLocation.textContent = selected ? selected.label.split(',')[0] : ''; progressLocation.hidden = !selected;  }
     marker.setAttribute('visibility', 'hidden');
     if (selected) {
-      input.value = selected.label;
+      input.value = selected.kind === 'city' ? selected.label : '';
       const hasCoords = selected.lat != null && selected.lon != null;
       const box = region.getBBox();
       const point = hasCoords ? project(selected.lon, selected.lat) : { x: box.x + box.width / 2, y: box.y + box.height / 2 };
@@ -59,21 +58,12 @@
     suggestions.classList.toggle('show', !!items.length || !!message);
   }
   function cancel() { clearTimeout(timer); request++; if (controller) controller.abort(); }
-  function scrollAfterRegionPick() {
-    if (!window.matchMedia('(max-width: 760px)').matches) return;
-    const anchor = q('.updated') || q('.progress') || q('#locationStep');
-    if (!anchor) return;
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      const top = Math.max(0, window.scrollY + anchor.getBoundingClientRect().top - 10);
-      window.scrollTo({ top, behavior: 'smooth' });
-    }));
-  }
   regions.forEach(path => {
     const choose = () => {
       cancel();
       pick({ label: path.dataset.region, region: path.dataset.region, kind: 'region' });
       render([]);
-      scrollAfterRegionPick();
+
     };
     path.addEventListener('click', choose);
     path.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); choose(); } });
@@ -96,7 +86,7 @@
     return { label: [city, address.postcode, address.state].filter(Boolean).join(', '), lat: Number(result.lat), lon: Number(result.lon), region: address.state, kind: 'city' };
   };
   input.addEventListener('input', () => {
-    cancel(); const text = input.value.trim(); pick(null); input.value = text;
+    cancel(); const text = input.value.trim(); const region = selected?.region; pick(region ? {label:region,region,kind:'region'} : null); input.value = text;
     if (text.length < 2) { render([]); return; }
     const query = normalize(text);
     const local = cities.filter(city => normalize(city.city).startsWith(query) || city.postcode.replace(/\s/g, '').startsWith(query.replace(/\s/g, '')));
@@ -120,6 +110,7 @@
       }
     }, 400);
   });
+  q('#changeLocation').addEventListener('click', () => { cancel(); const region = selected && regionFor(selected); pick(null); input.value = ''; render([]); (region || regions[0])?.focus(); });
   input.addEventListener('keydown', event => {
     if (event.key === 'Escape') render([]);
     if (event.key === 'ArrowDown') { event.preventDefault(); suggestions.querySelector('button')?.focus(); }
