@@ -74,7 +74,7 @@ function revealDesktopPartnerBg(partner,bg){
 
 function applyMobilePartnerArtwork(){
  const partner=document.querySelector('.partner');
- if(!partner)return;
+ if(!partner||partner.classList.contains('partner-reference'))return;
  const mobile=window.matchMedia('(max-width:760px)').matches;
  const cta=partner.querySelector('#partner');
  if(mobile){
