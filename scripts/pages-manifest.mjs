@@ -4,7 +4,7 @@ export const activeScripts=[
 ];
 
 export const requiredArtifact=[
-  'name="plotao-deploy"','/assets/ui-bootstrap-v1.js','data-v="material" class="on"','Ceník aktualizován 12. 9. 2026','<input id="gate" type="checkbox">','<input id="door" type="checkbox">','<title>Kalkulátor ceny plotu a materiálu | PLOTAO.cz</title>','<h1><span class="hero-line">Spočítejte</span> <span class="hero-line">materiál na</span> <span class="hero-line">celý plot. <em>Hned.</em></span></h1>','Spočítejte ověřený materiálový rozpočet plotu podle typu','Ověřený materiál spočítáme hned.','terén, podloží a přístup slouží jako podklady pro individuální realizační nabídku.'
+  'name="plotao-deploy"','/assets/ui-bootstrap-v1.js','data-v="material" class="on"','Ceník aktualizován 12. 9. 2026','<input id="gate" type="checkbox">','<input id="door" type="checkbox">','<title>Kalkulátor ceny plotu a materiálu | PLOTAO.cz</title>','<h1><span class="hero-line">Spočítejte</span> <span class="hero-line">materiál na</span> <span class="hero-line">celý plot. <em>Hned.</em></span></h1>','Spočítejte ověřený materiálový rozpočet plotu podle typu','Materiál a orientační cenu spočítáme hned.','terén, podloží a přístup slouží jako podklady pro individuální realizační nabídku.'
 ];
 
 export const forbiddenArtifact=[
