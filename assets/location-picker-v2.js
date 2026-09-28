@@ -179,7 +179,26 @@
     item.addEventListener('click', () => showStep(i + 1));
     item.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); showStep(i + 1); } });
   });
-  document.addEventListener('click', event => { if (event.target.closest('.type')) setTimeout(syncType, 0); });
+  let typeScrollTimer;
+  document.addEventListener('click', event => {
+    if (!event.target.closest('#typeStep #types .type')) return;
+    clearTimeout(typeScrollTimer);
+    typeScrollTimer = setTimeout(() => {
+      syncType();
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const section = q('#typeStep'), button = q('#parametersNext');
+        if (step !== 2 || !section || button.disabled || !section.getClientRects().length) return;
+        const viewport = window.visualViewport;
+        const viewportHeight = viewport?.height || window.innerHeight;
+        const viewportOffset = viewport?.offsetTop || 0;
+        const top = window.scrollY + section.getBoundingClientRect().bottom - viewportHeight - viewportOffset + 18;
+        window.scrollTo({
+          top: Math.max(0, top),
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+        });
+      }));
+    }, 0);
+  });
   document.addEventListener('plotao:location-change', updateProgress);
   document.addEventListener('plotao:ui-ready', syncType);
   q('.mobile-price')?.classList.add('location-blocked');
