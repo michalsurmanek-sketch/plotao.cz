@@ -15,7 +15,7 @@
     .head{height:96px}
     .head .logo{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;text-decoration:none;line-height:1}
     .head .logo img{width:190px}
-    .plotao-network-claim{display:flex;align-items:center;gap:7px;margin-top:2px;margin-left:43px;white-space:nowrap}
+    .plotao-network-claim{display:flex;align-items:center;gap:7px;transform:translateY(-6px);margin-top:2px;margin-left:43px;white-space:nowrap}
     .plotao-network-pin{display:grid;place-items:center;width:25px;height:29px;flex:0 0 25px}
     .plotao-network-pin svg{display:block;width:25px;height:29px;fill:#07915d}
     .plotao-network-pin circle{fill:#fff}
