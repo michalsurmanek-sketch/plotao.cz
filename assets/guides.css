@@ -6,3 +6,5 @@
 .guide-footer .guide-legal small{font-size:13px;color:#a5bfb0}
 .guide-footer .guide-legal a{color:#edf3f0;text-decoration:none;font-size:14px}
 @media(max-width:640px){.guides-cta{margin-bottom:24px!important}.guide-footer{gap:18px!important;padding:26px 24px 24px!important}.guide-footer>div:first-child p{margin:8px 0 0!important;font-size:15px}.guide-footer nav{gap:0!important}.guide-footer nav a{min-height:50px;padding:10px 0!important;font-size:16px}.guide-footer .guide-legal{padding-top:14px;gap:8px;flex-wrap:wrap}.guide-footer .guide-legal small,.guide-footer .guide-legal a{font-size:12px}}
+
+@media(max-width:640px){.guide-footer .guide-legal{width:100%;justify-content:space-between;align-items:center}.guide-footer .guide-legal a{margin-left:auto;text-align:right;font-size:11px!important;line-height:1.2}}
