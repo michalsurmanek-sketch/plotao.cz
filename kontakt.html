@@ -85,4 +85,16 @@ label.scrollIntoView({behavior:'smooth',block:'nearest'});
 </script><style>
 .hero .heading>div>p,.regionHead>div>p{font-size:20px;color:var(--mut);line-height:1.4;margin:0;text-align:left;max-width:none}
 @media(max-width:800px){.hero .heading>div>p,.regionHead>div>p{font-size:16px;line-height:1.4;text-align:left;max-width:none}}
+</style><style>
+.hero .heading{align-items:center}
+.hero h1,.regionHead h2{font-size:52px;line-height:1.04;letter-spacing:-1.6px}
+@media(max-width:800px){
+.hero .heading,.contactFormSection .regionHead,#pusobnost .regionHead{align-items:center;gap:10px}
+.hero .heading{flex-wrap:nowrap}
+.contactFormSection .regionHead{flex-wrap:nowrap}
+#pusobnost .regionHead{flex-wrap:wrap}
+.hero .heading .headingIcon,.regionHead .headingIcon{width:52px;height:52px;flex:0 0 52px}
+.hero .heading>div,.regionHead>div{min-width:0;flex:1}
+.hero h1,.regionHead h2{font-size:clamp(18px,5.7vw,24px);line-height:1.05;letter-spacing:-.45px;white-space:nowrap}
+}
 </style></body></html>
