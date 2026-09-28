@@ -92,7 +92,10 @@ label.scrollIntoView({behavior:'smooth',block:'nearest'});
 .hero .heading,.contactFormSection .regionHead,#pusobnost .regionHead{align-items:center;gap:10px}
 .hero .heading{flex-wrap:nowrap}
 .contactFormSection .regionHead{flex-wrap:nowrap}
-#pusobnost .regionHead{flex-wrap:wrap}
+#pusobnost .regionHead{display:grid;grid-template-columns:52px minmax(0,1fr);align-items:center;gap:10px}
+#pusobnost .regionHead .headingIcon{grid-column:1;grid-row:1}
+#pusobnost .regionHead>div{grid-column:2;grid-row:1;min-width:0;width:auto}
+#pusobnost .regionHead .nationwide{grid-column:2;grid-row:2;justify-self:start;margin:4px 0 0;align-self:auto}
 .hero .heading .headingIcon,.regionHead .headingIcon{width:52px;height:52px;flex:0 0 52px}
 .hero .heading>div,.regionHead>div{min-width:0;flex:1}
 .hero h1,.regionHead h2{font-size:clamp(18px,5.7vw,24px);line-height:1.05;letter-spacing:-.45px;white-space:nowrap}
