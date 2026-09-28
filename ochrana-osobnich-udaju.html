@@ -17,13 +17,22 @@
     .card{margin-top:24px;padding:28px;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 5px 24px #1237260b}.card h2{margin:28px 0 8px;font-size:23px}.card h2:first-child{margin-top:0}.card h3{margin:20px 0 6px;font-size:18px}.card p,.card li{color:#405249}.card ul{padding-left:22px}.note{padding:16px 18px;border-left:4px solid var(--g);border-radius:10px;background:#eef8f2}.contact{padding:18px;border-radius:14px;background:#f7faf8;border:1px solid var(--line)}
     footer{background:#10261d;color:#c9d8d0;padding:28px 20px}.foot{max-width:980px;margin:auto;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}.foot a{color:#fff}
     @media(max-width:680px){.head{padding:0 14px}.head img{width:174px}.wrap{padding:28px 14px 48px}.hero h1{font-size:34px}.card{padding:21px}}
+  
+    /* Match the shared contact page header and footer */
+    .head{height:72px;background:#063f31;color:#fff;padding:0 max(24px,calc((100% - 1180px)/2));gap:24px}
+    .head .logo img{width:180px;height:auto}
+    .head .nav{display:flex;align-items:center;margin-left:auto}
+    .head .cta{display:inline-flex;align-items:center;gap:8px;padding:13px 18px;border-radius:9px;background:#f47712;color:#fff;font-weight:700;text-decoration:none;white-space:nowrap}
+    .head .ctaIcon{width:18px;height:18px;flex:none}
+    footer.contact-foot{background:#063f31;color:#dce9e3;padding:27px 17px;text-align:center;font-size:13px;line-height:1.4}
+    .contact-foot .footPrivacy{white-space:nowrap;margin-left:4px}
+    .contact-foot a{color:inherit;text-decoration:none}
+    @media(max-width:680px){.head{height:68px;padding:0 14px;gap:12px;background:#fff;color:#10231d}.head .logo img{width:148px}.head .cta{background:#063f31;padding:12px 14px;font-size:13px}.head .ctaIcon{width:16px;height:16px}}
+    @media(max-width:420px){.contact-foot .footPrivacy{display:block;margin:4px 0 0}}
   </style>
 </head>
 <body>
-  <header class="head">
-    <a href="/" aria-label="PLOTAO.cz – domů"><img src="/assets/logo-plotao.svg" alt="PLOTAO.CZ" width="2172" height="724"></a>
-    <a class="back" href="/#kalkulator">← Kalkulátor</a>
-  </header>
+  <header class="head"><a class="logo" href="/" aria-label="PLOTAO.cz – domů"><img src="/assets/logo-plotao.svg" alt="PLOTAO.cz"></a><nav class="nav" aria-label="Hlavní navigace"><a class="cta" href="/#kalkulator"><svg class="ctaIcon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2.5" width="16" height="19" rx="2"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h4"/></svg><span>Kalkulátor plotu</span></a></nav></header>
   <main class="wrap">
     <section class="hero">
       <div class="eyebrow">Vaše údaje pod kontrolou</div>
@@ -74,6 +83,6 @@
       </div>
     </article>
   </main>
-  <footer><div class="foot"><span>© 2026 PLOTAO.cz · Provozovatel AO Holding s.r.o.</span><a href="/">Zpět na hlavní stránku</a></div></footer>
+  <footer class="contact-foot">© 2026 PLOTAO.cz – Všechna práva vyhrazena.<span class="footPrivacy"><a data-plotao-privacy-link="1" href="/ochrana-osobnich-udaju.html">Ochrana osobních údajů</a></span></footer>
 </body>
 </html>
