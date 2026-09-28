@@ -191,14 +191,15 @@
         const viewport = window.visualViewport;
         const viewportHeight = viewport?.height || window.innerHeight;
         const viewportOffset = viewport?.offsetTop || 0;
-        const top = window.scrollY + section.getBoundingClientRect().bottom - viewportHeight - viewportOffset + 18;
+        const rect = button.getBoundingClientRect();
+        const top = window.scrollY + rect.top - viewportOffset - (viewportHeight - rect.height) / 2;
         window.scrollTo({
           top: Math.max(0, top),
           behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
         });
       }));
     }, 0);
-  });
+  }, true); // Capture before renderTypes replaces the clicked card and detaches its target.
   document.addEventListener('plotao:location-change', updateProgress);
   document.addEventListener('plotao:ui-ready', syncType);
   q('.mobile-price')?.classList.add('location-blocked');

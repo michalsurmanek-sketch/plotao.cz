@@ -123,6 +123,7 @@ jobs:
             sleep 1
           done
           curl -fsS http://127.0.0.1:4173/ >/dev/null
+          PLOTAO_E2E_URL=http://127.0.0.1:4173 node scripts/guides-wizard-browser-check.mjs
           PLOTAO_E2E_URL=http://127.0.0.1:4173 npm run browser:e2e
           PLOTAO_E2E_URL=http://127.0.0.1:4173 node scripts/free-route-browser-check.mjs
           PLOTAO_E2E_URL=http://127.0.0.1:4173 node scripts/segment-add-position-browser-check.mjs
@@ -201,9 +202,12 @@ jobs:
           const errors=[];
           page.on('pageerror',e=>errors.push(String(e)));
           await page.goto(`https://plotao.cz/?sha=${process.env.EXPECTED_SHA}`,{waitUntil:'networkidle',timeout:60000});
+          await page.locator('.region').first().press('Enter');
+          await page.locator('#locationNext').click();
           const mobile=page.locator('.type[data-id="mobile"]');
           await mobile.waitFor({state:'visible',timeout:15000});
           await mobile.click();
+          await page.locator('#parametersNext').click();
           const config=page.locator('#extraFenceConfig[data-type="mobile"]');
           await config.waitFor({state:'visible',timeout:15000});
           await config.locator('[data-ev="solid"]').click();
