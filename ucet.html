@@ -77,35 +77,21 @@
   <footer class="account-footer">© PLOTAO.cz · Zákaznický účet</footer>
 
   <script>
-    (()=> {
-      const loginTab=document.querySelector('#loginTab');
-      const registerTab=document.querySelector('#registerTab');
-      const loginPanel=document.querySelector('#loginPanel');
-      const registerPanel=document.querySelector('#registerPanel');
-      const show=(name)=>{
-        const login=name==='login';
-        loginTab.setAttribute('aria-selected',String(login));
-        registerTab.setAttribute('aria-selected',String(!login));
-        loginPanel.hidden=!login;
-        registerPanel.hidden=login;
-        (login?document.querySelector('#loginEmail'):document.querySelector('#registerEmail'))?.focus();
-      };
-      loginTab.addEventListener('click',()=>show('login'));
-      registerTab.addEventListener('click',()=>show('register'));
-      const unavailable=(form,status)=>{
-        form.addEventListener('submit',event=>{
-          event.preventDefault();
-          if(!form.reportValidity())return;
-          status.textContent='Účet zatím není napojený na bezpečný PLOTAO Auth backend. Vaše heslo nebylo odesláno ani uloženo.';
-        });
-      };
-      unavailable(document.querySelector('#loginForm'),document.querySelector('#loginStatus'));
-      unavailable(document.querySelector('#registerForm'),document.querySelector('#registerStatus'));
-      document.querySelector('#forgotPassword').addEventListener('click',event=>{
-        event.preventDefault();
-        document.querySelector('#loginStatus').textContent='Obnova hesla se zpřístupní současně s aktivací zákaznických účtů.';
-      });
-    })();
-  </script>
+(()=> {
+ const URL='https://jmukoccjqykyoqsypuwb.supabase.co';
+ const KEY='sb_publishable_FSrTbgu1LeF9DNeam3ztwA_3dNHGq-V';
+ const headers={'Content-Type':'application/json','apikey':KEY};
+ const loginTab=document.querySelector('#loginTab'),registerTab=document.querySelector('#registerTab');
+ const loginPanel=document.querySelector('#loginPanel'),registerPanel=document.querySelector('#registerPanel');
+ const show=name=>{const login=name==='login';loginTab.setAttribute('aria-selected',String(login));registerTab.setAttribute('aria-selected',String(!login));loginPanel.hidden=!login;registerPanel.hidden=login;(login?document.querySelector('#loginEmail'):document.querySelector('#registerEmail'))?.focus()};
+ loginTab.addEventListener('click',()=>show('login')); registerTab.addEventListener('click',()=>show('register'));
+ const msg=(el,text,ok=false)=>{el.textContent=text;el.style.color=ok?'#176a44':'#7b3b13'};
+ const registerForm=document.querySelector('#registerForm'), registerStatus=document.querySelector('#registerStatus');
+ registerForm.addEventListener('submit',async e=>{e.preventDefault();if(!registerForm.reportValidity())return;const email=document.querySelector('#registerEmail').value.trim(),password=document.querySelector('#registerPassword').value;msg(registerStatus,'Vytvářím účet…');try{const r=await fetch(URL+'/auth/v1/signup',{method:'POST',headers,body:JSON.stringify({email,password})});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.msg||j.error_description||'Registrace se nepodařila.');msg(registerStatus,j.user?'Účet byl vytvořen. Zkontrolujte e-mail pro potvrzení.':'Registrace proběhla. Zkontrolujte e-mail pro potvrzení.',true)}catch(err){msg(registerStatus,err.message)}});
+ const loginForm=document.querySelector('#loginForm'), loginStatus=document.querySelector('#loginStatus');
+ loginForm.addEventListener('submit',async e=>{e.preventDefault();if(!loginForm.reportValidity())return;const email=document.querySelector('#loginEmail').value.trim(),password=document.querySelector('#loginPassword').value;msg(loginStatus,'Přihlašuji…');try{const r=await fetch(URL+'/auth/v1/token?grant_type=password',{method:'POST',headers,body:JSON.stringify({email,password})});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error_description||j.msg||'Přihlášení se nepodařilo.');sessionStorage.setItem('plotao.auth',JSON.stringify({access_token:j.access_token,refresh_token:j.refresh_token,user:j.user}));msg(loginStatus,'Přihlášení proběhlo úspěšně.',true)}catch(err){msg(loginStatus,err.message)}});
+ document.querySelector('#forgotPassword').addEventListener('click',async e=>{e.preventDefault();const email=document.querySelector('#loginEmail').value.trim();if(!email){msg(loginStatus,'Nejprve zadejte e-mail.');return}msg(loginStatus,'Odesílám odkaz pro obnovu hesla…');try{const r=await fetch(URL+'/auth/v1/recover',{method:'POST',headers,body:JSON.stringify({email})});if(!r.ok)throw new Error('Obnovu hesla se nepodařilo odeslat.');msg(loginStatus,'Odkaz pro obnovu hesla byl odeslán na e-mail.',true)}catch(err){msg(loginStatus,err.message)}});
+})();
+</script>
 </body>
 </html>
