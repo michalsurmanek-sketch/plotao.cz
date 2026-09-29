@@ -44,7 +44,7 @@
   // City and postcode autocomplete mirrors the calculator's map search.
   const placeInput = $('#placeInput'), placeSuggestions = $('#placeSuggestions');
   if (placeInput && placeSuggestions) {
-    const normalizePlace = value => String(value || '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().trim();
+    const normalizePlace = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
     const placeCities = [
       ['Uherské Hradiště','686 01'],['Uherský Brod','688 01'],['Uherský Ostroh','687 24'],['Zlín','760 01'],
       ['Praha','110 00'],['Brno','602 00'],['Ostrava','702 00'],['Olomouc','779 00'],
@@ -87,13 +87,13 @@
       const queryText=placeInput.value.trim();
       if (queryText.length < 2) { hidePlaceSuggestions(); return; }
       const normalized=normalizePlace(queryText);
-      const local=placeCities.filter(item=>normalizePlace(item.city).startsWith(normalized) || item.postcode.replace(/\\s/g,'').startsWith(normalized.replace(/\\s/g,'')));
+      const local=placeCities.filter(item=>normalizePlace(item.city).startsWith(normalized) || item.postcode.replace(/\s/g,'').startsWith(normalized.replace(/\s/g,'')));
       if (local.length) { renderPlaceSuggestions(local); return; }
       const token=placeRequest;
       placeTimer=setTimeout(async () => {
         placeController=new AbortController();
         try {
-          const field=/^\\d[\\d ]*$/.test(queryText) ? 'postalcode' : 'city';
+          const field=/^\d[\d ]*$/.test(queryText) ? 'postalcode' : 'city';
           const url='https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&countrycodes=cz&limit=8&'+field+'='+encodeURIComponent(queryText);
           const response=await fetch(url,{signal:placeController.signal});
           if (!response.ok) throw new Error('search');
