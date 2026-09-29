@@ -13,3 +13,5 @@ footer.foot{max-width:none;width:100%;margin:45px 0 0;padding:27px 17px;display:
 .place-suggestions button:last-of-type{border-bottom:0}
 .place-suggestions button:hover,.place-suggestions button:focus-visible{background:#eef7f1;outline:0}
 .place-suggestions .place-message{margin:0;padding:11px 14px;color:var(--muted);font-size:13px}
+
+.slab-options{margin:10px 0 6px 30px;padding:13px 14px;border:1px solid #dce8de;border-radius:10px;background:#f5faf6}.slab-options[hidden]{display:none}.slab-options label{font-weight:600}.slab-options select{margin-top:6px}
