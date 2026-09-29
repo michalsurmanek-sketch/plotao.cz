@@ -1,7 +1,7 @@
 (()=>{
   window.PLOTAO_LEAD_TRANSPORT_CONFIG=Object.freeze({
-    enabled:false,
-    endpoint:'',
-    allowedOrigins:[]
+    enabled:true,
+    endpoint:'https://jmukoccjqykyoqsypuwb.supabase.co/functions/v1/submit-lead',
+    allowedOrigins:['https://plotao.cz','https://www.plotao.cz']
   });
 })();
