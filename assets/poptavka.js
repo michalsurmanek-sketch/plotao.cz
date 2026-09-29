@@ -40,6 +40,80 @@
     $('#summaryImage').alt=k?names[k]:'Inspirace pro váš nový plot';
     form.querySelectorAll('[name=fenceType]').forEach(el=>el.required=!val('extraType'));
   }
+
+  // City and postcode autocomplete mirrors the calculator's map search.
+  const placeInput = $('#placeInput'), placeSuggestions = $('#placeSuggestions');
+  if (placeInput && placeSuggestions) {
+    const normalizePlace = value => String(value || '').normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().trim();
+    const placeCities = [
+      ['Uherské Hradiště','686 01'],['Uherský Brod','688 01'],['Uherský Ostroh','687 24'],['Zlín','760 01'],
+      ['Praha','110 00'],['Brno','602 00'],['Ostrava','702 00'],['Olomouc','779 00'],
+      ['Plzeň','301 00'],['Liberec','460 01'],['České Budějovice','370 01'],['Hradec Králové','500 02'],
+      ['Pardubice','530 02'],['Jihlava','586 01'],['Karlovy Vary','360 01'],['Ústí nad Labem','400 01']
+    ].map(([city, postcode]) => ({label: city + ', ' + postcode, city, postcode}));
+    let placeTimer = 0, placeRequest = 0, placeController = null;
+    const hidePlaceSuggestions = () => { placeSuggestions.replaceChildren(); placeSuggestions.classList.remove('show'); placeInput.setAttribute('aria-expanded','false'); };
+    const renderPlaceSuggestions = (items, message = '') => {
+      placeSuggestions.replaceChildren();
+      items.forEach((item, index) => {
+        const option = document.createElement('button');
+        option.type = 'button'; option.role = 'option'; option.tabIndex = -1;
+        option.setAttribute('aria-selected','false'); option.textContent = item.label;
+        option.addEventListener('keydown', event => {
+          if (event.key === 'ArrowDown') { event.preventDefault(); placeSuggestions.querySelectorAll('button')[index + 1]?.focus(); }
+          if (event.key === 'ArrowUp') { event.preventDefault(); index ? placeSuggestions.querySelectorAll('button')[index - 1]?.focus() : placeInput.focus(); }
+          if (event.key === 'Escape') { hidePlaceSuggestions(); placeInput.focus(); }
+        });
+        option.addEventListener('click', () => {
+          clearTimeout(placeTimer); placeRequest++; if (placeController) placeController.abort();
+          placeInput.value = item.label; hidePlaceSuggestions(); update(); placeInput.focus({preventScroll:true});
+          placeInput.dispatchEvent(new Event('change',{bubbles:true}));
+        });
+        placeSuggestions.appendChild(option);
+      });
+      if (message) { const note=document.createElement('p'); note.className='place-message'; note.textContent=message; placeSuggestions.appendChild(note); }
+      const visible = !!items.length || !!message;
+      placeSuggestions.classList.toggle('show',visible); placeInput.setAttribute('aria-expanded',String(visible));
+    };
+    const cancelPlaceSearch = () => { clearTimeout(placeTimer); placeRequest++; if (placeController) placeController.abort(); };
+    const placeFromResult = result => {
+      const address = result.address || {};
+      const city = address.city || address.town || address.village || address.municipality;
+      if (!city) return null;
+      return {label:[city,address.postcode,address.state].filter(Boolean).join(', ')};
+    };
+    placeInput.addEventListener('input', () => {
+      cancelPlaceSearch();
+      const queryText=placeInput.value.trim();
+      if (queryText.length < 2) { hidePlaceSuggestions(); return; }
+      const normalized=normalizePlace(queryText);
+      const local=placeCities.filter(item=>normalizePlace(item.city).startsWith(normalized) || item.postcode.replace(/\\s/g,'').startsWith(normalized.replace(/\\s/g,'')));
+      if (local.length) { renderPlaceSuggestions(local); return; }
+      const token=placeRequest;
+      placeTimer=setTimeout(async () => {
+        placeController=new AbortController();
+        try {
+          const field=/^\\d[\\d ]*$/.test(queryText) ? 'postalcode' : 'city';
+          const url='https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&countrycodes=cz&limit=8&'+field+'='+encodeURIComponent(queryText);
+          const response=await fetch(url,{signal:placeController.signal});
+          if (!response.ok) throw new Error('search');
+          const rows=await response.json();
+          if (token!==placeRequest) return;
+          const unique=[...new Map(rows.map(placeFromResult).filter(Boolean).map(item=>[item.label,item])).values()];
+          renderPlaceSuggestions(unique,unique.length?'':'Obec nenalezena. Zkuste celý název nebo PSČ.');
+        } catch(error) {
+          if (token===placeRequest && error.name!=='AbortError') renderPlaceSuggestions([],'Vyhledávání není dostupné. Zkuste celý název obce nebo PSČ.');
+        }
+      },400);
+    });
+    placeInput.addEventListener('keydown',event=>{
+      if(event.key==='Escape') hidePlaceSuggestions();
+      if(event.key==='ArrowDown'){const first=placeSuggestions.querySelector('button');if(first){event.preventDefault();first.focus();}}
+      if(event.key==='Enter' && placeSuggestions.classList.contains('show')){const first=placeSuggestions.querySelector('button');if(first){event.preventDefault();first.click();}}
+    });
+    placeInput.addEventListener('blur',()=>setTimeout(()=>{if(!placeSuggestions.contains(document.activeElement))hidePlaceSuggestions();},120));
+  }
+
   form.addEventListener('input',update); form.addEventListener('change',update);
   form.querySelectorAll('[name=fenceType]').forEach(el=>el.addEventListener('change',()=>{set('extraType','');$('#otherType').value='';update();}));
   $('#otherType').addEventListener('change',e=>{set('extraType',e.target.value);if(e.target.value)form.querySelectorAll('[name=fenceType]').forEach(el=>el.checked=false);update();});
