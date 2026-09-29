@@ -132,7 +132,7 @@
   const readFile = file => new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve({name:file.name,type:file.type,data:r.result});r.onerror=()=>reject(new Error('Soubor nelze přečíst.'));r.readAsDataURL(file);});
   form.addEventListener('submit',async e=>{
     e.preventDefault();update();if(!form.reportValidity())return;
-    const button=$('#downloadQuote');button.disabled=true;$('#status').textContent='Připravuji poptávku…';
+    const button=$('#downloadQuote');button.disabled=true;$('#status').textContent='Odesílám poptávku…';return;
     try{
       const attachments=await Promise.all(files.map(readFile));
       const rows=[['Místo realizace',val('place')],['Typ plotu',names[kind()]],['Rozsah dodávky',val('scope')],['Barva / povrch',val('color')],['Varianta / dekor',val('variant')],['Podhrabové desky',form.elements.slab.checked?'Ano':'Ne'],['Výška podhrabových desek',form.elements.slab.checked?val('slabHeight'):'—'],['Soukromí',form.elements.privacy.checked?'Ano':'Ne'],['Brána',val('gate')],['Šířka brány',val('gate')==='Bez brány'?'—':val('gateWidth')?val('gateWidth')+' m':'Upřesním později'],['Ovládání brány',val('gate')==='Bez brány'?'—':val('drive')],['Počet branek',val('wickets')],['Terén',val('terrain')],['Příjezd techniky',val('access')],['Demontáž a odvoz',form.elements.demolition.checked?'Ano':'Ne'],['Podloží a překážky',val('obstacles')],['Termín',val('timing')],['Jméno',val('name')],['Telefon',val('phone')],['E-mail',val('email')]];
