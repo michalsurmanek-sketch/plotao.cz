@@ -56,7 +56,7 @@ ok(sql.includes('alter table public.plotao_leads enable row level security')&&sq
 ok(sql.includes('grant select, insert, update on table public.plotao_leads to service_role'),'server role must have only required lead-table operations');
 ok(sql.includes('Raw IP addresses are never stored'),'rate-limit schema must document no raw IP retention');
 ok(deno.imports?.['@supabase/server']==='npm:@supabase/server@1.6.0','Supabase server dependency must be exactly pinned');
-ok(browserConfig.includes('enabled:true')&&browserConfig.includes("endpoint:'https://jmukoccjqykyoqsypuwb.supabase.co/functions/v1/submit-lead'")&&browserConfig.includes("allowedOrigins:['https://plotao.cz']"),'production browser transport must stay explicitly enabled only for the verified Supabase endpoint and its approved site origin');
+ok(browserConfig.includes('enabled:true')&&browserConfig.includes("endpoint:'https://jmukoccjqykyoqsypuwb.supabase.co/functions/v1/submit-lead'")&&browserConfig.includes("allowedOrigins:['https://jmukoccjqykyoqsypuwb.supabase.co']"),'production browser transport must allow only the verified Supabase endpoint origin; site-origin filtering belongs to the Edge Function');
 
 if(fail.length){console.error('Lead backend source checks failed:\n- '+fail.join('\n- '));process.exit(1)}
 console.log('Lead backend source checks OK: geometry validation, RLS, exact CORS, body limits, multi-key hashed rate limiting, server receipt timestamps, pinned dependency and disabled browser activation are protected');

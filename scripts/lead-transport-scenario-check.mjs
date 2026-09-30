@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import {createRequire} from 'node:module';
+import vm from 'node:vm';
 const require=createRequire(import.meta.url),core=require('../assets/lead-transport-core-v1.js');
 const fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 const payload={schemaVersion:2,mode:'lead',name:'Jan Novák',phone:'+420777123456',email:'jan@example.cz',place:'Praha',note:'Test'};
@@ -28,7 +29,10 @@ r=core.prepare({...payload,schemaVersion:1},{enabled:true,endpoint:'https://api.
 ok(r.ok===false&&r.code==='payload','unexpected payload schema must be blocked before network access');
 
 const adapter=fs.readFileSync('assets/lead-transport-v1.js','utf8'),config=fs.readFileSync('assets/lead-transport-config-v1.js','utf8'),safety=fs.readFileSync('assets/lead-safety-v1.js','utf8'),manifest=fs.readFileSync('scripts/pages-manifest.mjs','utf8'),index=fs.readFileSync('index.html','utf8');
-ok(config.includes('enabled:true')&&config.includes("endpoint:'https://jmukoccjqykyoqsypuwb.supabase.co/functions/v1/submit-lead'")&&config.includes("allowedOrigins:['https://plotao.cz']"),'production transport config must ship enabled with the approved Supabase endpoint and backend-approved site origin');
+ok(config.includes('enabled:true')&&config.includes("endpoint:'https://jmukoccjqykyoqsypuwb.supabase.co/functions/v1/submit-lead'")&&config.includes("allowedOrigins:['https://jmukoccjqykyoqsypuwb.supabase.co']"),'production transport config must allow the Supabase endpoint origin');
+const productionWindow={};vm.runInNewContext(config,{window:productionWindow});
+const productionPrepare=core.prepare({...payload,mode:'help'},productionWindow.PLOTAO_LEAD_TRANSPORT_CONFIG);
+ok(productionPrepare.ok===true&&productionPrepare.endpoint==='https://jmukoccjqykyoqsypuwb.supabase.co/functions/v1/submit-lead','production help request must pass the same origin check used by the browser transport');
 ok(adapter.includes('core.prepare(payload,config())')&&adapter.includes('fetch(prepared.endpoint'),'browser transport must fetch only a core-approved endpoint');
 ok(adapter.includes('new AbortController()')&&adapter.includes('setTimeout(()=>controller.abort(),10000)'),'browser transport must enforce a finite network timeout');
 ok(adapter.includes("body?.error||'http'")&&adapter.includes("AbortError'?'timeout':'network'"),'browser transport must preserve backend rejection codes and distinguish timeout from network failure');
