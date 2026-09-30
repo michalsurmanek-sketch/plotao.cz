@@ -163,7 +163,7 @@
 <section class="view" id="leads"><div class="welcome"><div><h2>Poptávky</h2><p>Jedna fronta poptávek pro celou Českou republiku. Každá žádost má stav, odpovědnou osobu a další krok.</p></div><button class="action">Export CSV</button></div><p class="workflow-note">Postup: nová → prověřit → čekáme na zákazníka / připravuje se nabídka → nabídka odeslána → čekáme na rozhodnutí → objednáno nebo uzavřeno.</p>
 <div class="lead-filters"><input id="leadSearch" class="search" placeholder="Hledat kontakt, obec, PSČ…"><select id="leadStatus"><option value="">Všechny stavy</option><option value="new">Nové</option><option value="review">Prověřit</option><option value="waiting_customer">Čekáme na zákazníka</option><option value="preparing_quote">Připravuje se nabídka</option><option value="quote_sent">Nabídka odeslána</option><option value="waiting_decision">Čekáme na rozhodnutí</option><option value="ordered">Objednáno</option><option value="partner_assigned">Předáno partnerovi</option><option value="completed">Vyřízeno</option><option value="closed">Uzavřeno bez realizace</option></select><select id="leadRegion"><option value="">Celá ČR · všechny kraje</option><option>Hlavní město Praha</option><option>Středočeský kraj</option><option>Jihočeský kraj</option><option>Plzeňský kraj</option><option>Karlovarský kraj</option><option>Ústecký kraj</option><option>Liberecký kraj</option><option>Královéhradecký kraj</option><option>Pardubický kraj</option><option>Kraj Vysočina</option><option>Jihomoravský kraj</option><option>Olomoucký kraj</option><option>Zlínský kraj</option><option>Moravskoslezský kraj</option></select></div>
 <div class="panel table-wrap"><table class="table"><thead><tr><th>Kontakt a zadání</th><th>Oblast</th><th>Typ / rozsah</th><th>Délka</th><th>Stav</th><th>Další krok</th><th>Přijato</th><th>Detail</th></tr></thead><tbody id="leadRows"></tbody></table></div></section>
-<section class="view" id="companies"><div class="welcome"><div><h2>Partnerské firmy</h2><p>Evidujte ověřené firmy, jejich kraje a typy oplocení. Předávání poptávek pak nabídne jen odpovídající partnery.</p></div><button class="action" type="button" data-new-partner>+ Registrovat firmu</button></div><div class="partner-summary"><span class="partner-count" id="partnerCount">0</span><span>partnerských firem v evidenci</span><span class="partner-summary-note">K předání se zobrazí jen aktivní firma s odpovídajícím krajem a typem plotu.</span></div><div class="panel partner-form-panel" id="partnerFormPanel" hidden><div class="panel-head"><h3 id="partnerFormTitle">Registrace partnerské firmy</h3><button type="button" class="link" data-cancel-partner>Zavřít</button></div><form id="partnerForm"><input type="hidden" name="partner_id"><div class="partner-fields"><label>Název firmy<input name="company_name" required maxlength="160" placeholder="Např. Ploty Novák s.r.o."></label><label>Kontaktní osoba<input name="contact_name" maxlength="120" placeholder="Jméno kontaktu"></label><label>E-mail pro předání poptávek<input name="email" type="email" required maxlength="254" placeholder="firma@example.cz"></label><label>Telefon<input name="phone" type="tel" maxlength="40" placeholder="+420…"></label><label>IČO<input name="ico" inputmode="numeric" maxlength="8" placeholder="Volitelné"></label></div><fieldset class="partner-checks"><legend>Co firma nabízí?</legend><div class="check-grid" id="partnerServices"></div></fieldset><fieldset class="partner-checks"><legend>Kraje působnosti</legend><label class="nationwide"><input type="checkbox" data-all-regions> Celá Česká republika</label><div class="check-grid" id="partnerRegions"></div></fieldset><fieldset class="partner-checks"><legend>Typy oplocení</legend><div class="check-grid types" id="partnerTypes"></div></fieldset><div class="partner-form-actions"><button class="action" type="submit" id="partnerSubmit">Uložit firmu</button><button class="secondary" type="button" data-cancel-partner>Zrušit</button><span id="partnerFormStatus" role="status"></span></div></form></div><div class="panel table-wrap partner-table-wrap"><table class="table partner-table"><thead><tr><th>Firma a kontakt</th><th>Kraje</th><th>Typy oplocení</th><th>Služby</th><th>Stav</th><th>Správa</th></tr></thead><tbody id="partnerRows"><tr><td colspan="6" class="empty">Načítají se partnerské firmy…</td></tr></tbody></table></div></section><section class="view" id="prices"><div class="welcome"><div><h2>Ceníky</h2><p>Správa orientačních cen materiálu.</p></div><button class="action">+ Přidat položku</button></div><div class="panel empty">Ceníky budou načteny z centrální konfigurace.</div></section>
+<section class="view" id="companies"><div class="welcome"><div><h2>Partnerské firmy</h2><p>Evidujte ověřené firmy, jejich kraje a typy oplocení. Předávání poptávek pak nabídne jen odpovídající partnery.</p></div><button class="action" type="button" data-new-partner>+ Registrovat firmu</button></div><div class="partner-summary"><span class="partner-count" id="partnerCount">0</span><span>partnerských firem v evidenci</span><span class="partner-summary-note">K předání se zobrazí jen aktivní firma s odpovídajícím krajem a typem plotu.</span></div><div class="panel partner-form-panel" id="partnerFormPanel" hidden><div class="panel-head"><h3 id="partnerFormTitle">Registrace partnerské firmy</h3><button type="button" class="link" data-cancel-partner>Zavřít</button></div><form id="partnerForm"><input type="hidden" name="partner_id"><div class="partner-fields"><label>Název firmy<input name="company_name" required maxlength="160" placeholder="Např. Ploty Novák s.r.o."><small>Po ověření IČO se doplní název z ARES.</small></label><label>Kontaktní osoba<input name="contact_name" maxlength="120" placeholder="Jméno kontaktu"></label><label>E-mail pro předání poptávek<input name="email" type="email" required maxlength="254" placeholder="firma@example.cz"></label><label>Telefon<input name="phone" type="tel" maxlength="40" placeholder="+420…"></label><label>IČO<input name="ico" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="Zadejte IČO (volitelné)"><small id="icoStatus" role="status" aria-live="polite">IČO je volitelné. Po zadání ověříme firmu v ARES.</small></label></div><fieldset class="partner-checks"><legend>Co firma nabízí?</legend><div class="check-grid" id="partnerServices"></div></fieldset><fieldset class="partner-checks"><legend>Kraje působnosti</legend><label class="nationwide"><input type="checkbox" data-all-regions> Celá Česká republika</label><div class="check-grid" id="partnerRegions"></div></fieldset><fieldset class="partner-checks"><legend>Typy oplocení</legend><div class="check-grid types" id="partnerTypes"></div></fieldset><div class="partner-form-actions"><button class="action" type="submit" id="partnerSubmit">Uložit firmu</button><button class="secondary" type="button" data-cancel-partner>Zrušit</button><span id="partnerFormStatus" role="status"></span></div></form></div><div class="panel table-wrap partner-table-wrap"><table class="table partner-table"><thead><tr><th>Firma a kontakt</th><th>Kraje</th><th>Typy oplocení</th><th>Služby</th><th>Stav</th><th>Správa</th></tr></thead><tbody id="partnerRows"><tr><td colspan="6" class="empty">Načítají se partnerské firmy…</td></tr></tbody></table></div></section><section class="view" id="prices"><div class="welcome"><div><h2>Ceníky</h2><p>Správa orientačních cen materiálu.</p></div><button class="action">+ Přidat položku</button></div><div class="panel empty">Ceníky budou načteny z centrální konfigurace.</div></section>
 <section class="view" id="locations"><div class="welcome"><div><h2>Lokality</h2><p>Přehled výběrů podle krajů a měst.</p></div></div><div class="panel empty">Přehled lokalit bude napojen na data kalkulátoru.</div></section>
 <section class="view" id="settings"><div class="welcome"><div><h2>Nastavení</h2><p>Provozní nastavení administrace.</p></div></div><div class="panel empty">Napojení účtu a oprávnění bude řešeno přes zabezpečené přihlášení.</div></section>
 <section class="view" id="emails"><div class="welcome"><div><h2>E-maily a upozornění</h2><p>Kontaktní zprávy a poptávky jsou ukládány do Supabase.</p></div></div><div class="panel"><h3>Aktuální stav</h3><p><b>Ukládání zpráv:</b> Aktivní</p><p><b>Zobrazení v administraci:</b> Aktivní</p><p><b>Automatické e-mailové upozornění:</b> Nepoužívá se — stejně jako na Gurmao.cz</p><p class="muted">Nové zprávy najdeš v sekci Poptávky. Pokud budeš chtít upozornění do e-mailu, doplníme e-mailovou službu.</p></div></section></div></main></div><footer><div class="foot-bottom"><span>© 2026 PLOTAO.cz</span></div></footer>
@@ -255,7 +255,48 @@ const save=e.target.closest('[data-save]');if(save){const row=document.querySele
 });
 document.addEventListener('change',async e=>{const sel=e.target.closest('[data-quick]');if(!sel)return;try{const x=await patch(sel.dataset.quick,{status:sel.value});leads=leads.map(v=>v.id===x.id?x:v);render()}catch{authBox('Stav se nepodařilo uložit. Přihlaste se znovu.')}});
 document.querySelector('#admLogin').onclick=async()=>{const m=document.querySelector('#admMsg');m.textContent='Ověřuji přihlášení…';try{const r=await fetch(AUTH,{method:'POST',headers:{apikey:K,'Content-Type':'application/json'},body:JSON.stringify({email:document.querySelector('#admEmail').value,password:document.querySelector('#admPass').value})}),j=await r.json();if(!r.ok||!j.access_token)throw Error('Přihlášení se nepodařilo. Ověřte e-mail, heslo a přístup správce.');sessionStorage.setItem('plotao.auth',JSON.stringify(j));await load(j.access_token)}catch(e){m.textContent=e.message}};
+function validIcoChecksum(value){
+ const digits=String(value||'').replace(/\D/g,'');
+ if(!/^\d{8}$/.test(digits))return false;
+ const n=[...digits].map(Number);
+ const sum=n[0]*8+n[1]*7+n[2]*6+n[3]*5+n[4]*4+n[5]*3+n[6]*2;
+ const mod=sum%11,check=mod===0?1:mod===1?0:11-mod;
+ return check===n[7];
+}
+let icoTimer=0,icoRequest=0;
+async function lookupIco(value){
+ const input=document.querySelector('#partnerForm input[name="ico"]'),status=document.querySelector('#icoStatus');
+ if(!input||!status)return;
+ const ico=String(value||'').replace(/\D/g,'');
+ input.dataset.aresValid='';input.dataset.aresIco='';
+ if(!ico){status.textContent='IČO je volitelné. Po zadání ověříme firmu v ARES.';return}
+ if(ico.length!==8){status.textContent=ico.length<8?'Doplňte osm číslic IČO.':'IČO musí obsahovat osm číslic.';return}
+ if(!validIcoChecksum(ico)){status.textContent='Kontrolní číslice nesouhlasí. Zkontrolujte zadané IČO.';return}
+ const request=++icoRequest;status.textContent='Ověřuji IČO v registru ARES…';
+ try{
+  const response=await fetch('https://ares.gov.cz/ekonomicke-subjekty-v-be/rest/ekonomicke-subjekty/'+encodeURIComponent(ico),{headers:{Accept:'application/json'}});
+  const data=await response.json().catch(()=>({}));
+  if(request!==icoRequest||input.value.replace(/\D/g,'')!==ico)return;
+  if(response.status===404){status.textContent='Toto IČO ARES nenašel. Ověřte, zda je správně.';return}
+  if(!response.ok){status.textContent='ARES nyní neodpovídá. Registraci zkuste uložit později.';return}
+  const state=data.seznamRegistraci?.stavZdrojeRos;
+  if(String(data.ico)!==ico||state==='NEAKTIVNI'||state==='ZANIKLY'){
+   status.textContent='IČO je v ARES neaktivní. Firmu nelze uložit s tímto IČO.';return
+  }
+  input.dataset.aresValid='true';input.dataset.aresIco=ico;
+  const company=document.querySelector('#partnerForm input[name="company_name"]');
+  if(company&&(!company.value.trim()||company.dataset.aresFilled==='true')){
+   company.value=data.obchodniJmeno||company.value;company.dataset.aresFilled='true';
+  }
+  status.textContent='✓ Platné IČO · '+(data.obchodniJmeno||'firma nalezena v ARES')+(state==='AKTIVNI'?' · aktivní subjekt':' · záznam nalezen');
+ }catch{
+  if(request===icoRequest)status.textContent='ARES není dostupný. Ověření se nezdařilo; zkuste to znovu.';
+ }
+}
 function initPartnerForm(){
+ const icoInput=document.querySelector('#partnerForm input[name="ico"]');
+ icoInput?.addEventListener('input',()=>{clearTimeout(icoTimer);const company=document.querySelector('#partnerForm input[name="company_name"]');if(company&&company.dataset.aresFilled==='true')company.dataset.aresFilled='';icoTimer=setTimeout(()=>lookupIco(icoInput.value),450)});
+ icoInput?.addEventListener('blur',()=>{clearTimeout(icoTimer);if(icoInput.value.trim())lookupIco(icoInput.value)});
  const regions=document.querySelector('#partnerRegions'),types=document.querySelector('#partnerTypes'),services=document.querySelector('#partnerServices');
  if(regions)regions.innerHTML=REGIONS.map((v,i)=>'<label><input type="checkbox" name="regions" value="'+esc(v)+'"> '+esc(v)+'</label>').join('');
  if(types)types.innerHTML=FENCE_TYPES.map(v=>'<label><input type="checkbox" name="fence_types" value="'+esc(v)+'"> '+esc(v)+'</label>').join('');
@@ -263,7 +304,7 @@ function initPartnerForm(){
 }
 function clearPartnerForm(){
  const form=document.querySelector('#partnerForm');if(!form)return;
- form.reset();form.elements.partner_id.value='';document.querySelector('#partnerFormTitle').textContent='Registrace partnerské firmy';document.querySelector('#partnerSubmit').textContent='Uložit firmu';document.querySelector('#partnerFormStatus').textContent='';
+ form.reset();form.elements.partner_id.value='';form.elements.ico.dataset.aresValid='';form.elements.ico.dataset.aresIco='';form.elements.company_name.dataset.aresFilled='';document.querySelector('#icoStatus').textContent='IČO je volitelné. Po zadání ověříme firmu v ARES.';document.querySelector('#partnerFormTitle').textContent='Registrace partnerské firmy';document.querySelector('#partnerSubmit').textContent='Uložit firmu';document.querySelector('#partnerFormStatus').textContent='';
 }
 function fillPartnerForm(p){
  const form=document.querySelector('#partnerForm');if(!form)return;
@@ -271,6 +312,7 @@ function fillPartnerForm(p){
  form.querySelectorAll('input[name="regions"]').forEach(e=>e.checked=(p.regions||[]).includes(e.value));
  form.querySelectorAll('input[name="fence_types"]').forEach(e=>e.checked=(p.fence_types||[]).includes(e.value));
  form.querySelectorAll('input[name="service_types"]').forEach(e=>e.checked=(p.service_types||['material_only']).includes(e.value));
+ if(p.ico)lookupIco(p.ico);
  const all= form.querySelector('[data-all-regions]');if(all)all.checked=REGIONS.every(v=>(p.regions||[]).includes(v));
  document.querySelector('#partnerFormTitle').textContent='Upravit partnerskou firmu';document.querySelector('#partnerSubmit').textContent='Uložit změny';
  document.querySelector('#partnerFormPanel').hidden=false;document.querySelector('#partnerFormPanel').scrollIntoView({behavior:'smooth',block:'start'});
@@ -288,6 +330,7 @@ document.addEventListener('click',async e=>{
 document.querySelector('#partnerForm')?.addEventListener('submit',async e=>{
  e.preventDefault();const form=e.currentTarget,status=document.querySelector('#partnerFormStatus'),id=form.elements.partner_id.value;
  const partner={company_name:form.elements.company_name.value.trim(),contact_name:form.elements.contact_name.value.trim(),email:form.elements.email.value.trim(),phone:form.elements.phone.value.trim(),ico:form.elements.ico.value.trim(),regions:[...form.querySelectorAll('input[name="regions"]:checked')].map(i=>i.value),fence_types:[...form.querySelectorAll('input[name="fence_types"]:checked')].map(i=>i.value),service_types:[...form.querySelectorAll('input[name="service_types"]:checked')].map(i=>i.value),active:id?(partners.find(p=>p.id===id)?.active!==false):true};
+ if(partner.ico&&(form.elements.ico.dataset.aresValid!=='true'||form.elements.ico.dataset.aresIco!==partner.ico)){status.textContent='IČO nejdřív ověřte v ARES. Vyčkejte na potvrzení platného IČO.';lookupIco(partner.ico);return}
  if(!partner.regions.length){status.textContent='Vyberte alespoň jeden kraj.';return}
  if(!partner.fence_types.length){status.textContent='Vyberte alespoň jeden typ oplocení.';return}
  if(!partner.service_types.length){status.textContent='Vyberte alespoň jednu službu.';return}
