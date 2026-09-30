@@ -55,6 +55,7 @@ create table if not exists public.plotao_partners (
   email text not null check (char_length(email) between 3 and 254),
   phone text not null default '' check (char_length(phone) <= 40),
   ico text not null default '' check (char_length(ico) <= 20),
+  registered_address text not null default '' check (char_length(registered_address) <= 255),
   regions text[] not null default '{}',
   fence_types text[] not null default '{}',
   service_types text[] not null default ARRAY['material_only']::text[] check (
