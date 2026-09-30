@@ -7,6 +7,7 @@ const allowed=req=>{const t=req.headers.get("authorization")?.replace(/^Bearer\s
 const apiHeaders=key=>({apikey:key,Authorization:"Bearer "+key});
 const leadUrl=(base,id,select="*")=>base+"/rest/v1/plotao_leads?id=eq."+encodeURIComponent(id)+"&select="+encodeURIComponent(select);
 const PARTNER_REGIONS=["Hlavní město Praha","Středočeský kraj","Jihočeský kraj","Plzeňský kraj","Karlovarský kraj","Ústecký kraj","Liberecký kraj","Královéhradecký kraj","Pardubický kraj","Kraj Vysočina","Jihomoravský kraj","Olomoucký kraj","Zlínský kraj","Moravskoslezský kraj"];
+const PARTNER_SERVICE_TYPES=["installation_material","installation_only","material_only"];
 const PARTNER_TYPES=["Panelový plot","Pletivový plot","Betonový plot","Gabionový plot","Hliníkový plot","Kovový plot","Zděný plot","Mobilní oplocení","Živý plot","Všechny typy"];
 const norm=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]/g,"");
 const validId=v=>typeof v==="string"&&/^[0-9a-f-]{36}$/i.test(v);
@@ -17,9 +18,10 @@ function cleanPartner(v){
  const company_name=String(v.company_name||"").trim().slice(0,160),contact_name=String(v.contact_name||"").trim().slice(0,120),email=String(v.email||"").trim().toLowerCase(),phone=String(v.phone||"").trim().slice(0,40),ico=String(v.ico||"").replace(/\s/g,"").slice(0,20);
  const regions=Array.isArray(v.regions)?[...new Set(v.regions.filter(x=>PARTNER_REGIONS.includes(x)))]:[];
  const fence_types=Array.isArray(v.fence_types)?[...new Set(v.fence_types.filter(x=>PARTNER_TYPES.includes(x)))]:[];
- if(company_name.length<2||!/^\S+@\S+\.\S+$/.test(email)||email.length>254||!regions.length||!fence_types.length)return null;
+ const service_types=Array.isArray(v.service_types)?[...new Set(v.service_types.filter(x=>PARTNER_SERVICE_TYPES.includes(x)))]:[];
+ if(company_name.length<2||!/^\S+@\S+\.\S+$/.test(email)||email.length>254||!regions.length||!fence_types.length||!service_types.length)return null;
  if(ico&&!/^\d{8}$/.test(ico))return null;
- return{company_name,contact_name,email,phone,ico,regions,fence_types,active:v.active!==false,updated_at:new Date().toISOString()};
+ return{company_name,contact_name,email,phone,ico,regions,fence_types,service_types,active:v.active!==false,updated_at:new Date().toISOString()};
 }
 function regionForLead(lead){
  const value=String(lead.region||lead.payload?.region||"")+" "+String(lead.place||"")+" "+String(lead.payload?.placeFromCalculator||"");
@@ -83,6 +85,10 @@ Deno.serve(async req=>{
    const typeKnown=fenceType&&!["neupresneno","kalkulatorplotu","poraditsvyberem"].includes(norm(fenceType));
    const typeMatches=!typeKnown||partner.fence_types?.includes("Všechny typy")||(Array.isArray(partner.fence_types)&&partner.fence_types.some(t=>norm(fenceType).includes(norm(t))||norm(t).includes(norm(fenceType))));
    if(!typeMatches)return json({error:"partner_type_mismatch"},409);
+   const scope=String(lead.payload?.scopeValue||"material"),services=Array.isArray(partner.service_types)?partner.service_types:["material_only"];
+   const installNeeded=scope==="turnkey"||scope==="installation",materialNeeded=scope!=="installation";
+   const serviceMatches=(!installNeeded||services.includes("installation_material")||services.includes("installation_only"))&&(!materialNeeded||services.includes("installation_material")||services.includes("material_only"));
+   if(!serviceMatches)return json({error:"partner_service_mismatch"},409);
    if(!lead.email&&!lead.phone)return json({error:"lead_has_no_contact"},409);
    const active=await fetch(base+"/rest/v1/plotao_lead_referrals?select=id&lead_id=eq."+encodeURIComponent(b.id)+"&status=in.(sending,sent,accepted)",{headers:apiHeaders(key)});
    if(!active.ok)return json({error:"referral_read_failed"},active.status);
