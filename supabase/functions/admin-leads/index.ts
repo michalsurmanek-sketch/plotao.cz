@@ -118,7 +118,7 @@ Deno.serve(async req=>{
     "Požadovaný termín: "+(job.planned_start_at?new Date(job.planned_start_at).toLocaleDateString("cs-CZ"):"bude domluven"),
     "Poznámka: "+(job.note||lead.note||"bez poznámky")
    ];
-   const siteUrl=(Deno.env.get("PLOTAO_SITE_URL")?.trim()||"https://plotao.cz").replace(/\/$/,""),responseUrl=siteUrl+"/partner-odpoved.html?id="+encodeURIComponent(referral.id)+"&token="+encodeURIComponent(responseToken);
+   const siteUrl=(Deno.env.get("PLOTAO_SITE_URL")?.trim()||"https://plotao.cz").replace(/\/$/,""),responseUrl=siteUrl+"/partner-odpoved.html#id="+encodeURIComponent(referral.id)+"&token="+encodeURIComponent(responseToken);
    const message=["Dobrý den, "+(partner.contact_name||""),"","PLOTAO.cz vám předává přijatou zakázku k potvrzení.",...params,"","Kontakt na zákazníka:","Jméno: "+(customer.full_name||lead.name||"neuvedeno"),"Telefon: "+(customer.phone||lead.phone||"neuveden"),"E-mail: "+(customer.email||lead.email||"neuveden"),"","Zákazník souhlasil s předáním kontaktu partnerské firmě PLOTAO.cz.","","Potvrzení zakázky:",responseUrl,"","Odkaz je jednorázový. Otevřete jej a výslovně potvrďte přijetí nebo odmítnutí zakázky.","","PLOTAO.cz","https://plotao.cz"].join("\n");
    const resendKey=Deno.env.get("RESEND_API_KEY")?.trim();
    if(!resendKey){await fetch(base+"/rest/v1/plotao_job_referrals?id=eq."+encodeURIComponent(referral.id),{method:"PATCH",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({status:"failed",error_code:"resend_not_configured",updated_at:new Date().toISOString()})});return json({error:"resend_not_configured"},503)}
