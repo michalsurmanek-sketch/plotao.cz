@@ -33,7 +33,11 @@ async function load(t){
  box.style.display='none';render();renderPartners();
  window.dispatchEvent(new CustomEvent('plotao:admin-data',{detail:{leads}}));
  document.querySelector('#statLeads').textContent=leads.filter(x=>x.status==='new').length;
- const recent=document.querySelector('#dashboard .list');
+ const statusBox=document.querySelector('#dashboardStatuses');
+ const stateRows=Object.entries(statuses).map(([key,label])=>({key,label,count:leads.filter(x=>x.status===key).length})).filter(x=>x.count>0);
+ const waitingPartner=referrals.filter(x=>x.status==='sent').length;
+ if(statusBox)statusBox.innerHTML=(stateRows.map(x=>'<div class="lead"><b>'+esc(x.label)+'</b><span class="badge '+(x.key==='new'?'new':x.key==='completed'?'closed':'contacted')+'">'+x.count+'</span></div>').join('')+(waitingPartner?'<div class="lead"><b>Čeká na reakci partnera</b><span class="badge new">'+waitingPartner+'</span></div>':'')||'<div class="empty">Zatím nejsou žádné poptávky.</div>');
+ const recent=document.querySelector('#dashboard .grid .panel:last-child .list');
  if(recent)recent.innerHTML=leads.slice(0,5).map(x=>'<div class="lead"><b>'+esc(x.name)+'</b><span class="badge new">'+esc(statuses[x.status]||x.status)+'</span><small>'+esc(x.place||'Lokalita neuvedena')+' · '+esc(x.mode==='help'?'Rada':x.mode==='partner'?'Partner':'Poptávka')+'</small></div>').join('')||'<div class="empty">Zatím žádné poptávky.</div>';
 }
 function leadRegion(x){const value=[x.region,x.payload?.region,x.place,x.payload?.placeFromCalculator].filter(Boolean).join(' ').toLocaleLowerCase('cs-CZ');return REGIONS.find(r=>value.includes(r.toLocaleLowerCase('cs-CZ')))||''}
