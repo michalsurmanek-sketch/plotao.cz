@@ -17,11 +17,11 @@
     let choice=form.querySelector('[data-partner-share]');
     if(!choice){
       choice=document.createElement('label');choice.className='partner-share-choice';choice.dataset.partnerShare='';
-      choice.innerHTML='<input type="checkbox" name="partnerShareConsent" value="yes"><span>Chci, aby PLOTAO předalo mou poptávku vhodné partnerské firmě. Firma dostane údaje potřebné ke kontaktování a přípravě nabídky. <a href="/ochrana-osobnich-udaju.html">Více o zpracování údajů</a>.</span>';
+      choice.innerHTML='<input type="checkbox" name="partnerShareConsent" value="yes"><span>Chci, aby PLOTAO předalo mou poptávku vhodné partnerské firmě. Firma dostane údaje potřebné ke kontaktování a přípravě nabídky. <a href="/ochrana-osobnich-udaju.html">Více o zpracování údajů</a>.</span>';choice.style.cssText='align-items:flex-start;gap:9px;margin:10px 0;padding:10px 12px;border:1px solid #dce8e1;border-radius:10px;background:#f7faf8;color:#43564c;font-size:12px;line-height:1.5';const shareInput=choice.querySelector('input');if(shareInput)shareInput.style.cssText='flex:0 0 16px;width:16px;height:16px;margin:2px 0 0;accent-color:#087443';const shareLink=choice.querySelector('a');if(shareLink)shareLink.style.cssText='color:#087443;font-weight:700';
       const notice=form.querySelector('#leadPrivacyNotice');
       if(notice)notice.insertAdjacentElement('afterend',choice);else form.querySelector('.send')?.insertAdjacentElement('afterend',choice);
     }
-    choice.hidden=form.dataset.mode==='partner';
+    choice.hidden=form.dataset.mode==='partner';choice.style.display=choice.hidden?'none':'flex';
     return choice;
   }
   function apply(mode){
