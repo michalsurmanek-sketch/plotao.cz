@@ -22,7 +22,7 @@
   const count=document.querySelector('#customerCount');if(count)count.textContent=filtered.length+' zákazníků · '+filtered.reduce((n,g)=>n+g.leads.length,0)+' poptávek';
   body.innerHTML=filtered.map(group=>{
    const latest=group.leads[0],email=group.leads.find(x=>x.email)?.email||'',phone=group.leads.find(x=>x.phone)?.phone||'',opened=expanded.has(group.key);
-   return '<tr><td><strong>'+esc(latest.name||'Zákazník')+'</strong></td><td>'+(email?'<a href="mailto:'+esc(email)+'">'+esc(email)+'</a>':'')+(phone?'<small><a href="tel:'+esc(phone)+'">'+esc(phone)+'</a></small>':'')+(!email&&!phone?'—':'')+'</td><td>'+group.leads.length+'</td><td>'+esc(received(latest.created_at))+'</td><td><button class="link" type="button" data-customer-toggle="'+esc(group.key)+'">'+(opened?'Skrýt':'Historie')+'</button></td></tr>'+(opened?leadDetail(group):'')
+   return '<tr><td data-label="Zákazník"><strong>'+esc(latest.name||'Zákazník')+'</strong></td><td data-label="Kontakt">'+(email?'<a href="mailto:'+esc(email)+'">'+esc(email)+'</a>':'')+(phone?'<small><a href="tel:'+esc(phone)+'">'+esc(phone)+'</a></small>':'')+(!email&&!phone?'—':'')+'</td><td data-label="Poptávky">'+group.leads.length+'</td><td data-label="Poslední aktivita">'+esc(received(latest.created_at))+'</td><td data-label="Historie"><button class="link" type="button" data-customer-toggle="'+esc(group.key)+'">'+(opened?'Skrýt':'Historie')+'</button></td></tr>'+(opened?leadDetail(group):'')
   }).join('')||'<tr><td colspan="5" class="empty">Zatím nejsou žádní zákazníci odpovídající hledání.</td></tr>'
  }
  document.querySelector('#customerSearch')?.addEventListener('input',render);
