@@ -13,13 +13,24 @@
   function sendText(mode){const live=transportReady();if(mode==='partner')return live?'Odeslat kontakt':'Zkontrolovat kontakt a zkopírovat';if(mode==='help')return live?'Odeslat žádost':'Zkontrolovat žádost a zkopírovat';return live?'Odeslat poptávku':'Zkontrolovat poptávku a zkopírovat'}
   function privacyText(mode){if(!transportReady())return'Formulář neodesílá na server; po kontrole podklady pouze zkopíruje.';const subject=mode==='partner'?'spolupráce':mode==='help'?'žádosti o radu':'poptávky';return'Údaje použijeme pouze k vyřízení '+subject+'. Bez souhlasu je nepoužijeme k marketingu.'}
   function ensurePrivacy(form){let p=$('#leadPrivacyNotice');const send=form.querySelector('.send');if(!p){p=document.createElement('p');p.id='leadPrivacyNotice';p.setAttribute('role','note');p.style.cssText='margin:10px 2px 0;color:#68786f;font-size:12px;line-height:1.45';send?.insertAdjacentElement('afterend',p)}if(send)send.setAttribute('aria-describedby','leadPrivacyNotice');return p}
+  function ensurePartnerShare(form){
+    let choice=form.querySelector('[data-partner-share]');
+    if(!choice){
+      choice=document.createElement('label');choice.className='partner-share-choice';choice.dataset.partnerShare='';
+      choice.innerHTML='<input type="checkbox" name="partnerShareConsent" value="yes"><span>Chci, aby PLOTAO předalo mou poptávku vhodné partnerské firmě. Firma dostane údaje potřebné ke kontaktování a přípravě nabídky. <a href="/ochrana-osobnich-udaju.html">Více o zpracování údajů</a>.</span>';
+      const notice=form.querySelector('#leadPrivacyNotice');
+      if(notice)notice.insertAdjacentElement('afterend',choice);else form.querySelector('.send')?.insertAdjacentElement('afterend',choice);
+    }
+    choice.hidden=form.dataset.mode==='partner';
+    return choice;
+  }
   function apply(mode){
-    const form=$('#form');if(!form)return;const place=form.elements.place,note=form.elements.note,send=form.querySelector('.send'),placeLabel=place?.closest('label'),noteLabel=note?.closest('label'),scope=scopeValue(),modalText=$('#modalText'),privacy=ensurePrivacy(form);
+    const form=$('#form');if(!form)return;form.dataset.mode=mode;ensurePartnerShare(form);const place=form.elements.place,note=form.elements.note,send=form.querySelector('.send'),placeLabel=place?.closest('label'),noteLabel=note?.closest('label'),scope=scopeValue(),modalText=$('#modalText'),privacy=ensurePrivacy(form);
     if(mode==='partner'){if(modalText)modalText.textContent='Napište kontakt a oblast, ve které montujete ploty.';labelText(placeLabel,'Oblast působnosti');if(place){place.placeholder='Kraj, okres nebo města';place.required=true;place.minLength=2}labelText(noteLabel,'Poznámka / typy plotů');if(note){note.required=false;note.minLength=0}}
     else if(mode==='help'){if(modalText)modalText.textContent='Napište, s čím potřebujete poradit. Výpočet plotu nemusíte dokončit.';labelText(placeLabel,'Obec / PSČ (volitelné)');if(place){place.placeholder='Obec nebo PSČ';place.required=false;place.minLength=0}labelText(noteLabel,'S čím potřebujete poradit');if(note){note.required=true;note.minLength=5;note.placeholder='Stručně popište svůj dotaz'}}
     else{if(modalText)modalText.textContent=scope==='material'?'Kontakt spojíme s aktuální konfigurací kalkulátoru.':'Kontakt spojíme s aktuální konfigurací. Pro dopravu nebo realizaci potřebujeme obec nebo PSČ.';labelText(placeLabel,scope==='material'?'Obec / PSČ (volitelné)':'Obec / PSČ');if(place){place.placeholder='Obec nebo PSČ';place.required=scope==='delivery'||scope==='turnkey';place.minLength=place.required?2:0}labelText(noteLabel,'Poznámka');if(note){note.required=false;note.minLength=0;note.placeholder=''}}
     if(send){send.textContent=sendText(mode);send.title=transportReady()?'Bezpečně odeslat formulář PLOTAO':'Zkontrolovat a zkopírovat podklady bez serverového odeslání'}if(privacy)privacy.textContent=privacyText(mode);
   }
-  function init(){const form=$('#form');if(!form)return;configureContactFields(form);const privacy=ensurePrivacy(form);if(privacy)privacy.textContent=privacyText(form.dataset.mode||'lead');[['#lead','lead'],['#help','help'],['#partner','partner']].forEach(([selector,mode])=>$(selector)?.addEventListener('click',()=>apply(mode)));document.addEventListener('click',event=>{if(event.target.closest('#scope button')&&form.dataset.mode==='lead')setTimeout(()=>apply('lead'),0)})}
+  function init(){const form=$('#form');if(!form)return;configureContactFields(form);const privacy=ensurePrivacy(form);ensurePartnerShare(form);if(privacy)privacy.textContent=privacyText(form.dataset.mode||'lead');[['#lead','lead'],['#help','help'],['#partner','partner']].forEach(([selector,mode])=>$(selector)?.addEventListener('click',()=>apply(mode)));document.addEventListener('click',event=>{if(event.target.closest('#scope button')&&form.dataset.mode==='lead')setTimeout(()=>apply('lead'),0)})}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
