@@ -100,7 +100,9 @@ Deno.serve(async req=>{
    const activeRes=await fetch(base+"/rest/v1/plotao_job_referrals?select=id&job_id=eq."+encodeURIComponent(job.id)+"&status=in.(sending,sent,accepted)",{headers:apiHeaders(key)});
    if(!activeRes.ok)return json({error:"job_referral_read_failed"},activeRes.status);
    if((await activeRes.json()).length)return json({error:"job_partner_already_assigned"},409);
-   const responseToken=bytesToBase64Url(crypto.getRandomValues(new Uint8Array(32)));\n   const responseTokenHash=await sha256(responseToken);\n   const created=await fetch(base+"/rest/v1/plotao_job_referrals",{method:"POST",headers:{...apiHeaders(key),"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify({job_id:job.id,partner_id:partner.id,status:"sending",sent_by:ADMIN_EMAIL,response_token_hash:responseTokenHash})});
+   const responseToken=bytesToBase64Url(crypto.getRandomValues(new Uint8Array(32)));
+   const responseTokenHash=await sha256(responseToken);
+   const created=await fetch(base+"/rest/v1/plotao_job_referrals",{method:"POST",headers:{...apiHeaders(key),"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify({job_id:job.id,partner_id:partner.id,status:"sending",sent_by:ADMIN_EMAIL,response_token_hash:responseTokenHash})});
    let referralRows;try{referralRows=await created.json()}catch{referralRows=null}
    if(!created.ok||!Array.isArray(referralRows)||!referralRows[0]?.id)return json({error:created.status===409?"job_partner_already_assigned":"job_referral_create_failed"},created.status===409?409:(created.status||500));
    const referral=referralRows[0],items=Array.isArray(job.plotao_job_items)?job.plotao_job_items:[];
