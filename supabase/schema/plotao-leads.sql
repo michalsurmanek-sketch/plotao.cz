@@ -57,12 +57,17 @@ create table if not exists public.plotao_partners (
   ico text not null default '' check (char_length(ico) <= 20),
   regions text[] not null default '{}',
   fence_types text[] not null default '{}',
+  service_types text[] not null default ARRAY['material_only']::text[] check (
+    cardinality(service_types) >= 1
+    and service_types <@ ARRAY['installation_material','installation_only','material_only']::text[]
+  ),
   active boolean not null default true
 );
 
 create index if not exists plotao_partners_active_idx on public.plotao_partners (active, company_name);
 create index if not exists plotao_partners_regions_gin_idx on public.plotao_partners using gin (regions);
 create index if not exists plotao_partners_fence_types_gin_idx on public.plotao_partners using gin (fence_types);
+create index if not exists plotao_partners_service_types_gin_idx on public.plotao_partners using gin (service_types);
 
 create table if not exists public.plotao_lead_referrals (
   id uuid primary key default gen_random_uuid(),
