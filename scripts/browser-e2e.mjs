@@ -205,7 +205,7 @@ await runScenario('mobile-390',{width:390,height:844},async page=>{
   assert((await modal.getAttribute('aria-modal'))==='true','lead modal must expose aria-modal=true');
   const privacyNotice=modal.locator('[data-plotao-privacy-notice="1"]');
   assert(await privacyNotice.isVisible(),'lead modal must show the privacy information notice before submission');
-  assert((await text(privacyNotice)).includes('Údaje použijeme k vyřízení poptávky'),'lead privacy notice must explain why contact data are used');
+  assert((await text(privacyNotice)).includes('Údaje použijeme pouze k vyřízení vašeho požadavku'),'lead privacy notice must explain that contact data are used only to handle the submitted request');
   const privacyLink=privacyNotice.locator('a[href="/ochrana-osobnich-udaju.html"]');
   assert(await privacyLink.isVisible(),'lead privacy notice must expose a visible privacy-page link');
   assert((await privacyLink.getAttribute('href'))==='/ochrana-osobnich-udaju.html','lead privacy link must target the canonical privacy page');
