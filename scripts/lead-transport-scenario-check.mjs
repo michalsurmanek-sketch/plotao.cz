@@ -28,15 +28,19 @@ r=core.prepare({...payload,schemaVersion:1},{enabled:true,endpoint:'https://api.
 ok(r.ok===false&&r.code==='payload','unexpected payload schema must be blocked before network access');
 
 const adapter=fs.readFileSync('assets/lead-transport-v1.js','utf8'),config=fs.readFileSync('assets/lead-transport-config-v1.js','utf8'),safety=fs.readFileSync('assets/lead-safety-v1.js','utf8'),manifest=fs.readFileSync('scripts/pages-manifest.mjs','utf8'),index=fs.readFileSync('index.html','utf8');
-ok(config.includes('enabled:true')&&config.includes("endpoint:'https://jmukoccjqykyoqsypuwb.supabase.co/functions/v1/submit-lead'")&&config.includes("allowedOrigins:['https://plotao.cz','https://www.plotao.cz']"),'production transport config must ship enabled with the approved Supabase endpoint and exact site allowlist');
+ok(config.includes('enabled:true')&&config.includes("endpoint:'https://jmukoccjqykyoqsypuwb.supabase.co/functions/v1/submit-lead'")&&config.includes("allowedOrigins:['https://plotao.cz']"),'production transport config must ship enabled with the approved Supabase endpoint and backend-approved site origin');
 ok(adapter.includes('core.prepare(payload,config())')&&adapter.includes('fetch(prepared.endpoint'),'browser transport must fetch only a core-approved endpoint');
 ok(adapter.includes('new AbortController()')&&adapter.includes('setTimeout(()=>controller.abort(),10000)'),'browser transport must enforce a finite network timeout');
+ok(adapter.includes("body?.error||'http'")&&adapter.includes("AbortError'?'timeout':'network'"),'browser transport must preserve backend rejection codes and distinguish timeout from network failure');
+ok(adapter.includes("id:typeof body?.id==='string'?body.id:''"),'successful delivery must expose the server-created lead ID for confirmation');
 ok(!adapter.includes('credentials:\'include\'')&&!adapter.includes('credentials:"include"'),'browser transport must never opt into cookie credentials');
 ok(safety.includes('function transportReady()')&&safety.includes("await copyDraft(result.data,b,'Odeslání se nepodařilo. Podklady nebyly ztraceny.')"),'form must preserve a safe copy fallback after delivery failure');
 ok(safety.includes('sessionStorage.removeItem(key(result.data.mode))'),'only a successfully delivered mode draft may be cleared');
 const corePos=manifest.indexOf('/assets/lead-transport-core-v1.js'),configPos=manifest.indexOf('/assets/lead-transport-config-v1.js'),adapterPos=manifest.indexOf('/assets/lead-transport-v1.js'),safetyPos=manifest.indexOf('/assets/lead-safety-v1.js');
 ok(corePos>=0&&corePos<configPos&&configPos<adapterPos&&adapterPos<safetyPos,'production build must load transport core, explicit config, adapter, then form safety');
 ok(!index.includes('PLOTAO_LEAD_TRANSPORT_CONFIG'),'HTML must not inline backend configuration or secrets');
+ok((index.match(/src="\/assets\/lead-transport-v1\.js/g)||[]).length===1,'homepage must load exactly one active network transport implementation');
+ok(!index.includes('v=body-20260930'),'homepage must not reload the transport later and replace its hardened implementation');
 
 if(fail.length){console.error('Lead transport scenario checks failed:\n- '+fail.join('\n- '));process.exit(1)}
 console.log('Lead transport scenario checks OK: explicit enable flag, HTTPS allowlist, disabled-by-default config, script order, timeout and fallback are protected');

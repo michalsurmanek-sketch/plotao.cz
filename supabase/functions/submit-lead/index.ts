@@ -1,7 +1,7 @@
 import { withSupabase } from '@supabase/server'
 import { validateEnvelope } from './validation.mjs'
 
-const ALLOWED_ORIGIN = 'https://plotao.cz'
+const ALLOWED_ORIGINS = new Set(['https://plotao.cz', 'https://www.plotao.cz'])
 const MAX_BODY_BYTES = 64 * 1024
 const RATE_WINDOW_MS = 15 * 60 * 1000
 const RATE_LIMIT = 8
@@ -9,17 +9,22 @@ const RATE_RETENTION_MS = 24 * 60 * 60 * 1000
 const encoder = new TextEncoder()
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': ALLOWED_ORIGIN,
+  'Access-Control-Allow-Origin': 'https://plotao.cz',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'content-type, accept',
   'Access-Control-Max-Age': '600',
   'Vary': 'Origin',
 }
 
-function response(status: number, body: Record<string, unknown>) {
+function response(status: number, body: Record<string, unknown>, origin = '') {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
+    headers: {
+      ...corsHeaders,
+      'Access-Control-Allow-Origin': ALLOWED_ORIGINS.has(origin) ? origin : 'https://plotao.cz',
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+    },
   })
 }
 
@@ -75,29 +80,29 @@ export default {
     { auth: 'none', cors: 'disabled' },
     async (req, ctx) => {
       const origin = req.headers.get('origin') || ''
-      if (origin !== ALLOWED_ORIGIN) return response(403, { error: 'origin_not_allowed' })
-      if (req.method === 'OPTIONS') return response(200, { ok: true })
-      if (req.method !== 'POST') return response(405, { error: 'method_not_allowed' })
+      if (!ALLOWED_ORIGINS.has(origin)) return response(403, { error: 'origin_not_allowed' }, origin)
+      if (req.method === 'OPTIONS') return response(200, { ok: true }, origin)
+      if (req.method !== 'POST') return response(405, { error: 'method_not_allowed' }, origin)
       if (!(req.headers.get('content-type') || '').toLowerCase().startsWith('application/json')) {
-        return response(415, { error: 'json_required' })
+        return response(415, { error: 'json_required' }, origin)
       }
 
       let raw = ''
       try {
         raw = await readBodyLimited(req)
       } catch (error) {
-        return response(error instanceof Error && error.message === 'body_too_large' ? 413 : 400, { error: 'invalid_body' })
+        return response(error instanceof Error && error.message === 'body_too_large' ? 413 : 400, { error: 'invalid_body' }, origin)
       }
 
       let input: unknown
       try {
         input = JSON.parse(raw)
       } catch {
-        return response(400, { error: 'invalid_json' })
+        return response(400, { error: 'invalid_json' }, origin)
       }
 
       const validated = validateEnvelope(input)
-      if (!validated.ok) return response(422, { error: 'validation_failed', fields: validated.errors })
+      if (!validated.ok) return response(422, { error: 'validation_failed', fields: validated.errors }, origin)
       const lead = validated.lead
       const receivedAt = new Date().toISOString()
 
@@ -110,7 +115,7 @@ export default {
         rateKeys.push(await digest(`${salt}\ncontact\n${lead.phone}\n${lead.email}`))
         rateKeys = [...new Set(rateKeys)]
       } catch {
-        return response(503, { error: 'rate_limit_unavailable' })
+        return response(503, { error: 'rate_limit_unavailable' }, origin)
       }
 
       const since = new Date(Date.now() - RATE_WINDOW_MS).toISOString()
@@ -123,16 +128,16 @@ export default {
       if (checks.some((x) => x.error)) {
         const firstError = checks.find((x) => x.error)?.error
         console.error('plotao rate count failed', firstError?.code || 'unknown')
-        return response(503, { error: 'rate_limit_unavailable' })
+        return response(503, { error: 'rate_limit_unavailable' }, origin)
       }
-      if (checks.some((x) => (x.count || 0) >= RATE_LIMIT)) return response(429, { error: 'rate_limited' })
+      if (checks.some((x) => (x.count || 0) >= RATE_LIMIT)) return response(429, { error: 'rate_limited' }, origin)
 
       const { error: rateInsertError } = await ctx.supabaseAdmin
         .from('plotao_lead_rate_events')
         .insert(rateKeys.map((key_hash) => ({ key_hash })))
       if (rateInsertError) {
         console.error('plotao rate insert failed', rateInsertError.code || 'unknown')
-        return response(503, { error: 'rate_limit_unavailable' })
+        return response(503, { error: 'rate_limit_unavailable' }, origin)
       }
 
       const row = {
@@ -155,7 +160,7 @@ export default {
 
       if (insertError || !data?.id) {
         console.error('plotao lead insert failed', insertError?.code || 'missing_id')
-        return response(500, { error: 'storage_failed' })
+        return response(500, { error: 'storage_failed' }, origin)
       }
 
       // Best-effort retention cleanup. Failure never exposes or loses the accepted lead.
@@ -164,7 +169,10 @@ export default {
         if (error) console.error('plotao rate cleanup failed', error.code || 'unknown')
       })
 
-      return response(201, { id: data.id })
+      return new Response(JSON.stringify({ id: data.id }), {
+        status: 201,
+        headers: { ...corsHeaders, 'Access-Control-Allow-Origin': origin, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
+      })
     },
   ),
 }
