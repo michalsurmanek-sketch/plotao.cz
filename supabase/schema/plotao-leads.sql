@@ -43,3 +43,54 @@ revoke all on table public.plotao_lead_rate_events from anon, authenticated;
 grant select, insert, delete on table public.plotao_lead_rate_events to service_role;
 
 comment on table public.plotao_lead_rate_events is 'Short-lived anti-abuse events keyed by a salted SHA-256 digest. Raw IP addresses are never stored.';
+
+
+-- Partner registry and auditable, one-at-a-time lead handoff.
+create table if not exists public.plotao_partners (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  company_name text not null check (char_length(btrim(company_name)) between 2 and 160),
+  contact_name text not null default '' check (char_length(contact_name) <= 120),
+  email text not null check (char_length(email) between 3 and 254),
+  phone text not null default '' check (char_length(phone) <= 40),
+  ico text not null default '' check (char_length(ico) <= 20),
+  regions text[] not null default '{}',
+  fence_types text[] not null default '{}',
+  active boolean not null default true
+);
+
+create index if not exists plotao_partners_active_idx on public.plotao_partners (active, company_name);
+create index if not exists plotao_partners_regions_gin_idx on public.plotao_partners using gin (regions);
+create index if not exists plotao_partners_fence_types_gin_idx on public.plotao_partners using gin (fence_types);
+
+create table if not exists public.plotao_lead_referrals (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  lead_id uuid not null references public.plotao_leads(id) on delete cascade,
+  partner_id uuid not null references public.plotao_partners(id) on delete restrict,
+  status text not null default 'sending' check (status in ('sending','sent','accepted','declined','withdrawn','failed')),
+  sent_at timestamptz,
+  sent_by text not null,
+  provider text not null default 'resend',
+  provider_id text,
+  response_at timestamptz,
+  response_note text not null default '' check (char_length(response_note) <= 1000),
+  error_code text not null default '' check (char_length(error_code) <= 80)
+);
+
+create unique index if not exists plotao_one_active_referral_per_lead
+  on public.plotao_lead_referrals (lead_id)
+  where status in ('sending','sent','accepted');
+create index if not exists plotao_referrals_lead_created_idx
+  on public.plotao_lead_referrals (lead_id, created_at desc);
+create index if not exists plotao_referrals_partner_created_idx
+  on public.plotao_lead_referrals (partner_id, created_at desc);
+
+alter table public.plotao_partners enable row level security;
+alter table public.plotao_lead_referrals enable row level security;
+revoke all on public.plotao_partners from anon, authenticated;
+revoke all on public.plotao_lead_referrals from anon, authenticated;
+grant select, insert, update, delete on public.plotao_partners to service_role;
+grant select, insert, update, delete on public.plotao_lead_referrals to service_role;
