@@ -25,11 +25,12 @@
 - Veřejná funkce `submit-lead` má záměrně vypnuté JWT ověření, protože ji volá webový formulář; nahrazuje je allowlist originů, validace a rate limit. `admin-leads` vyžaduje JWT a dále kontroluje e-mail administrátora.
 - Nové SECURITY DEFINER triggery nemají EXECUTE přístup pro `anon` ani `authenticated`; auditní tabulka nemá browser oprávnění.
 - Aktuální oprávnění ještě nejsou rolový systém. Dispečer, účetní a partner nemají vlastní role ani izolované pohledy. Partner zatím nepřijímá/odmítá poptávku přihlášeným portálem; stav zaznamenává administrátor.
-- Supabase Security Advisor hlásí vypnutou ochranu proti uniklým heslům. Performance Advisor upozorňuje na dva shodné indexy stavu poptávek. Nejde o důvod sahat na současné odesílání formulářů; jsou to samostatné úkoly.
+- Supabase Security Advisor hlásí vypnutou ochranu proti uniklým heslům. Performance Advisor původně upozornil na dva shodné indexy stavu poptávek; jejich přesná duplicita byla ověřena a jeden index bezpečně odstraněn. Zůstávají jen upozornění na dosud nepoužité indexy u zatím malých tabulek.
 
 ## Co se provedlo v první implementační části
 
 - Administrace byla rozdělena na shell `admin.html`, styl `assets/admin/admin-v1.css` a aplikační logiku `assets/admin/admin-v1.js`. Přidán samostatný modul `assets/admin/crm-v1.js`.
+- Ukázkové sloupce falešného grafu byly nahrazeny přehledem skutečných poptávek podle stavu a čekajících reakcí partnera.
 - Přidána karta Zákazníci jako bezpečný CRM přehled nad stávajícími poptávkami: deduplikuje přes e-mail, u nějž e-mail chybí přes telefon, zobrazuje historii žádostí a umí otevřít původní poptávku. Neudržuje druhou kopii poptávkových dat.
 - Přidána datová vrstva pro zákazníky a adresy; stávajících 19 žádostí se backfillnulo. Budoucí formuláře založí zákazníka a uloží adresu v databázovém triggeru.
 - Připraveny privátní tabulky nabídky, řádků nabídky, zakázky a řádků zakázky. Nabídka má číslování a položky pro materiál, montáž, dopravu, slevu, nákupní cenu, prodejní cenu a DPH; řádky počítají prodejní základ, náklad a DPH.
