@@ -188,3 +188,40 @@
  #jobs .table tbody>tr>td:first-child,#jobs .table tbody>tr>td:nth-child(2),#jobs .table tbody>tr>td:nth-child(3),#jobs .table tbody>tr>td:last-child{grid-column:1/-1}
 }
 @media(max-width:520px){#jobs .table tbody>tr{grid-template-columns:1fr 1fr;gap:0 8px}}
+
+/* Detail zakázky, dispečink partnerů a průběh realizace */
+#jobs .job-detail{margin-top:16px}
+#jobs .job-detail-card{padding:22px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 4px 18px #12392b08}
+#jobs .job-detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding-bottom:15px;border-bottom:1px solid var(--line)}
+#jobs .job-detail-head small{color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.09em}
+#jobs .job-detail-head h3{margin:5px 0;color:var(--deep)}
+#jobs .job-detail-head p{margin:4px 0;color:var(--muted);font-size:13px}
+#jobs .job-detail-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);gap:18px;margin-top:18px}
+#jobs .job-detail-section{min-width:0;padding:16px;border:1px solid var(--line);border-radius:12px;background:#fbfdfb}
+#jobs .job-detail-section h4{margin:0 0 12px;color:var(--deep)}
+#jobs .job-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-bottom:12px}
+#jobs .job-fields label,#jobs .job-detail-section>label{display:grid;gap:5px;color:var(--muted);font-size:12px;font-weight:700}
+#jobs .job-fields input,#jobs .job-fields select,#jobs .job-fields textarea,#jobs .job-detail-section select,#jobs .job-detail-section input{width:100%;min-width:0;padding:9px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font:inherit}
+#jobs .job-field-wide{grid-column:1/-1}
+#jobs .job-items{display:grid;gap:8px;margin-top:20px}
+#jobs .job-items h4{margin-bottom:3px}
+#jobs .job-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;padding:10px;border:1px solid var(--line);border-radius:9px;background:#fff}
+#jobs .job-item small{grid-column:1/-1;color:var(--muted);white-space:pre-wrap}
+#jobs .job-consent,#jobs .job-active-referral{display:grid;gap:5px;margin:10px 0;padding:12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+#jobs .job-consent.ok{border-color:#bddcc7;background:#f0f8f2}
+#jobs .job-consent.blocked{border-color:#f0d1a8;background:#fff8ed}
+#jobs .job-consent small,#jobs .job-active-referral small{color:var(--muted);line-height:1.5}
+#jobs .job-active-referral span{color:var(--green);font-weight:800}
+#jobs .job-detail-section>small{display:block;margin:7px 0 12px;color:var(--muted);line-height:1.5}
+#jobs .job-detail-section>button{margin:8px 0 16px}
+#jobs .job-referral-history{display:grid;gap:8px}
+#jobs .job-referral-row{display:flex;justify-content:space-between;gap:12px;padding:10px;border:1px solid var(--line);border-radius:9px;background:#fff}
+#jobs .job-referral-row small{display:block;margin-top:3px;color:var(--muted);font-size:11px}
+#jobs .job-referral-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+#jobs .job-referral-actions button{font-size:12px;padding:7px 9px}
+#jobs .job-notice{min-height:0;margin:8px 0;color:var(--green);font-weight:700}
+#jobs .job-notice:empty{display:none}
+#jobs .job-notice.job-error{color:#a33c25}
+#jobs .table tbody tr.job-focused{background:#f0f8f2}
+@media(max-width:900px){#jobs .job-detail-grid{grid-template-columns:1fr}}
+@media(max-width:560px){#jobs .job-detail-card{padding:14px}#jobs .job-detail-head{align-items:stretch;flex-direction:column}#jobs .job-fields{grid-template-columns:1fr}#jobs .job-field-wide{grid-column:auto}#jobs .job-referral-row{align-items:flex-start;flex-direction:column}}
