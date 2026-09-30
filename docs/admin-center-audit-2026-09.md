@@ -5,7 +5,7 @@
 1. Veřejné kontaktní, poradenské a kalkulační formuláře skládají payload v `assets/plotao-supabase-leads.js`. Kalkulační parametry se posílají jako validovaný snapshot; orientační cenu klientského payloadu nelze považovat za smluvní cenu.
 2. Formuláře volají veřejnou Supabase Edge Function `submit-lead` (aktivní verze 12). Funkce kontroluje origin, JSON, velikost a tvar vstupu, rate-limituje přes hashované události a uloží poptávku do `plotao_leads`. Přijetí případně potvrdí přes Resend.
 3. Insert trigger nyní automaticky založí/sdílí kartu zákazníka podle normalizovaného e-mailu, zachová místo realizace a zapíše auditní událost. Telefonní záznam bez e-mailu se záměrně neslučuje s dalšími lidmi na sdíleném čísle.
-4. Administrace ověřuje přihlášení přes Supabase Auth a volá chráněnou Edge Function `admin-leads` (aktivní verze 18; JWT povinný). Funkce dnes povoluje jedno konkrétní administrátorské e-mailové konto.
+4. Administrace ověřuje přihlášení přes Supabase Auth a volá chráněnou Edge Function `admin-leads` (aktivní verze 19; JWT povinný). Funkce dnes povoluje jedno konkrétní administrátorské e-mailové konto.
 5. V detailu poptávky zůstává historie komunikace, odpověď zákazníkovi přes Resend a při souhlasu zákazníka možnost předat poptávku jedné vhodné partnerské firmě. Vhodnost se kontroluje podle kraje, plotu a služby; předání se eviduje v `plotao_lead_referrals`.
 
 ## Stav databáze při auditu
