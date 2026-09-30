@@ -33,8 +33,8 @@ export function validateEnvelope(input){
   if(tooLong(l.note,4000))errors.push('note');
   const name=text(l.name,120),phoneValue=phone(l.phone),email=rawText(l.email,254).toLowerCase(),place=text(l.place,200),note=rawText(l.note,4000);
   if(name.length<2)errors.push('name');
-  if(!phoneValue)errors.push('phone');
-  if(!emailOk(email))errors.push('email');
+  if(!phoneValue&&!email)errors.push('contact');
+  if(email&&!emailOk(email))errors.push('email');
   if(mode==='help'&&note.length<5)errors.push('note');
   if(mode==='partner'&&place.length<2)errors.push('place');
   const lead={schemaVersion:2,mode,name,phone:phoneValue,email,place,note};
