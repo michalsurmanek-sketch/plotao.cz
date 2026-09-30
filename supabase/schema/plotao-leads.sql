@@ -280,6 +280,11 @@ drop trigger if exists plotao_quotes_number on public.plotao_quotes;
 create trigger plotao_quotes_number before insert on public.plotao_quotes
 for each row execute function public.plotao_assign_document_number();
 
+-- Job numbers use the same document-number trigger as offers.
+drop trigger if exists plotao_jobs_number on public.plotao_jobs;
+create trigger plotao_jobs_number before insert on public.plotao_jobs
+for each row execute function public.plotao_assign_document_number();
+
 create table if not exists public.plotao_quote_items (
   id uuid primary key default gen_random_uuid(),
   quote_id uuid not null references public.plotao_quotes(id) on delete cascade,
