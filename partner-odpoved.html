@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="no-referrer">
+<title>Potvrzení zakázky | PLOTAO.cz</title>
+<style>
+:root{color-scheme:light;--green:#125c42;--ink:#18342a;--muted:#64756d;--line:#dce8e1;--bg:#f3f7f4}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:var(--bg);font:16px/1.55 system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);display:grid;place-items:center;padding:24px}.card{width:min(100%,560px);background:#fff;border:1px solid var(--line);border-radius:20px;padding:clamp(24px,5vw,40px);box-shadow:0 18px 48px #193b2b12}.brand{font-weight:850;font-size:24px;letter-spacing:-.04em;color:var(--green)}.brand span{color:#75a88d}.eyebrow{margin:32px 0 4px;font-size:12px;font-weight:750;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}h1{font-size:clamp(25px,6vw,34px);line-height:1.15;letter-spacing:-.04em;margin:0 0 12px}p{margin:8px 0;color:var(--muted)}.job{margin:24px 0;padding:17px 18px;background:#f6faf7;border:1px solid var(--line);border-radius:13px}.job strong{display:block;color:var(--ink);font-size:18px}.job small{display:block;color:var(--muted);margin-top:4px}.actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}.btn{min-height:50px;border:0;border-radius:11px;padding:12px 15px;font:700 15px/1.2 inherit;cursor:pointer}.primary{background:var(--green);color:white}.secondary{background:#fff;color:var(--ink);border:1px solid var(--line)}.btn:disabled{opacity:.55;cursor:wait}label{display:block;font-weight:650;margin:18px 0 6px}textarea{width:100%;min-height:92px;border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;resize:vertical}#confirmBox{margin-top:20px;padding:16px;border:1px solid #b8d8c5;background:#f2faf5;border-radius:12px}#confirmBox p{color:var(--ink)}.status{min-height:24px;margin-top:17px;font-weight:650;color:var(--green)}.status.error{color:#a32626}.foot{margin-top:24px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}a{color:var(--green)}[hidden]{display:none!important}@media(max-width:480px){body{padding:14px}.actions{grid-template-columns:1fr}.card{border-radius:16px}}
+</style>
+</head>
+<body>
+<main class="card">
+<div class="brand">PLOTAO<span>.cz</span></div>
+<p class="eyebrow">Partnerská zakázka</p>
+<h1>Potvrzení zakázky</h1>
+<p>Na této stránce můžete potvrdit, zda zakázku přijímáte, nebo odmítáte. Odpověď se zaznamená do evidence PLOTAO.cz.</p>
+<section id="job" class="job" hidden><strong id="jobNumber"></strong><small id="partnerName"></small></section>
+<div id="choice" class="actions" hidden>
+<button class="btn primary" type="button" data-choose="accepted">Přijmout zakázku</button>
+<button class="btn secondary" type="button" data-choose="declined">Odmítnout zakázku</button>
+</div>
+<section id="confirmBox" hidden>
+<p id="confirmText"></p>
+<label for="note">Poznámka pro PLOTAO.cz (nepovinné)</label>
+<textarea id="note" maxlength="1000" placeholder="Například navržený termín realizace"></textarea>
+<div class="actions">
+<button class="btn primary" id="confirm" type="button">Potvrdit odpověď</button>
+<button class="btn secondary" id="cancel" type="button">Zpět</button>
+</div>
+</section>
+<p class="status" id="status" role="status" aria-live="polite">Ověřujeme platnost odkazu…</p>
+<div class="foot">Potřebujete pomoc? Kontaktujte <a href="mailto:michalsurmanek@seznam.cz">PLOTAO.cz</a>.</div>
+</main>
+<script src="/assets/partner-job-response.js?v=1" defer></script>
+</body></html>
