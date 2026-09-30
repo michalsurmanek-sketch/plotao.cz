@@ -28,7 +28,29 @@
       return send({transportVersion:1,source:'plotao.cz',submittedAt:now(),lead:{schemaVersion:2,mode:'help',name,phone,email,place,note:val(form,'message')}},status);
     }
     if(form.id==='quoteForm'){
-      return send({transportVersion:1,source:'plotao.cz',submittedAt:now(),lead:{schemaVersion:2,mode:'lead',name,phone,email,place,note:val(form,'note'),fenceType:val(form,'fenceType')||val(form,'extraType')||'Neupřesněno',height:180,segments:[{name:'Hlavní úsek',length:10,connection:'začátek'}],options:[val(form,'color'),val(form,'variant'),val(form,'slab')?'Podhrabové desky':''].filter(Boolean),gate:false,wicket:false,scopeValue:'material',scope:val(form,'scope'),displayedPrice:'',priceKind:'individuální nabídka'}},status);
+      const segmentNodes=[...document.querySelectorAll('#segments .segment')];
+      const segments=segmentNodes.map((node,index)=>({name:node.querySelector('[data-name]')?.value||'Úsek '+(index+1),length:Number(node.querySelector('[data-length]')?.value)||0,connection:index===0?'začátek':'navazuje rohem'}));
+      const height=Number(segmentNodes[0]?.querySelector('[data-height]')?.value)||180;
+      const extras=[
+        val(form,'color')&&'Povrch: '+val(form,'color'),
+        val(form,'variant')&&'Varianta: '+val(form,'variant'),
+        form.elements.slab?.checked&&'Podhrabové desky: '+val(form,'slabHeight'),
+        form.elements.privacy?.checked&&'Neprůhledný plot / soukromí',
+        val(form,'gate')&&'Brána: '+val(form,'gate'),
+        val(form,'gateWidth')&&'Šířka brány: '+val(form,'gateWidth')+' m',
+        val(form,'drive')&&'Ovládání: '+val(form,'drive'),
+        val(form,'wickets')&&'Počet branek: '+val(form,'wickets'),
+        val(form,'terrain')&&'Terén: '+val(form,'terrain'),
+        val(form,'access')&&'Přístup techniky: '+val(form,'access'),
+        form.elements.demolition?.checked&&'Demontáž původního plotu',
+        val(form,'obstacles')&&'Podloží a překážky: '+val(form,'obstacles'),
+        val(form,'timing')&&'Požadovaný termín: '+val(form,'timing'),
+        ...segmentNodes.map((node,index)=>'Výška úseku '+(index+1)+': '+(node.querySelector('[data-height]')?.value||'')+' cm')
+      ].filter(Boolean);
+      const fullNote=[val(form,'note'),...extras].filter(Boolean).join('\\n');
+      const scope=val(form,'scope');
+      const scopeValue=scope.includes('klíč')?'turnkey':scope.includes('dopravou')?'delivery':'material';
+      return send({transportVersion:1,source:'plotao.cz',submittedAt:now(),lead:{schemaVersion:2,mode:'lead',name,phone,email,place,note:fullNote,fenceType:val(form,'fenceType')||val(form,'extraType')||'Neupřesněno',height,segments,options:extras,gate:false,wicket:false,scopeValue,scope,displayedPrice:'',priceKind:'individuální nabídka'}},status);
     }
     if(form.id==='form'){
       const help=(document.querySelector('#modalTitle')?.textContent||'').includes('poradit');
