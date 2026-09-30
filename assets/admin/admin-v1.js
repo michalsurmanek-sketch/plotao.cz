@@ -31,6 +31,7 @@ async function load(t){
  if(!leadResponse.ok)throw Error(leadResponse.status===401||leadResponse.status===403?'Přihlášení vypršelo nebo účet nemá administrátorský přístup.':'Poptávky se nepodařilo načíst.');
  leads=await leadResponse.json();partners=Array.isArray(partnerData)?partnerData:[];referrals=Array.isArray(referralData)?referralData:[];
  box.style.display='none';render();renderPartners();
+ window.dispatchEvent(new CustomEvent('plotao:admin-data',{detail:{leads}}));
  document.querySelector('#statLeads').textContent=leads.filter(x=>x.status==='new').length;
  const recent=document.querySelector('#dashboard .list');
  if(recent)recent.innerHTML=leads.slice(0,5).map(x=>'<div class="lead"><b>'+esc(x.name)+'</b><span class="badge new">'+esc(statuses[x.status]||x.status)+'</span><small>'+esc(x.place||'Lokalita neuvedena')+' · '+esc(x.mode==='help'?'Rada':x.mode==='partner'?'Partner':'Poptávka')+'</small></div>').join('')||'<div class="empty">Zatím žádné poptávky.</div>';
