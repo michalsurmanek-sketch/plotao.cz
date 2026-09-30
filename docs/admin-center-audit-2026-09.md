@@ -5,7 +5,7 @@
 1. Veřejné kontaktní, poradenské a kalkulační formuláře skládají payload v `assets/plotao-supabase-leads.js`. Kalkulační parametry se posílají jako validovaný snapshot; orientační cenu klientského payloadu nelze považovat za smluvní cenu.
 2. Formuláře volají veřejnou Supabase Edge Function `submit-lead` (aktivní verze 12). Funkce kontroluje origin, JSON, velikost a tvar vstupu, rate-limituje přes hashované události a uloží poptávku do `plotao_leads`. Přijetí případně potvrdí přes Resend.
 3. Insert trigger nyní automaticky založí/sdílí kartu zákazníka podle normalizovaného e-mailu, zachová místo realizace a zapíše auditní událost. Telefonní záznam bez e-mailu se záměrně neslučuje s dalšími lidmi na sdíleném čísle.
-4. Administrace ověřuje přihlášení přes Supabase Auth a volá chráněnou Edge Function `admin-leads` (aktivní verze 14; JWT povinný). Funkce dnes povoluje jedno konkrétní administrátorské e-mailové konto.
+4. Administrace ověřuje přihlášení přes Supabase Auth a volá chráněnou Edge Function `admin-leads` (aktivní verze 17; JWT povinný). Funkce dnes povoluje jedno konkrétní administrátorské e-mailové konto.
 5. V detailu poptávky zůstává historie komunikace, odpověď zákazníkovi přes Resend a při souhlasu zákazníka možnost předat poptávku jedné vhodné partnerské firmě. Vhodnost se kontroluje podle kraje, plotu a služby; předání se eviduje v `plotao_lead_referrals`.
 
 ## Stav databáze při auditu
@@ -33,6 +33,14 @@
 - Koncept vzniká přes chráněnou `admin-leads` funkci a propojí existující kartu zákazníka i původní poptávku. Uloží celý payload kalkulátoru do `source_snapshot` jako podklad, vytvoří počáteční řádek s délkou a parametry a jasně označí nulové ceny jako doplnění nutné před odesláním.
 - Editor upravuje položky materiálu, montáže, dopravy a ostatních nákladů, množství, nákup/prodej, DPH, slevu, platnost a poznámku. Přepočítá cenu včetně DPH i orientační marži. Metadata a položky se ukládají atomicky přes `plotao_save_quote`; RPC smí spouštět pouze `service_role`.
 - Nabídky zůstávají koncepty. Odeslání zákazníkovi, PDF, přijetí/odmítnutí a vytvoření zakázky jsou navazující nedokončené části. Nulové výchozí ceny nejsou nabídkovou cenou a nesmí se odeslat bez doplnění.
+
+## Odeslání a rozhodnutí k nabídce — doplnění
+
+- V modulu Nabídky lze koncept odeslat na e-mail zákazníka přes existující Resend. Odeslání je povoleno jen při vyplněných nenulových prodejních cenách; předem se uloží náhodný token pouze ve formě SHA-256 hashe.
+- Zákaznická stránka `nabidka-rozhodnuti.html` nabídne přijetí/odmítnutí bez účtu. Jednorázový token je svázaný s konkrétní odeslanou nabídkou a RPC dovolí rozhodnutí jen pro stav `sent`.
+- Obchodník může v editoru ručně zaznamenat přijetí/odmítnutí, přidat poznámku (např. telefonická domluva) a rozhodnutí opravovat, pokud bylo zaznamenáno ručně. Zákaznické rozhodnutí ručně nepřepisuje.
+- `plotao_quote_events` uchovává odeslání a rozhodnutí včetně zdroje, aktéra, poznámky a času. Stav související poptávky se po rozhodnutí aktualizuje.
+- PDF příloha zatím není vytvořená; e-mail obsahuje ceny a odkazovanou nabídku jako textový souhrn. Odeslání e-mailu přes účet Resend ani zákaznické kliknutí nebyly v tomto běhu provedeny, protože by šlo o skutečnou zprávu / rozhodnutí reálného obchodního záznamu.
 
 ## Co se provedlo v první implementační části
 
