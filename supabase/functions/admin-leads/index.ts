@@ -54,6 +54,10 @@ Deno.serve(async req=>{
    const r=await fetch(base+"/rest/v1/plotao_quotes?select=*,plotao_customers(id,full_name,email,phone),plotao_leads(id,name,email,phone,place,region,payload),plotao_quote_items(*),plotao_quote_events(*)&order=created_at.desc&limit=1000",{headers:apiHeaders(key)});
    return json(await r.json(),r.status)
   }
+  if(resource==="jobs"){
+   const r=await fetch(base+"/rest/v1/plotao_jobs?select=*,plotao_customers(id,full_name,email,phone),plotao_leads(id,name,email,phone,place,region,payload),plotao_quotes(id,quote_number,status),plotao_job_items(*)&order=created_at.desc&limit=1000",{headers:apiHeaders(key)});
+   return json(await r.json(),r.status)
+  }
   if(resource==="partners"){
    const r=await fetch(base+"/rest/v1/plotao_partners?select=*&order=company_name.asc",{headers:apiHeaders(key)});
    return json(await r.json(),r.status)
@@ -67,6 +71,18 @@ Deno.serve(async req=>{
  }
  if(req.method==="POST"){
   let b;try{b=await req.json()}catch{return json({error:"invalid_json"},400)}
+  if(b.action==="create_job_from_quote"){
+   if(!validId(b.quote_id))return json({error:"invalid_quote_id"},422);
+   const created=await fetch(base+"/rest/v1/rpc/plotao_create_job_from_quote",{method:"POST",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({p_quote_id:b.quote_id,p_actor:ADMIN_EMAIL})});
+   let job;try{job=await created.json()}catch{job=null}
+   if(!created.ok)return json({error:created.status===400?"quote_not_accepted":"job_create_failed"},created.status===400?409:created.status);
+   const id=Array.isArray(job)?job[0]?.id:job?.id;
+   if(!validId(id))return json({error:"job_create_failed"},500);
+   const detail=await fetch(base+"/rest/v1/plotao_jobs?id=eq."+encodeURIComponent(id)+"&select=*,plotao_customers(id,full_name,email,phone),plotao_leads(id,name,email,phone,place,region,payload),plotao_quotes(id,quote_number,status),plotao_job_items(*)&limit=1",{headers:apiHeaders(key)});
+   if(!detail.ok)return json({error:"job_read_failed"},detail.status);
+   const rows=await detail.json();
+   return json(rows[0]||job,201)
+  }
   if(b.action==="customer_quote_decision"){
    if(!validId(b.quote_id)||!["accepted","declined"].includes(b.status))return json({error:"invalid_quote_decision"},422);
    const token=typeof b.token==="string"?b.token:"";if(!/^[A-Za-z0-9_-]{40,100}$/.test(token))return json({error:"invalid_decision_token"},422);
