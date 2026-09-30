@@ -249,7 +249,14 @@ create table if not exists public.plotao_quotes (
   sent_at timestamptz,
   responded_at timestamptz,
   created_by text not null default '',
-  source_snapshot jsonb not null default '{}'::jsonb
+  source_snapshot jsonb not null default '{}'::jsonb,
+  decision_token_hash text,
+  decision_source text not null default '' check (decision_source in ('','customer_link','admin_manual')),
+  decision_note text not null default '' check(char_length(decision_note)<=1000),
+  decision_by text not null default '',
+  decision_event_at timestamptz,
+  sent_to_email text not null default '' check(char_length(sent_to_email)<=254),
+  email_provider_id text
 );
 create unique index if not exists plotao_quotes_lead_version_idx on public.plotao_quotes(lead_id,version);
 create index if not exists plotao_quotes_customer_created_idx on public.plotao_quotes(customer_id,created_at desc);
@@ -487,3 +494,12 @@ end;
 $$;
 revoke all on function public.plotao_save_quote(uuid,numeric,text,date,jsonb) from public,anon,authenticated;
 grant execute on function public.plotao_save_quote(uuid,numeric,text,date,jsonb) to service_role;
+
+create table if not exists public.plotao_quote_events (id uuid primary key default gen_random_uuid(),quote_id uuid not null references public.plotao_quotes(id) on delete cascade,event_type text not null check(event_type in ('sent','accepted','declined')),event_source text not null check(event_source in ('email','customer_link','admin_manual')),actor text not null default '',note text not null default '' check(char_length(note)<=1000),created_at timestamptz not null default now());
+create index if not exists plotao_quote_events_quote_created_idx on public.plotao_quote_events(quote_id,created_at);
+alter table public.plotao_quote_events enable row level security;
+revoke all on public.plotao_quote_events from public,anon,authenticated;
+grant select,insert on public.plotao_quote_events to service_role;
+create or replace function public.plotao_set_quote_decision(p_quote_id uuid,p_status text,p_source text,p_note text,p_actor text,p_token_hash text default null) returns public.plotao_quotes language plpgsql security definer set search_path=public,pg_temp as $$ declare saved public.plotao_quotes; begin if p_status not in ('accepted','declined') or p_source not in ('customer_link','admin_manual') then raise exception 'invalid decision'; end if; if char_length(coalesce(p_note,''))>1000 then raise exception 'decision note too long'; end if; if p_source='customer_link' then update public.plotao_quotes set status=p_status,decision_source=p_source,decision_note=coalesce(p_note,''),decision_by='zákazník',decision_event_at=now(),responded_at=now(),updated_at=now() where id=p_quote_id and status='sent' and decision_token_hash=p_token_hash returning * into saved; else update public.plotao_quotes set status=p_status,decision_source=p_source,decision_note=coalesce(p_note,''),decision_by=left(coalesce(p_actor,''),254),decision_event_at=now(),responded_at=now(),updated_at=now() where id=p_quote_id and status in ('sent','accepted','declined') and (status='sent' or decision_source='admin_manual') returning * into saved; end if; if saved.id is null then raise exception 'quote decision unavailable'; end if; insert into public.plotao_quote_events(quote_id,event_type,event_source,actor,note) values(p_quote_id,p_status,case when p_source='customer_link' then 'customer_link' else 'admin_manual' end,case when p_source='customer_link' then 'zákazník' else left(coalesce(p_actor,''),254) end,coalesce(p_note,'')); return saved; end; $$;
+revoke all on function public.plotao_set_quote_decision(uuid,text,text,text,text,text) from public,anon,authenticated;
+grant execute on function public.plotao_set_quote_decision(uuid,text,text,text,text,text) to service_role;
