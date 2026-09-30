@@ -34,6 +34,10 @@ Deno.serve(async req=>{
  if(!base||!key)return json({error:"server_config"},500);
  if(req.method==="GET"){
   const resource=new URL(req.url).searchParams.get("resource")||"leads";
+  if(resource==="quotes"){
+   const r=await fetch(base+"/rest/v1/plotao_quotes?select=*,plotao_customers(id,full_name,email,phone),plotao_leads(id,name,email,phone,place,region,payload),plotao_quote_items(*)&order=created_at.desc&limit=1000",{headers:apiHeaders(key)});
+   return json(await r.json(),r.status)
+  }
   if(resource==="partners"){
    const r=await fetch(base+"/rest/v1/plotao_partners?select=*&order=company_name.asc",{headers:apiHeaders(key)});
    return json(await r.json(),r.status)
@@ -47,6 +51,26 @@ Deno.serve(async req=>{
  }
  if(req.method==="POST"){
   let b;try{b=await req.json()}catch{return json({error:"invalid_json"},400)}
+  if(b.action==="create_quote"){
+   if(!validId(b.lead_id))return json({error:"invalid_lead_id"},422);
+   const leadRes=await fetch(leadUrl(base,b.lead_id,"id,customer_id,name,email,phone,place,region,payload,created_at"),{headers:apiHeaders(key)});
+   if(!leadRes.ok)return json({error:"lead_read_failed"},leadRes.status);
+   const leadsFound=await leadRes.json(),lead=leadsFound[0];
+   if(!lead)return json({error:"lead_not_found"},404);
+   if(!validId(lead.customer_id))return json({error:"customer_link_missing"},409);
+   const prior=await fetch(base+"/rest/v1/plotao_quotes?lead_id=eq."+encodeURIComponent(lead.id)+"&select=version&order=version.desc&limit=1",{headers:apiHeaders(key)});
+   if(!prior.ok)return json({error:"quote_version_read_failed"},prior.status);
+   const priorRows=await prior.json(),version=Number(priorRows[0]?.version||0)+1;
+   const payload=lead.payload&&typeof lead.payload==="object"?lead.payload:{};
+   const segments=Array.isArray(payload.segments)?payload.segments:[];
+   const length=segments.reduce((sum,x)=>sum+(Number(x?.length)||0),0);
+   const details=[payload.scope?String(payload.scope):"",payload.height?"Výška "+String(payload.height)+" cm":"",segments.map((x,n)=>"Úsek "+(n+1)+": "+(Number(x?.length)||0)+" m").join("; "),Array.isArray(payload.options)?payload.options.join(", "):"",lead.note?"Poznámka: "+lead.note:""].filter(Boolean).join("\n").slice(0,4000);
+   const item={position:1,category:"material",product_name:String(payload.fenceType||"Oplocení").slice(0,200),description:details,quantity:length>0?length:1,unit:length>0?"m":"soubor",purchase_unit_price:0,sale_unit_price:0,vat_percent:21};
+   const create=await fetch(base+"/rest/v1/plotao_quotes",{method:"POST",headers:{...apiHeaders(key),"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify({lead_id:lead.id,customer_id:lead.customer_id,version,status:"draft",created_by:ADMIN_EMAIL,source_snapshot:payload,plotao_quote_items:[item]})});
+   let saved;try{saved=await create.json()}catch{saved=null}
+   if(!create.ok)return json({error:"quote_create_failed"},create.status);
+   return json(Array.isArray(saved)?saved[0]:saved,201)
+  }
   if(b.action!=="create_partner")return json({error:"invalid_action"},422);
   const partner=cleanPartner(b.partner);
   if(!partner)return json({error:"invalid_partner"},422);
@@ -57,6 +81,29 @@ Deno.serve(async req=>{
  }
  if(req.method==="PATCH"){
   let b;try{b=await req.json()}catch{return json({error:"invalid_json"},400)}
+  if(b.action==="save_quote"){
+   if(!validId(b.quote_id))return json({error:"invalid_quote_id"},422);
+   const discount=Number(b.discount_percent??0);
+   if(!Number.isFinite(discount)||discount<0||discount>100)return json({error:"invalid_discount"},422);
+   const note=typeof b.note==="string"?b.note.trim().slice(0,4000):"";
+   const validUntil=b.valid_until===""?null:b.valid_until;
+   if(validUntil!==null&&(typeof validUntil!=="string"||!/^\\d{4}-\\d{2}-\\d{2}$/.test(validUntil)||!Number.isFinite(Date.parse(validUntil))))return json({error:"invalid_valid_until"},422);
+   if(!Array.isArray(b.items)||b.items.length<1||b.items.length>100)return json({error:"invalid_quote_items"},422);
+   const items=[];
+   for(let i=0;i<b.items.length;i++){
+    const row=b.items[i]||{},number=(value,fallback=0)=>value===""||value==null?fallback:Number(value);
+    const quantity=number(row.quantity),purchase=number(row.purchase_unit_price),sale=number(row.sale_unit_price),rowDiscount=number(row.discount_percent),vat=number(row.vat_percent,21);
+    if(!Number.isFinite(quantity)||quantity<=0||quantity>1000000||![purchase,sale,rowDiscount,vat].every(Number.isFinite)||purchase<0||sale<0||purchase>100000000||sale>100000000||rowDiscount<0||rowDiscount>100||vat<0||vat>100)return json({error:"invalid_quote_item",position:i},422);
+    if(!["material","installation","transport","other"].includes(row.category))return json({error:"invalid_quote_item_category",position:i},422);
+    const product=String(row.product_name||"").trim().slice(0,200);
+    if(!product)return json({error:"quote_item_name_required",position:i},422);
+    items.push({position:i+1,category:row.category,product_name:product,description:String(row.description||"").trim().slice(0,2000),sku:String(row.sku||"").trim().slice(0,80),quantity,unit:String(row.unit||"ks").trim().slice(0,30),purchase_unit_price:purchase,sale_unit_price:sale,discount_percent:rowDiscount,vat_percent:vat});
+   }
+   const saved=await fetch(base+"/rest/v1/rpc/plotao_save_quote",{method:"POST",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({p_quote_id:b.quote_id,p_discount_percent:discount,p_note:note,p_valid_until:validUntil,p_items:items})});
+   let data;try{data=await saved.json()}catch{data=null}
+   if(!saved.ok)return json({error:"quote_save_failed",detail:data?.message||data?.details||""},saved.status);
+   return json(data,200)
+  }
   if(b.action==="update_partner"){
    if(!validId(b.partner_id))return json({error:"invalid_partner_id"},422);
    const partner=cleanPartner(b.partner);
