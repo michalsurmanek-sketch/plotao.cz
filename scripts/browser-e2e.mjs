@@ -72,6 +72,30 @@ await runScenario('help-submit-confirmation-mobile',{width:390,height:740},async
   assert(Boolean(visible),'complete success confirmation must be visible inside the scrollable mobile dialog');
 });
 
+await runScenario('help-submit-confirmation-desktop',{width:1440,height:900},async page=>{
+  await page.route('**/functions/v1/submit-lead',route=>route.fulfill({status:201,contentType:'application/json',body:JSON.stringify({id:'e2e-help-request'})}));
+  await page.locator('#help').click();
+  const modal=page.locator('#modal');
+  await modal.waitFor({state:'visible'});
+  await page.locator('#form input[name="name"]').fill('Testovací klient');
+  await page.locator('#form input[name="phone"]').fill('+420777123456');
+  await page.locator('#form input[name="email"]').fill('test@example.cz');
+  await page.locator('#form textarea[name="note"]').fill('Testovací dotaz pro kontrolu zobrazení.');
+  await page.locator('#form .send').click();
+  await page.waitForFunction(()=>document.querySelector('#leadSafetyStatus')?.textContent?.startsWith('Odesláno.'),null,{timeout:5000});
+  const layout=await page.evaluate(()=>{
+    const form=document.querySelector('#modal .modalbox'),status=document.querySelector('#leadSafetyStatus');
+    const box=form.getBoundingClientRect(),confirmation=status.getBoundingClientRect();
+    return {overflow:getComputedStyle(form).overflowY,scrollHeight:form.scrollHeight,clientHeight:form.clientHeight,
+      confirmationVisible:confirmation.top>=box.top-1&&confirmation.bottom<=box.bottom+1,
+      labelColumns:getComputedStyle(form.querySelector('label')).gridTemplateColumns};
+  });
+  assert(layout.overflow==='hidden','desktop help dialog must not show a scrollbar');
+  assert(layout.scrollHeight<=layout.clientHeight+1,'desktop help form and confirmation must fit in the dialog height');
+  assert(layout.confirmationVisible,'desktop success confirmation must be fully visible after submission');
+  assert(layout.labelColumns.split(' ').length>=2,'desktop form labels and fields must use a compact two-column layout');
+});
+
 await runScenario('desktop',{width:1440,height:1000},async page=>{
   assert(await page.locator('h1').isVisible(),'desktop H1 must be visible');
   const skip=page.locator('[data-plotao-skip-link="1"]');

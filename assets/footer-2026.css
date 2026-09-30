@@ -7,3 +7,5 @@
 #modal .modalbox{max-height:calc(100vh - 30px);max-height:calc(100dvh - 30px);overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain}
 #modal #leadSafetyStatus{scroll-margin-block:12px}
 @media(max-width:680px){#modal{padding:10px}#modal .modalbox{padding:18px;max-height:calc(100dvh - 20px)}}
+
+@media(min-width:681px){#modal{overflow-y:hidden}#modal .modalbox{max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);overflow-y:hidden;padding:22px 28px}#modal .modalbox>h2{margin-top:0}#modal .modalbox>p{margin-block:8px}#modal .modalbox>label{display:grid;grid-template-columns:130px minmax(0,1fr);align-items:center;gap:12px;margin-block:9px}#modal .modalbox>label input,#modal .modalbox>label textarea{margin-top:0}#modal .modalbox>label textarea{min-height:54px;resize:vertical}#modal .modalbox>#leadSafetyStatus{margin-top:10px}}
