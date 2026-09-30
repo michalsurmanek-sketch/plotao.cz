@@ -38,7 +38,7 @@ Deno.serve(async req=>{
      body:JSON.stringify({from:FROM_EMAIL,to:[lead.email],reply_to:ADMIN_EMAIL,subject:"Re: Poptávka na oplocení – PLOTAO.cz",text:"Dobrý den,\\n\\n"+text+"\\n\\nS pozdravem,\\nPLOTAO.cz"})
     })
    }catch(error){console.error("resend network failure",error instanceof Error?error.message:"unknown");return json({error:"email_send_failed"},502)}
-   let sent={};try{sent=await sendResponse.json()}catch{}
+   let sent:Record<string,any>={};try{sent=await sendResponse.json()}catch{}
    if(!sendResponse.ok){console.error("resend rejected email",sendResponse.status,sent?.name||"");return json({error:"email_send_failed",provider_status:sendResponse.status},502)}
    const history=Array.isArray(lead.communication)?lead.communication:[];
    update.communication=[...history,{direction:"out",body:text,sent_at:new Date().toISOString(),provider:"resend",provider_id:sent.id||null}];
