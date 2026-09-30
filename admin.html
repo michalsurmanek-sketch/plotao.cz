@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Administrace PLOTAO.cz pro správu poptávek, firem, lokalit a orientačních ceníků plotů."><link rel="canonical" href="https://plotao.cz/admin.html">
 <title>Administrace | PLOTAO.cz</title>
-<link rel="stylesheet" href="/assets/admin/admin-v1.css?v=1">
+<link rel="stylesheet" href="/assets/admin/admin-v1.css?v=20260930-3">
 </head>
 <body><div class="app">
 <aside class="side"><div class="brand">PLOTAO<em>.cz</em></div><nav class="nav">
@@ -25,4 +25,4 @@
 const titles={dashboard:'Přehled',customers:'Zákazníci',quotes:'Nabídky',leads:'Poptávky',companies:'Firmy',prices:'Ceníky',locations:'Lokality',settings:'Nastavení',emails:'E-maily'};
 function show(name){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id===name));document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('on',x.dataset.view===name));document.querySelector('#pageTitle').textContent=titles[name]||'Přehled';}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)show(b.dataset.view)});
-</script><script src="/assets/admin/admin-v1.js?v=20260930-2" defer></script><script src="/assets/admin/crm-v1.js?v=1" defer></script><script src="/assets/admin/quotes-v1.js?v=20260930-2" defer></script></body></html>
+</script><script src="/assets/admin/admin-v1.js?v=20260930-2" defer></script><script src="/assets/admin/crm-v1.js?v=1" defer></script><script src="/assets/admin/quotes-v1.js?v=20260930-3" defer></script></body></html>
