@@ -25,6 +25,7 @@ function cleanPartner(v){
 }
 
 function bytesToHex(bytes){return [...new Uint8Array(bytes)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+function bytesToBase64Url(bytes){let binary="";for(const byte of bytes)binary+=String.fromCharCode(byte);return btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"")}
 async function sha256(value){return bytesToHex(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value)))}
 const quoteUrl=(base,id,select="*")=>base+"/rest/v1/plotao_quotes?id=eq."+encodeURIComponent(id)+"&select="+encodeURIComponent(select);
 async function decideQuote(base,key,quoteId,status,source,note,actor,tokenHash=null){
@@ -99,7 +100,7 @@ Deno.serve(async req=>{
    const activeRes=await fetch(base+"/rest/v1/plotao_job_referrals?select=id&job_id=eq."+encodeURIComponent(job.id)+"&status=in.(sending,sent,accepted)",{headers:apiHeaders(key)});
    if(!activeRes.ok)return json({error:"job_referral_read_failed"},activeRes.status);
    if((await activeRes.json()).length)return json({error:"job_partner_already_assigned"},409);
-   const created=await fetch(base+"/rest/v1/plotao_job_referrals",{method:"POST",headers:{...apiHeaders(key),"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify({job_id:job.id,partner_id:partner.id,status:"sending",sent_by:ADMIN_EMAIL})});
+   const responseToken=bytesToBase64Url(crypto.getRandomValues(new Uint8Array(32)));\n   const responseTokenHash=await sha256(responseToken);\n   const created=await fetch(base+"/rest/v1/plotao_job_referrals",{method:"POST",headers:{...apiHeaders(key),"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify({job_id:job.id,partner_id:partner.id,status:"sending",sent_by:ADMIN_EMAIL,response_token_hash:responseTokenHash})});
    let referralRows;try{referralRows=await created.json()}catch{referralRows=null}
    if(!created.ok||!Array.isArray(referralRows)||!referralRows[0]?.id)return json({error:created.status===409?"job_partner_already_assigned":"job_referral_create_failed"},created.status===409?409:(created.status||500));
    const referral=referralRows[0],items=Array.isArray(job.plotao_job_items)?job.plotao_job_items:[];
@@ -115,7 +116,8 @@ Deno.serve(async req=>{
     "Požadovaný termín: "+(job.planned_start_at?new Date(job.planned_start_at).toLocaleDateString("cs-CZ"):"bude domluven"),
     "Poznámka: "+(job.note||lead.note||"bez poznámky")
    ];
-   const message=["Dobrý den, "+(partner.contact_name||""),"","PLOTAO.cz vám předává přijatou zakázku k potvrzení.",...params,"","Kontakt na zákazníka:","Jméno: "+(customer.full_name||lead.name||"neuvedeno"),"Telefon: "+(customer.phone||lead.phone||"neuveden"),"E-mail: "+(customer.email||lead.email||"neuveden"),"","Zákazník souhlasil s předáním kontaktu partnerské firmě PLOTAO.cz.","Prosíme odpovězte na tento e-mail, zda zakázku přijímáte nebo odmítáte. PLOTAO.cz vaši reakci zaznamená.","","PLOTAO.cz","https://plotao.cz"].join("\n");
+   const siteUrl=(Deno.env.get("PLOTAO_SITE_URL")?.trim()||"https://plotao.cz").replace(/\/$/,""),responseUrl=siteUrl+"/partner-odpoved.html?id="+encodeURIComponent(referral.id)+"&token="+encodeURIComponent(responseToken);
+   const message=["Dobrý den, "+(partner.contact_name||""),"","PLOTAO.cz vám předává přijatou zakázku k potvrzení.",...params,"","Kontakt na zákazníka:","Jméno: "+(customer.full_name||lead.name||"neuvedeno"),"Telefon: "+(customer.phone||lead.phone||"neuveden"),"E-mail: "+(customer.email||lead.email||"neuveden"),"","Zákazník souhlasil s předáním kontaktu partnerské firmě PLOTAO.cz.","","Potvrzení zakázky:",responseUrl,"","Odkaz je jednorázový. Otevřete jej a výslovně potvrďte přijetí nebo odmítnutí zakázky.","","PLOTAO.cz","https://plotao.cz"].join("\n");
    const resendKey=Deno.env.get("RESEND_API_KEY")?.trim();
    if(!resendKey){await fetch(base+"/rest/v1/plotao_job_referrals?id=eq."+encodeURIComponent(referral.id),{method:"PATCH",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({status:"failed",error_code:"resend_not_configured",updated_at:new Date().toISOString()})});return json({error:"resend_not_configured"},503)}
    let sendResponse;try{sendResponse=await fetch("https://api.resend.com/emails",{method:"POST",headers:{"Authorization":"Bearer "+resendKey,"Content-Type":"application/json","Idempotency-Key":"plotao-job-referral-"+referral.id},body:JSON.stringify({from:FROM_EMAIL,to:[partner.email],reply_to:ADMIN_EMAIL,subject:"Zakázka "+job.job_number+" k potvrzení – PLOTAO.cz",text:message})})}catch(error){console.error("job referral email network failure",error instanceof Error?error.message:"unknown");await fetch(base+"/rest/v1/plotao_job_referrals?id=eq."+encodeURIComponent(referral.id),{method:"PATCH",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({status:"failed",error_code:"network_failure",updated_at:new Date().toISOString()})});return json({error:"partner_email_failed"},502)}
