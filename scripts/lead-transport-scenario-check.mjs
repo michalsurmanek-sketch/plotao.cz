@@ -29,6 +29,7 @@ r=core.prepare({...payload,schemaVersion:1},{enabled:true,endpoint:'https://api.
 ok(r.ok===false&&r.code==='payload','unexpected payload schema must be blocked before network access');
 
 const adapter=fs.readFileSync('assets/lead-transport-v1.js','utf8'),config=fs.readFileSync('assets/lead-transport-config-v1.js','utf8'),safety=fs.readFileSync('assets/lead-safety-v1.js','utf8'),manifest=fs.readFileSync('scripts/pages-manifest.mjs','utf8'),index=fs.readFileSync('index.html','utf8');
+const modalCss=fs.readFileSync('assets/footer-2026.css','utf8');
 ok(config.includes('enabled:true')&&config.includes("endpoint:'https://jmukoccjqykyoqsypuwb.supabase.co/functions/v1/submit-lead'")&&config.includes("allowedOrigins:['https://jmukoccjqykyoqsypuwb.supabase.co']"),'production transport config must allow the Supabase endpoint origin');
 const productionWindow={};vm.runInNewContext(config,{window:productionWindow});
 const productionPrepare=core.prepare({...payload,mode:'help'},productionWindow.PLOTAO_LEAD_TRANSPORT_CONFIG);
@@ -40,6 +41,8 @@ ok(adapter.includes("id:typeof body?.id==='string'?body.id:''"),'successful deli
 ok(!adapter.includes('credentials:\'include\'')&&!adapter.includes('credentials:"include"'),'browser transport must never opt into cookie credentials');
 ok(safety.includes('function transportReady()')&&safety.includes("await copyDraft(result.data,b,'Odeslání se nepodařilo. Podklady nebyly ztraceny.')"),'form must preserve a safe copy fallback after delivery failure');
 ok(safety.includes('sessionStorage.removeItem(key(result.data.mode))'),'only a successfully delivered mode draft may be cleared');
+ok(safety.includes("requestAnimationFrame(()=>b.scrollIntoView({block:'nearest',behavior:'smooth'}))"),'successful delivery must scroll the confirmation into view');
+ok(modalCss.includes('#modal .modalbox{max-height:calc(100vh - 30px);max-height:calc(100dvh - 30px);overflow-x:hidden;overflow-y:auto'),'long modal content and confirmation must remain reachable within the viewport');
 const corePos=manifest.indexOf('/assets/lead-transport-core-v1.js'),configPos=manifest.indexOf('/assets/lead-transport-config-v1.js'),adapterPos=manifest.indexOf('/assets/lead-transport-v1.js'),safetyPos=manifest.indexOf('/assets/lead-safety-v1.js');
 ok(corePos>=0&&corePos<configPos&&configPos<adapterPos&&adapterPos<safetyPos,'production build must load transport core, explicit config, adapter, then form safety');
 ok(!index.includes('PLOTAO_LEAD_TRANSPORT_CONFIG'),'HTML must not inline backend configuration or secrets');
