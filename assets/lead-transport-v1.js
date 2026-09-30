@@ -13,4 +13,4 @@
     }catch(err){return{ok:false,code:err?.name==='AbortError'?'timeout':'network'}}finally{clearTimeout(timer)}
   }
   window.PLOTAO_LEAD_TRANSPORT={available,submit};
-})();
+})();(()=>{const c=window.PLOTAO_LEAD_TRANSPORT_CORE;if(!c)return;function q(){return window.PLOTAO_LEAD_TRANSPORT_CONFIG||{}}function available(){return c.prepare({schemaVersion:2,mode:'help',name:'Test User',phone:'777888999',email:'test@example.com'},q()).ok}async function submit(p){const x=c.prepare(p,q());if(!x.ok)return{ok:false,code:x.code};try{const r=await fetch(x.endpoint,x.request);return{ok:r.ok,status:r.status}}catch(e){return{ok:false,code:'network'}}}window.PLOTAO_LEAD_TRANSPORT={available,submit}})();
