@@ -23,6 +23,21 @@ function cleanPartner(v){
  if(ico&&!/^\d{8}$/.test(ico))return null;
  return{company_name,contact_name,email,phone,ico,registered_address,regions,fence_types,service_types,active:v.active!==false,updated_at:new Date().toISOString()};
 }
+const PRODUCT_CATEGORIES=["panel","mesh","concrete","gabion","aluminium","metal","masonry","gate","accessory","transport","other"];
+const PRODUCT_AVAILABILITY=["available","on_order","unavailable","made_to_order"];
+function cleanSupplier(v){
+ if(!v||typeof v!=="object")return null;
+ const company_name=String(v.company_name||"").trim().slice(0,160),contact_name=String(v.contact_name||"").trim().slice(0,120),email=String(v.email||"").trim().toLowerCase(),phone=String(v.phone||"").trim().slice(0,40),website=String(v.website||"").trim().slice(0,255),notes=String(v.notes||"").trim().slice(0,2000);
+ if(company_name.length<2||email&& !/^\S+@\S+\.\S+$/.test(email)||website&&!/^https?:\/\//i.test(website))return null;
+ return{company_name,contact_name,email,phone,website,notes,active:v.active!==false,updated_at:new Date().toISOString()};
+}
+function cleanProduct(v){
+ if(!v||typeof v!=="object")return null;
+ const name=String(v.name||"").trim().slice(0,200),sku=String(v.sku||"").trim().slice(0,80),category=String(v.category||"other").trim(),supplier_id=v.supplier_id==null||v.supplier_id===""?null:String(v.supplier_id),dimensions=String(v.dimensions||"").trim().slice(0,160),color=String(v.color||"").trim().slice(0,80),unit=String(v.unit||"ks").trim().slice(0,20),availability=String(v.availability||"available"),photo_url=String(v.photo_url||"").trim().slice(0,1000),notes=String(v.notes||"").trim().slice(0,2000),purchase_price=Number(v.purchase_price),sale_price=Number(v.sale_price),vat_percent=Number(v.vat_percent);
+ if(name.length<2||!PRODUCT_CATEGORIES.includes(category)||!PRODUCT_AVAILABILITY.includes(availability)||!unit||!Number.isFinite(purchase_price)||!Number.isFinite(sale_price)||!Number.isFinite(vat_percent)||purchase_price<0||sale_price<0||purchase_price>100000000||sale_price>100000000||vat_percent<0||vat_percent>100)return null;
+ if(supplier_id&&!validId(supplier_id)||photo_url&&!/^https?:\/\//i.test(photo_url))return null;
+ return{name,sku,category,supplier_id,dimensions,color,unit,availability,photo_url,notes,purchase_price,sale_price,vat_percent,active:v.active!==false,updated_by:ADMIN_EMAIL,updated_at:new Date().toISOString()};
+}
 
 function bytesToHex(bytes){return [...new Uint8Array(bytes)].map(x=>x.toString(16).padStart(2,"0")).join("")}
 function bytesToBase64Url(bytes){let binary="";for(const byte of bytes)binary+=String.fromCharCode(byte);return btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"")}
@@ -67,11 +82,47 @@ Deno.serve(async req=>{
    const r=await fetch(base+"/rest/v1/plotao_lead_referrals?select=*,plotao_partners(id,company_name,email)&order=created_at.desc&limit=1000",{headers:apiHeaders(key)});
    return json(await r.json(),r.status)
   }
+  if(resource==="products"){
+   const r=await fetch(base+"/rest/v1/plotao_products?select=*,plotao_suppliers(id,company_name)&order=name.asc&limit=2000",{headers:apiHeaders(key)});
+   return json(await r.json(),r.status)
+  }
+  if(resource==="suppliers"){
+   const r=await fetch(base+"/rest/v1/plotao_suppliers?select=*&order=company_name.asc&limit=1000",{headers:apiHeaders(key)});
+   return json(await r.json(),r.status)
+  }
+  if(resource==="product_price_history"){
+   const r=await fetch(base+"/rest/v1/plotao_product_price_history?select=*&order=changed_at.desc&limit=2000",{headers:apiHeaders(key)});
+   return json(await r.json(),r.status)
+  }
+  if(resource==="competitor_prices"){
+   const params=new URL(req.url).searchParams;
+   const offset=Math.max(0,Math.min(10000,Number.parseInt(params.get("offset")||"0",10)||0));
+   const r=await fetch(base+"/rest/v1/plotao_competitor_prices?select=id,source_sku,product_name,source_category,source_url,price_net,price_gross,availability,observed_at&source_key=eq.ploty-dobry&order=product_name.asc&limit=1000&offset="+offset,{headers:apiHeaders(key)});
+   return json(await r.json(),r.status)
+  }
   const r=await fetch(base+"/rest/v1/plotao_leads?select=*&order=created_at.desc&limit=500",{headers:apiHeaders(key)});
   return json(await r.json(),r.status)
  }
  if(req.method==="POST"){
   let b;try{b=await req.json()}catch{return json({error:"invalid_json"},400)}
+  if(b.action==="save_product"){
+   if(b.product_id!=null&&!validId(b.product_id))return json({error:"invalid_product_id"},422);
+   const product=cleanProduct(b.product);if(!product)return json({error:"invalid_product"},422);
+   const url=b.product_id?base+"/rest/v1/plotao_products?id=eq."+encodeURIComponent(b.product_id):base+"/rest/v1/plotao_products";
+   const r=await fetch(url,{method:b.product_id?"PATCH":"POST",headers:{...apiHeaders(key),"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify(product)});
+   let data;try{data=await r.json()}catch{data=null}
+   if(!r.ok)return json({error:r.status===409?"product_sku_exists":"product_save_failed"},r.status);
+   const row=Array.isArray(data)?data[0]:data;if(!row)return json({error:"product_save_failed"},500);return json(row,b.product_id?200:201)
+  }
+  if(b.action==="save_supplier"){
+   if(b.supplier_id!=null&&!validId(b.supplier_id))return json({error:"invalid_supplier_id"},422);
+   const supplier=cleanSupplier(b.supplier);if(!supplier)return json({error:"invalid_supplier"},422);
+   const url=b.supplier_id?base+"/rest/v1/plotao_suppliers?id=eq."+encodeURIComponent(b.supplier_id):base+"/rest/v1/plotao_suppliers";
+   const r=await fetch(url,{method:b.supplier_id?"PATCH":"POST",headers:{...apiHeaders(key),"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify(supplier)});
+   let data;try{data=await r.json()}catch{data=null}
+   if(!r.ok)return json({error:"supplier_save_failed"},r.status);
+   const row=Array.isArray(data)?data[0]:data;if(!row)return json({error:"supplier_save_failed"},500);return json(row,b.supplier_id?200:201)
+  }
   if(b.action==="dispatch_job"){
    if(!validId(b.job_id)||!validId(b.partner_id))return json({error:"invalid_job_or_partner"},422);
    const jobRes=await fetch(base+"/rest/v1/plotao_jobs?id=eq."+encodeURIComponent(b.job_id)+"&select=*,plotao_leads(id,name,email,phone,place,region,note,payload),plotao_customers(id,full_name,email,phone),plotao_quotes(id,quote_number,status),plotao_job_items(*)&limit=1",{headers:apiHeaders(key)});
