@@ -3,6 +3,7 @@ import fs from 'node:fs';
 const fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 const pages=fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort();
 const privacyPage='ochrana-osobnich-udaju.html';
+const utilityNoindexPages=new Set([privacyPage,'nabidka-rozhodnuti.html']);
 const buildCanonicalPages=new Set(['eshop.html']);
 const titles=new Map(),canonicals=new Map();
 
@@ -49,6 +50,7 @@ for(const file of pages){
   else ok(can===expected,`${file}: canonical must be ${expected}`);
   if(can){ok(!canonicals.has(can),`${file}: duplicate canonical also used by ${canonicals.get(can)}`);canonicals.set(can,file)}
   const h1=(html.match(/<h1\b/gi)||[]).length;ok(h1===1,`${file}: expected exactly one H1, got ${h1}`);
+  if(utilityNoindexPages.has(file))ok(metaBy(html,'name','robots').toLowerCase()==='noindex,follow',`${file}: utility page must stay noindex,follow`);
   for(const img of html.match(/<img\b[^>]*>/gi)||[])ok(/\balt=["'][^"']*["']/i.test(img),`${file}: image missing alt attribute: ${img.slice(0,100)}`);
 }
 
@@ -89,10 +91,10 @@ for(const file of Object.keys(landingType)){
 
 const sitemap=fs.readFileSync('sitemap.xml','utf8');
 const urls=[...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1].trim());
-const indexablePages=pages.filter(f=>f!==privacyPage);
+const indexablePages=pages.filter(f=>!utilityNoindexPages.has(f));
 const expectedUrls=indexablePages.map(f=>f==='index.html'?'https://plotao.cz/':`https://plotao.cz/${f}`);
 for(const u of expectedUrls)ok(urls.includes(u),`sitemap.xml: missing indexable URL ${u}`);
-ok(!urls.includes(`https://plotao.cz/${privacyPage}`),`sitemap.xml: noindex privacy page must stay excluded`);
+for(const file of utilityNoindexPages)ok(!urls.includes(`https://plotao.cz/${file}`),`sitemap.xml: noindex utility page must stay excluded: ${file}`);
 for(const u of urls){ok(u.startsWith('https://plotao.cz/'),`sitemap.xml: foreign/non-HTTPS URL ${u}`);ok(expectedUrls.includes(u),`sitemap.xml: URL is not an indexable public discovery page: ${u}`)}
 ok(new Set(urls).size===urls.length,'sitemap.xml: duplicate URL');
 const lastmods=[...sitemap.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map(m=>m[1]);
