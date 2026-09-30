@@ -55,7 +55,7 @@ Deno.serve(async req=>{
    return json(await r.json(),r.status)
   }
   if(resource==="jobs"){
-   const r=await fetch(base+"/rest/v1/plotao_jobs?select=*,plotao_customers(id,full_name,email,phone),plotao_leads(id,name,email,phone,place,region,payload),plotao_quotes(id,quote_number,status),plotao_job_items(*)&order=created_at.desc&limit=1000",{headers:apiHeaders(key)});
+   const r=await fetch(base+"/rest/v1/plotao_jobs?select=*,plotao_customers(id,full_name,email,phone),plotao_leads(id,name,email,phone,place,region,payload),plotao_quotes(id,quote_number,status),plotao_job_items(*),plotao_job_referrals(*,plotao_partners(id,company_name,email,phone,contact_name,active,regions,fence_types,service_types))&order=created_at.desc&limit=1000",{headers:apiHeaders(key)});
    return json(await r.json(),r.status)
   }
   if(resource==="partners"){
@@ -71,6 +71,64 @@ Deno.serve(async req=>{
  }
  if(req.method==="POST"){
   let b;try{b=await req.json()}catch{return json({error:"invalid_json"},400)}
+  if(b.action==="dispatch_job"){
+   if(!validId(b.job_id)||!validId(b.partner_id))return json({error:"invalid_job_or_partner"},422);
+   const jobRes=await fetch(base+"/rest/v1/plotao_jobs?id=eq."+encodeURIComponent(b.job_id)+"&select=*,plotao_leads(id,name,email,phone,place,region,note,payload),plotao_customers(id,full_name,email,phone),plotao_quotes(id,quote_number,status),plotao_job_items(*)&limit=1",{headers:apiHeaders(key)});
+   if(!jobRes.ok)return json({error:"job_read_failed"},jobRes.status);
+   const jobRows=await jobRes.json(),job=jobRows[0];if(!job)return json({error:"job_not_found"},404);
+   if(["completed","cancelled","complaint"].includes(job.status))return json({error:"job_not_dispatchable"},409);
+   const lead=job.plotao_leads||{},payload=lead.payload||job.plotao_quotes?.source_snapshot||{};
+   if(payload.partner_share_consent!==true)return json({error:"partner_consent_required"},409);
+   const region=regionForLead(lead);
+   if(!region)return json({error:"partner_region_required"},409);
+   const partnerRes=await fetch(partnerUrl(base,b.partner_id),{headers:apiHeaders(key)});
+   if(!partnerRes.ok)return json({error:"partner_read_failed"},partnerRes.status);
+   const partnerRows=await partnerRes.json(),partner=partnerRows[0];if(!partner)return json({error:"partner_not_found"},404);
+   if(!partner.active)return json({error:"partner_inactive"},409);
+   if(!Array.isArray(partner.regions)||!partner.regions.includes(region))return json({error:"partner_region_mismatch"},409);
+   const fenceType=String(payload.fenceType||"");
+   const typeKnown=fenceType&&!["neupresneno","kalkulatorplotu","poraditsvyberem"].includes(norm(fenceType));
+   const typeMatches=!typeKnown||partner.fence_types?.includes("Všechny typy")||(Array.isArray(partner.fence_types)&&partner.fence_types.some(t=>norm(fenceType).includes(norm(t))||norm(t).includes(norm(fenceType))));
+   if(!typeMatches)return json({error:"partner_type_mismatch"},409);
+   const scope=String(payload.scopeValue||"material"),services=Array.isArray(partner.service_types)?partner.service_types:["material_only"];
+   const installNeeded=scope==="turnkey"||scope==="installation",materialNeeded=scope!=="installation";
+   const serviceMatches=(!installNeeded||services.includes("installation_material")||services.includes("installation_only"))&&(!materialNeeded||services.includes("installation_material")||services.includes("material_only"));
+   if(!serviceMatches)return json({error:"partner_service_mismatch"},409);
+   const customer=job.plotao_customers||{};
+   if(!customer.email&&!customer.phone)return json({error:"job_has_no_customer_contact"},409);
+   const activeRes=await fetch(base+"/rest/v1/plotao_job_referrals?select=id&job_id=eq."+encodeURIComponent(job.id)+"&status=in.(sending,sent,accepted)",{headers:apiHeaders(key)});
+   if(!activeRes.ok)return json({error:"job_referral_read_failed"},activeRes.status);
+   if((await activeRes.json()).length)return json({error:"job_partner_already_assigned"},409);
+   const created=await fetch(base+"/rest/v1/plotao_job_referrals",{method:"POST",headers:{...apiHeaders(key),"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify({job_id:job.id,partner_id:partner.id,status:"sending",sent_by:ADMIN_EMAIL})});
+   let referralRows;try{referralRows=await created.json()}catch{referralRows=null}
+   if(!created.ok||!Array.isArray(referralRows)||!referralRows[0]?.id)return json({error:created.status===409?"job_partner_already_assigned":"job_referral_create_failed"},created.status===409?409:(created.status||500));
+   const referral=referralRows[0],items=Array.isArray(job.plotao_job_items)?job.plotao_job_items:[];
+   const params=[
+    "Zakázka PLOTAO.cz: "+job.job_number,
+    "Přijatá nabídka: "+(job.plotao_quotes?.quote_number||"—"),
+    "Místo realizace: "+(job.site_address||lead.place||"neuvedeno"),
+    "Kraj: "+region,
+    "Typ oplocení: "+(fenceType||"bude upřesněn"),
+    "Rozsah služby: "+(payload.scope||scope||"bude upřesněn"),
+    "Položky zakázky:",
+    ...items.map((x,i)=>(i+1)+". "+x.product_name+" · "+x.quantity+" "+x.unit+(x.description?" · "+x.description:"")),
+    "Požadovaný termín: "+(job.planned_start_at?new Date(job.planned_start_at).toLocaleDateString("cs-CZ"):"bude domluven"),
+    "Poznámka: "+(job.note||lead.note||"bez poznámky")
+   ];
+   const message=["Dobrý den, "+(partner.contact_name||""),"","PLOTAO.cz vám předává přijatou zakázku k potvrzení.",...params,"","Kontakt na zákazníka:","Jméno: "+(customer.full_name||lead.name||"neuvedeno"),"Telefon: "+(customer.phone||lead.phone||"neuveden"),"E-mail: "+(customer.email||lead.email||"neuveden"),"","Zákazník souhlasil s předáním kontaktu partnerské firmě PLOTAO.cz.","Prosíme odpovězte na tento e-mail, zda zakázku přijímáte nebo odmítáte. PLOTAO.cz vaši reakci zaznamená.","","PLOTAO.cz","https://plotao.cz"].join("\n");
+   const resendKey=Deno.env.get("RESEND_API_KEY")?.trim();
+   if(!resendKey){await fetch(base+"/rest/v1/plotao_job_referrals?id=eq."+encodeURIComponent(referral.id),{method:"PATCH",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({status:"failed",error_code:"resend_not_configured",updated_at:new Date().toISOString()})});return json({error:"resend_not_configured"},503)}
+   let sendResponse;try{sendResponse=await fetch("https://api.resend.com/emails",{method:"POST",headers:{"Authorization":"Bearer "+resendKey,"Content-Type":"application/json","Idempotency-Key":"plotao-job-referral-"+referral.id},body:JSON.stringify({from:FROM_EMAIL,to:[partner.email],reply_to:ADMIN_EMAIL,subject:"Zakázka "+job.job_number+" k potvrzení – PLOTAO.cz",text:message})})}catch(error){console.error("job referral email network failure",error instanceof Error?error.message:"unknown");await fetch(base+"/rest/v1/plotao_job_referrals?id=eq."+encodeURIComponent(referral.id),{method:"PATCH",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({status:"failed",error_code:"network_failure",updated_at:new Date().toISOString()})});return json({error:"partner_email_failed"},502)}
+   let sent={};try{sent=await sendResponse.json()}catch{}
+   if(!sendResponse.ok){console.error("job referral email rejected",sendResponse.status,sent?.name||"");await fetch(base+"/rest/v1/plotao_job_referrals?id=eq."+encodeURIComponent(referral.id),{method:"PATCH",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({status:"failed",error_code:"provider_rejected",updated_at:new Date().toISOString()})});return json({error:"partner_email_failed"},502)}
+   const now=new Date().toISOString();
+   const saved=await fetch(base+"/rest/v1/plotao_job_referrals?id=eq."+encodeURIComponent(referral.id),{method:"PATCH",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({status:"sent",sent_at:now,provider_id:typeof sent.id==="string"?sent.id:null,updated_at:now})});
+   if(!saved.ok)return json({error:"partner_send_record_failed",email_sent:true},502);
+   const jobSaved=await fetch(base+"/rest/v1/plotao_jobs?id=eq."+encodeURIComponent(job.id),{method:"PATCH",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({partner_id:partner.id,updated_at:now})});
+   if(!jobSaved.ok)return json({error:"partner_send_record_failed",email_sent:true},502);
+   await fetch(leadUrl(base,lead.id),{method:"PATCH",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({status:"partner_assigned",partner_name:partner.company_name,region,updated_at:now})});
+   return json({ok:true,email_sent:true,referral_id:referral.id,partner_name:partner.company_name,sent_at:now},200)
+  }
   if(b.action==="create_job_from_quote"){
    if(!validId(b.quote_id))return json({error:"invalid_quote_id"},422);
    const created=await fetch(base+"/rest/v1/rpc/plotao_create_job_from_quote",{method:"POST",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({p_quote_id:b.quote_id,p_actor:ADMIN_EMAIL})});
@@ -123,6 +181,28 @@ Deno.serve(async req=>{
  }
  if(req.method==="PATCH"){
   let b;try{b=await req.json()}catch{return json({error:"invalid_json"},400)}
+  if(b.action==="update_job"){
+   if(!validId(b.job_id))return json({error:"invalid_job_id"},422);
+   const statuses=["preparing","material_ordered","material_delivered","scheduled","in_progress","paused","completed","cancelled","complaint"];
+   if(!statuses.includes(b.status))return json({error:"invalid_job_status"},422);
+   if(typeof b.site_address!=="string"||b.site_address.trim().length>255)return json({error:"invalid_site_address"},422);
+   if(typeof b.region!=="string"||(b.region!==""&&!PARTNER_REGIONS.includes(b.region)))return json({error:"invalid_region"},422);
+   const validDate=v=>v===null||v===""||(typeof v==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(Date.parse(v)));
+   if(!validDate(b.planned_start_at)||!validDate(b.planned_end_at))return json({error:"invalid_job_date"},422);
+   if(typeof b.note!=="string"||b.note.length>4000)return json({error:"invalid_job_note"},422);
+   const saved=await fetch(base+"/rest/v1/rpc/plotao_update_job",{method:"POST",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({p_job_id:b.job_id,p_status:b.status,p_site_address:b.site_address.trim(),p_region:b.region,p_planned_start:b.planned_start_at||null,p_planned_end:b.planned_end_at||null,p_note:b.note.trim(),p_actor:ADMIN_EMAIL})});
+   let data;try{data=await saved.json()}catch{data=null}
+   if(!saved.ok)return json({error:saved.status===400?"job_validation_failed":"job_save_failed"},saved.status===400?422:saved.status);
+   return json(Array.isArray(data)?data[0]:data,200)
+  }
+  if(b.action==="update_job_referral"){
+   if(!validId(b.referral_id)||!["accepted","declined","withdrawn"].includes(b.status))return json({error:"invalid_job_referral_update"},422);
+   const note=typeof b.response_note==="string"?b.response_note.trim().slice(0,1000):"";
+   const saved=await fetch(base+"/rest/v1/rpc/plotao_update_job_referral",{method:"POST",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({p_referral_id:b.referral_id,p_status:b.status,p_response_note:note,p_actor:ADMIN_EMAIL})});
+   let data;try{data=await saved.json()}catch{data=null}
+   if(!saved.ok)return json({error:saved.status===400?"job_referral_not_active":"job_referral_save_failed"},saved.status===400?409:saved.status);
+   return json(Array.isArray(data)?data[0]:data,200)
+  }
   if(b.action==="send_quote"){
    if(!validId(b.quote_id))return json({error:"invalid_quote_id"},422);
    const read=await fetch(quoteUrl(base,b.quote_id,"*,plotao_customers(id,full_name,email,phone),plotao_leads(id,name,email,phone,place,payload),plotao_quote_items(*)"),{headers:apiHeaders(key)});
@@ -158,7 +238,7 @@ Deno.serve(async req=>{
    if(!Number.isFinite(discount)||discount<0||discount>100)return json({error:"invalid_discount"},422);
    const note=typeof b.note==="string"?b.note.trim().slice(0,4000):"";
    const validUntil=b.valid_until===""?null:b.valid_until;
-   if(validUntil!==null&&(typeof validUntil!=="string"||!/^\\d{4}-\\d{2}-\\d{2}$/.test(validUntil)||!Number.isFinite(Date.parse(validUntil))))return json({error:"invalid_valid_until"},422);
+   if(validUntil!==null&&(typeof validUntil!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(validUntil)||!Number.isFinite(Date.parse(validUntil))))return json({error:"invalid_valid_until"},422);
    if(!Array.isArray(b.items)||b.items.length<1||b.items.length>100)return json({error:"invalid_quote_items"},422);
    const items=[];
    for(let i=0;i<b.items.length;i++){
