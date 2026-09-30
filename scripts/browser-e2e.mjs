@@ -45,6 +45,33 @@ async function runScenario(name,viewport,scenario){
   }
 }
 
+await runScenario('help-submit-confirmation-mobile',{width:390,height:740},async page=>{
+  let requests=0;
+  await page.route('**/functions/v1/submit-lead',async route=>{
+    requests++;
+    await route.fulfill({status:201,contentType:'application/json',body:JSON.stringify({id:'e2e-help-request'})});
+  });
+  await page.locator('#help').click();
+  const modal=page.locator('#modal');
+  await modal.waitFor({state:'visible'});
+  await page.locator('#form input[name="name"]').fill('Testovací klient');
+  await page.locator('#form input[name="phone"]').fill('+420777123456');
+  await page.locator('#form input[name="email"]').fill('test@example.cz');
+  await page.locator('#form textarea[name="note"]').fill('Testovací dotaz pro kontrolu zobrazení.');
+  await page.locator('#form .send').click();
+  const status=page.locator('#leadSafetyStatus');
+  await page.waitForFunction(()=>document.querySelector('#leadSafetyStatus')?.textContent?.startsWith('Odesláno.'),null,{timeout:5000});
+  assert(requests===1,'help form must send exactly one request to the intercepted test endpoint');
+  assert((await text(status)).includes('e2e-help-request'),'confirmation must show the returned request number');
+  const visible=await page.waitForFunction(()=>{
+    const modal=document.querySelector('#modal .modalbox'),notice=document.querySelector('#leadSafetyStatus');
+    if(!modal||!notice)return false;
+    const outer=modal.getBoundingClientRect(),inner=notice.getBoundingClientRect();
+    return inner.top>=outer.top-1&&inner.bottom<=outer.bottom+1&&inner.bottom<=inner.top+inner.height;
+  },null,{timeout:5000});
+  assert(Boolean(visible),'complete success confirmation must be visible inside the scrollable mobile dialog');
+});
+
 await runScenario('desktop',{width:1440,height:1000},async page=>{
   assert(await page.locator('h1').isVisible(),'desktop H1 must be visible');
   const skip=page.locator('[data-plotao-skip-link="1"]');
