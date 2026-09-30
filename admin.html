@@ -60,4 +60,4 @@ const save=e.target.closest('[data-save]');if(save){const row=document.querySele
 document.addEventListener('change',async e=>{const sel=e.target.closest('[data-quick]');if(!sel)return;try{const x=await patch(sel.dataset.quick,{status:sel.value});leads=leads.map(v=>v.id===x.id?x:v);render()}catch{authBox('Stav se nepodařilo uložit. Přihlaste se znovu.')}});
 document.querySelector('#admLogin').onclick=async()=>{const m=document.querySelector('#admMsg');m.textContent='Ověřuji přihlášení…';try{const r=await fetch(AUTH,{method:'POST',headers:{apikey:K,'Content-Type':'application/json'},body:JSON.stringify({email:document.querySelector('#admEmail').value,password:document.querySelector('#admPass').value})}),j=await r.json();if(!r.ok||!j.access_token)throw Error('Přihlášení se nepodařilo. Ověřte e-mail, heslo a přístup správce.');localStorage.setItem('plotao.auth',JSON.stringify(j));await load(j.access_token)}catch(e){m.textContent=e.message}};
 const session=saved();if(session?.access_token){load(session.access_token).catch(()=>authBox('Přihlášení vypršelo. Zadejte prosím přihlašovací údaje.'))}else authBox();
-})();</body></html>
+})();</script></body></html>
