@@ -14,11 +14,11 @@ Deno.serve(async req=>{
  if(req.method==="GET"){
   const url=new URL(req.url),id=url.searchParams.get("id")||"",token=url.searchParams.get("token")||"";
   if(!validId(id)||!/^[A-Za-z0-9_-]{40,100}$/.test(token))return json({error:"invalid_decision_link"},400,origin);
-  const result=await fetch(quoteUrl(base,id,"id,quote_number,status,decision_token_hash"),{headers:headers(key)});
+  const result=await fetch(quoteUrl(base,id,"id,quote_number,status,decision_token_hash,valid_until,note,discount_percent,source_snapshot,plotao_quote_items(product_name,description,quantity,unit,sale_unit_price,discount_percent,vat_percent,net_total,vat_total)"),{headers:headers(key)});
   if(!result.ok)return json({error:"quote_read_failed"},result.status,origin);
   const rows=await result.json(),quote=rows[0];
   if(!quote||quote.status!=="sent"||quote.decision_token_hash!==await hash(token))return json({error:"decision_link_unavailable"},404,origin);
-  return json({quote_number:quote.quote_number,status:quote.status},200,origin)
+  const discount=1-(Number(quote.discount_percent)||0)/100,items=(quote.plotao_quote_items||[]).map(item=>({product_name:item.product_name,description:item.description,quantity:item.quantity,unit:item.unit,sale_unit_price:item.sale_unit_price,net_total:Number(item.net_total||0)*discount,vat_total:Number(item.vat_total||0)*discount})),net=items.reduce((sum,item)=>sum+item.net_total,0),vat=items.reduce((sum,item)=>sum+item.vat_total,0);return json({quote_number:quote.quote_number,status:quote.status,valid_until:quote.valid_until,note:quote.note,source_snapshot:quote.source_snapshot,items,net_total:net,vat_total:vat,gross_total:net+vat},200,origin)
  }
  if(req.method==="POST"){
   let body;try{body=await req.json()}catch{return json({error:"invalid_json"},400,origin)}
