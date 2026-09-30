@@ -574,3 +574,96 @@ end;
 $$;
 revoke all on function public.plotao_create_job_from_quote(uuid,text) from public,anon,authenticated;
 grant execute on function public.plotao_create_job_from_quote(uuid,text) to service_role;
+
+
+-- Job dispatch, response tracking and atomic workflow controls added 2026-09-30.
+create table if not exists public.plotao_job_referrals (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  job_id uuid not null references public.plotao_jobs(id) on delete cascade,
+  partner_id uuid not null references public.plotao_partners(id) on delete restrict,
+  status text not null default 'sending' check (status in ('sending','sent','accepted','declined','withdrawn','failed')),
+  sent_at timestamptz,
+  sent_by text not null,
+  provider text not null default 'resend',
+  provider_id text,
+  response_at timestamptz,
+  response_note text not null default '' check (char_length(response_note)<=1000),
+  error_code text not null default '' check (char_length(error_code)<=80),
+  response_by text not null default ''
+);
+alter table public.plotao_job_referrals add column if not exists response_by text not null default '';
+create unique index if not exists plotao_one_active_referral_per_job on public.plotao_job_referrals(job_id) where status in ('sending','sent','accepted');
+create index if not exists plotao_job_referrals_job_created_idx on public.plotao_job_referrals(job_id,created_at desc);
+create index if not exists plotao_job_referrals_partner_created_idx on public.plotao_job_referrals(partner_id,created_at desc);
+alter table public.plotao_job_referrals enable row level security;
+revoke all on public.plotao_job_referrals from public,anon,authenticated;
+grant select,insert,update,delete on public.plotao_job_referrals to service_role;
+alter table public.plotao_audit_log drop constraint if exists plotao_audit_log_entity_type_check;
+alter table public.plotao_audit_log add constraint plotao_audit_log_entity_type_check check (entity_type in ('lead','customer','address','quote','quote_item','job','job_item','partner','referral','job_referral'));
+
+create or replace function public.plotao_audit_business_row()
+returns trigger language plpgsql security definer set search_path=public,pg_temp as $$
+declare old_data jsonb; new_data jsonb; row_id uuid; entity text; actor text; action_name text;
+begin
+  entity:=case tg_table_name
+    when 'plotao_leads' then 'lead' when 'plotao_customers' then 'customer'
+    when 'plotao_customer_addresses' then 'address' when 'plotao_partners' then 'partner'
+    when 'plotao_lead_referrals' then 'referral' when 'plotao_job_referrals' then 'job_referral'
+    when 'plotao_quotes' then 'quote' when 'plotao_quote_items' then 'quote_item'
+    when 'plotao_jobs' then 'job' when 'plotao_job_items' then 'job_item'
+    else 'customer' end;
+  actor:=coalesce(nullif((nullif(current_setting('request.jwt.claims',true),'')::jsonb)->>'email',''),case when tg_op='INSERT' and entity in ('lead','customer','address') then 'web intake' else 'michalsurmanek@seznam.cz' end);
+  if tg_op='INSERT' then new_data:=to_jsonb(new)-'communication';row_id:=(new_data->>'id')::uuid;action_name:='created';old_data:=null;
+  elsif tg_op='UPDATE' then old_data:=to_jsonb(old)-'communication';new_data:=to_jsonb(new)-'communication';row_id:=(new_data->>'id')::uuid;if old_data=new_data then return new;end if;action_name:=case when old_data->>'status' is distinct from new_data->>'status' then 'status_changed' else 'updated' end;
+  else old_data:=to_jsonb(old)-'communication';row_id:=(old_data->>'id')::uuid;new_data:=null;action_name:='deleted';end if;
+  insert into public.plotao_audit_log(entity_type,entity_id,action,actor_email,before_data,after_data) values(entity,row_id,action_name,actor,old_data,new_data);
+  if tg_op='DELETE' then return old;end if;return new;
+end;$$;
+drop trigger if exists plotao_job_referrals_audit on public.plotao_job_referrals;
+create trigger plotao_job_referrals_audit after insert or update or delete on public.plotao_job_referrals for each row execute function public.plotao_audit_business_row();
+
+create or replace function public.plotao_update_job(p_job_id uuid,p_status text,p_site_address text,p_region text,p_planned_start date,p_planned_end date,p_note text,p_actor text default '')
+returns public.plotao_jobs language plpgsql security definer set search_path=public,pg_temp as $$
+declare saved public.plotao_jobs;
+begin
+ if p_status not in ('preparing','material_ordered','material_delivered','scheduled','in_progress','paused','completed','cancelled','complaint') then raise exception 'invalid job status'; end if;
+ if char_length(coalesce(p_site_address,''))>255 or char_length(coalesce(p_note,''))>4000 then raise exception 'job field too long'; end if;
+ if nullif(coalesce(p_region,''),'') is not null and p_region not in ('Hlavní město Praha','Středočeský kraj','Jihočeský kraj','Plzeňský kraj','Karlovarský kraj','Ústecký kraj','Liberecký kraj','Královéhradecký kraj','Pardubický kraj','Kraj Vysočina','Jihomoravský kraj','Olomoucký kraj','Zlínský kraj','Moravskoslezský kraj') then raise exception 'invalid region'; end if;
+ update public.plotao_jobs set status=p_status,site_address=btrim(coalesce(p_site_address,'')),
+  planned_start_at=case when p_planned_start is null then null else (p_planned_start::timestamp+time '09:00') at time zone 'Europe/Prague' end,
+  planned_end_at=case when p_planned_end is null then null else (p_planned_end::timestamp+time '17:00') at time zone 'Europe/Prague' end,
+  completed_at=case when p_status='completed' then coalesce(completed_at,now()) else null end,
+  note=btrim(coalesce(p_note,'')),updated_at=now()
+ where id=p_job_id returning * into saved;
+ if saved.id is null then raise exception 'job not found'; end if;
+ update public.plotao_leads set region=coalesce(p_region,''),updated_at=now() where id=saved.lead_id;
+ return saved;
+end;$$;
+revoke all on function public.plotao_update_job(uuid,text,text,text,date,date,text,text) from public,anon,authenticated;
+grant execute on function public.plotao_update_job(uuid,text,text,text,date,date,text,text) to service_role;
+
+create or replace function public.plotao_update_job_referral(p_referral_id uuid,p_status text,p_response_note text,p_actor text)
+returns public.plotao_job_referrals language plpgsql security definer set search_path=public,pg_temp as $$
+declare ref public.plotao_job_referrals; saved public.plotao_job_referrals; firm text; lead_key uuid;
+begin
+ if p_status not in ('accepted','declined','withdrawn') then raise exception 'invalid response'; end if;
+ if char_length(coalesce(p_response_note,''))>1000 then raise exception 'response note too long'; end if;
+ select * into ref from public.plotao_job_referrals where id=p_referral_id for update;
+ if ref.id is null then raise exception 'referral not found'; end if;
+ if ref.status not in ('sent','accepted') then raise exception 'referral is not awaiting a response'; end if;
+ update public.plotao_job_referrals set status=p_status,response_at=now(),response_note=btrim(coalesce(p_response_note,'')),response_by=left(coalesce(p_actor,''),254),updated_at=now() where id=ref.id returning * into saved;
+ select lead_id into lead_key from public.plotao_jobs where id=ref.job_id;
+ if p_status='accepted' then
+  update public.plotao_jobs set partner_id=ref.partner_id,updated_at=now() where id=ref.job_id;
+  select company_name into firm from public.plotao_partners where id=ref.partner_id;
+  update public.plotao_leads set status='partner_assigned',partner_name=coalesce(firm,''),updated_at=now() where id=lead_key;
+ else
+  update public.plotao_jobs set partner_id=null,updated_at=now() where id=ref.job_id and partner_id=ref.partner_id;
+  update public.plotao_leads set status='ordered',partner_name='',updated_at=now() where id=lead_key;
+ end if;
+ return saved;
+end;$$;
+revoke all on function public.plotao_update_job_referral(uuid,text,text,text) from public,anon,authenticated;
+grant execute on function public.plotao_update_job_referral(uuid,text,text,text) to service_role;
