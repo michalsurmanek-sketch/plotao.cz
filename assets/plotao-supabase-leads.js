@@ -24,7 +24,7 @@
       });
       const result=await response.json().catch(()=>({}));
       if(!response.ok)throw new Error(result.error||'send_failed');
-      if(status)status.textContent='Odesláno. Brzy se vám ozveme.';
+      if(status)status.textContent=result.email_sent===true?'Poptávku jsme přijali a poslali potvrzení na e-mail.':payload.lead?.email?'Poptávku jsme přijali, ale potvrzovací e-mail se nepodařilo odeslat. Ozveme se vám.':'Odesláno. Brzy se vám ozveme telefonicky.';
       return result;
     }catch(error){
       console.warn('PLOTAO lead submit failed',error);
