@@ -23,6 +23,14 @@ function cleanPartner(v){
  if(ico&&!/^\d{8}$/.test(ico))return null;
  return{company_name,contact_name,email,phone,ico,registered_address,regions,fence_types,service_types,active:v.active!==false,updated_at:new Date().toISOString()};
 }
+
+function bytesToHex(bytes){return [...new Uint8Array(bytes)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+async function sha256(value){return bytesToHex(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(value)))}
+const quoteUrl=(base,id,select="*")=>base+"/rest/v1/plotao_quotes?id=eq."+encodeURIComponent(id)+"&select="+encodeURIComponent(select);
+async function decideQuote(base,key,quoteId,status,source,note,actor,tokenHash=null){
+ const r=await fetch(base+"/rest/v1/rpc/plotao_set_quote_decision",{method:"POST",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({p_quote_id:quoteId,p_status:status,p_source:source,p_note:note,p_actor:actor,p_token_hash:tokenHash})});
+ let data;try{data=await r.json()}catch{data=null}return{response:r,data}
+}
 function regionForLead(lead){
  const value=String(lead.region||lead.payload?.region||"")+" "+String(lead.place||"")+" "+String(lead.payload?.placeFromCalculator||"");
  return PARTNER_REGIONS.find(region=>norm(value).includes(norm(region)))||"";
@@ -34,8 +42,16 @@ Deno.serve(async req=>{
  if(!base||!key)return json({error:"server_config"},500);
  if(req.method==="GET"){
   const resource=new URL(req.url).searchParams.get("resource")||"leads";
+  if(resource==="quote_decision"){
+   const id=url.searchParams.get("id")||"",token=url.searchParams.get("token")||"";
+   if(!validId(id)||!/^[A-Za-z0-9_-]{40,100}$/.test(token))return json({error:"invalid_decision_link"},400);
+   const hash=await sha256(token),found=await fetch(quoteUrl(base,id,"id,quote_number,status,decision_token_hash"),{headers:apiHeaders(key)});
+   if(!found.ok)return json({error:"quote_read_failed"},found.status);
+   const rows=await found.json(),q=rows[0];if(!q||q.status!=="sent"||q.decision_token_hash!==hash)return json({error:"decision_link_unavailable"},404);
+   return json({quote_number:q.quote_number,status:q.status})
+  }
   if(resource==="quotes"){
-   const r=await fetch(base+"/rest/v1/plotao_quotes?select=*,plotao_customers(id,full_name,email,phone),plotao_leads(id,name,email,phone,place,region,payload),plotao_quote_items(*)&order=created_at.desc&limit=1000",{headers:apiHeaders(key)});
+   const r=await fetch(base+"/rest/v1/plotao_quotes?select=*,plotao_customers(id,full_name,email,phone),plotao_leads(id,name,email,phone,place,region,payload),plotao_quote_items(*),plotao_quote_events(*)&order=created_at.desc&limit=1000",{headers:apiHeaders(key)});
    return json(await r.json(),r.status)
   }
   if(resource==="partners"){
@@ -51,6 +67,16 @@ Deno.serve(async req=>{
  }
  if(req.method==="POST"){
   let b;try{b=await req.json()}catch{return json({error:"invalid_json"},400)}
+  if(b.action==="customer_quote_decision"){
+   if(!validId(b.quote_id)||!["accepted","declined"].includes(b.status))return json({error:"invalid_quote_decision"},422);
+   const token=typeof b.token==="string"?b.token:"";if(!/^[A-Za-z0-9_-]{40,100}$/.test(token))return json({error:"invalid_decision_token"},422);
+   const allowed=await fetch(quoteUrl(base,b.quote_id,"id,quote_number,lead_id,status,decision_token_hash"),{headers:apiHeaders(key)});if(!allowed.ok)return json({error:"quote_read_failed"},allowed.status);
+   const rows=await allowed.json(),quote=rows[0];if(!quote||quote.status!=="sent"||quote.decision_token_hash!==await sha256(token))return json({error:"decision_link_unavailable"},404);
+   const result=await decideQuote(base,key,b.quote_id,b.status,"customer_link",typeof b.note==="string"?b.note.trim().slice(0,1000):"","zákazník",await sha256(token));
+   if(!result.response.ok)return json({error:"decision_link_unavailable"},result.response.status===409?409:404);
+   if(quote.lead_id)await fetch(leadUrl(base,quote.lead_id),{method:"PATCH",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({status:b.status==="accepted"?"ordered":"review",updated_at:new Date().toISOString()})});
+   return json({ok:true,quote_number:result.data.quote_number,status:result.data.status})
+  }
   if(b.action==="create_quote"){
    if(!validId(b.lead_id))return json({error:"invalid_lead_id"},422);
    const leadRes=await fetch(leadUrl(base,b.lead_id,"id,customer_id,name,email,phone,place,region,payload,created_at"),{headers:apiHeaders(key)});
@@ -81,6 +107,35 @@ Deno.serve(async req=>{
  }
  if(req.method==="PATCH"){
   let b;try{b=await req.json()}catch{return json({error:"invalid_json"},400)}
+  if(b.action==="send_quote"){
+   if(!validId(b.quote_id))return json({error:"invalid_quote_id"},422);
+   const read=await fetch(quoteUrl(base,b.quote_id,"*,plotao_customers(id,full_name,email,phone),plotao_leads(id,name,email,phone,place,payload),plotao_quote_items(*)"),{headers:apiHeaders(key)});
+   if(!read.ok)return json({error:"quote_read_failed"},read.status);const rows=await read.json(),q=rows[0];if(!q)return json({error:"quote_not_found"},404);
+   if(q.status!=="draft")return json({error:"quote_not_draft"},409);
+   const customer=q.plotao_customers||{},email=String(customer.email||q.plotao_leads?.email||"").trim();if(!/^\\S+@\\S+\\.\\S+$/.test(email))return json({error:"customer_email_missing"},422);
+   const items=Array.isArray(q.plotao_quote_items)?q.plotao_quote_items:[];if(!items.length||items.some(i=>Number(i.sale_unit_price)<=0))return json({error:"quote_prices_incomplete"},409);
+   const percent=1-(Number(q.discount_percent)||0)/100;const net=items.reduce((s,i)=>s+(Number(i.net_total)||0),0)*percent;const vat=items.reduce((s,i)=>s+(Number(i.vat_total)||0),0)*percent;const gross=net+vat;
+   const date=q.valid_until?new Date(q.valid_until).toLocaleDateString("cs-CZ",{timeZone:"Europe/Prague"}):"neuvedena";
+   const itemText=items.map(i=>String(i.product_name)+" · "+Number(i.quantity)+" "+i.unit+" · "+Number(i.net_total||0).toLocaleString("cs-CZ")+" Kč bez DPH").join("\n");
+   const token=crypto.randomUUID()+crypto.randomUUID(),hash=await sha256(token),sentAt=new Date().toISOString();
+   const updated=await fetch(quoteUrl(base,q.id),{method:"PATCH",headers:{...apiHeaders(key),"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify({status:"sent",sent_at:sentAt,sent_to_email:email,email_provider_id:null,decision_token_hash:hash,decision_source:"",decision_note:"",decision_by:"",decision_event_at:null,updated_at:sentAt})});let saved;try{saved=await updated.json()}catch{saved=null}if(!updated.ok)return json({error:"quote_send_prepare_failed"},updated.status);
+   const baseUrl=Deno.env.get("PLOTAO_SITE_URL")?.trim()||"https://plotao.cz",decisionUrl=baseUrl+"/nabidka-rozhodnuti.html?id="+encodeURIComponent(q.id)+"&token="+encodeURIComponent(token);
+   const message=["Dobrý den, "+(customer.full_name||q.plotao_leads?.name||""), "", "zasíláme vám cenovou nabídku "+q.quote_number+".", "", "Položky:",itemText,"","Celkem včetně DPH: "+gross.toLocaleString("cs-CZ")+" Kč","Platnost do: "+date,"", "Pro přijetí nabídky otevřete tento odkaz: "+decisionUrl+"&decision=accepted","Pro odmítnutí nabídky otevřete tento odkaz: "+decisionUrl+"&decision=declined","", "PLOTAO.cz"].join("\n");
+   const resendKey=Deno.env.get("RESEND_API_KEY")?.trim();if(!resendKey){await fetch(quoteUrl(base,q.id),{method:"PATCH",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({status:"draft",decision_token_hash:null,sent_at:null,sent_to_email:"",updated_at:new Date().toISOString()})});return json({error:"resend_not_configured"},503)}
+   let send;try{send=await fetch("https://api.resend.com/emails",{method:"POST",headers:{"Authorization":"Bearer "+resendKey,"Content-Type":"application/json","Idempotency-Key":"plotao-quote-"+q.id+"-"+Date.now()},body:JSON.stringify({from:FROM_EMAIL,to:[email],reply_to:ADMIN_EMAIL,subject:"Cenová nabídka "+q.quote_number+" – PLOTAO.cz",text:message})})}catch{send=null}
+   let provider={};if(send)try{provider=await send.json()}catch{}if(!send?.ok){await fetch(quoteUrl(base,q.id),{method:"PATCH",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({status:"draft",decision_token_hash:null,sent_at:null,updated_at:new Date().toISOString()})});return json({error:"quote_email_failed"},502)}
+   const sentRow=Array.isArray(saved)?saved[0]:saved;await fetch(quoteUrl(base,q.id),{method:"PATCH",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({email_provider_id:provider.id||null,updated_at:new Date().toISOString()})});await fetch(base+"/rest/v1/plotao_quote_events",{method:"POST",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({quote_id:q.id,event_type:"sent",event_source:"email",actor:ADMIN_EMAIL,note:"E-mail odeslán zákazníkovi"})});
+   if(q.lead_id)await fetch(leadUrl(base,q.lead_id),{method:"PATCH",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({status:"quote_sent",updated_at:sentAt})});
+   return json({ok:true,id:q.id,status:"sent",sent_to_email:email,provider_id:provider.id||null,quote:sentRow})
+  }
+  if(b.action==="quote_decision_admin"){
+   if(!validId(b.quote_id)||!["accepted","declined"].includes(b.status))return json({error:"invalid_quote_decision"},422);
+   const note=typeof b.note==="string"?b.note.trim().slice(0,1000):"";
+   const result=await decideQuote(base,key,b.quote_id,b.status,"admin_manual",note,ADMIN_EMAIL);
+   if(!result.response.ok)return json({error:"quote_decision_unavailable"},409);
+   const q=result.data;if(q.lead_id)await fetch(leadUrl(base,q.lead_id),{method:"PATCH",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({status:q.status==="accepted"?"ordered":"review",updated_at:new Date().toISOString()})});
+   return json(q,200)
+  }
   if(b.action==="save_quote"){
    if(!validId(b.quote_id))return json({error:"invalid_quote_id"},422);
    const discount=Number(b.discount_percent??0);
