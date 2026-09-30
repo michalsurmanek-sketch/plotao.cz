@@ -3,6 +3,17 @@
   const API_KEY='sb_publishable_FSrTbgu1LeF9DNeam3ztwA_3dNHGq-V';
   const now=()=>new Date().toISOString();
   const val=(form,name)=>String(form.elements?.[name]?.value||'').trim();
+  const shareConsent=form=>form.elements.namedItem('partnerShareConsent')?.checked===true;
+  const selectedRegion=form=>{
+    try{
+      const value=JSON.parse(localStorage.getItem('plotao.location')||'null');
+      if(!value?.region)return '';
+      if(form.id==='form')return value.region;
+      const normalize=s=>String(s||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');
+      const place=normalize(val(form,'place')),label=normalize(value.label),region=normalize(value.region);
+      return place&&(label.includes(place)||place.includes(label)||place.includes(region))?value.region:'';
+    }catch{return ''}
+  };
   const statusFor=form=>form.querySelector('[role="status"]')||document.querySelector('#status,#contactStatus');
   async function send(payload,status){
     try{
@@ -25,7 +36,7 @@
     const status=statusFor(form);
     const name=val(form,'name'),phone=val(form,'phone'),email=val(form,'email'),place=val(form,'place');
     if(form.id==='contactForm'){
-      return send({transportVersion:1,source:'plotao.cz',submittedAt:now(),lead:{schemaVersion:2,mode:'help',name,phone,email,place,note:val(form,'message')}},status);
+      return send({transportVersion:1,source:'plotao.cz',submittedAt:now(),lead:{schemaVersion:2,mode:'help',name,phone,email,place,region:selectedRegion(form),partner_share_consent:shareConsent(form),note:val(form,'message')}},status);
     }
     if(form.id==='quoteForm'){
       const segmentNodes=[...document.querySelectorAll('#segments .segment')];
@@ -50,11 +61,11 @@
       const fullNote=[val(form,'note'),...extras].filter(Boolean).join('\\n');
       const scope=val(form,'scope');
       const scopeValue=scope.includes('klíč')?'turnkey':scope.includes('dopravou')?'delivery':'material';
-      return send({transportVersion:1,source:'plotao.cz',submittedAt:now(),lead:{schemaVersion:2,mode:'lead',name,phone,email,place,note:fullNote,fenceType:val(form,'fenceType')||val(form,'extraType')||'Neupřesněno',height,segments,options:extras,gate:false,wicket:false,scopeValue,scope,displayedPrice:'',priceKind:'individuální nabídka'}},status);
+      return send({transportVersion:1,source:'plotao.cz',submittedAt:now(),lead:{schemaVersion:2,mode:'lead',name,phone,email,place,region:selectedRegion(form),partner_share_consent:shareConsent(form),note:fullNote,fenceType:val(form,'fenceType')||val(form,'extraType')||'Neupřesněno',height,segments,options:extras,gate:false,wicket:false,scopeValue,scope,displayedPrice:'',priceKind:'individuální nabídka'}},status);
     }
     if(form.id==='form'){
       const help=(document.querySelector('#modalTitle')?.textContent||'').includes('poradit');
-      return send({transportVersion:1,source:'plotao.cz',submittedAt:now(),lead:{schemaVersion:2,mode:help?'help':'lead',name,phone,email,place,note:val(form,'note')||document.querySelector('#modalText')?.textContent||'Dotaz z kalkulátoru',fenceType:'Kalkulátor plotu',height:180,segments:[{name:'Hlavní úsek',length:10,connection:'začátek'}],options:[],gate:false,wicket:false,scopeValue:'material',scope:'Materiál',displayedPrice:'',priceKind:'individuální nabídka'}},status);
+      return send({transportVersion:1,source:'plotao.cz',submittedAt:now(),lead:{schemaVersion:2,mode:help?'help':'lead',name,phone,email,place,region:selectedRegion(form),partner_share_consent:shareConsent(form),note:val(form,'note')||document.querySelector('#modalText')?.textContent||'Dotaz z kalkulátoru',fenceType:'Kalkulátor plotu',height:180,segments:[{name:'Hlavní úsek',length:10,connection:'začátek'}],options:[],gate:false,wicket:false,scopeValue:'material',scope:'Materiál',displayedPrice:'',priceKind:'individuální nabídka'}},status);
     }
     return null;
   }
