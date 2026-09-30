@@ -2,6 +2,7 @@ const MODES=new Set(['lead','help','partner']);
 const SCOPES=new Set(['material','delivery','turnkey']);
 const PRICE_KINDS=new Set(['ověřená cena','individuální nabídka','částečný rozpočet']);
 const CONNECTIONS=new Set(['začátek','samostatný úsek','navazuje rohem']);
+const REGIONS=new Set(['Hlavní město Praha','Středočeský kraj','Jihočeský kraj','Plzeňský kraj','Karlovarský kraj','Ústecký kraj','Liberecký kraj','Královéhradecký kraj','Pardubický kraj','Kraj Vysočina','Jihomoravský kraj','Olomoucký kraj','Zlínský kraj','Moravskoslezský kraj']);
 
 const isObj=v=>!!v&&typeof v==='object'&&!Array.isArray(v);
 const text=(v,max)=>typeof v==='string'?v.trim().replace(/\s+/g,' ').slice(0,max):'';
@@ -30,14 +31,16 @@ export function validateEnvelope(input){
   if(tooLong(l.name,120))errors.push('name');
   if(tooLong(l.email,254))errors.push('email');
   if(tooLong(l.place,200))errors.push('place');
+  if(tooLong(l.region,100))errors.push('region');
   if(tooLong(l.note,4000))errors.push('note');
-  const name=text(l.name,120),phoneValue=phone(l.phone),email=rawText(l.email,254).toLowerCase(),place=text(l.place,200),note=rawText(l.note,4000);
+  const name=text(l.name,120),phoneValue=phone(l.phone),email=rawText(l.email,254).toLowerCase(),place=text(l.place,200),note=rawText(l.note,4000),regionValue=text(l.region,100);
   if(name.length<2)errors.push('name');
   if(!phoneValue&&!email)errors.push('contact');
+  if(regionValue&&!REGIONS.has(regionValue))errors.push('region');
   if(email&&!emailOk(email))errors.push('email');
   if(mode==='help'&&note.length<5)errors.push('note');
   if(mode==='partner'&&place.length<2)errors.push('place');
-  const lead={schemaVersion:2,mode,name,phone:phoneValue,email,place,note};
+  const lead={schemaVersion:2,mode,name,phone:phoneValue,email,place,note,region:REGIONS.has(regionValue)?regionValue:'',partner_share_consent:bool(l.partner_share_consent)};
   if(mode==='lead'){
     if(tooLong(l.fenceType,120))errors.push('fenceType');
     if(tooLong(l.gateType,80))errors.push('gateType');
