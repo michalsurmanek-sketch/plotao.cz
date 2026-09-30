@@ -40,6 +40,7 @@
 - Zákaznická stránka `nabidka-rozhodnuti.html` nabídne přijetí/odmítnutí bez účtu. Pro veřejný odkaz používá samostatnou Edge Function `quote-decision` (verze 2, bez Supabase JWT), která povoluje pouze domény PLOTAO.cz a ověřuje náhodný 256bitový token uložený pouze jako SHA-256 hash. Otevření odkazu volbu samo neodešle: zákazník ji musí výslovně potvrdit na stránce, čímž se předejde automatickému kliknutí e-mailových bezpečnostních skenerů. RPC dovolí rozhodnutí jen pro stav `sent`.
 - Obchodník může v editoru ručně zaznamenat přijetí/odmítnutí, přidat poznámku (např. telefonická domluva) a rozhodnutí opravovat, pokud bylo zaznamenáno ručně. Zákaznické rozhodnutí ručně nepřepisuje.
 - `plotao_quote_events` uchovává odeslání a rozhodnutí včetně zdroje, aktéra, poznámky a času. Stav související poptávky se po rozhodnutí aktualizuje.
+- Stránka rozhodnutí obsahuje položky a zákaznické ceny bez interních nákupních cen. Je označena `noindex,follow` a není v sitemapě, protože URL nese soukromý přístupový token; SEO regresní kontrola tuto utility stránku výslovně vyřazuje z indexovatelných URL.
 - PDF příloha zatím není vytvořená; e-mail obsahuje odkaz na zabezpečený přehled nabídky s položkami, cenami a součty. Zákazník může přehled vytisknout nebo uložit jako PDF z prohlížeče. Odeslání e-mailu přes účet Resend ani zákaznické kliknutí nebyly v tomto běhu provedeny, protože by šlo o skutečnou zprávu / rozhodnutí reálného obchodního záznamu.
 
 ## Co se provedlo v první implementační části
