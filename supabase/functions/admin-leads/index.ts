@@ -15,13 +15,13 @@ const partnerUrl=(base,id)=>base+"/rest/v1/plotao_partners?id=eq."+encodeURIComp
 const referralUrl=(base,id)=>base+"/rest/v1/plotao_lead_referrals?id=eq."+encodeURIComponent(id)+"&select=*";
 function cleanPartner(v){
  if(!v||typeof v!=="object")return null;
- const company_name=String(v.company_name||"").trim().slice(0,160),contact_name=String(v.contact_name||"").trim().slice(0,120),email=String(v.email||"").trim().toLowerCase(),phone=String(v.phone||"").trim().slice(0,40),ico=String(v.ico||"").replace(/\s/g,"").slice(0,20);
+ const company_name=String(v.company_name||"").trim().slice(0,160),contact_name=String(v.contact_name||"").trim().slice(0,120),email=String(v.email||"").trim().toLowerCase(),phone=String(v.phone||"").trim().slice(0,40),ico=String(v.ico||"").replace(/\s/g,"").slice(0,20),registered_address=String(v.registered_address||"").trim().slice(0,255);
  const regions=Array.isArray(v.regions)?[...new Set(v.regions.filter(x=>PARTNER_REGIONS.includes(x)))]:[];
  const fence_types=Array.isArray(v.fence_types)?[...new Set(v.fence_types.filter(x=>PARTNER_TYPES.includes(x)))]:[];
  const service_types=Array.isArray(v.service_types)?[...new Set(v.service_types.filter(x=>PARTNER_SERVICE_TYPES.includes(x)))]:[];
  if(company_name.length<2||!/^\S+@\S+\.\S+$/.test(email)||email.length>254||!regions.length||!fence_types.length||!service_types.length)return null;
  if(ico&&!/^\d{8}$/.test(ico))return null;
- return{company_name,contact_name,email,phone,ico,regions,fence_types,service_types,active:v.active!==false,updated_at:new Date().toISOString()};
+ return{company_name,contact_name,email,phone,ico,registered_address,regions,fence_types,service_types,active:v.active!==false,updated_at:new Date().toISOString()};
 }
 function regionForLead(lead){
  const value=String(lead.region||lead.payload?.region||"")+" "+String(lead.place||"")+" "+String(lead.payload?.placeFromCalculator||"");
