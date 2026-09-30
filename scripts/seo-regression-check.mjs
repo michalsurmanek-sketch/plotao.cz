@@ -3,7 +3,7 @@ import fs from 'node:fs';
 const fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 const pages=fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort();
 const privacyPage='ochrana-osobnich-udaju.html';
-const utilityNoindexPages=new Set([privacyPage,'nabidka-rozhodnuti.html']);
+const utilityNoindexPages=new Set([privacyPage,'nabidka-rozhodnuti.html','partner-odpoved.html']);
 const buildCanonicalPages=new Set(['eshop.html']);
 const titles=new Map(),canonicals=new Map();
 
