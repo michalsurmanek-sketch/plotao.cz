@@ -11,7 +11,7 @@ const encoder = new TextEncoder()
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://plotao.cz',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'content-type, accept',
+  'Access-Control-Allow-Headers': 'content-type, accept, apikey',
   'Access-Control-Max-Age': '600',
   'Vary': 'Origin',
 }
@@ -148,6 +148,7 @@ export default {
         phone: lead.phone,
         email: lead.email,
         place: lead.place,
+        region: lead.region,
         note: lead.note,
         payload: lead,
       }
@@ -169,7 +170,67 @@ export default {
         if (error) console.error('plotao rate cleanup failed', error.code || 'unknown')
       })
 
-      return new Response(JSON.stringify({ id: data.id }), {
+      let emailSent = false
+      if (lead.email) {
+        const resendKey = Deno.env.get('RESEND_API_KEY')?.trim()
+        if (!resendKey) {
+          console.error('plotao auto-reply unavailable: RESEND_API_KEY missing')
+        } else {
+          const subject = lead.mode === 'help'
+            ? 'Potvrzení přijetí vašeho dotazu – PLOTAO.cz'
+            : lead.mode === 'partner'
+              ? 'Potvrzení přijetí vaší zprávy – PLOTAO.cz'
+              : 'Potvrzení přijetí poptávky – PLOTAO.cz'
+          const detail = lead.mode === 'help'
+            ? 'Vaši zprávu jsme v pořádku přijali. Ozveme se vám co nejdříve na uvedený e-mail nebo telefon.'
+            : lead.mode === 'partner'
+              ? 'Děkujeme za zájem o spolupráci. Vaši zprávu jsme předali k vyřízení a ozveme se vám.'
+              : 'Vaši poptávku jsme v pořádku přijali. Prověříme zadané informace a ozveme se vám s dalším postupem.'
+          const message = 'Dobrý den, ' + lead.name + ',\n\n' + detail + '\n\nDěkujeme, že jste se obrátili na PLOTAO.cz.\n\nS pozdravem,\nPLOTAO.cz\nPlotové centrum\nhttps://plotao.cz'
+          try {
+            const mailResponse = await fetch('https://api.resend.com/emails', {
+              method: 'POST',
+              headers: {
+                'Authorization': 'Bearer ' + resendKey,
+                'Content-Type': 'application/json',
+                'Idempotency-Key': 'plotao-auto-' + data.id,
+              },
+              body: JSON.stringify({
+                from: 'PLOTAO.cz <odpovedi@plotao.cz>',
+                to: [lead.email],
+                reply_to: 'michalsurmanek@seznam.cz',
+                subject,
+                text: message,
+              }),
+            })
+            let mailData: Record<string, unknown> = {}
+            try { mailData = await mailResponse.json() } catch {}
+            if (mailResponse.ok) {
+              emailSent = true
+              const { error: communicationError } = await ctx.supabaseAdmin
+                .from('plotao_leads')
+                .update({
+                  communication: [{
+                    direction: 'out',
+                    body: message,
+                    sent_at: new Date().toISOString(),
+                    provider: 'resend',
+                    provider_id: typeof mailData.id === 'string' ? mailData.id : null,
+                    kind: 'automatic_confirmation',
+                  }],
+                })
+                .eq('id', data.id)
+              if (communicationError) console.error('plotao auto-reply history save failed', communicationError.code || 'unknown')
+            } else {
+              console.error('plotao auto-reply rejected', mailResponse.status, typeof mailData.name === 'string' ? mailData.name : '')
+            }
+          } catch (error) {
+            console.error('plotao auto-reply network failure', error instanceof Error ? error.message : 'unknown')
+          }
+        }
+      }
+
+      return new Response(JSON.stringify({ id: data.id, email_sent: emailSent }), {
         status: 201,
         headers: { ...corsHeaders, 'Access-Control-Allow-Origin': origin, 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
       })
