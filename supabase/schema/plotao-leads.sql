@@ -503,3 +503,69 @@ grant select,insert on public.plotao_quote_events to service_role;
 create or replace function public.plotao_set_quote_decision(p_quote_id uuid,p_status text,p_source text,p_note text,p_actor text,p_token_hash text default null) returns public.plotao_quotes language plpgsql security definer set search_path=public,pg_temp as $$ declare saved public.plotao_quotes; begin if p_status not in ('accepted','declined') or p_source not in ('customer_link','admin_manual') then raise exception 'invalid decision'; end if; if char_length(coalesce(p_note,''))>1000 then raise exception 'decision note too long'; end if; if p_source='customer_link' then update public.plotao_quotes set status=p_status,decision_source=p_source,decision_note=coalesce(p_note,''),decision_by='zákazník',decision_event_at=now(),responded_at=now(),updated_at=now() where id=p_quote_id and status='sent' and decision_token_hash=p_token_hash returning * into saved; else update public.plotao_quotes set status=p_status,decision_source=p_source,decision_note=coalesce(p_note,''),decision_by=left(coalesce(p_actor,''),254),decision_event_at=now(),responded_at=now(),updated_at=now() where id=p_quote_id and status in ('sent','accepted','declined') and (status='sent' or decision_source='admin_manual') returning * into saved; end if; if saved.id is null then raise exception 'quote decision unavailable'; end if; insert into public.plotao_quote_events(quote_id,event_type,event_source,actor,note) values(p_quote_id,p_status,case when p_source='customer_link' then 'customer_link' else 'admin_manual' end,case when p_source='customer_link' then 'zákazník' else left(coalesce(p_actor,''),254) end,coalesce(p_note,'')); return saved; end; $$;
 revoke all on function public.plotao_set_quote_decision(uuid,text,text,text,text,text) from public,anon,authenticated;
 grant execute on function public.plotao_set_quote_decision(uuid,text,text,text,text,text) to service_role;
+
+
+-- Accepted quote to job conversion, additive release 2026-09-30.
+alter table public.plotao_jobs
+  add column if not exists quote_discount_percent numeric(5,2) not null default 0
+  check (quote_discount_percent between 0 and 100);
+alter table public.plotao_job_items
+  add column if not exists discount_percent numeric(5,2) not null default 0
+  check (discount_percent between 0 and 100);
+
+create or replace function public.plotao_create_job_from_quote(p_quote_id uuid,p_actor text default '')
+returns public.plotao_jobs
+language plpgsql
+security definer
+set search_path=public,pg_temp
+as $$
+declare
+  q public.plotao_quotes;
+  l public.plotao_leads;
+  existing_job public.plotao_jobs;
+  created_job public.plotao_jobs;
+  item_count integer;
+  purchase_sum numeric(14,2);
+  sale_sum numeric(14,2);
+begin
+  select * into q from public.plotao_quotes where id=p_quote_id for update;
+  if q.id is null then raise exception 'quote not found'; end if;
+
+  select * into existing_job from public.plotao_jobs where quote_id=p_quote_id;
+  if existing_job.id is not null then return existing_job; end if;
+  if q.status<>'accepted' then raise exception 'quote must be accepted'; end if;
+
+  select * into l from public.plotao_leads where id=q.lead_id;
+  if l.id is null or q.customer_id is null then raise exception 'quote relationship missing'; end if;
+
+  select count(*),
+         coalesce(sum(cost_total),0),
+         coalesce(sum(net_total+vat_total),0)
+    into item_count,purchase_sum,sale_sum
+    from public.plotao_quote_items where quote_id=q.id;
+  if item_count=0 then raise exception 'accepted quote has no items'; end if;
+
+  insert into public.plotao_jobs(
+    lead_id,quote_id,customer_id,status,site_address,purchase_total,sale_total,
+    quote_discount_percent,note,created_by
+  ) values (
+    q.lead_id,q.id,q.customer_id,'preparing',left(coalesce(l.place,''),255),
+    purchase_sum,round(sale_sum*(1-q.discount_percent/100),2),
+    q.discount_percent,left(coalesce(q.note,''),4000),left(coalesce(p_actor,''),254)
+  ) returning * into created_job;
+
+  insert into public.plotao_job_items(
+    job_id,position,category,product_name,description,sku,quantity,unit,
+    purchase_unit_price,sale_unit_price,vat_percent,discount_percent
+  )
+  select created_job.id,position,category,product_name,description,sku,quantity,unit,
+         purchase_unit_price,sale_unit_price,vat_percent,discount_percent
+    from public.plotao_quote_items
+   where quote_id=q.id
+   order by position;
+
+  return created_job;
+end;
+$$;
+revoke all on function public.plotao_create_job_from_quote(uuid,text) from public,anon,authenticated;
+grant execute on function public.plotao_create_job_from_quote(uuid,text) to service_role;
