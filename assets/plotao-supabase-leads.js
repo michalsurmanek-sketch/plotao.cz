@@ -9,7 +9,7 @@
       const value=JSON.parse(localStorage.getItem('plotao.location')||'null');
       if(!value?.region)return '';
       if(form.id==='form')return value.region;
-      const normalize=s=>String(s||'').normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');
+      const normalize=s=>String(s||'').toLocaleLowerCase('cs-CZ').replace(/[\\s,]+/g,'');
       const place=normalize(val(form,'place')),label=normalize(value.label),region=normalize(value.region);
       return place&&(label.includes(place)||place.includes(label)||place.includes(region))?value.region:'';
     }catch{return ''}
