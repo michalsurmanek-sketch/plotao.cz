@@ -1,1 +1,53 @@
-(()=>{const ENDPOINT='https://jmukoccjqykyoqsypuwb.supabase.co/functions/v1/submit-lead';const API_KEY='sb_publishable_FSrTbgu1LeF9DNeam3ztwA_3dNHGq-V';const now=()=>new Date().toISOString();const val=(f,n)=>String(f.elements?.[n]?.value||'').trim();const send=async(payload,status)=>{try{const r=await fetch(ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json','apikey':API_KEY},body:JSON.stringify(payload)});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'send_failed');if(status)status.textContent='Odesláno. Brzy se vám ozveme.';return j}catch(e){console.warn('PLOTAO lead submit failed',e);if(status)status.textContent='Poptávka se připravuje ke stažení. Online odeslání se nepodařilo.';return null}};document.addEventListener('submit',e=>{const f=e.target;if(!(f instanceof HTMLFormElement))return;if(!['contactForm','quoteForm','form'].includes(f.id))return;e.preventDefault();const status=f.querySelector('[role="status"]')||document.querySelector('#status,#contactStatus');const name=val(f,'name'),phone=val(f,'phone'),email=val(f,'email'),place=val(f,'place');if(f.id==='contactForm'){const message=val(f,'message');send({transportVersion:1,source:'plotao.cz',submittedAt:now(),lead:{schemaVersion:2,mode:'help',name,phone,email,place,note:message}},status);return}if(f.id==='quoteForm'){const segments=[{name:'Hlavní úsek',length:10,connection:'začátek'}];send({transportVersion:1,source:'plotao.cz',submittedAt:now(),lead:{schemaVersion:2,mode:'lead',name,phone,email,place,note:val(f,'note'),fenceType:val(f,'fenceType')||val(f,'extraType')||'Neupřesněno',height:180,segments,options:[val(f,'color'),val(f,'variant'),val(f,'slab')?'Podhrabové desky':''].filter(Boolean),gate:false,wicket:false,scopeValue:'material',scope:val(f,'scope'),displayedPrice:'',priceKind:'individuální nabídka'}},status);return}if(f.id==='form'){send({transportVersion:1,source:'plotao.cz',submittedAt:now(),lead:{schemaVersion:2,mode:(document.querySelector('#modalTitle')?.textContent||'').includes('poradit')?'help':'lead',name,phone,email,place,note:val(f,'note')||document.querySelector('#modalText')?.textContent||'Dotaz z kalkulátoru',fenceType:'Kalkulátor plotu',height:180,segments:[{name:'Hlavní úsek',length:10,connection:'začátek'}],options:[],gate:false,wicket:false,scopeValue:'material',scope:'Materiál',displayedPrice:'',priceKind:'individuální nabídka'}},status}})();document.addEventListener('click',e=>{const b=e.target.closest?.('#downloadQuote');if(!b)return;const f=document.querySelector('#quoteForm');if(!f)return;e.preventDefault();if(f.reportValidity())f.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}))});})();
+(()=>{
+  const ENDPOINT='https://jmukoccjqykyoqsypuwb.supabase.co/functions/v1/submit-lead';
+  const API_KEY='sb_publishable_FSrTbgu1LeF9DNeam3ztwA_3dNHGq-V';
+  const now=()=>new Date().toISOString();
+  const val=(form,name)=>String(form.elements?.[name]?.value||'').trim();
+  const statusFor=form=>form.querySelector('[role="status"]')||document.querySelector('#status,#contactStatus');
+  async function send(payload,status){
+    try{
+      const response=await fetch(ENDPOINT,{
+        method:'POST',
+        headers:{'Content-Type':'application/json',apikey:API_KEY},
+        body:JSON.stringify(payload)
+      });
+      const result=await response.json().catch(()=>({}));
+      if(!response.ok)throw new Error(result.error||'send_failed');
+      if(status)status.textContent='Odesláno. Brzy se vám ozveme.';
+      return result;
+    }catch(error){
+      console.warn('PLOTAO lead submit failed',error);
+      if(status)status.textContent='Odeslání se nepodařilo. Zkuste to prosím znovu.';
+      return null;
+    }
+  }
+  function submitForm(form){
+    const status=statusFor(form);
+    const name=val(form,'name'),phone=val(form,'phone'),email=val(form,'email'),place=val(form,'place');
+    if(form.id==='contactForm'){
+      return send({transportVersion:1,source:'plotao.cz',submittedAt:now(),lead:{schemaVersion:2,mode:'help',name,phone,email,place,note:val(form,'message')}},status);
+    }
+    if(form.id==='quoteForm'){
+      return send({transportVersion:1,source:'plotao.cz',submittedAt:now(),lead:{schemaVersion:2,mode:'lead',name,phone,email,place,note:val(form,'note'),fenceType:val(form,'fenceType')||val(form,'extraType')||'Neupřesněno',height:180,segments:[{name:'Hlavní úsek',length:10,connection:'začátek'}],options:[val(form,'color'),val(form,'variant'),val(form,'slab')?'Podhrabové desky':''].filter(Boolean),gate:false,wicket:false,scopeValue:'material',scope:val(form,'scope'),displayedPrice:'',priceKind:'individuální nabídka'}},status);
+    }
+    if(form.id==='form'){
+      const help=(document.querySelector('#modalTitle')?.textContent||'').includes('poradit');
+      return send({transportVersion:1,source:'plotao.cz',submittedAt:now(),lead:{schemaVersion:2,mode:help?'help':'lead',name,phone,email,place,note:val(form,'note')||document.querySelector('#modalText')?.textContent||'Dotaz z kalkulátoru',fenceType:'Kalkulátor plotu',height:180,segments:[{name:'Hlavní úsek',length:10,connection:'začátek'}],options:[],gate:false,wicket:false,scopeValue:'material',scope:'Materiál',displayedPrice:'',priceKind:'individuální nabídka'}},status);
+    }
+    return null;
+  }
+  document.addEventListener('submit',event=>{
+    const form=event.target;
+    if(!(form instanceof HTMLFormElement)||!['contactForm','quoteForm','form'].includes(form.id))return;
+    event.preventDefault();
+    submitForm(form);
+  });
+  document.addEventListener('click',event=>{
+    const button=event.target.closest?.('#downloadQuote');
+    if(!button)return;
+    const form=document.querySelector('#quoteForm');
+    if(!form)return;
+    event.preventDefault();
+    if(form.reportValidity())form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
+  });
+})();
