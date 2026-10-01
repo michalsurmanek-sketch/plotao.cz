@@ -407,3 +407,12 @@ input::placeholder,textarea::placeholder{color:#98a69e}
 .nav{flex:none}
 .side-foot{position:static;bottom:auto;width:auto;flex:none;margin-top:auto}
 @media(max-width:900px){.side{height:100vh;overflow-y:auto}.side-foot{display:none}}
+
+/* Use the official PLOTAO brand asset in the admin navigation */
+.brand{display:block;line-height:0}
+.brand img{display:block;width:min(100%,205px);height:auto;max-height:66px;object-fit:contain;object-position:left center}
+@media(max-width:900px){
+ .brand{display:block;width:100%;min-height:30px}
+ .brand img{display:none}
+ .brand:before{content:'P';display:block;font-size:25px;line-height:30px;color:#f7a153}
+}
