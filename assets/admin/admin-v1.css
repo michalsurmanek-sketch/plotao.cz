@@ -401,3 +401,9 @@ input::placeholder,textarea::placeholder{color:#98a69e}
 @media(prefers-reduced-motion:reduce){
  *,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
 }
+
+/* Keep the sidebar footer in normal flow so it never covers navigation */
+.side{position:sticky;top:0;align-self:flex-start;display:flex;flex-direction:column;height:100vh;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.nav{flex:none}
+.side-foot{position:static;bottom:auto;width:auto;flex:none;margin-top:auto}
+@media(max-width:900px){.side{height:100vh;overflow-y:auto}.side-foot{display:none}}
