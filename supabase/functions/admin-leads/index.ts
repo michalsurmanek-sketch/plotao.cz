@@ -1,7 +1,7 @@
 const ADMIN_EMAIL="michalsurmanek@seznam.cz";
 const STATUSES=["new","review","waiting_customer","preparing_quote","quote_sent","waiting_decision","ordered","partner_assigned","completed","closed","contacted"];
 const FROM_EMAIL="PLOTAO.cz <odpovedi@plotao.cz>";
-const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{"Content-Type":"application/json","Cache-Control":"no-store","Access-Control-Allow-Origin":"https://plotao.cz","Access-Control-Allow-Headers":"authorization,apikey,content-type","Access-Control-Allow-Methods":"GET,POST,PATCH,OPTIONS"}});
+const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:{"Content-Type":"application/json","Cache-Control":"no-store","Access-Control-Allow-Origin":"https://plotao.cz","Access-Control-Allow-Headers":"authorization,apikey,content-type","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS"}});
 const decode=token=>{try{const p=token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/");return JSON.parse(atob(p.padEnd(p.length+((4-p.length%4)%4),"=")))}catch{return null}};
 const allowed=req=>{const t=req.headers.get("authorization")?.replace(/^Bearer\s+/i,"");const p=t&&decode(t);return p&&String(p.email||"").toLowerCase()===ADMIN_EMAIL};
 const apiHeaders=key=>({apikey:key,Authorization:"Bearer "+key});
@@ -56,6 +56,21 @@ Deno.serve(async req=>{
  if(!allowed(req))return json({error:"admin_forbidden"},403);
  const base=Deno.env.get("SUPABASE_URL"),key=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
  if(!base||!key)return json({error:"server_config"},500);
+ if(req.method==="DELETE"){
+  let b;try{b=await req.json()}catch{return json({error:"invalid_json"},400)}
+  const ids=Array.isArray(b.lead_ids)?[...new Set(b.lead_ids.filter(validId))]:[];
+  const type=String(b.identity_type||""),value=String(b.identity_value||"").trim();
+  if(!ids.length||ids.length>100||ids.length!==(Array.isArray(b.lead_ids)?b.lead_ids.length:0))return json({error:"invalid_customer_leads"},422);
+  if(!["email","phone","lead"].includes(type)||!value||value.length>254)return json({error:"invalid_customer_identity"},422);
+  if(type==="email"&&(!/^\\S+@\\S+\\.\\S+$/.test(value)||value!==value.toLowerCase()))return json({error:"invalid_customer_identity"},422);
+  if(type==="phone"&&!/^\\d{9,20}$/.test(value))return json({error:"invalid_customer_identity"},422);
+  if(type==="lead"&&(!validId(value)||ids.length!==1||ids[0]!==value))return json({error:"invalid_customer_identity"},422);
+  const response=await fetch(base+"/rest/v1/rpc/plotao_admin_delete_customer_leads",{method:"POST",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({p_lead_ids:ids,p_identity_type:type,p_identity_value:value})});
+  let result;try{result=await response.json()}catch{result=null}
+  if(!response.ok){console.error("customer deletion rpc failed",response.status);return json({error:"customer_delete_failed"},500)}
+  if(result?.error){const statuses={customer_has_quotes_or_jobs:409,customer_group_changed:409,customer_not_found:404,invalid_customer_selection:422};return json({error:result.error,...(result.quote_count!=null?{quote_count:result.quote_count}:{}),...(result.job_count!=null?{job_count:result.job_count}:{})},statuses[result.error]||409)}
+  return json(result,200)
+ }
  if(req.method==="GET"){
   const resource=new URL(req.url).searchParams.get("resource")||"leads";
   if(resource==="quote_decision"){
