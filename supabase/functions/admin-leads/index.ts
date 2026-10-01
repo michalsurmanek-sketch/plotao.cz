@@ -223,23 +223,16 @@ Deno.serve(async req=>{
   }
   if(b.action==="create_quote"){
    if(!validId(b.lead_id))return json({error:"invalid_lead_id"},422);
-   const leadRes=await fetch(leadUrl(base,b.lead_id,"id,customer_id,name,email,phone,place,region,payload,created_at"),{headers:apiHeaders(key)});
-   if(!leadRes.ok)return json({error:"lead_read_failed"},leadRes.status);
-   const leadsFound=await leadRes.json(),lead=leadsFound[0];
-   if(!lead)return json({error:"lead_not_found"},404);
-   if(!validId(lead.customer_id))return json({error:"customer_link_missing"},409);
-   const prior=await fetch(base+"/rest/v1/plotao_quotes?lead_id=eq."+encodeURIComponent(lead.id)+"&select=version&order=version.desc&limit=1",{headers:apiHeaders(key)});
-   if(!prior.ok)return json({error:"quote_version_read_failed"},prior.status);
-   const priorRows=await prior.json(),version=Number(priorRows[0]?.version||0)+1;
-   const payload=lead.payload&&typeof lead.payload==="object"?lead.payload:{};
-   const segments=Array.isArray(payload.segments)?payload.segments:[];
-   const length=segments.reduce((sum,x)=>sum+(Number(x?.length)||0),0);
-   const details=[payload.scope?String(payload.scope):"",payload.height?"Výška "+String(payload.height)+" cm":"",segments.map((x,n)=>"Úsek "+(n+1)+": "+(Number(x?.length)||0)+" m").join("; "),Array.isArray(payload.options)?payload.options.join(", "):"",lead.note?"Poznámka: "+lead.note:""].filter(Boolean).join("\n").slice(0,4000);
-   const item={position:1,category:"material",product_name:String(payload.fenceType||"Oplocení").slice(0,200),description:details,quantity:length>0?length:1,unit:length>0?"m":"soubor",purchase_unit_price:0,sale_unit_price:0,vat_percent:21};
-   const create=await fetch(base+"/rest/v1/plotao_quotes",{method:"POST",headers:{...apiHeaders(key),"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify({lead_id:lead.id,customer_id:lead.customer_id,version,status:"draft",created_by:ADMIN_EMAIL,source_snapshot:payload,plotao_quote_items:[item]})});
-   let saved;try{saved=await create.json()}catch{saved=null}
-   if(!create.ok)return json({error:"quote_create_failed"},create.status);
-   return json(Array.isArray(saved)?saved[0]:saved,201)
+   const created=await fetch(base+"/rest/v1/rpc/plotao_create_quote_from_lead",{method:"POST",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({p_lead_id:b.lead_id,p_actor:ADMIN_EMAIL})});
+   let data;try{data=await created.json()}catch{data=null}
+   if(!created.ok){console.error("quote creation rpc failed",created.status);return json({error:"quote_create_failed"},created.status>=500?500:400)}
+   if(data?.error){
+    const errors={lead_not_found:["lead_not_found",404],customer_link_missing:["customer_link_missing",409]};
+    const mapped=errors[data.error]||["quote_create_failed",400];
+    return json({error:mapped[0]},mapped[1])
+   }
+   if(!data||typeof data.id!=="string")return json({error:"quote_create_failed"},500);
+   return json(data,201)
   }
   if(b.action!=="create_partner")return json({error:"invalid_action"},422);
   const partner=cleanPartner(b.partner);
