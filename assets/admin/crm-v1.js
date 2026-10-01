@@ -40,7 +40,7 @@
   const latest=group.leads[0],email=group.leads.find(x=>x.email)?.email||'',phone=group.leads.find(x=>x.phone)?.phone||'';
   const identityType=key.slice(0,key.indexOf(':')),identityValue=key.slice(key.indexOf(':')+1);
   const label=latest.name||email||phone||'Zákazník';
-  if(!confirm('Opravdu smazat zákazníka „'+label+'“ a všech '+group.leads.length+' jeho poptávek? Smaže se také historie komunikace a předání partnerům. Nabídky nebo zakázky mazání zablokují. Tuto akci nelze vrátit.'))return;
+  if(!confirm('Opravdu smazat zákazníka „'+label+'“ a všech '+group.leads.length+' jeho poptávek? Smaže se také historie komunikace a předání partnerům. Nabídky nebo zakázky mazání zablokují. Audit zůstane anonymně bez kontaktů. Tuto akci nelze vrátit.'))return;
   const status=document.querySelector('[data-customer-delete-status="'+CSS.escape(key)+'"]');
   button.disabled=true;if(status)status.textContent='Mažu zákazníka a jeho poptávky…';
   try{
