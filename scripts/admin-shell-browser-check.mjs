@@ -9,6 +9,7 @@ page.on('pageerror', error => errors.push(String(error)));
 try {
   await page.goto(base + '/admin.html', { waitUntil: 'networkidle', timeout: 45000 });
   await page.locator('#products').waitFor({ state: 'attached' });
+  await page.locator('body > div[style*="position:fixed"]').evaluate(el => { el.style.display = 'none'; });
   assert.equal(await page.locator('[data-view="products"]').count(), 1, 'Products menu entry is missing');
   assert.equal(await page.locator('[data-view="suppliers"]').count(), 1, 'Suppliers menu entry is missing');
 
