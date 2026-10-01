@@ -418,3 +418,5 @@ input::placeholder,textarea::placeholder{color:#98a69e}
 }
 
 #customers .customer-actions{display:flex;align-items:center;gap:12px}#customers .customer-actions .link{padding:0;cursor:pointer}#customers .customer-actions .customer-delete{color:#a32626}#customers .customer-delete-status{display:block;max-width:220px;margin-top:5px;white-space:normal}#customers .customer-delete:disabled{opacity:.55;cursor:wait}
+
+
