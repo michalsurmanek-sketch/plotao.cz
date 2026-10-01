@@ -36,6 +36,9 @@ function renderPartners(){
  const count=document.querySelector('#partnerCount');if(count)count.textContent=String(partners.length);
  body.innerHTML=partners.map(p=>'<tr><td><strong>'+esc(p.company_name)+'</strong>'+(p.contact_name?'<small>'+esc(p.contact_name)+'</small>':'')+'<small><a href="mailto:'+esc(p.email)+'">'+esc(p.email)+'</a></small>'+(p.phone?'<small>'+esc(p.phone)+'</small>':'')+(p.ico?'<small>IČO '+esc(p.ico)+'</small>':'')+'</td><td>'+esc((p.regions||[]).join(' · '))+'</td><td>'+esc((p.fence_types||[]).join(' · '))+'</td><td><span class="badge '+(p.active?'closed':'new')+'">'+(p.active?'Aktivní':'Pozastavená')+'</span></td><td><div class="partner-row-actions"><button class="link" data-edit-partner="'+esc(p.id)+'">Upravit</button><button class="link" data-toggle-partner="'+esc(p.id)+'">'+(p.active?'Pozastavit':'Aktivovat')+'</button></div></td></tr>').join('')||'<tr><td colspan="6" class="empty">Zatím tu nejsou žádné partnerské firmy. Zaregistrujte první firmu pomocí tlačítka nahoře.</td></tr>';
 }
+function sessionInfo(){const session=saved(),activeToken=token||session?.access_token||'',claims=(()=>{try{const part=activeToken.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');return JSON.parse(atob(part.padEnd(part.length+((4-part.length%4)%4),'=')))}catch{return {}}})();return{email:session?.user?.email||claims.email||'',expiresAt:tokenExpiry(activeToken)*1000}}
+async function changeAdminPassword(currentPassword,newPassword){const account=sessionInfo().email;if(!account)throw Error('Přihlášení už není platné. Přihlaste se prosím znovu.');const login=await fetch(AUTH,{method:'POST',headers:{apikey:K,'Content-Type':'application/json'},body:JSON.stringify({email:account,password:currentPassword})});let session;try{session=await login.json()}catch{session=null}if(!login.ok||!session?.access_token)throw Error('Aktuální heslo není správné.');const response=await fetch(S+'/auth/v1/user',{method:'PUT',headers:{apikey:K,Authorization:'Bearer '+session.access_token,'Content-Type':'application/json'},body:JSON.stringify({password:newPassword})});let data;try{data=await response.json()}catch{data=null}if(!response.ok)throw Error('Heslo se nepodařilo změnit. Zkontrolujte požadavky na heslo v Supabase Auth.');persistSession(session);token=session.access_token;return data}
+async function signOutAdmin(){try{if(token)await fetch(S+'/auth/v1/logout?scope=local',{method:'POST',headers:{apikey:K,Authorization:'Bearer '+token}})}catch{}clearSession();token=''}
 async function load(t){
  token=t;
  const [leadData,partnerData,referralData]=await Promise.all([
@@ -45,7 +48,7 @@ async function load(t){
  ]);
  leads=Array.isArray(leadData)?leadData:[];partners=Array.isArray(partnerData)?partnerData:[];referrals=Array.isArray(referralData)?referralData:[];
  box.style.display='none';render();renderPartners();
- window.PLOTAOAdmin={request:(path,method='GET',body=null)=>jsonRequest(path,method,body),get leads(){return leads},get token(){return token},refresh:()=>load(token),show:view=>{const b=document.querySelector('[data-view="'+view+'"]');if(b)b.click()}};
+ window.PLOTAOAdmin={request:(path,method='GET',body=null)=>jsonRequest(path,method,body),get leads(){return leads},get token(){return token},get session(){return sessionInfo()},refresh:()=>load(token),show:view=>{const b=document.querySelector('[data-view="'+view+'"]');if(b)b.click()},changePassword:changeAdminPassword,signOut:signOutAdmin};
  window.dispatchEvent(new CustomEvent('plotao:admin-data',{detail:{leads}}));
  document.querySelector('#statLeads').textContent=leads.filter(x=>x.status==='new').length;
  const statusBox=document.querySelector('#dashboardStatuses');
