@@ -311,9 +311,10 @@ Deno.serve(async req=>{
     if(!["material","installation","transport","other"].includes(row.category))return json({error:"invalid_quote_item_category",position:i},422);
     const product=String(row.product_name||"").trim().slice(0,200);
     if(!product)return json({error:"quote_item_name_required",position:i},422);
-    items.push({position:i+1,category:row.category,product_name:product,description:String(row.description||"").trim().slice(0,2000),sku:String(row.sku||"").trim().slice(0,80),quantity,unit:String(row.unit||"ks").trim().slice(0,30),purchase_unit_price:purchase,sale_unit_price:sale,discount_percent:rowDiscount,vat_percent:vat});
+    items.push({position:i+1,category:row.category,product_name:product,description:String(row.description||"").trim().slice(0,1000),sku:String(row.sku||"").trim().slice(0,80),quantity,unit:String(row.unit||"ks").trim().slice(0,20),purchase_unit_price:purchase,sale_unit_price:sale,discount_percent:rowDiscount,vat_percent:vat});
    }
-   const saved=await fetch(base+"/rest/v1/rpc/plotao_save_quote",{method:"POST",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({p_quote_id:b.quote_id,p_discount_percent:discount,p_note:note,p_valid_until:validUntil,p_items:items})});
+   const sourceSnapshot=b.source_snapshot==null?null:(b.source_snapshot&&typeof b.source_snapshot==="object"&&!Array.isArray(b.source_snapshot)?b.source_snapshot:null);if(b.source_snapshot!=null&&!sourceSnapshot)return json({error:"invalid_quote_snapshot"},422);
+   const saved=await fetch(base+"/rest/v1/rpc/plotao_save_quote_with_snapshot",{method:"POST",headers:{...apiHeaders(key),"Content-Type":"application/json"},body:JSON.stringify({p_quote_id:b.quote_id,p_discount_percent:discount,p_note:note,p_valid_until:validUntil,p_items:items,p_source_snapshot:sourceSnapshot})});
    let data;try{data=await saved.json()}catch{data=null}
    if(!saved.ok)return json({error:"quote_save_failed",detail:data?.message||data?.details||""},saved.status);
    return json(data,200)
