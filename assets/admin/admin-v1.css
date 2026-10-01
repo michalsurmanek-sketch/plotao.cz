@@ -460,3 +460,14 @@ input::placeholder,textarea::placeholder{color:#98a69e}
 @media(max-width:600px){.bulkbar{align-items:flex-start;flex-direction:column}.bulkbar>div{width:100%}.bulkbar>div button{flex:1}.bulkbar select{width:100%}}
 
 #leads .quote-lead-status{display:block;min-height:0;margin-top:6px;color:var(--muted);font-size:12px;white-space:normal}#leads .quote-lead-status:empty{display:none}#leads .quote-lead-status.error{color:#a32626}
+
+.quote-dimensions{display:grid;grid-template-columns:42px minmax(0,1fr);gap:14px;margin:16px 0;padding:18px;border:1px solid #f1cf8d;border-radius:16px;background:linear-gradient(135deg,#fff9ed,#fffdf8);box-shadow:0 8px 24px rgba(102,75,26,.06)}
+.quote-dimensions-icon{width:40px;height:40px;display:grid;place-items:center;border-radius:13px;background:#fff0cf;color:#9a5a00;font-size:24px;font-weight:800}
+.quote-dimensions-content h4{margin:1px 0 5px;color:#754800;font-size:16px}
+.quote-dimensions-content p{margin:0 0 12px;color:#655b4a}
+.quote-dimensions-fields{display:grid;grid-template-columns:minmax(120px,180px) minmax(120px,180px) auto;align-items:end;gap:12px}
+.quote-dimensions-fields label{display:grid;gap:6px;font-size:13px;font-weight:700}
+.quote-dimensions-fields input{min-width:0;width:100%;padding:10px 12px;border:1px solid #d8d4ca;border-radius:10px;background:#fff}
+.quote-dimensions-fields button{min-height:40px;white-space:nowrap}
+.quote-dimensions-content>small{display:block;margin-top:10px;color:#756e60}
+@media(max-width:720px){.quote-dimensions{grid-template-columns:34px minmax(0,1fr);padding:14px;gap:10px}.quote-dimensions-icon{width:34px;height:34px}.quote-dimensions-fields{grid-template-columns:1fr 1fr}.quote-dimensions-fields button{grid-column:1/-1}}
