@@ -435,3 +435,26 @@ input::placeholder,textarea::placeholder{color:#98a69e}
  #customers .table tbody>tr:not(.customer-history-row)>td:nth-child(2){grid-column:1/-1}
  #customers .table tbody>tr:not(.customer-history-row)>td:first-child:before{display:none}
 }
+
+/* Hromadný výběr v pracovních seznamech */
+.bulk-select,[data-lead-select-all],[data-partner-select-all],[data-supplier-select-all],[data-product-select-all],[data-job-select-all],[data-quote-select-all]{width:17px;height:17px;accent-color:var(--green);cursor:pointer}
+.bulkbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0;padding:12px 16px;background:#fff;border:1px solid var(--line);border-radius:12px}
+.bulkbar[hidden]{display:none!important}
+.bulkbar>div{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.bulkbar button{cursor:pointer}
+.bulkbar .link{padding:8px}
+.bulkbar .secondary{border:1px solid var(--line);border-radius:8px;background:#f8fbf9;color:var(--deep);padding:9px 12px;font-weight:800}
+[data-lead-bulk-status]:empty,[data-partner-bulk-status]:empty,[data-supplier-bulk-status]:empty,[data-product-bulk-status]:empty{display:none}
+#leads .table th:first-child,#leads .table td:first-child{width:4%;text-align:center}
+#leads .table th:nth-child(2),#leads .table td:nth-child(2){width:17%}
+#leads .table th:nth-child(3),#leads .table td:nth-child(3){width:11%}
+#leads .table th:nth-child(4),#leads .table td:nth-child(4){width:13%}
+#leads .table th:nth-child(5),#leads .table td:nth-child(5){width:6%}
+#leads .table th:nth-child(6),#leads .table td:nth-child(6){width:13%}
+#leads .table th:nth-child(7),#leads .table td:nth-child(7){width:12%}
+#leads .table th:nth-child(8),#leads .table td:nth-child(8){width:15%}
+#leads .table th:nth-child(9),#leads .table td:nth-child(9){width:9%}
+#companies .partner-table th:first-child,#companies .partner-table td:first-child,#suppliers .table th:first-child,#suppliers .table td:first-child,#products .catalog-table th:first-child,#products .catalog-table td:first-child,#jobs .table th:first-child,#jobs .table td:first-child{width:42px;text-align:center}
+#leads .table td:first-child input,#companies .partner-table td:first-child input,#suppliers .table td:first-child input,#products .catalog-table td:first-child input,#jobs .table td:first-child input{vertical-align:middle}
+@media(max-width:900px){#leads .table tbody>tr:not(.detail-row)>td:nth-child(1){grid-column:auto;display:flex;align-items:center;justify-content:center}#leads .table tbody>tr:not(.detail-row)>td:nth-child(2){grid-column:1/-1}}
+@media(max-width:600px){.bulkbar{align-items:flex-start;flex-direction:column}.bulkbar>div{width:100%}.bulkbar>div button{flex:1}.bulkbar select{width:100%}}
