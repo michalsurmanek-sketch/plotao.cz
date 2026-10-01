@@ -420,3 +420,18 @@ input::placeholder,textarea::placeholder{color:#98a69e}
 #customers .customer-actions{display:flex;align-items:center;gap:12px}#customers .customer-actions .link{padding:0;cursor:pointer}#customers .customer-actions .customer-delete{color:#a32626}#customers .customer-delete-status{display:block;max-width:220px;margin-top:5px;white-space:normal}#customers .customer-delete:disabled{opacity:.55;cursor:wait}
 
 
+
+#customers .customer-select,#customers [data-customer-select-all]{width:17px;height:17px;accent-color:var(--green);cursor:pointer}
+#customers .customer-bulkbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0;padding:12px 16px;background:#fff;border:1px solid var(--line);border-radius:12px}
+#customers .customer-bulkbar>div{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#customers .danger-action{background:#fff1ef;color:#a32626;border:1px solid #efc8c4;border-radius:8px;padding:9px 12px;font-weight:800;cursor:pointer}
+#customers .danger-action:disabled{opacity:.55;cursor:wait}
+#customers #customerBulkStatus:empty{display:none}
+@media(max-width:520px){
+ #customers .customer-bulkbar{align-items:flex-start;flex-direction:column}
+ #customers .customer-bulkbar>div{width:100%}
+ #customers .customer-bulkbar button{flex:1}
+ #customers .table tbody>tr:not(.customer-history-row)>td:first-child{grid-column:auto;display:flex;align-items:center;justify-content:center}
+ #customers .table tbody>tr:not(.customer-history-row)>td:nth-child(2){grid-column:1/-1}
+ #customers .table tbody>tr:not(.customer-history-row)>td:first-child:before{display:none}
+}
