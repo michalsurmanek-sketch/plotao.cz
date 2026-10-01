@@ -22,7 +22,8 @@ async function renewSession(session,force=false){
 }
 function authBox(message=''){box.style.display='block';document.querySelector('#admMsg').textContent=message}
 async function jsonRequest(path,method='GET',body=null){
- const send=()=>fetch(path,{method,headers:{apikey:K,Authorization:'Bearer '+token,...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
+ const url=/^https?:\/\//i.test(path)?path:S+path;
+ const send=()=>fetch(url,{method,headers:{apikey:K,Authorization:'Bearer '+token,...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
  let response=await send();
  if(response.status===401){const session=await renewSession(saved(),true);if(session?.access_token){token=session.access_token;response=await send()}}
  let data;try{data=await response.json()}catch{data=null}
