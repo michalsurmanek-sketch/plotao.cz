@@ -7,12 +7,26 @@ const FENCE_TYPES=["Panelový plot","Pletivový plot","Betonový plot","Gabionov
 const normMatch=s=>String(s||'').toLocaleLowerCase('cs-CZ').replace(/[\s,]+/g,'');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let token='',leads=[],partners=[],referrals=[];
-const saved=()=>{try{return JSON.parse(localStorage.getItem('plotao.auth')||sessionStorage.getItem('plotao.auth')||'null')}catch{return null}};
+let refreshPromise=null;
+const saved=()=>{try{return JSON.parse(sessionStorage.getItem('plotao.auth')||localStorage.getItem('plotao.auth')||'null')}catch{return null}};
+function persistSession(session){sessionStorage.setItem('plotao.auth',JSON.stringify(session));localStorage.removeItem('plotao.auth')}
+function clearSession(){sessionStorage.removeItem('plotao.auth');localStorage.removeItem('plotao.auth')}
+function tokenExpiry(value){try{const part=value.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');return JSON.parse(atob(part.padEnd(part.length+((4-part.length%4)%4),'='))).exp||0}catch{return 0}}
+async function renewSession(session,force=false){
+ if(!session?.access_token)return null;
+ if(!force&&tokenExpiry(session.access_token)*1000>Date.now()+60000)return session;
+ if(!session.refresh_token)return null;
+ if(refreshPromise)return refreshPromise;
+ refreshPromise=(async()=>{try{const response=await fetch(S+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:K,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:session.refresh_token})});let next;try{next=await response.json()}catch{next=null}if(!response.ok||!next?.access_token||!next?.refresh_token){clearSession();return null}persistSession(next);return next}catch{return null}})();
+ try{return await refreshPromise}finally{refreshPromise=null}
+}
 function authBox(message=''){box.style.display='block';document.querySelector('#admMsg').textContent=message}
 async function jsonRequest(path,method='GET',body=null){
- const response=await fetch(path,{method,headers:{apikey:K,Authorization:'Bearer '+token,...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
+ const send=()=>fetch(path,{method,headers:{apikey:K,Authorization:'Bearer '+token,...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
+ let response=await send();
+ if(response.status===401){const session=await renewSession(saved(),true);if(session?.access_token){token=session.access_token;response=await send()}}
  let data;try{data=await response.json()}catch{data=null}
- if(!response.ok){const code=data?.error||'request_failed';const messages={partner_consent_required:'Zákazník nedal souhlas s předáním údajů partnerovi.',partner_region_required:'Nejdřív uložte kraj realizace v detailu poptávky.',partner_already_assigned:'Tato poptávka už má aktivní předání jiné firmě.',partner_region_mismatch:'Firma nepůsobí v tomto kraji.',partner_type_mismatch:'Firma neprovádí zvolený typ oplocení.',partner_service_mismatch:'Firma nenabízí požadovanou kombinaci montáže a materiálu.',partner_email_failed:'Resend e-mail nepřijal. Ověřte jeho nastavení a doménu.',resend_not_configured:'V Supabase chybí klíč Resend.',partner_send_record_failed:'E-mail mohl být odeslán, ale uložení předání selhalo; před opakováním zkontrolujte historii.'};throw Error(messages[code]||'Změnu se nepodařilo uložit ('+code+').')}
+ if(!response.ok){const code=data?.error||data?.code||response.headers.get('sb-error-code')||'request_failed';const messages={partner_consent_required:'Zákazník nedal souhlas s předáním údajů partnerovi.',partner_region_required:'Nejdřív uložte kraj realizace v detailu poptávky.',partner_already_assigned:'Tato poptávka už má aktivní předání jiné firmě.',partner_region_mismatch:'Firma nepůsobí v tomto kraji.',partner_type_mismatch:'Firma neprovádí zvolený typ oplocení.',partner_service_mismatch:'Firma nenabízí požadovanou kombinaci montáže a materiálu.',partner_email_failed:'Resend e-mail nepřijal. Ověřte jeho nastavení a doménu.',email_send_failed:'Resend e-mail nepřijal. Zkontrolujte ověření domény a nastavení účtu.',email_sent_log_failed:'Resend e-mail přijal, ale uložení do historie selhalo. Před opakováním ověřte složku Odeslané.',resend_not_configured:'V Supabase chybí klíč Resend.',partner_send_record_failed:'E-mail mohl být odeslán, ale uložení předání selhalo; před opakováním zkontrolujte historii.'};const error=new Error(messages[code]||('Požadavek selhal (HTTP '+response.status+(code?' · '+code:'')+(data?.message?': '+data.message:'')+').'));error.status=response.status;error.code=code;throw error}
  return data
 }
 function serviceLabels(p){return (p.service_types||["material_only"]).map(v=>SERVICE_TYPES.find(x=>x.value===v)?.label||v).join(" · ")}
@@ -23,13 +37,12 @@ function renderPartners(){
 }
 async function load(t){
  token=t;
- const [leadResponse,partnerData,referralData]=await Promise.all([
-  fetch(F,{headers:{apikey:K,Authorization:'Bearer '+t}}),
+ const [leadData,partnerData,referralData]=await Promise.all([
+  jsonRequest(F),
   jsonRequest(F+'?resource=partners'),
   jsonRequest(F+'?resource=referrals')
  ]);
- if(!leadResponse.ok)throw Error(leadResponse.status===401||leadResponse.status===403?'Přihlášení vypršelo nebo účet nemá administrátorský přístup.':'Poptávky se nepodařilo načíst.');
- leads=await leadResponse.json();partners=Array.isArray(partnerData)?partnerData:[];referrals=Array.isArray(referralData)?referralData:[];
+ leads=Array.isArray(leadData)?leadData:[];partners=Array.isArray(partnerData)?partnerData:[];referrals=Array.isArray(referralData)?referralData:[];
  box.style.display='none';render();renderPartners();
  window.PLOTAOAdmin={request:(path,method='GET',body=null)=>jsonRequest(path,method,body),get leads(){return leads},get token(){return token},refresh:()=>load(token),show:view=>{const b=document.querySelector('[data-view="'+view+'"]');if(b)b.click()}};
  window.dispatchEvent(new CustomEvent('plotao:admin-data',{detail:{leads}}));
@@ -78,7 +91,7 @@ function detail(x){
 }
 function receivedAt(value){const d=new Date(value);if(!Number.isFinite(d.getTime()))return '—';const tz='Europe/Prague',fmt=new Intl.DateTimeFormat('cs-CZ',{timeZone:tz,year:'numeric',month:'numeric',day:'numeric'});return fmt.format(d)===fmt.format(new Date())?d.toLocaleTimeString('cs-CZ',{timeZone:tz,hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString('cs-CZ',{timeZone:tz})}
 function render(){const body=document.querySelector('#leadRows');if(!body)return;const q=(document.querySelector('#leadSearch')?.value||'').toLowerCase(),st=document.querySelector('#leadStatus')?.value||'',rg=document.querySelector('#leadRegion')?.value||'';const rows=leads.filter(x=>(!st||x.status===st)&&(!rg||area(x)===rg)&&(!q||[x.name,x.place,x.phone,x.email,x.note,x.payload?.fenceType,x.assigned_to].join(' ').toLowerCase().includes(q)));body.innerHTML=rows.map(x=>'<tr><td><strong>'+esc(x.name)+'</strong><small>'+esc(x.phone||x.email||'')+'</small></td><td>'+esc(x.place||'—')+(x.place&&x.place.trim().toLowerCase()===area(x).trim().toLowerCase()?'':'<small>'+esc(area(x))+'</small>')+'</td><td>'+esc(x.payload?.fenceType|| (x.mode==='help'?'Potřebuji poradit':'—'))+'<small>'+esc(x.payload?.scope||'')+'</small></td><td>'+esc(total(x))+'</td><td><select class="status-select" data-quick="'+esc(x.id)+'">'+Object.entries(statuses).map(([k,v])=>'<option value="'+k+'" '+(x.status===k?'selected':'')+'>'+v+'</option>').join('')+'</select></td><td>'+esc(x.next_action||'—')+(x.next_action_at?'<small>'+new Date(x.next_action_at).toLocaleString('cs-CZ')+'</small>':'')+'</td><td>'+receivedAt(x.created_at)+'</td><td><button class="link" data-open="'+esc(x.id)+'">Otevřít</button></td></tr>'+detail(x)).join('')||'<tr><td colspan="8" class="empty">Žádná poptávka neodpovídá filtrům.</td></tr>'}
-async function patch(id,data){const r=await fetch(F,{method:'PATCH',headers:{apikey:K,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({id,...data})});let result={};try{result=await r.json()}catch{}if(!r.ok){const errors={resend_not_configured:'V Supabase chybí klíč Resend.',email_send_failed:'Resend e-mail nepřijal. Zkontrolujte ověření domény a nastavení účtu.',email_sent_log_failed:'Resend e-mail přijal, ale uložení do historie selhalo. Před opakováním ověřte složku Odeslané.'};throw Error(errors[result.error]||'Změnu se nepodařilo uložit. ('+(result.error||r.status)+')')}return result}
+async function patch(id,data){return jsonRequest(F,'PATCH',{id,...data})}
 document.querySelector('#leadSearch')?.addEventListener('input',render);document.querySelector('#leadStatus')?.addEventListener('change',render);document.querySelector('#leadRegion')?.addEventListener('change',render);
 document.addEventListener('click',async e=>{const open=e.target.closest('[data-open]');if(open){const row=document.querySelector('[data-detail="'+CSS.escape(open.dataset.open)+'"]');row.hidden=!row.hidden;open.textContent=row.hidden?'Otevřít':'Zavřít';}
 
@@ -86,7 +99,7 @@ const sendReply=e.target.closest('[data-send-reply]');if(sendReply){const id=sen
 const save=e.target.closest('[data-save]');if(save){const row=document.querySelector('[data-detail="'+CSS.escape(save.dataset.save)+'"]'),data={};row.querySelectorAll('[data-field]').forEach(el=>data[el.dataset.field]=el.value);const due=row.querySelector('[data-field=next_action_at]').value;data.next_action_at=due?new Date(due).toISOString():null;const msg=row.querySelector('[role=status]');msg.textContent='Ukládám…';try{const updated=await patch(save.dataset.save,data);leads=leads.map(x=>x.id===updated.id?updated:x);render();const refreshed=document.querySelector('[data-detail="'+CSS.escape(save.dataset.save)+'"]');if(refreshed){refreshed.hidden=false;const opener=document.querySelector('[data-open="'+CSS.escape(save.dataset.save)+'"]');if(opener)opener.textContent='Zavřít';const status=refreshed.querySelector('[role=status]');if(status)status.textContent='Uloženo'}}catch(err){msg.textContent=err.message}}
 });
 document.addEventListener('change',async e=>{const sel=e.target.closest('[data-quick]');if(!sel)return;try{const x=await patch(sel.dataset.quick,{status:sel.value});leads=leads.map(v=>v.id===x.id?x:v);render()}catch{authBox('Stav se nepodařilo uložit. Přihlaste se znovu.')}});
-document.querySelector('#admLogin').onclick=async()=>{const m=document.querySelector('#admMsg');m.textContent='Ověřuji přihlášení…';try{const r=await fetch(AUTH,{method:'POST',headers:{apikey:K,'Content-Type':'application/json'},body:JSON.stringify({email:document.querySelector('#admEmail').value,password:document.querySelector('#admPass').value})}),j=await r.json();if(!r.ok||!j.access_token)throw Error('Přihlášení se nepodařilo. Ověřte e-mail, heslo a přístup správce.');sessionStorage.setItem('plotao.auth',JSON.stringify(j));await load(j.access_token)}catch(e){m.textContent=e.message}};
+document.querySelector('#admLogin').onclick=async()=>{const m=document.querySelector('#admMsg');m.textContent='Ověřuji přihlášení…';try{const r=await fetch(AUTH,{method:'POST',headers:{apikey:K,'Content-Type':'application/json'},body:JSON.stringify({email:document.querySelector('#admEmail').value,password:document.querySelector('#admPass').value})}),j=await r.json();if(!r.ok||!j.access_token)throw Error('Přihlášení se nepodařilo. Ověřte e-mail, heslo a přístup správce.');persistSession(j);await load(j.access_token)}catch(e){m.textContent=e.message}};
 function validIcoChecksum(value){
  const digits=String(value||'').replace(/\D/g,'');
  if(!/^\d{8}$/.test(digits))return false;
@@ -181,5 +194,5 @@ document.querySelector('#partnerForm')?.addEventListener('submit',async e=>{
  catch(err){status.textContent=err.message}
  finally{button.disabled=false}
 });
-const session=saved();if(session?.access_token){load(session.access_token).catch(()=>authBox('Přihlášení vypršelo. Zadejte prosím přihlašovací údaje.'))}else authBox();
+const session=saved();if(session?.access_token){renewSession(session).then(active=>{if(!active){clearSession();authBox('Přihlášení vypršelo. Zadejte prosím přihlašovací údaje.');return}load(active.access_token).catch(error=>{if(error.status===401||error.code==='admin_forbidden'){clearSession();authBox('Přihlášení vypršelo nebo účet nemá administrátorský přístup.')}else authBox(error.message)})})}else authBox();
 })();
