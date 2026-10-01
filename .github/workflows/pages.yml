@@ -126,6 +126,7 @@ jobs:
           PLOTAO_E2E_URL=http://127.0.0.1:4173 node scripts/quote-page-browser-check.mjs
           PLOTAO_E2E_URL=http://127.0.0.1:4173 node scripts/guides-wizard-browser-check.mjs
           PLOTAO_E2E_URL=http://127.0.0.1:4173 npm run browser:e2e
+          PLOTAO_E2E_URL=http://127.0.0.1:4173 node scripts/admin-shell-browser-check.mjs
           PLOTAO_E2E_URL=http://127.0.0.1:4173 node scripts/free-route-browser-check.mjs
           PLOTAO_E2E_URL=http://127.0.0.1:4173 node scripts/segment-add-position-browser-check.mjs
           PLOTAO_E2E_URL=http://127.0.0.1:4173 node scripts/focus-visible-browser-check.mjs
