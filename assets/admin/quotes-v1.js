@@ -14,7 +14,7 @@ function quoteDimensions(q,items=rows(q)){
  let length=(Array.isArray(p.segments)?p.segments:[]).reduce((sum,x)=>sum+(Number(x?.length)||0),0);
  if(!length)length=items.filter(x=>String(x.unit||'').toLowerCase()==='m').reduce((sum,x)=>sum+(Number(x.quantity)||0),0);
  let height=Number(p.height)||0;
- if(!height){for(const item of items){const match=String(item.description||'').match(/výška\\s*:?\\s*(\\d+(?:[.,]\\d+)?)\\s*cm/i);if(match){height=Number(match[1].replace(',','.'));break}}}
+ if(!height){for(const item of items){const match=String(item.description||'').match(/výška\s*:?\s*(\d+(?:[.,]\d+)?)\s*cm/i);if(match){height=Number(match[1].replace(',','.'));break}}}
  return{length,height,missing:!(length>0&&height>0)}
 }
 function totals(items,discount){let net=0,cost=0,tax=0;for(const i of items){const base=(Number(i.quantity)||0)*(Number(i.sale_unit_price)||0)*(1-(Number(i.discount_percent)||0)/100);net+=base;cost+=(Number(i.quantity)||0)*(Number(i.purchase_unit_price)||0);tax+=base*(Number(i.vat_percent)||0)/100}const d=1-(Number(discount)||0)/100;return{net:net*d,cost,vat:tax*d,gross:(net+tax)*d,margin:net*d-cost}}
