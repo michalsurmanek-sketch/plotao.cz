@@ -471,3 +471,26 @@ input::placeholder,textarea::placeholder{color:#98a69e}
 .quote-dimensions-fields button{min-height:40px;white-space:nowrap}
 .quote-dimensions-content>small{display:block;margin-top:10px;color:#756e60}
 @media(max-width:720px){.quote-dimensions{grid-template-columns:34px minmax(0,1fr);padding:14px;gap:10px}.quote-dimensions-icon{width:34px;height:34px}.quote-dimensions-fields{grid-template-columns:1fr 1fr}.quote-dimensions-fields button{grid-column:1/-1}}
+
+.quote-configuration{margin:16px 0;padding:18px;border:1px solid #e5c174;border-radius:16px;background:linear-gradient(135deg,#fff9ed,#fffdf8);box-shadow:0 8px 24px rgba(102,75,26,.06)}
+.quote-configuration-heading{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
+.quote-configuration-heading h4{margin:1px 0 5px;color:#754800;font-size:17px}
+.quote-configuration-heading p{margin:0;color:#655b4a}
+.quote-config-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.quote-config-grid>label,.quote-config-segment>label,.quote-config-section>label{display:grid;gap:6px;font-size:13px;font-weight:700;color:#34483e}
+.quote-config-grid input,.quote-config-grid select,.quote-config-segment input,.quote-config-segment select,.quote-config-section textarea{min-width:0;width:100%;padding:10px 11px;border:1px solid #d5ded8;border-radius:10px;background:#fff;color:#1e3028;font:inherit;font-weight:500}
+.quote-config-grid input:focus,.quote-config-grid select:focus,.quote-config-segment input:focus,.quote-config-segment select:focus,.quote-config-section textarea:focus{outline:3px solid rgba(0,120,76,.15);border-color:#08794f}
+.quote-config-wide{grid-column:1/-1}
+.quote-config-section{margin-top:18px;padding-top:16px;border-top:1px solid #eadfca}
+.quote-config-section h5{margin:0 0 11px;color:#263d31;font-size:15px}
+.quote-config-section small{display:block;margin-top:8px;color:#66756c}
+.quote-config-segments{display:grid;gap:10px;margin-bottom:10px}
+.quote-config-segment{display:grid;grid-template-columns:1.25fr .8fr .8fr 1fr auto;align-items:end;gap:10px;padding:12px;border:1px solid #e2e8e3;border-radius:12px;background:#fff}
+.quote-config-segment button{min-height:40px}
+.quote-config-check{display:flex!important;align-items:center;gap:9px;padding:10px;border:1px solid #d5ded8;border-radius:10px;background:#fff}
+.quote-config-check input{width:18px!important;height:18px}
+.quote-config-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px}
+.quote-config-toggle{margin:12px 0}
+.quote-row .quote-desc textarea{width:100%;min-height:58px;padding:9px;border:1px solid #d5ded8;border-radius:9px;font:inherit;resize:vertical}
+@media(max-width:900px){.quote-config-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.quote-config-segment{grid-template-columns:repeat(2,minmax(0,1fr))}.quote-config-segment button{grid-column:2}}
+@media(max-width:560px){.quote-configuration{padding:14px}.quote-config-grid{grid-template-columns:1fr}.quote-config-wide{grid-column:auto}.quote-config-segment{grid-template-columns:1fr}.quote-config-segment button{grid-column:auto}.quote-config-actions{align-items:stretch;flex-direction:column}}
