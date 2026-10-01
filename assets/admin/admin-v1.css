@@ -458,3 +458,5 @@ input::placeholder,textarea::placeholder{color:#98a69e}
 #leads .table td:first-child input,#companies .partner-table td:first-child input,#suppliers .table td:first-child input,#products .catalog-table td:first-child input,#jobs .table td:first-child input{vertical-align:middle}
 @media(max-width:900px){#leads .table tbody>tr:not(.detail-row)>td:nth-child(1){grid-column:auto;display:flex;align-items:center;justify-content:center}#leads .table tbody>tr:not(.detail-row)>td:nth-child(2){grid-column:1/-1}}
 @media(max-width:600px){.bulkbar{align-items:flex-start;flex-direction:column}.bulkbar>div{width:100%}.bulkbar>div button{flex:1}.bulkbar select{width:100%}}
+
+#leads .quote-lead-status{display:block;min-height:0;margin-top:6px;color:var(--muted);font-size:12px;white-space:normal}#leads .quote-lead-status:empty{display:none}#leads .quote-lead-status.error{color:#a32626}
