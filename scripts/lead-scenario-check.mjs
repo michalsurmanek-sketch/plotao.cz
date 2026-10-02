@@ -99,8 +99,8 @@ ok(out.includes('PLOTAO.CZ – podklady poptávky')&&out.includes('+420777123456
 ok(out.includes('Předek 20 m')&&out.includes('Bok 17 m · navazuje rohem'),'customer clipboard export must preserve all normalized fence sections');
 const helpOut=core.toText({...base,mode:'help',note:'Jak vyřešit roh ve svahu?'});
 ok(helpOut.startsWith('PLOTAO.CZ – žádost o radu')&&helpOut.includes('Dotaz:\nJak vyřešit roh ve svahu?')&&!helpOut.includes('Plot:')&&!helpOut.includes('Stav ceny:'),'help export must contain the question but no customer quote payload');
-const partnerOut=core.toText({...base,mode:'partner',place:'Zlínský kraj',placeFromCalculator:'Jiná obec',fenceType:'Panelový plot',segments:base.segments});
-ok(partnerOut.startsWith('PLOTAO.CZ – zájem montážní firmy')&&partnerOut.includes('Oblast působnosti: Zlínský kraj')&&!partnerOut.includes('Jiná obec')&&!partnerOut.includes('Plot:'),'partner export must use explicit service area only and exclude customer calculator payload');
+const partnerOut=core.toText({...base,mode:'partner',ico:'12345678',place:'Zlínský kraj',placeFromCalculator:'Jiná obec',fenceType:'Panelový plot',segments:base.segments});
+ok(partnerOut.startsWith('PLOTAO.CZ – zájem montážní firmy')&&partnerOut.includes('IČO: 12345678')&&partnerOut.includes('Oblast působnosti: Zlínský kraj')&&!partnerOut.includes('Jiná obec')&&!partnerOut.includes('Plot:'),'partner export must use explicit service area only and exclude customer calculator payload');
 
 if(fail.length){console.error('Lead scenario checks failed:\n- '+fail.join('\n- '));process.exit(1)}
 console.log('Lead scenario checks OK: isolated drafts, visible option-limit failures, geometry limits and mode-specific payloads are protected');

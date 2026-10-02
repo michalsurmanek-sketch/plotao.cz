@@ -8,7 +8,7 @@
     if(name){name.required=true;name.autocomplete='name';name.enterKeyHint='next';name.minLength=2;name.maxLength=120}
     if(phone){phone.type='tel';phone.required=true;phone.autocomplete='tel';phone.inputMode='tel';phone.enterKeyHint='next';phone.maxLength=32}
     if(email){email.type='email';email.required=true;email.autocomplete='email';email.inputMode='email';email.autocapitalize='none';email.spellcheck=false;email.enterKeyHint='next';email.maxLength=254}
-    if(place)place.maxLength=160;if(note)note.maxLength=2000;
+    if(place)place.maxLength=160;if(note)note.maxLength=2000;const ico=form.elements.namedItem('ico');if(ico){ico.maxLength=8;ico.inputMode='numeric';ico.autocomplete='off'}
   }
   function sendText(mode){const live=transportReady();if(mode==='partner')return live?'Odeslat kontakt':'Zkontrolovat kontakt a zkopírovat';if(mode==='help')return live?'Odeslat žádost':'Zkontrolovat žádost a zkopírovat';return live?'Odeslat poptávku':'Zkontrolovat poptávku a zkopírovat'}
   function privacyText(mode){if(!transportReady())return'Formulář neodesílá na server; po kontrole podklady pouze zkopíruje.';const subject=mode==='partner'?'spolupráce':mode==='help'?'žádosti o radu':'poptávky';return'Údaje použijeme pouze k vyřízení '+subject+'. Bez souhlasu je nepoužijeme k marketingu.'}
@@ -25,7 +25,7 @@
     return choice;
   }
   function apply(mode){
-    const form=$('#form');if(!form)return;form.dataset.mode=mode;ensurePartnerShare(form);const place=form.elements.place,note=form.elements.note,send=form.querySelector('.send'),placeLabel=place?.closest('label'),noteLabel=note?.closest('label'),scope=scopeValue(),modalText=$('#modalText'),privacy=ensurePrivacy(form);
+    const form=$('#form');if(!form)return;form.dataset.mode=mode;ensurePartnerShare(form);const isPartner=mode==='partner',icoLabel=$('#partnerIcoField'),quoteLink=$('#partnerQuoteLink'),ico=form.elements.namedItem('ico');if(icoLabel)icoLabel.hidden=!isPartner;if(quoteLink)quoteLink.hidden=isPartner;if(ico)ico.required=isPartner;const place=form.elements.place,note=form.elements.note,send=form.querySelector('.send'),placeLabel=place?.closest('label'),noteLabel=note?.closest('label'),scope=scopeValue(),modalText=$('#modalText'),privacy=ensurePrivacy(form);
     if(mode==='partner'){if(modalText)modalText.textContent='Napište kontakt a oblast, ve které montujete ploty.';labelText(placeLabel,'Oblast působnosti');if(place){place.placeholder='Kraj, okres nebo města';place.required=true;place.minLength=2}labelText(noteLabel,'Poznámka / typy plotů');if(note){note.required=false;note.minLength=0}}
     else if(mode==='help'){if(modalText)modalText.textContent='Napište, s čím potřebujete poradit. Výpočet plotu nemusíte dokončit.';labelText(placeLabel,'Obec / PSČ (volitelné)');if(place){place.placeholder='Obec nebo PSČ';place.required=false;place.minLength=0}labelText(noteLabel,'S čím potřebujete poradit');if(note){note.required=true;note.minLength=5;note.placeholder='Stručně popište svůj dotaz'}}
     else{if(modalText)modalText.textContent=scope==='material'?'Kontakt spojíme s aktuální konfigurací kalkulátoru.':'Kontakt spojíme s aktuální konfigurací. Pro dopravu nebo realizaci potřebujeme obec nebo PSČ.';labelText(placeLabel,scope==='material'?'Obec / PSČ (volitelné)':'Obec / PSČ');if(place){place.placeholder='Obec nebo PSČ';place.required=scope==='delivery'||scope==='turnkey';place.minLength=place.required?2:0}labelText(noteLabel,'Poznámka');if(note){note.required=false;note.minLength=0;note.placeholder=''}}

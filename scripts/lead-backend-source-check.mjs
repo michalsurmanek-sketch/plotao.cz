@@ -24,8 +24,10 @@ r=validateEnvelope(env({...baseLead,gate:true,gateWidth:4,gateSection:0,gatePos:
 ok(r.ok===true,'adjacent non-overlapping gate and wicket must remain valid');
 r=validateEnvelope(env({schemaVersion:2,mode:'help',name:'Jan Novák',phone:'777123456',email:'jan@example.cz',place:'',note:'Potřebuji poradit s výškou.'}));
 ok(r.ok===true&&r.lead.mode==='help'&&!('fenceType' in r.lead),'help must not acquire fence payload');
+r=validateEnvelope(env({schemaVersion:2,mode:'partner',name:'Firma Plot',phone:'777123456',email:'firma@example.cz',ico:'12345678',place:'Zlínský kraj',note:'Montujeme panely.'}));
+ok(r.ok===true&&r.lead.mode==='partner'&&r.lead.ico==='12345678'&&!('fenceType' in r.lead),'partner lead must retain its IČO and not acquire customer fence payload');
 r=validateEnvelope(env({schemaVersion:2,mode:'partner',name:'Firma Plot',phone:'777123456',email:'firma@example.cz',place:'Zlínský kraj',note:'Montujeme panely.'}));
-ok(r.ok===true&&r.lead.mode==='partner'&&!('fenceType' in r.lead),'partner must not acquire customer fence payload');
+ok(r.ok===false&&r.errors.includes('ico'),'partner registration must reject a missing IČO');
 r=validateEnvelope(env({schemaVersion:2,mode:'help',name:'A'.repeat(121),phone:'777123456',email:'jan@example.cz',place:'',note:'Dost dlouhý dotaz'}));
 ok(r.ok===false&&r.errors.includes('name'),'oversized text must be rejected rather than silently truncated');
 
