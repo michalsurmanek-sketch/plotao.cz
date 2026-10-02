@@ -38,6 +38,11 @@
       .footer{padding:20px 0}.footer .wrap{align-items:flex-start;flex-direction:column;gap:10px}.footer-brand img{width:140px}.footer-note{font-size:10px}
     }
     @media(max-width:380px){.hero h1{font-size:40px}.hero-ctas{grid-template-columns:1fr}.hero{min-height:780px}.hero .wrap{min-height:780px}.hero-callout{bottom:20px}.main-nav a{font-size:10px}}
+    /* Remove the default blue tap flash while retaining a clear keyboard focus ring. */
+    html{-webkit-tap-highlight-color:transparent}
+    a,button,input{-webkit-tap-highlight-color:transparent}
+    :focus:not(:focus-visible){outline:none;box-shadow:none}
+    a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(--orange);outline-offset:3px}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
   </style>
 </head>
