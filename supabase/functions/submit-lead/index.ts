@@ -75,6 +75,31 @@ function rateSalt() {
   return salt
 }
 
+const REGION_NAMES = [
+  'Hlavní město Praha', 'Středočeský kraj', 'Jihočeský kraj', 'Plzeňský kraj',
+  'Karlovarský kraj', 'Ústecký kraj', 'Liberecký kraj', 'Královéhradecký kraj',
+  'Pardubický kraj', 'Kraj Vysočina', 'Jihomoravský kraj', 'Olomoucký kraj',
+  'Zlínský kraj', 'Moravskoslezský kraj',
+]
+const normalizePlace = (value: string) => String(value || '')
+  .normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+const CITY_REGIONS: Array<[string, string]> = [
+  ['uherske hradiste', 'Zlínský kraj'], ['uhersky brod', 'Zlínský kraj'],
+  ['uhersky ostroh', 'Zlínský kraj'], ['zlin', 'Zlínský kraj'],
+  ['praha', 'Hlavní město Praha'], ['brno', 'Jihomoravský kraj'],
+  ['ostrava', 'Moravskoslezský kraj'], ['olomouc', 'Olomoucký kraj'],
+  ['plzen', 'Plzeňský kraj'], ['liberec', 'Liberecký kraj'],
+  ['ceske budejovice', 'Jihočeský kraj'], ['hradec kralove', 'Královéhradecký kraj'],
+  ['pardubice', 'Pardubický kraj'], ['jihlava', 'Kraj Vysočina'],
+  ['karlovy vary', 'Karlovarský kraj'], ['usti nad labem', 'Ústecký kraj'],
+]
+function inferRegionFromPlace(place: string) {
+  const normalized = normalizePlace(place)
+  const explicit = REGION_NAMES.find((region) => normalized.includes(normalizePlace(region)))
+  if (explicit) return explicit
+  return CITY_REGIONS.find(([city]) => normalized === city || normalized.startsWith(city + ' '))?.[1] || ''
+}
+
 export default {
   fetch: withSupabase(
     { auth: 'none', cors: 'disabled' },
@@ -104,6 +129,7 @@ export default {
       const validated = validateEnvelope(input)
       if (!validated.ok) return response(422, { error: 'validation_failed', fields: validated.errors }, origin)
       const lead = validated.lead
+      if (!lead.region) lead.region = inferRegionFromPlace(lead.place)
       const receivedAt = new Date().toISOString()
 
       let rateKeys: string[] = []
@@ -171,6 +197,7 @@ export default {
       })
 
       let emailSent = false
+      const communication: Record<string, unknown>[] = []
       if (lead.email) {
         const resendKey = Deno.env.get('RESEND_API_KEY')?.trim()
         if (!resendKey) {
@@ -207,20 +234,14 @@ export default {
             try { mailData = await mailResponse.json() } catch {}
             if (mailResponse.ok) {
               emailSent = true
-              const { error: communicationError } = await ctx.supabaseAdmin
-                .from('plotao_leads')
-                .update({
-                  communication: [{
-                    direction: 'out',
-                    body: message,
-                    sent_at: new Date().toISOString(),
-                    provider: 'resend',
-                    provider_id: typeof mailData.id === 'string' ? mailData.id : null,
-                    kind: 'automatic_confirmation',
-                  }],
-                })
-                .eq('id', data.id)
-              if (communicationError) console.error('plotao auto-reply history save failed', communicationError.code || 'unknown')
+              communication.push({
+                direction: 'out',
+                body: message,
+                sent_at: new Date().toISOString(),
+                provider: 'resend',
+                provider_id: typeof mailData.id === 'string' ? mailData.id : null,
+                kind: 'automatic_confirmation',
+              })
             } else {
               console.error('plotao auto-reply rejected', mailResponse.status, typeof mailData.name === 'string' ? mailData.name : '')
             }
@@ -228,6 +249,61 @@ export default {
             console.error('plotao auto-reply network failure', error instanceof Error ? error.message : 'unknown')
           }
         }
+      }
+
+      const resendKey = Deno.env.get('RESEND_API_KEY')?.trim()
+      if (!resendKey) {
+        console.error('plotao admin notification unavailable: RESEND_API_KEY missing')
+      } else {
+        const adminNotice = [
+          'Na webu PLOTAO.cz dorazila nová žádost.',
+          '',
+          'Čas přijetí: ' + receivedAt,
+          'ID žádosti: ' + data.id,
+          '',
+          'Otevřete administraci PLOTAO.cz a v sekci Poptávky zobrazte detail žádosti.',
+          'Toto upozornění neobsahuje kontaktní údaje zákazníka.',
+        ].join('\n')
+        try {
+          const notificationResponse = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer ' + resendKey,
+              'Content-Type': 'application/json',
+              'Idempotency-Key': 'plotao-admin-notice-' + data.id,
+            },
+            body: JSON.stringify({
+              from: 'PLOTAO.cz <odpovedi@plotao.cz>',
+              to: ['michalsurmanek@seznam.cz'],
+              subject: 'Nová poptávka v administraci PLOTAO.cz',
+              text: adminNotice,
+            }),
+          })
+          let notificationData: Record<string, unknown> = {}
+          try { notificationData = await notificationResponse.json() } catch {}
+          if (notificationResponse.ok) {
+            communication.push({
+              direction: 'out',
+              body: adminNotice,
+              sent_at: new Date().toISOString(),
+              provider: 'resend',
+              provider_id: typeof notificationData.id === 'string' ? notificationData.id : null,
+              kind: 'admin_notification',
+            })
+          } else {
+            console.error('plotao admin notification rejected', notificationResponse.status, typeof notificationData.name === 'string' ? notificationData.name : '')
+          }
+        } catch (error) {
+          console.error('plotao admin notification network failure', error instanceof Error ? error.message : 'unknown')
+        }
+      }
+
+      if (communication.length) {
+        const { error: communicationError } = await ctx.supabaseAdmin
+          .from('plotao_leads')
+          .update({ communication })
+          .eq('id', data.id)
+        if (communicationError) console.error('plotao communication history save failed', communicationError.code || 'unknown')
       }
 
       return new Response(JSON.stringify({ id: data.id, email_sent: emailSent }), {

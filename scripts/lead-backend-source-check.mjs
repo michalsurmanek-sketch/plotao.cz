@@ -58,5 +58,9 @@ ok(sql.includes('Raw IP addresses are never stored'),'rate-limit schema must doc
 ok(deno.imports?.['@supabase/server']==='npm:@supabase/server@1.6.0','Supabase server dependency must be exactly pinned');
 ok(browserConfig.includes('enabled:true')&&browserConfig.includes("endpoint:'https://jmukoccjqykyoqsypuwb.supabase.co/functions/v1/submit-lead'")&&browserConfig.includes("allowedOrigins:['https://jmukoccjqykyoqsypuwb.supabase.co']"),'production browser transport must allow only the verified Supabase endpoint origin; site-origin filtering belongs to the Edge Function');
 
+ok(index.includes('function inferRegionFromPlace')&&index.includes("['uherske hradiste', 'Zlínský kraj']"),'known Czech place names must resolve a missing lead region');
+ok(index.includes("kind: 'admin_notification'")&&index.includes("Idempotency-Key': 'plotao-admin-notice-'"),'each new lead must send an idempotent admin notification through Resend');
+ok(index.includes("to: ['michalsurmanek@seznam.cz']")&&index.includes('Toto upozornění neobsahuje kontaktní údaje zákazníka.'),'admin notices must go to the configured administrator without customer contact details');
+
 if(fail.length){console.error('Lead backend source checks failed:\n- '+fail.join('\n- '));process.exit(1)}
 console.log('Lead backend source checks OK: geometry validation, RLS, exact CORS, body limits, multi-key hashed rate limiting, server receipt timestamps, pinned dependency and disabled browser activation are protected');
