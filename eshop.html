@@ -4,307 +4,146 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>E-shop plotů | PLOTAO.cz</title>
-  <meta name="description" content="Nakupte ploty, sloupky, podhrabové desky, brány a příslušenství PLOTAO.cz. Vyberte systém nebo si celý plot navrhněte v konfigurátoru.">
+  <meta name="description" content="Vyberte plotový systém nebo potřebné komponenty. Navrhněte plot v konfigurátoru a získejte přehled všech potřebných dílů.">
   <link rel="icon" href="/assets/favicon.svg">
   <style>
-    :root{--green:#005440;--deep:#003f31;--mint:#d8faee;--orange:#ff6900;--ink:#071d18;--line:#dce7e3;--soft:#f5f8f7}
-    [hidden]{display:none!important}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.search-empty{margin:20px auto 4px;padding:18px 22px;max-width:720px;text-align:center;border:1px solid #cfe0da;border-radius:10px;background:#f4faf7;color:#37584e;font-weight:700}.mobile-only,.mobile-head-button{display:none}
-    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);font-family:Arial,Helvetica,sans-serif;background:#fff}a{color:inherit;text-decoration:none}button,input{font:inherit}.wrap{width:min(1480px,calc(100% - 48px));margin:auto}.top{height:84px;background:linear-gradient(105deg,#075b47,#003b2e);color:#fff}.top .wrap{height:100%;display:grid;grid-template-columns:300px minmax(340px,1fr) auto;align-items:center;gap:42px}.logo{width:250px;display:block}.search{height:50px;border-radius:6px;background:#fff;display:flex;align-items:center;padding:0 18px;color:#65716e}.search input{border:0;outline:0;min-width:0;flex:1;font-size:16px}.search svg{width:24px}.top-actions{display:flex;align-items:center;gap:30px;font-size:14px}.top-action{display:flex;align-items:center;gap:10px;white-space:nowrap}.top-action b{display:block;font-size:14px}.top-action span{font-size:13px}.ico{font-size:29px}.cart{position:relative}.badge{position:absolute;top:-10px;left:22px;background:var(--orange);width:25px;height:25px;border-radius:50%;display:grid;place-items:center;font-weight:700}.nav{height:54px;border-bottom:1px solid #ccd9d5;box-shadow:0 2px 8px #00271c12;background:#fff}.nav .wrap{height:100%;display:flex;align-items:center;justify-content:space-between}.nav a{height:100%;display:flex;align-items:center;padding:0 18px;font-size:15px}.nav a.active{background:#76a89a;color:#fff;font-weight:700}.hero{height:530px;position:relative;overflow:hidden;background:#eef7f3}.hero:before{content:"";position:absolute;right:0;top:0;bottom:0;width:64%;background-image:linear-gradient(90deg,#eef7f3 0%,transparent 31%),url('/assets/images/eshopeshop-reference.png.png?v=20260916-2');background-size:auto 2280px;background-position:right -132px;background-repeat:no-repeat}.hero .wrap{position:relative;height:100%;display:flex;align-items:center}.hero-copy{width:640px;padding-left:8px}.hero h1{font-size:57px;line-height:.98;margin:0 0 24px;letter-spacing:-2.5px}.hero .lead{font-size:19px;line-height:1.45;margin:0 0 30px}.benefits{display:flex;gap:34px;margin:0 0 30px}.benefit{text-align:center;font-size:13px;line-height:1.3}.benefit i{display:block;font-style:normal;font-size:38px;margin-bottom:7px}.actions{display:flex;gap:16px}.btn{min-height:54px;padding:0 28px;border:2px solid var(--green);border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-weight:700}.btn.primary{background:var(--orange);border-color:var(--orange);color:#fff}.cats{padding:18px 0 22px}.cat-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:16px}.cat-card{background:#fff;border:1px solid #e3e9e7;border-radius:7px;overflow:hidden;box-shadow:0 2px 8px #073c2d12;text-align:center;font-weight:700}.cat-card img{width:100%;height:140px;object-fit:cover;display:block;background:#edf1f0}.cat-card span{display:block;padding:12px 4px}.config{position:relative;min-height:355px;overflow:hidden;background:#eff8f4}.config:before{content:"";position:absolute;right:0;top:0;bottom:0;width:64%;background-image:linear-gradient(90deg,#eff8f4 0%,transparent 31%),url('/assets/images/eshopeshop-reference.png.png?v=20260916-2');background-size:auto 2280px;background-position:right -895px;background-repeat:no-repeat}.config .wrap{position:relative;padding:38px 8px}.config h2,.section-head h2{font-size:34px;letter-spacing:-1px;margin:0 0 10px}.config p{font-size:18px;line-height:1.45;margin:0 0 18px}.steps{display:grid;grid-template-columns:230px 230px;gap:18px 22px;margin-top:18px}.step{display:flex;align-items:center;gap:12px;font-size:15px}.step i{font-style:normal;width:40px;height:40px;border-radius:50%;background:var(--mint);display:grid;place-items:center;font-size:22px}.trust{background:#f4f8f7;padding:22px 0}.trust-grid{display:grid;grid-template-columns:repeat(4,1fr)}.trust-item{display:flex;align-items:center;justify-content:center;gap:16px;border-right:1px solid #dce7e3}.trust-item:last-child{border:0}.trust-item i{font-style:normal;font-size:38px;background:var(--mint);width:58px;height:58px;border-radius:50%;display:grid;place-items:center}.trust-item b{display:block}.trust-item small{font-size:13px}.products,.inspiration{padding:28px 0 12px}.section-head{display:flex;align-items:end;justify-content:space-between}.section-head a{font-size:14px;color:var(--green)}.product-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}.product{border:1px solid #e1e9e6;border-radius:8px;padding:14px;box-shadow:0 2px 8px #0434280d;position:relative}.product img{width:100%;height:180px;object-fit:contain;background:linear-gradient(135deg,#f7faf9,#edf2f1);border-radius:5px}.tag{position:absolute;top:16px;left:16px;background:#087848;color:#fff;padding:6px 10px;border-radius:5px;font-size:12px;font-weight:700}.product h3{font-size:16px;margin:12px 0 5px}.product small{display:block;color:#75807d;min-height:30px}.price{font-size:20px;font-weight:800;margin:7px 0 12px}.product .btn{width:100%;min-height:43px;padding:0 10px;font-size:14px}.gallery{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.shot{height:160px;border-radius:8px;background-image:url('/assets/images/eshopeshop-reference.png.png?v=20260916-2');background-size:1024px auto;background-position:center -1260px;background-repeat:no-repeat}.shot:nth-child(2){background-position:35% -1260px}.shot:nth-child(3){background-position:55% -1260px}.shot:nth-child(4){background-position:72% -1260px}.shot:nth-child(5){background-position:95% -1260px}.contact-bar{margin-top:18px;background:linear-gradient(100deg,#075b47,#003b2e);color:#fff;padding:20px 0}.contact-grid{display:grid;grid-template-columns:1.4fr 1fr auto;align-items:center;gap:40px}.contact-item{display:flex;gap:16px;align-items:center}.contact-item i{font-size:38px;font-style:normal}.contact-bar .btn{background:var(--orange);border-color:var(--orange);color:#fff;min-width:260px}.bottom{padding:25px 0 30px;background:#f5f8f7}.bottom-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}.bottom-item{display:flex;align-items:center;justify-content:center;gap:16px}.bottom-item i{font-style:normal;font-size:32px;background:#fff;width:54px;height:54px;border-radius:50%;display:grid;place-items:center}.bottom-item b{display:block;font-size:14px}.bottom-item small{font-size:13px}
-    .shot{height:150px;background-size:1475px auto;background-position:8% -1812px}.shot:nth-child(2){background-position:31% -1812px}.shot:nth-child(3){background-position:52% -1812px}.shot:nth-child(4){background-position:73% -1812px}.shot:nth-child(5){background-position:96% -1812px}.bottom{font-size:0}.bottom-grid{font-size:16px}.bottom>a[data-plotao-privacy-link]{display:block;width:max-content;margin:20px auto 0;color:#65736e;font-size:13px;text-decoration:none}.bottom>a[data-plotao-privacy-link]:hover{text-decoration:underline}
-    @media(max-width:950px){.wrap{width:min(100% - 28px,1480px)}.top{height:auto;padding:12px 0}.top .wrap{grid-template-columns:1fr auto;gap:12px}.logo{width:190px}.search{grid-column:1/-1;grid-row:2}.top-actions .advice,.top-actions .login{display:none}.nav{overflow-x:auto}.nav .wrap{width:max-content}.nav a{padding:0 14px}.hero{height:540px}.hero:before{width:100%;background-size:auto 1660px;background-position:72% -96px;opacity:.52}.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#fffffff2,#ffffffb5)}.hero-copy{z-index:1;width:100%;padding:0}.hero h1{font-size:45px}.benefits{gap:16px;display:grid;grid-template-columns:repeat(2,1fr);max-width:390px}.benefit{text-align:left;display:flex;align-items:center;gap:10px}.benefit i{margin:0}.cat-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px}.cat-card{min-width:155px;scroll-snap-align:start}.cat-card img{height:115px}.config:before{width:100%;opacity:.35;background-size:auto 1660px;background-position:70% -650px}.config .wrap{z-index:1}.product-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory}.product{min-width:230px;scroll-snap-align:start}.gallery{display:flex;overflow-x:auto;scroll-snap-type:x mandatory}.shot{min-width:260px;scroll-snap-align:start}.trust-grid,.bottom-grid{grid-template-columns:repeat(2,1fr);gap:20px}.trust-item{border:0}.contact-grid{grid-template-columns:1fr}.contact-bar .btn{width:100%}}
-    @media(max-width:560px){body{background:#f6f8f7}.wrap{width:calc(100% - 28px)}.top{margin:0 14px;height:92px;padding:7px 12px 10px;border-radius:0 0 12px 12px}.top .wrap{width:100%;display:grid;grid-template-columns:1fr auto auto auto;grid-template-rows:35px 36px;gap:4px 10px}.logo{width:168px;max-width:100%;align-self:center}.mobile-head-button{display:grid;width:32px;height:32px;place-items:center;border:0;background:transparent;color:#fff;padding:0}.mobile-head-button svg{width:26px;height:26px}.mobile-search-icon{grid-column:2}.top-actions{grid-column:3;display:block}.top-actions .cart{display:flex}.cart .sum,.top-actions .advice,.top-actions .login{display:none}.cart .ico{font-size:24px}.badge{width:19px;height:19px;font-size:11px;top:-7px;left:17px}.menu-button{grid-column:4}.search{grid-column:1/-1;grid-row:2;height:36px;padding:0 11px;border-radius:6px}.search input{font-size:13px}.search svg{width:20px}.nav{display:none}.nav.mobile-open{display:block;height:auto;margin:0 14px;border-radius:0 0 10px 10px;overflow:hidden;position:absolute;z-index:20;left:0;right:0}.nav.mobile-open .wrap{width:100%;display:grid;grid-template-columns:repeat(2,1fr)}.nav.mobile-open a{min-height:42px;height:auto;padding:9px 13px;border-bottom:1px solid #e2e9e6;font-size:12px}.hero{height:500px;min-height:500px;padding:20px 0 10px;background:#fff}.hero:before{width:66%;right:0;opacity:1;background-image:linear-gradient(90deg,#fff 0%,transparent 42%),url('/assets/images/eshopeshop-reference.png.png?v=20260916-2');background-size:auto 1410px;background-position:right -82px}.hero:after{display:none}.hero .wrap{align-items:flex-start;position:relative}.hero-copy{display:flex;flex-direction:column;width:100%;padding:0}.hero h1{order:1;width:70%;font-size:27px;line-height:.96;letter-spacing:-1.2px;margin:0 0 9px}.hero .lead{order:2;width:62%;font-size:12px;line-height:1.28;margin:0 0 11px}.actions{order:3;width:58%;flex-direction:column;gap:7px}.actions .btn{width:100%;min-height:40px;padding:0 7px;font-size:11px;border-width:1px}.benefits{position:absolute!important;z-index:5;left:0!important;right:0!important;bottom:12px!important;width:100%;display:grid;grid-template-columns:repeat(4,1fr);gap:3px;max-width:none;margin:0!important;padding:7px 0 0;background:linear-gradient(180deg,transparent,#fffffff2 28%,#fff 100%)}.benefit{display:block;text-align:center;font-size:10px;line-height:1.2}.benefit i{display:block;font-size:25px;margin:0 0 3px}.mobile-only{display:flex}.cats{padding:10px 0 14px;background:#fff}.mobile-section-head{align-items:center;justify-content:space-between;margin-bottom:8px}.mobile-section-head h2{font-size:21px;margin:0}.mobile-section-head a{font-size:12px;color:var(--green);font-weight:700}.cat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;overflow:visible;padding:0}.cat-card{min-width:0;border-radius:6px;font-size:10px}.cat-card:nth-child(n+5){display:none}.cat-card img{height:94px}.cat-card span{padding:8px 2px}.config{min-height:310px;background:#fff;border-radius:8px;margin:0 14px}.config:before{width:100%;opacity:1;background-image:linear-gradient(90deg,#fff 0%,#fffffff2 48%,#ffffff22 74%),linear-gradient(180deg,#ffffffc9 0%,transparent 48%),url('/assets/images/eshopeshop-reference.png.png?v=20260916-2');background-size:auto,auto,auto 1740px;background-position:center,center,68% -681px}.config .wrap{padding:14px 0}.config h2{width:74%;font-size:20px;line-height:1.05;margin-bottom:5px}.config p{font-size:12px;line-height:1.25;margin:0 0 9px;width:55%}.config .btn{width:auto!important;min-height:38px;padding:0 15px;font-size:12px}.steps{display:none}.trust{padding:9px 0;background:#f2f7f5}.trust-grid{grid-template-columns:repeat(2,1fr);gap:7px}.trust-item{justify-content:flex-start;gap:9px;padding:9px;background:#fff;border:0;border-radius:7px;box-shadow:0 2px 7px #003b2e0b}.trust-item i{width:36px;height:36px;font-size:22px;flex:0 0 auto}.trust-item b{font-size:12px}.trust-item small{font-size:10px}.products,.inspiration{padding:13px 0 5px;background:#fff}.section-head{align-items:center}.section-head h2{font-size:20px;white-space:nowrap}.section-head a{font-size:11px}.product-grid{gap:7px}.product{min-width:calc((100vw - 50px)/3);padding:7px;border-radius:6px}.product img{height:100px}.product h3{font-size:11px;margin:7px 0 2px}.product small{font-size:9px;min-height:22px}.price{font-size:14px;margin:3px 0 6px}.product .btn{min-height:29px;font-size:9px;border-width:1px;padding:0 4px}.tag{top:8px;left:8px;padding:4px 6px;font-size:8px}.gallery{gap:7px}.shot{min-width:calc((100vw - 50px)/3);height:92px;border-radius:6px;background-size:905px auto;background-position:8% -1111px}.shot:nth-child(2){background-position:31% -1111px}.shot:nth-child(3){background-position:52% -1111px}.shot:nth-child(4){background-position:73% -1111px}.shot:nth-child(5){background-position:96% -1111px}.contact-bar{margin:8px 14px 0;padding:9px 0;border-radius:7px}.contact-bar .wrap{width:calc(100% - 18px)}.contact-grid{grid-template-columns:1.15fr 1fr .9fr;gap:5px}.contact-item{gap:5px}.contact-item i{font-size:22px}.contact-item b{font-size:10px;white-space:nowrap}.contact-item small{display:none}.contact-bar .btn{min-width:0;width:100%;min-height:37px;padding:0 5px;font-size:10px;border:0}.bottom{padding:3px 14px 12px;background:#fff}.bottom-grid{display:block}.bottom-item{position:relative;justify-content:flex-start;gap:8px;padding:8px 24px 8px 0;border-bottom:1px solid #e6ece9}.bottom-item i{width:28px;height:28px;font-size:19px;background:transparent}.bottom-item b{font-size:11px}.bottom-item small{display:inline;font-size:10px;margin-left:3px}.bottom-item:after{content:'⌄';position:absolute;right:3px;top:10px;font-size:16px}.bottom>a[data-plotao-privacy-link]{margin-top:9px;font-size:10px}}
-    /* Mobile storefront refresh — 2026-09-16 */
-    .hero-quality-badge,.mobile-benefit-bar{display:none}.mobile-break{display:none}
-    @media(max-width:560px){
-      body{background:#fff}
-      .wrap{width:calc(100% - 32px)}
-
-      .top{height:142px;margin:0;padding:12px 16px 14px;border-radius:0 0 14px 14px}
-      .top .wrap{grid-template-columns:minmax(0,1fr) 38px 42px 38px;grid-template-rows:52px 52px;gap:8px 8px}
-      .logo{width:184px}
-      .mobile-head-button{width:38px;height:38px}
-      .mobile-head-button svg{width:29px;height:29px}
-      .cart .ico{font-size:29px}
-      .badge{width:22px;height:22px;font-size:12px;top:-8px;left:21px}
-      .search{height:52px;padding:0 16px;border-radius:9px}
-      .search input{font-size:16px}
-      .search svg{width:24px}
-
-      .hero{height:520px;min-height:520px;padding:0;background:#eef7f3;overflow:hidden}
-      .hero:before{
-        width:100%;opacity:1;
-        background-image:linear-gradient(90deg,#fffffff9 0%,#fffffff0 38%,#ffffff91 57%,transparent 78%),url('/assets/fence-types/panelovy-3d.webp');
-        background-size:auto 1420px;
-        background-position:72% -84px
-      }
-      .hero .wrap{align-items:flex-start;padding-top:34px}
-      .hero-copy{width:100%;display:block}
-      .mobile-break{display:inline}.hero h1{width:78%;font-size:38px;line-height:.98;letter-spacing:-1.8px;margin:0 0 20px}
-      .hero .lead{width:63%;font-size:16px;line-height:1.35;margin:0 0 22px}
-      .actions{width:65%;display:flex;flex-direction:column;gap:10px}
-      .actions .btn{min-height:54px;padding:0 13px;font-size:15px;border-width:2px;border-radius:8px;background:#fffffff2}
-      .actions .btn.primary{background:var(--orange)}
-      .hero .benefits{display:none}
-      .hero-quality-badge{
-        display:flex;position:absolute;right:2px;bottom:18px;z-index:2;
-        align-items:center;gap:9px;padding:10px 12px;background:#fffffff2;
-        border:1px solid #dce7e3;border-radius:10px;box-shadow:0 5px 16px #002d221c;
-        color:#173c33;font-size:10px;font-weight:800;line-height:1.15
-      }
-      .hero-quality-badge .seal{width:30px;height:30px;border:2px solid var(--green);border-radius:50%;display:grid;place-items:center;font-size:16px}
-      .hero-quality-badge .flag{width:27px;height:27px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(#fff 0 50%,#d7141a 50%);font-size:0}
-
-      .mobile-benefit-bar{display:block;background:#fff;padding:14px 0 16px;border-bottom:1px solid #edf2f0}
-      .mobile-benefit-bar .wrap{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
-      .mobile-benefit{min-width:0;text-align:center;font-size:10px;line-height:1.22;color:#15342d}
-      .mobile-benefit i{display:grid;place-items:center;width:38px;height:38px;margin:0 auto 6px;border-radius:50%;background:#e4fff5;font-style:normal;font-size:21px}
-      .mobile-benefit b{display:block;font-size:10px;line-height:1.18}
-
-      .cats{padding:20px 0 22px}
-      .mobile-section-head{margin-bottom:13px}
-      .mobile-section-head h2{font-size:27px;letter-spacing:-.6px}
-      .mobile-section-head a{font-size:13px}
-      .cat-grid{gap:10px;overflow-x:auto;grid-template-columns:none;display:flex;margin-right:-16px;padding:0 16px 8px 0;scrollbar-width:none}
-      .cat-grid::-webkit-scrollbar{display:none}
-      .cat-card{display:block!important;flex:0 0 132px;font-size:12px;border-radius:9px;scroll-snap-align:start}
-      .cat-card img{height:112px}
-      .cat-card span{padding:10px 4px}
-
-      .config{min-height:390px;margin:0 16px;border-radius:12px;background:#eef7f3;box-shadow:0 3px 12px #003f3114}
-      .config:before{
-        opacity:1;width:100%;
-        background-image:linear-gradient(90deg,#fffffff7 0%,#ffffffe8 47%,#ffffff45 72%),url('/assets/fence-types/panelovy-3d.webp');
-        background-size:auto,auto 1640px;
-        background-position:center,69% -642px
-      }
-      .config .wrap{width:100%;padding:24px 22px}
-      .config h2{width:62%;font-size:26px;line-height:1.04;margin-bottom:10px}
-      .config p{width:55%;font-size:14px;line-height:1.3;margin-bottom:17px}
-      .config .btn{min-height:48px!important;padding:0 18px!important;font-size:14px!important;border-radius:8px}
-      .trust{padding:12px 0}
-      .trust-grid{gap:8px}
-      .trust-item{min-height:62px;padding:9px 10px}
-      .trust-item i{width:38px;height:38px;font-size:21px}
-      .trust-item b{font-size:11px}
-      .trust-item small{font-size:10px}
-
-      .products,.inspiration{padding-top:19px}
-      .section-head h2{font-size:22px}
-      .section-head a{font-size:12px}
+    :root{--forest:#073f33;--forest-2:#0b5945;--orange:#f36b21;--ink:#19231d;--muted:#66736b;--cream:#f5f5ef;--line:#e5e9e3;--white:#fff}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:#fff}body,button,input{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}a{color:inherit;text-decoration:none}button{font:inherit}.wrap{width:min(1280px,calc(100% - 64px));margin:auto}
+    .announcement{height:36px;background:var(--forest);color:#e8f3ed;font-size:12px}.announcement .wrap{height:100%;display:flex;justify-content:center;align-items:center;gap:8px}.announcement strong{color:#fff}.announcement i{width:6px;height:6px;border-radius:50%;background:var(--orange)}
+    .header{position:sticky;top:0;z-index:30;background:#fff;border-bottom:1px solid var(--line)}.header-main{height:82px;display:grid;grid-template-columns:190px minmax(250px,1fr) auto;gap:36px;align-items:center}.brand img{display:block;width:184px}.search{height:46px;display:flex;align-items:center;gap:12px;padding:0 15px;border:1px solid #dfe6df;background:#f7f8f5;border-radius:8px;color:var(--muted)}.search svg{width:20px;flex:none}.search input{width:100%;border:0;outline:0;background:transparent;font-size:14px;color:var(--ink)}.header-actions{display:flex;align-items:center;gap:24px}.header-link{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:650;white-space:nowrap}.header-link svg{width:21px;height:21px;stroke:var(--forest);fill:none;stroke-width:1.8}.cart-link{position:relative;padding-right:4px}.cart-link .count{display:grid;place-items:center;position:absolute;top:-11px;left:13px;min-width:17px;height:17px;padding:0 4px;border-radius:20px;background:var(--orange);color:#fff;font-size:10px;font-weight:800}.mobile-tools{display:none}
+    .main-nav{height:49px;border-top:1px solid #f0f2ee}.main-nav .wrap{height:100%;display:flex;align-items:center;gap:30px}.main-nav a{font-size:12px;font-weight:700;color:#4b5a51;white-space:nowrap}.main-nav a:hover,.main-nav a.active{color:var(--forest-2)}
+    .hero{min-height:550px;background:var(--cream);overflow:hidden}.hero-inner{min-height:550px;display:grid;grid-template-columns:.93fr 1.07fr;align-items:center;gap:38px}.hero-copy{padding:54px 0}.eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:22px;color:var(--forest-2);font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}.eyebrow:before{content:"";width:24px;height:2px;background:var(--orange)}h1,h2,h3,p{margin-top:0}.hero h1{max-width:580px;margin-bottom:20px;font-size:clamp(46px,5.2vw,68px);line-height:.99;letter-spacing:-.055em;font-weight:760}.hero h1 em{color:var(--forest-2);font-style:normal}.hero-copy>p{max-width:510px;margin-bottom:27px;color:#536158;font-size:16px;line-height:1.65}.journeys{display:flex;flex-wrap:wrap;gap:10px}.button{min-height:52px;display:inline-flex;align-items:center;justify-content:center;gap:12px;padding:0 20px;border:1px solid transparent;border-radius:6px;font-size:13px;font-weight:750;transition:transform .18s,background .18s,box-shadow .18s}.button:hover{transform:translateY(-2px);box-shadow:0 8px 22px #123b251b}.button svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2}.button-primary{background:var(--orange);color:#fff}.button-dark{background:var(--forest);color:#fff}.button-outline{background:transparent;border-color:#cbd5cc;color:var(--forest)}.hero-note{display:flex;align-items:center;gap:9px;margin-top:21px;color:#5b685f;font-size:12px}.hero-note span{color:var(--forest-2);font-weight:800}
+    .hero-visual{position:relative;height:470px;align-self:end;border-radius:8px 8px 0 0;overflow:hidden;background:#cad7cc}.hero-visual img{width:100%;height:100%;display:block;object-fit:cover}.hero-visual:after{content:"";position:absolute;inset:45% 0 0;background:linear-gradient(transparent,#071d17a8)}.visual-caption{position:absolute;z-index:1;left:24px;right:24px;bottom:21px;display:flex;justify-content:space-between;align-items:end;color:white}.visual-caption strong{font-size:15px}.visual-caption span{font-size:11px;color:#e1ebe3}.visual-chip{position:absolute;z-index:2;top:19px;left:19px;padding:10px 13px;background:#fff;border-radius:4px;font-size:11px;font-weight:750;box-shadow:0 5px 20px #12251b1a}
+    .proof{border-bottom:1px solid var(--line);background:#fff}.proof .wrap{min-height:92px;display:grid;grid-template-columns:repeat(4,1fr);align-items:center}.proof-item{display:flex;align-items:center;justify-content:center;gap:12px;padding:8px 14px;border-right:1px solid var(--line)}.proof-item:last-child{border:0}.proof-icon{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;background:#edf4ef;color:var(--forest-2);font-size:18px}.proof-item strong{display:block;font-size:12px}.proof-item small{display:block;margin-top:3px;color:var(--muted);font-size:11px}
+    .section{padding:62px 0}.section-head{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:25px}.section-kicker{margin-bottom:8px;color:var(--forest-2);font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}.section-head h2{margin:0;font-size:34px;line-height:1.08;letter-spacing:-.04em}.section-head p{max-width:450px;margin:0;color:var(--muted);font-size:13px;line-height:1.6}.section-link{display:inline-flex;align-items:center;gap:8px;color:var(--forest-2);font-size:12px;font-weight:750;white-space:nowrap}.section-link span{color:var(--orange);font-size:18px}
+    .category-section{padding-bottom:58px}.category-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.category-card{position:relative;min-height:230px;overflow:hidden;border-radius:6px;background:#e6ebe6}.category-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .4s}.category-card:after{content:"";position:absolute;inset:28% 0 0;background:linear-gradient(transparent,#081b14d9)}.category-card:hover img{transform:scale(1.045)}.category-name{position:absolute;z-index:1;left:17px;right:15px;bottom:15px;color:#fff}.category-name strong{display:block;font-size:16px;line-height:1.2}.category-name span{display:block;margin-top:6px;color:#e2ece5;font-size:11px}.category-name b{position:absolute;right:0;bottom:0;color:#fff;font-size:19px;font-weight:400}
+    .config-section{padding:4px 0 62px}.config-panel{position:relative;min-height:310px;display:grid;grid-template-columns:1fr 1fr;align-items:center;overflow:hidden;border-radius:7px;background:var(--forest);color:#fff}.config-copy{position:relative;z-index:1;padding:42px 0 42px 48px}.config-copy .section-kicker{color:#b8d6c4}.config-copy h2{max-width:470px;margin-bottom:12px;font-size:36px;line-height:1.05;letter-spacing:-.04em}.config-copy p{max-width:420px;margin-bottom:22px;color:#d2e2d7;font-size:14px;line-height:1.55}.config-panel img{position:absolute;right:0;top:0;width:56%;height:100%;object-fit:cover;mask-image:linear-gradient(90deg,transparent 0%,#000 35%)}.config-steps{display:flex;gap:18px;margin-top:22px;color:#d0e0d5;font-size:11px}.config-steps span{display:flex;align-items:center;gap:7px}.config-steps b{width:21px;height:21px;display:grid;place-items:center;border:1px solid #8aa99a;border-radius:50%;font-size:10px}
+    .product-section{background:#f6f7f4}.product-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.product-card{position:relative;padding:11px 11px 14px;border:1px solid #e5e9e3;border-radius:6px;background:#fff;transition:transform .2s,box-shadow .2s}.product-card:hover{transform:translateY(-4px);box-shadow:0 14px 28px #17291b15}.product-image{position:relative;height:205px;display:grid;place-items:center;overflow:hidden;background:#f5f6f3}.product-image img{width:100%;height:100%;object-fit:cover}.product-label{position:absolute;top:10px;left:10px;padding:6px 9px;border-radius:3px;background:var(--forest-2);color:#fff;font-size:10px;font-weight:750}.product-info{padding:13px 3px 0}.product-info h3{margin-bottom:5px;font-size:15px;line-height:1.3}.product-info p{min-height:32px;margin-bottom:8px;color:var(--muted);font-size:11px;line-height:1.45}.product-price{margin-bottom:12px;color:var(--forest);font-size:18px;font-weight:800}.product-price small{font-size:11px;font-weight:500;color:var(--muted)}.product-button{width:100%;min-height:42px;border-color:#d5dfd7;font-size:12px}
+    .inspiration-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.inspiration-card{height:165px;overflow:hidden;border-radius:5px;background:#edf1ed}.inspiration-card img{width:100%;height:100%;object-fit:cover;transition:transform .35s}.inspiration-card:hover img{transform:scale(1.05)}
+    .help{margin-top:8px;padding:34px 0;background:#f2f5f1}.help .wrap{display:flex;align-items:center;justify-content:space-between;gap:30px}.help h2{margin:0 0 6px;font-size:23px;letter-spacing:-.03em}.help p{margin:0;color:var(--muted);font-size:13px}.help-actions{display:flex;align-items:center;gap:22px}.phone{font-size:14px;font-weight:800;color:var(--forest)}
+    .footer{padding:28px 0;background:#092f27;color:#fff}.footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:24px}.footer-brand img{width:155px}.footer-note{color:#c6d9ce;font-size:11px}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.search-empty{margin:20px auto;padding:20px;text-align:center;border:1px solid var(--line);border-radius:6px;color:var(--muted)}[hidden]{display:none!important}
+    @media(max-width:1000px){.wrap{width:calc(100% - 40px)}.header-main{grid-template-columns:165px minmax(200px,1fr) auto;gap:18px}.brand img{width:160px}.header-actions{gap:12px}.header-link span{display:none}.main-nav .wrap{gap:20px}.hero-inner{gap:25px}.hero-visual{height:420px}.hero-copy{max-width:none}.hero h1{font-size:54px}.category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.category-card{min-height:220px}.config-panel img{width:53%}.inspiration-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.inspiration-card:nth-child(n+4){display:none}}
+    @media(max-width:650px){
+      .wrap{width:calc(100% - 32px)}.announcement{height:31px;font-size:10px}.header{position:relative}.header-main{height:112px;grid-template-columns:1fr auto;grid-template-rows:42px 42px;gap:7px 12px;padding:10px 0}.brand img{width:160px}.mobile-tools{display:flex;align-items:center;gap:13px}.mobile-tools button{width:30px;height:34px;padding:0;border:0;background:none;color:var(--forest)}.mobile-tools svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.8}.header-actions{display:none}.search{grid-column:1/-1;grid-row:2;height:42px;padding:0 11px}.search input{font-size:13px}.main-nav{display:none;position:absolute;z-index:40;top:143px;left:12px;right:12px;height:auto;border:1px solid var(--line);border-radius:6px;background:#fff;box-shadow:0 15px 30px #112b1d20}.main-nav.open{display:block}.main-nav .wrap{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:0;padding:5px 10px}.main-nav a{padding:12px 8px;border-bottom:1px solid #edf0ec;font-size:12px}
+      .hero{min-height:0}.hero-inner{display:flex;min-height:0;flex-direction:column;align-items:stretch;gap:0}.hero-copy{padding:34px 0 22px}.eyebrow{font-size:9px;margin-bottom:15px}.hero h1{max-width:440px;font-size:43px;letter-spacing:-.055em;margin-bottom:14px}.hero-copy>p{font-size:14px;line-height:1.55;margin-bottom:18px}.journeys{display:grid;grid-template-columns:1fr 1fr;gap:8px}.button{min-height:49px;padding:0 11px;gap:7px;font-size:11px}.button svg{width:15px}.hero-note{margin-top:14px;font-size:10px}.hero-visual{height:270px;margin:0 -16px;border-radius:0}.visual-chip{top:12px;left:16px;padding:8px 10px;font-size:10px}.visual-caption{left:16px;right:16px;bottom:13px}.visual-caption strong{font-size:13px}.visual-caption span{font-size:10px}
+      .proof .wrap{grid-template-columns:1fr 1fr;padding:7px 0}.proof-item{justify-content:flex-start;gap:8px;padding:8px 5px;border:0}.proof-icon{width:30px;height:30px;font-size:15px}.proof-item strong{font-size:10px}.proof-item small{font-size:9px}
+      .section{padding:42px 0}.section-head{display:block;margin-bottom:17px}.section-head h2{font-size:27px}.section-head p{margin-top:9px;font-size:12px}.section-link{margin-top:11px;font-size:11px}.category-section{padding-top:42px;padding-bottom:37px}.category-grid{grid-template-columns:1fr 1fr;gap:9px}.category-card{min-height:164px;border-radius:5px}.category-name{left:10px;right:9px;bottom:10px}.category-name strong{font-size:12px}.category-name span{margin-top:4px;font-size:9px}.category-name b{font-size:16px}
+      .config-section{padding:0 0 38px}.config-panel{min-height:345px;display:block;border-radius:5px}.config-copy{padding:26px 20px}.config-copy h2{max-width:310px;font-size:28px}.config-copy p{max-width:290px;font-size:12px}.config-panel img{top:auto;bottom:0;width:100%;height:48%;mask-image:linear-gradient(180deg,transparent 0%,#000 48%);opacity:.72}.config-steps{position:relative;z-index:1;flex-wrap:wrap;gap:8px 12px;font-size:9px}.config-steps b{width:18px;height:18px;font-size:9px}
+      .product-section{padding:40px 0}.product-grid{display:flex;overflow-x:auto;gap:10px;margin-right:-16px;padding:0 16px 9px 0;scroll-snap-type:x mandatory;scrollbar-width:none}.product-grid::-webkit-scrollbar{display:none}.product-card{flex:0 0 76%;scroll-snap-align:start}.product-image{height:180px}.product-info h3{font-size:14px}
+      .inspiration-grid{display:flex;overflow-x:auto;gap:9px;margin-right:-16px;padding-right:16px;scroll-snap-type:x mandatory;scrollbar-width:none}.inspiration-card{flex:0 0 76%;height:150px;scroll-snap-align:start}.inspiration-card:nth-child(n+4){display:block}
+      .help{padding:24px 0}.help .wrap{display:block}.help h2{font-size:20px}.help p{font-size:11px}.help-actions{margin-top:16px;justify-content:space-between;gap:10px}.phone{font-size:12px}.help-actions .button{min-height:43px}
+      .footer{padding:20px 0}.footer .wrap{align-items:flex-start;flex-direction:column;gap:10px}.footer-brand img{width:135px}.footer-note{font-size:10px}
     }
-  /* E-shop visual system refresh — 2026-10-02 */
-:root{--green:#075744;--deep:#063d32;--mint:#e7f3ed;--orange:#f36b21;--ink:#172720;--line:#e3e9e4;--soft:#f7f8f5}
-body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:#fff}.wrap{width:min(1320px,calc(100% - 64px))}
-.top{height:82px;background:var(--deep)}.top .wrap{grid-template-columns:220px minmax(300px,1fr) auto;gap:34px}.logo{width:205px}.search{height:48px;border-radius:8px;background:#fff;box-shadow:0 4px 14px #001d1510}.search input{font-size:14px}.top-actions{gap:24px}.top-action{gap:9px}.top-action .ico{font-size:22px}
-.nav{height:52px;border-color:#edf0ed;box-shadow:0 5px 18px #10291d08}.nav .wrap{justify-content:flex-start}.nav a{padding:0 15px;font-size:13px;font-weight:650;color:#37463f;white-space:nowrap}.nav a.active{background:transparent;color:var(--green);position:relative}.nav a.active:after{content:"";position:absolute;left:15px;right:15px;bottom:0;height:3px;background:var(--orange);border-radius:3px 3px 0 0}
-.hero{height:510px;background:#f4f7f3}.hero:before{width:67%;background-size:auto 2200px;background-position:right -145px}.hero-copy{width:560px;padding-left:0}.hero h1{max-width:550px;font-size:clamp(48px,5vw,64px);line-height:.99;letter-spacing:-3.6px;margin-bottom:20px}.hero .lead{max-width:480px;font-size:17px;line-height:1.55;color:#435149;margin-bottom:24px}.hero .lead b{color:var(--ink)}.benefits{gap:22px;margin-bottom:25px}.benefit{font-size:12px;color:#435149}.benefit i{font-size:30px}.actions{gap:12px}
-.btn{min-height:50px;padding:0 22px;border-radius:8px;border-width:1px;font-size:14px;transition:transform .18s,box-shadow .18s,background .18s}.btn:hover{transform:translateY(-2px);box-shadow:0 8px 18px #073d2e20}.btn.primary{background:var(--orange);border-color:var(--orange)}
-.cats{padding:28px 0 30px}.cat-grid{gap:14px}.cat-card{border:1px solid #e6ebe7;border-radius:11px;box-shadow:0 3px 12px #0a35250a;transition:transform .18s,box-shadow .18s,border-color .18s}.cat-card:hover{transform:translateY(-4px);border-color:#a9c9bc;box-shadow:0 12px 24px #0a352516}.cat-card img{height:126px}.cat-card span{padding:13px 7px;font-size:13px}
-.config{min-height:340px;background:#f1f6f2}.config:before{width:64%;background-size:auto 2200px;background-position:right -860px}.config .wrap{padding:42px 0}.config h2,.section-head h2{font-size:30px;letter-spacing:-1.1px}.config p{max-width:440px;font-size:16px;line-height:1.55;color:#4d5c53}.steps{grid-template-columns:200px 200px;gap:14px 18px}.step{font-size:13px;color:#35463d}.step i{width:36px;height:36px;font-size:18px}
-.trust{padding:20px 0;background:#fafbf9;border-top:1px solid #eef1ed;border-bottom:1px solid #eef1ed}.trust-item{gap:12px}.trust-item i{width:48px;height:48px;font-size:27px;background:#e9f2ed}.trust-item b{font-size:13px}.trust-item small{display:block;margin-top:3px;color:#67756c;font-size:12px}
-.products,.inspiration{padding:44px 0 8px}.section-head{margin-bottom:18px}.section-head h2{font-size:28px}.section-head a{font-weight:700;font-size:13px}.product-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}.product{padding:12px;border-radius:11px;border-color:#e6ebe7;box-shadow:0 4px 15px #092d2010;transition:transform .18s,box-shadow .18s}.product:hover{transform:translateY(-4px);box-shadow:0 14px 28px #092d2018}.product img{height:165px;background:#f5f7f4;border-radius:7px}.product h3{font-size:14px;line-height:1.3}.product small{color:#77827b;font-size:12px}.price{font-size:18px;color:var(--green)}.product .btn{min-height:40px;font-size:12px}.tag{background:var(--green);border-radius:20px}
-.gallery{gap:14px}.shot{height:155px;border-radius:10px;transition:transform .18s,filter .18s}.shot:hover{transform:scale(1.025);filter:saturate(1.08)}
-.contact-bar{margin-top:40px;padding:25px 0;background:var(--deep)}.contact-grid{gap:28px}.contact-item i{font-size:31px}.contact-item b{font-size:15px}.contact-item small{color:#d1e1d8}.contact-bar .btn{min-width:210px;border-radius:8px}
-.bottom{padding:25px 0;background:#f7f8f5}.bottom-item{gap:12px}.bottom-item i{width:46px;height:46px;font-size:26px;color:var(--green);background:#e9f2ed}.bottom-item b{font-size:13px}.bottom-item small{display:block;margin-top:2px;color:#6f7b73;font-size:11px}
-@media(max-width:1100px){.wrap{width:calc(100% - 40px)}.top .wrap{grid-template-columns:190px minmax(220px,1fr) auto;gap:20px}.logo{width:185px}.top-actions{gap:14px}.nav a{padding:0 11px;font-size:12px}.cat-grid{grid-template-columns:repeat(4,1fr)}.cat-card img{height:130px}.product-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.product:nth-child(n+4){display:none}}
-@media(max-width:950px){.wrap{width:calc(100% - 32px)}.top .wrap{grid-template-columns:1fr auto;gap:12px}.nav .wrap{width:max-content}.hero{height:500px}.hero h1{font-size:50px}.benefits{gap:14px}.config .wrap{padding:34px 0}.product-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.product:nth-child(n+4){display:block}.contact-grid{grid-template-columns:1fr 1fr auto}.contact-bar .btn{min-width:170px}}
-@media(max-width:560px){
-.wrap{width:calc(100% - 32px)}.top{height:126px;margin:0;padding:10px 14px 12px;border-radius:0 0 13px 13px}.top .wrap{grid-template-columns:minmax(0,1fr) 38px 42px 38px;grid-template-rows:44px 46px;gap:8px 7px}.logo{width:174px}.mobile-head-button{width:36px;height:36px}.search{height:46px;border-radius:8px;padding:0 13px}.search input{font-size:14px}
-.nav.mobile-open{margin:0;left:14px;right:14px;border:1px solid #e5ebe7;border-radius:0 0 12px 12px;box-shadow:0 15px 24px #052a1b20}.nav.mobile-open .wrap{width:100%}.nav.mobile-open a{font-size:13px}
-.hero{height:480px;min-height:480px;background:#f3f7f3}.hero:before{background-size:auto 1310px;background-position:72% -76px}.hero .wrap{padding-top:32px}.hero h1{font-size:37px;line-height:1.02;letter-spacing:-1.7px;width:78%;margin-bottom:15px}.hero .lead{font-size:14px;line-height:1.45;width:67%;margin-bottom:18px}.actions{width:68%;gap:9px}.actions .btn{min-height:48px;font-size:13px;border-radius:8px}.hero-quality-badge{right:0;bottom:15px;padding:9px 10px;border-radius:9px}
-.mobile-benefit-bar{padding:13px 0}.mobile-benefit-bar .wrap{width:calc(100% - 24px);gap:2px}.mobile-benefit{font-size:9px}.mobile-benefit i{width:34px;height:34px;font-size:19px;margin-bottom:5px}.mobile-benefit b{font-size:9px}
-.cats{padding:19px 0 21px}.cat-card{flex-basis:132px;border-radius:9px}.cat-card img{height:108px}
-.config{min-height:350px;margin:0 14px;border-radius:12px}.config:before{background-size:auto,auto 1450px;background-position:center,69% -563px}.config .wrap{width:100%;padding:22px 19px}.config h2{font-size:24px;width:65%}.config p{font-size:13px;width:58%;line-height:1.4}.config .btn{min-height:45px!important;font-size:13px!important}
-.trust{padding:12px 0}.trust-grid{gap:7px}.trust-item{gap:8px;padding:8px;min-height:58px}.trust-item i{width:34px;height:34px;font-size:19px}.trust-item b{font-size:10px}.trust-item small{font-size:9px}
-.products,.inspiration{padding:28px 0 5px}.section-head{margin-bottom:13px;gap:8px}.section-head h2{font-size:20px;letter-spacing:-.5px;white-space:normal}.section-head a{font-size:11px;white-space:nowrap}
-.product-grid{display:flex;gap:9px;margin-right:-16px;padding-right:16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}.product-grid::-webkit-scrollbar{display:none}.product{flex:0 0 72%;min-width:0;padding:10px;scroll-snap-align:start}.product img{height:150px}.product h3{font-size:13px}.product small{font-size:11px;min-height:25px}.price{font-size:17px}.product .btn{min-height:39px;font-size:12px}.tag{font-size:10px}
-.gallery{gap:9px;margin-right:-16px;padding-right:16px}.shot{flex:0 0 70%;min-width:70%;height:138px;border-radius:9px}
-.contact-bar{margin:18px 14px 0;padding:15px 0;border-radius:10px}.contact-bar .wrap{width:calc(100% - 22px)}.contact-grid{grid-template-columns:1fr 1fr;gap:12px}.contact-item{gap:7px}.contact-item i{font-size:22px}.contact-item b{font-size:11px;white-space:normal}.contact-item small{display:inline;font-size:9px}.contact-bar .btn{grid-column:1/-1;min-width:0;min-height:43px;font-size:12px}
-.bottom{padding:12px 14px;background:#f7f8f5}.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bottom-item{justify-content:flex-start;gap:7px;padding:8px;background:#fff;border-radius:8px}.bottom-item i{width:30px;height:30px;font-size:19px}.bottom-item b{font-size:10px}.bottom-item small{font-size:9px}.bottom-item:after{display:none}.bottom>a[data-plotao-privacy-link]{margin-top:12px;font-size:10px}
-}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
-
-    /* Stronger storefront redesign — 2026-10-02 */
-    :root{--green:#074d3e;--deep:#05372e;--mint:#e8f3ed;--orange:#f36b21;--ink:#14241c;--line:#e2e9e4;--soft:#f5f7f3}
-    .top{height:88px;background:#fff;color:var(--ink);border-bottom:1px solid #e8ede9}
-    .top .wrap{grid-template-columns:205px minmax(280px,1fr) auto;gap:30px}
-    .logo{width:195px;filter:none}
-    .top .search{background:#f6f8f5;border:1px solid #e3e9e4;box-shadow:none;border-radius:10px}
-    .search input{background:transparent}.top-actions{gap:20px}.top-action{color:#193a2e}.top-action .ico{font-size:22px}
-    .top .badge{background:var(--orange)}
-    .nav{height:55px;background:var(--green);border:0;box-shadow:none;color:white}
-    .nav .wrap{justify-content:space-between}.nav a{color:#fff;padding:0 12px;font-size:13px;font-weight:650}
-    .nav a:hover{color:#ffe1cd}.nav a.active{background:transparent;color:white}
-    .nav a.active:after{left:12px;right:12px;background:var(--orange);height:3px}
-    .hero{height:570px;background:#073e32;color:#fff}
-    .hero:before{width:72%;background-image:linear-gradient(90deg,#073e32 0%,#073e32ed 22%,#073e3280 49%,transparent 74%),url('/assets/fence-types/panelovy-3d.webp');background-size:auto,cover;background-position:center,right center}
-    .hero .wrap{align-items:center}.hero-copy{width:590px;max-width:55%;padding:0}
-    .hero h1{font-size:clamp(50px,5.5vw,70px);line-height:.98;letter-spacing:-3.8px;margin-bottom:22px;color:#fff}
-    .hero .lead{font-size:17px;line-height:1.55;color:#e1eee7;max-width:485px;margin-bottom:22px}
-    .hero .lead b{color:#fff}
-    .benefits{gap:18px;margin:0 0 27px}
-    .benefit{font-size:12px;color:#e0eee7}.benefit i{font-size:28px}
-    .hero .btn{min-height:54px;border-radius:9px}
-    .hero .btn:not(.primary){background:#ffffff14;border-color:#ffffff80;color:white}
-    .hero .btn.primary{background:var(--orange);border-color:var(--orange)}
-    .hero-quality-badge{background:#fff;border:0}
-    .mobile-benefit-bar{display:none}
-    .cats{padding:48px 0 52px;background:#fff}
-    .cats .mobile-section-head{display:flex}
-    .mobile-section-head h2{font-size:32px;letter-spacing:-1px}
-    .mobile-section-head a{font-weight:700}
-    .cat-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
-    .cat-card{position:relative;display:block;min-width:0;min-height:235px;text-align:left;border:0;border-radius:14px;overflow:hidden;box-shadow:0 6px 20px #10271a14;transition:transform .2s,box-shadow .2s}
-    .cat-card:hover{transform:translateY(-5px);box-shadow:0 16px 30px #10271a25}
-    .cat-card img{height:235px;object-fit:cover;transition:transform .45s}
-    .cat-card:hover img{transform:scale(1.045)}
-    .cat-card span{position:absolute;inset:auto 0 0;padding:38px 15px 15px;color:#fff;font-size:16px;line-height:1.2;background:linear-gradient(transparent,#061d16d9 80%);text-shadow:0 1px 3px #001a12}
-    .config{min-height:410px;background:#eff5f0}
-    .config:before{width:61%;background-image:linear-gradient(90deg,#eff5f0 0%,#eff5f0eb 28%,#eff5f070 53%,transparent 78%),url('/assets/fence-types/panelovy-3d.webp');background-size:auto,cover;background-position:center,right center}
-    .config .wrap{padding:55px 0}.config h2{font-size:38px;letter-spacing:-1.5px}.config p{font-size:17px;color:#45584c}
-    .config .btn{min-height:54px;border-radius:9px}
-    .steps{grid-template-columns:230px 230px;gap:16px 25px}.step{font-size:14px}.step i{background:#d9eee2;width:42px;height:42px}
-    .trust{background:#f6f8f5;padding:24px 0}
-    .trust-grid{grid-template-columns:repeat(4,1fr);gap:12px}
-    .trust-item{justify-content:flex-start;padding:10px 16px;border:0;border-right:1px solid #dce5de}
-    .trust-item:last-child{border:0}.trust-item i{background:#e5f1e9;width:50px;height:50px;font-size:26px}
-    .products,.inspiration{padding:52px 0 10px}
-    .section-head{margin-bottom:22px}.section-head h2{font-size:32px;letter-spacing:-1.1px}
-    .section-head a{font-size:14px;font-weight:700}
-    .product-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
-    .product{padding:13px;border-radius:13px;border-color:#e4eae5;box-shadow:0 5px 18px #10271a0d;transition:transform .2s,box-shadow .2s}
-    .product:hover{transform:translateY(-5px);box-shadow:0 16px 30px #10271a18}
-    .product img{height:210px;background:#f5f7f4;border-radius:9px}
-    .product h3{font-size:16px;line-height:1.3;margin:15px 0 6px}.product small{font-size:13px}
-    .price{font-size:21px;margin:10px 0 14px;color:var(--green)}
-    .product .btn{min-height:46px;border-radius:8px;font-size:13px}
-    .tag{top:22px;left:22px;padding:7px 12px;border-radius:30px;background:var(--orange)}
-    .gallery{gap:14px}.shot{height:190px;border-radius:12px}
-    .contact-bar{margin-top:52px;padding:28px 0}.contact-grid{grid-template-columns:1.3fr 1fr auto;gap:26px}
-    .contact-bar .btn{min-width:205px;min-height:52px;border-radius:9px}
-    .bottom{padding:28px 0}.bottom-grid{gap:14px}.bottom-item{justify-content:flex-start;padding:8px}
-    @media(max-width:1100px){
-      .top .wrap{grid-template-columns:175px minmax(190px,1fr) auto;gap:18px}.logo{width:168px}
-      .nav a{padding:0 8px;font-size:12px}.cat-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
-      .cat-card,.cat-card img{height:200px;min-height:200px}.product-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-      .product:nth-child(n+4){display:block}
-    }
-    @media(max-width:950px){
-      .top{height:auto;padding:12px 0}.top .wrap{grid-template-columns:1fr auto;gap:12px}.logo{width:185px;filter:none}
-      .nav{overflow-x:auto}.nav .wrap{width:max-content}.hero{height:540px}
-      .hero-copy{max-width:62%}.hero h1{font-size:54px}.cat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .cat-card,.cat-card img{height:210px;min-height:210px}.trust-grid{grid-template-columns:repeat(2,1fr)}
-      .trust-item{border:0}.product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .product img{height:180px}.contact-grid{grid-template-columns:1fr 1fr auto}
-    }
-    @media(max-width:560px){
-      body{background:#fff}.wrap{width:calc(100% - 32px)}
-      .top{height:126px;margin:0;padding:10px 14px 12px;border-radius:0 0 13px 13px;background:var(--green);color:white}
-      .top .wrap{grid-template-columns:minmax(0,1fr) 38px 42px 38px;grid-template-rows:44px 46px;gap:8px 7px}
-      .logo{width:174px;filter:none}.mobile-head-button{width:36px;height:36px;color:#fff}
-      .top .search{height:46px;border-radius:8px;padding:0 13px;background:white}.search input{font-size:14px}
-      .top-actions{gap:0}.top-actions .cart{color:white}
-      .nav{display:none}.nav.mobile-open{display:block;height:auto;margin:0 14px;left:0;right:0;position:absolute;z-index:20;border:0;border-radius:0 0 12px 12px;background:#fff;box-shadow:0 15px 24px #052a1b20;overflow:hidden}
-      .nav.mobile-open .wrap{width:100%;display:grid;grid-template-columns:repeat(2,1fr)}
-      .nav.mobile-open a{min-height:46px;height:auto;padding:10px 13px;border-bottom:1px solid #e6ece8;color:#234337;font-size:13px}
-      .nav.mobile-open a.active{color:var(--green)}.nav.mobile-open a.active:after{display:none}
-      .hero{height:540px;min-height:540px;background:#073e32}
-      .hero:before{width:100%;background-image:linear-gradient(90deg,#073e32f5 0%,#073e32e8 35%,#073e3270 73%,#073e3230),url('/assets/fence-types/panelovy-3d.webp');background-size:auto,cover;background-position:center,right center}
-      .hero .wrap{padding-top:32px;align-items:flex-start}.hero-copy{max-width:none;width:100%}
-      .hero h1{width:85%;font-size:42px;line-height:1.01;letter-spacing:-2px;margin-bottom:17px}
-      .hero .lead{width:72%;font-size:14px;line-height:1.45;margin-bottom:19px}
-      .hero .benefits{display:grid;grid-template-columns:repeat(2,1fr);gap:9px 10px;width:72%;margin:0 0 17px}
-      .benefit{display:flex;align-items:center;gap:8px;font-size:11px;line-height:1.2;text-align:left;color:#fff}
-      .benefit i{font-size:21px;margin:0}
-      .actions{width:76%;display:flex;flex-direction:column;gap:8px}
-      .hero .btn{width:100%;min-height:46px;padding:0 10px;font-size:12px}
-      .hero-quality-badge{right:0;bottom:14px;padding:8px 9px;font-size:9px}
-      .hero-quality-badge .seal{width:25px;height:25px}
-      .mobile-benefit-bar{display:none}
-      .cats{padding:28px 0 32px}.cats .mobile-section-head{margin:0 0 15px}
-      .mobile-section-head h2{font-size:26px}.mobile-section-head a{font-size:12px}
-      .cat-grid{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:10px;margin-right:-16px;padding:0 16px 9px 0;scrollbar-width:none}
-      .cat-grid::-webkit-scrollbar{display:none}.cat-card{display:block!important;flex:0 0 150px;height:190px!important;min-height:190px!important;border-radius:10px;scroll-snap-align:start}
-      .cat-card img{height:190px!important;min-height:190px!important}.cat-card span{font-size:13px;padding:32px 10px 11px}
-      .config{min-height:370px;margin:0 14px;border-radius:13px}
-      .config:before{width:100%;background-image:linear-gradient(90deg,#eff5f0fa 0%,#eff5f0e8 47%,#eff5f05c 78%),url('/assets/fence-types/panelovy-3d.webp');background-size:auto,cover;background-position:center,right center}
-      .config .wrap{width:100%;padding:27px 20px}.config h2{width:75%;font-size:26px;line-height:1.05;letter-spacing:-.8px;margin-bottom:9px}
-      .config p{width:64%;font-size:13px;line-height:1.4;margin-bottom:17px}.config .btn{min-height:46px!important;font-size:12px!important}
-      .steps{display:none}.trust{padding:14px 0}.trust-grid{gap:7px}.trust-item{padding:8px;gap:8px;min-height:60px;background:#fff;border-radius:9px;box-shadow:0 3px 10px #1637240c}
-      .trust-item i{width:34px;height:34px;font-size:19px}.trust-item b{font-size:10px}.trust-item small{font-size:9px}
-      .products,.inspiration{padding:30px 0 4px}.section-head{gap:8px;align-items:center;margin-bottom:14px}
-      .section-head h2{font-size:21px;line-height:1.1;letter-spacing:-.5px}.section-head a{font-size:10px;white-space:nowrap}
-      .product-grid{display:flex;gap:10px;margin-right:-16px;padding:0 16px 8px 0;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
-      .product-grid::-webkit-scrollbar{display:none}.product{flex:0 0 78%;min-width:0;padding:10px;border-radius:11px;scroll-snap-align:start}
-      .product img{height:175px}.product h3{font-size:14px;margin:11px 0 4px}.product small{font-size:11px;min-height:23px}
-      .price{font-size:18px;margin:7px 0 10px}.product .btn{min-height:42px;font-size:12px}
-      .tag{top:18px;left:18px;font-size:10px}
-      .gallery{gap:9px;margin-right:-16px;padding-right:16px}.shot{flex:0 0 78%;min-width:78%;height:145px;border-radius:10px}
-      .contact-bar{margin:20px 14px 0;padding:16px 0;border-radius:11px}.contact-bar .wrap{width:calc(100% - 22px)}
-      .contact-grid{grid-template-columns:1fr 1fr;gap:12px}.contact-item{gap:7px}.contact-item i{font-size:22px}
-      .contact-item b{font-size:11px;white-space:normal}.contact-item small{display:inline;font-size:9px}
-      .contact-bar .btn{grid-column:1/-1;min-width:0;min-height:43px;font-size:12px}
-      .bottom{padding:12px 14px}.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-      .bottom-item{gap:7px;padding:8px;background:white;border-radius:9px}.bottom-item i{width:30px;height:30px;font-size:19px}
-      .bottom-item b{font-size:10px}.bottom-item small{font-size:9px}
-      .bottom>a[data-plotao-privacy-link]{margin-top:12px;font-size:10px}
-    }
-
-</style>
+    @media(max-width:380px){.hero h1{font-size:38px}.journeys{grid-template-columns:1fr}.button{font-size:12px}.proof-item{gap:6px}.category-card{min-height:145px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+  </style>
 </head>
 <body>
-  <header class="top"><div class="wrap"><a href="/"><picture><source media="(max-width: 560px)" srcset="/assets/logo-plotao-inverse.svg"><img class="logo" src="/assets/logo-plotao.svg" alt="PLOTAO.cz"></picture></a><button class="mobile-head-button mobile-search-icon" type="button" aria-label="Přejít na vyhledávání"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button><label class="search"><input id="shopSearch" type="search" autocomplete="off" placeholder="Hledat produkty, ploty, komponenty…" aria-label="Hledat produkty" aria-controls="kategorie produkty" aria-describedby="searchStatus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></label><span id="searchStatus" class="sr-only" aria-live="polite"></span><div class="top-actions"><div class="top-action advice"><span class="ico">☎</span><span><b>Poradíme vám</b>+420 777 123 456</span></div><a class="top-action login" href="/ucet.html" aria-label="Přihlášení do zákaznického účtu"><span class="ico">♙</span><b>Přihlášení</b></a><a class="top-action cart" href="#"><span class="ico">🛒</span><i class="badge">3</i><span class="sum"><b>Košík</b>12 980 Kč</span></a></div><button class="mobile-head-button menu-button" type="button" aria-label="Otevřít menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button></div></header>
-  <nav class="nav"><div class="wrap"><a class="active" href="/eshop.html">E-shop</a><a href="#kategorie">Plotové systémy</a><a href="#konfigurator">Konfigurátor</a><a href="#produkty">Komponenty</a><a href="#produkty">Brány a branky</a><a href="#produkty">Příslušenství</a><a href="#doprava">Doprava</a><a href="/#kalkulator">Montáž</a><a href="#inspirace">Inspirace</a><a href="#kontakt">Kontakt</a></div></nav>
+  <div class="announcement"><div class="wrap"><i></i><span><strong>Navrhněte si plot online</strong> — konfigurátor spočítá potřebné díly i cenu</span></div></div>
+  <header class="header">
+    <div class="wrap header-main">
+      <a class="brand" href="/"><img src="/assets/logo-plotao.svg" alt="PLOTAO.cz"></a>
+      <label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="shopSearch" type="search" autocomplete="off" placeholder="Hledat ploty, brány nebo komponenty…" aria-label="Hledat produkty" aria-describedby="searchStatus"></label>
+      <span id="searchStatus" class="sr-only" aria-live="polite"></span>
+      <div class="header-actions">
+        <a class="header-link" href="/kontakt.html"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H8l-4 3z"/><path d="M8 9h8M8 12h5"/></svg><span>Poradíme vám</span></a>
+        <a class="header-link cart-link" href="#produkty" aria-label="Košík — výběr produktů"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.3 11.2a2 2 0 0 0 2 1.6h8.5a2 2 0 0 0 2-1.6L21 8H6"/><circle cx="10" cy="20" r="1"/><circle cx="18" cy="20" r="1"/></svg><span>Košík</span></a>
+      </div>
+      <div class="mobile-tools">
+        <button class="mobile-search-icon" type="button" aria-label="Přejít na vyhledávání"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button>
+        <button class="menu-button" type="button" aria-label="Otevřít menu" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      </div>
+    </div>
+    <nav class="main-nav" aria-label="Hlavní navigace"><div class="wrap">
+      <a class="active" href="/eshop.html">E-shop</a><a href="#kategorie">Plotové systémy</a><a href="#konfigurator">Konfigurátor</a><a href="#produkty">Komponenty</a><a href="#produkty">Brány a branky</a><a href="#doprava">Doprava</a><a href="/montaz.html">Montáž</a><a href="#inspirace">Inspirace</a><a href="/kontakt.html">Kontakt</a>
+    </div></nav>
+  </header>
   <main>
-    <section class="hero"><div class="wrap"><div class="hero-copy"><h1>Vše pro<span class="mobile-break"><br></span> váš plot<br>na jednom místě</h1><p class="lead"><b>Kvalitní ploty, komponenty a příslušenství.</b><br>Rychlé dodání, férové ceny, odborné poradenství.</p><div class="benefits"><div class="benefit"><i>🚚</i>Rychlé dodání<br>po celé ČR</div><div class="benefit"><i>♢</i>Ověřená kvalita<br>od výrobců</div><div class="benefit"><i>🎧</i>Odborné<br>poradenství</div><div class="benefit"><i>♧</i>Tisíce<br>spokojených zákazníků</div></div><div class="actions"><a class="btn primary" href="#kategorie">Začít nakupovat&nbsp; →</a><a class="btn" href="/?type=panel#kalkulator">Navrhnout plot (konfigurátor)</a></div></div><div class="hero-quality-badge" aria-label="Česká firma s tradicí"><span class="seal">✓</span><span>ČESKÁ FIRMA<br>S TRADICÍ</span><span class="flag" aria-hidden="true"></span></div></div></section><section class="mobile-benefit-bar" aria-label="Výhody nákupu"><div class="wrap"><div class="mobile-benefit"><i>🚚</i><b>Rychlé dodání</b>po celé ČR</div><div class="mobile-benefit"><i>♢</i><b>Ověřená kvalita</b>od výrobců</div><div class="mobile-benefit"><i>🎧</i><b>Odborné</b>poradenství</div><div class="mobile-benefit"><i>♧</i><b>Tisíce spokojených</b>zákazníků</div></div></section>
-    <section class="cats" id="kategorie"><div class="wrap"><div class="mobile-only mobile-section-head"><h2>Kategorie</h2><a href="/typy-plotu.html">Zobrazit všechny&nbsp; →</a></div><div class="cat-grid">
-      <a class="cat-card" href="/?type=panel#kalkulator"><img src="/assets/fence-types/panelovy-3d.webp" alt="Panelový plot"><span>Panelové ploty</span></a>
-      <a class="cat-card" href="/?type=mesh#kalkulator"><img src="/assets/fence-types/pletivovy.webp" alt="Pletivový plot"><span>Pletivové ploty</span></a>
-      <a class="cat-card" href="/?type=concrete#kalkulator"><img src="/assets/fence-types/betonovy.webp" alt="Betonový plot"><span>Betonové ploty</span></a>
-      <a class="cat-card" href="/?type=aluminium#kalkulator"><img src="/assets/fence-types/hlinikovy.webp" alt="Hliníkový plot"><span>Hliníkové ploty</span></a>
-      <a class="cat-card" href="/?type=privacy#kalkulator"><img src="/assets/fence-types/privacy-wood.webp" alt="Dřevěný plot"><span>Dřevěné ploty</span></a>
-      <a class="cat-card" href="/?type=gabion#kalkulator"><img src="/assets/fence-types/gabionovy.webp" alt="Gabionový plot"><span>Gabiony</span></a>
-      <a class="cat-card" href="#produkty"><img src="/assets/fence-types/category-metal.webp" alt="Brána a branka"><span>Brány a branky</span></a>
-      <a class="cat-card" href="#produkty"><img src="/assets/fence-types/mobile-barrier-clamp.webp" alt="Plotové komponenty"><span>Komponenty</span></a>
-    </div></div></section>
-    <section class="config" id="konfigurator"><div class="wrap"><h2>Vizuální konfigurátor plotu</h2><p>Navrhněte si plot přesně podle svých představ.<br>Okamžitě vidíte cenu i potřebné komponenty.</p><a class="btn primary" style="width:auto" href="/?type=panel#kalkulator">Spustit konfigurátor&nbsp; →</a><div class="steps"><div class="step"><i>▦</i>Vyberte typ plotu</div><div class="step"><i>🛠</i>Upravte parametry</div><div class="step"><i>⌘</i>Zadejte rozměry</div><div class="step"><i>♧</i>Přidejte do košíku</div></div></div></section>
-    <section class="trust" id="doprava"><div class="wrap trust-grid"><div class="trust-item"><i>🚚</i><div><b>Doprava po celé ČR</b><small>již od 799 Kč</small></div></div><div class="trust-item"><i>▣</i><div><b>Expedice do 24 hodin</b><small>skladem</small></div></div><div class="trust-item"><i>↻</i><div><b>Možnost vrácení zboží</b><small>do 14 dnů</small></div></div><div class="trust-item"><i>▤</i><div><b>Bezpečná platba</b><small>online i na dobírku</small></div></div></div></section>
-    <section class="products" id="produkty"><div class="wrap"><div class="section-head"><h2>Nejprodávanější produkty</h2><a href="#produkty">Zobrazit všechny&nbsp; →</a></div><div class="product-grid">
-      <article class="product"><span class="tag">Bestseller</span><img src="/assets/fence-types/panelovy-3d.webp" alt="3D plotový panel"><h3>3D panel 153 cm</h3><small>Pozink / Zelená / Antracit</small><div class="price">od 329 Kč</div><a class="btn" href="/?type=panel&height=153#kalkulator">Vybrat variantu</a></article>
-      <article class="product"><img src="/assets/fence-types/alu-vertical.webp" alt="Plotový sloupek"><h3>Sloupek 60×40 mm</h3><small>Pozink / Zelená / Antracit</small><div class="price">od 189 Kč</div><a class="btn" href="/?type=panel#kalkulator">Vybrat variantu</a></article>
-      <article class="product"><img src="/assets/fence-types/beton-sloupek-hladky.webp" alt="Podhrabová deska"><h3>Podhrabová deska</h3><small>Různé délky</small><div class="price">od 249 Kč</div><a class="btn" href="/?type=panel#kalkulator">Vybrat variantu</a></article>
-      <article class="product"><img src="/assets/fence-types/category-metal.webp" alt="Plotová branka"><h3>Branka jednokřídlá</h3><small>100 × 150 cm</small><div class="price">od 4 990 Kč</div><a class="btn" href="/?type=panel#kalkulator">Vybrat variantu</a></article>
-      <article class="product"><img src="/assets/fence-types/mobile-barrier-clamp.webp" alt="Montážní sada"><h3>Montážní sada</h3><small>Kompletní příslušenství</small><div class="price">od 29 Kč</div><a class="btn" href="/?type=panel#kalkulator">Vybrat variantu</a></article>
-    </div><p id="searchEmpty" class="search-empty" hidden>Pro tento výraz jsme nic nenašli. Zkuste například „panel“, „branka“ nebo „beton“.</p></div></section>
-    <section class="inspiration" id="inspirace"><div class="wrap"><div class="section-head"><h2>Inspirace od našich zákazníků</h2><a href="/#kalkulator">Navrhnout podobný plot&nbsp; →</a></div><div class="gallery"><a class="shot" href="/#kalkulator" aria-label="Navrhnout plot podle realizace 1"></a><a class="shot" href="/#kalkulator" aria-label="Navrhnout plot podle realizace 2"></a><a class="shot" href="/#kalkulator" aria-label="Navrhnout plot podle realizace 3"></a><a class="shot" href="/#kalkulator" aria-label="Navrhnout plot podle realizace 4"></a><a class="shot" href="/#kalkulator" aria-label="Navrhnout plot podle realizace 5"></a></div></div></section>
+    <section class="hero">
+      <div class="wrap hero-inner">
+        <div class="hero-copy">
+          <div class="eyebrow">PLOTAO · české oplocení</div>
+          <h1>Plot, který<br><em>sedne vašemu</em><br>domovu.</h1>
+          <p>Od prvního panelu po poslední šroubek. Vyberte si celý plot a nechte konfigurátor spočítat vše potřebné, nebo sáhněte jen po konkrétním dílu.</p>
+          <div class="journeys">
+            <a class="button button-primary" href="/?type=panel#kalkulator">Chci celý plot <svg viewBox="0 0 24 24"><path d="M4 12h15M13 5l7 7-7 7"/></svg></a>
+            <a class="button button-outline" href="#produkty">Chci komponenty <svg viewBox="0 0 24 24"><path d="M4 12h15M13 5l7 7-7 7"/></svg></a>
+          </div>
+          <div class="hero-note"><span>✓</span> Návrh zdarma · přehled potřebných komponent</div>
+        </div>
+        <div class="hero-visual">
+          <img src="/assets/fence-types/panelovy-3d.webp" alt="Moderní panelový plot u rodinného domu">
+          <div class="visual-chip">Váš projekt začíná tady</div>
+          <div class="visual-caption"><strong>Dobře navržený plot. Bez hádání.</strong><span>Plotao.cz · oplocení na míru</span></div>
+        </div>
+      </div>
+    </section>
+    <section class="proof" id="doprava" aria-label="Výhody nákupu">
+      <div class="wrap">
+        <div class="proof-item"><span class="proof-icon">↗</span><div><strong>Doprava po celé ČR</strong><small>od 799 Kč</small></div></div>
+        <div class="proof-item"><span class="proof-icon">◷</span><div><strong>Rychlé dodání</strong><small>skladové položky</small></div></div>
+        <div class="proof-item"><span class="proof-icon">↺</span><div><strong>Vrácení do 14 dnů</strong><small>u standardního zboží</small></div></div>
+        <div class="proof-item"><span class="proof-icon">♡</span><div><strong>Pomoc s výběrem</strong><small>poradíme s projektem</small></div></div>
+      </div>
+    </section>
+    <section class="section category-section" id="kategorie">
+      <div class="wrap">
+        <div class="section-head"><div><div class="section-kicker">Vyberte si cestu</div><h2>Co právě stavíte?</h2></div><p>Začněte typem oplocení. V konfigurátoru upravíte rozměry, výšku i příslušenství.</p></div>
+        <div class="category-grid">
+          <a class="category-card" href="/?type=panel#kalkulator"><img src="/assets/fence-types/panelovy-3d.webp" alt=""><span class="category-name"><strong>Panelové ploty</strong><span>Odolné a univerzální</span><b>↗</b></span></a>
+          <a class="category-card" href="/?type=mesh#kalkulator"><img src="/assets/fence-types/pletivovy.webp" alt=""><span class="category-name"><strong>Pletivové ploty</strong><span>Praktické řešení kolem domu</span><b>↗</b></span></a>
+          <a class="category-card" href="/?type=concrete#kalkulator"><img src="/assets/fence-types/betonovy.webp" alt=""><span class="category-name"><strong>Betonové ploty</strong><span>Soukromí a pevná hranice</span><b>↗</b></span></a>
+          <a class="category-card" href="/?type=aluminium#kalkulator"><img src="/assets/fence-types/hlinikovy.webp" alt=""><span class="category-name"><strong>Hliníkové ploty</strong><span>Čistý moderní vzhled</span><b>↗</b></span></a>
+          <a class="category-card" href="/?type=privacy#kalkulator"><img src="/assets/fence-types/privacy-wood.webp" alt=""><span class="category-name"><strong>Soukromé oplocení</strong><span>Dřevo a neprůhledné výplně</span><b>↗</b></span></a>
+          <a class="category-card" href="/?type=gabion#kalkulator"><img src="/assets/fence-types/gabionovy.webp" alt=""><span class="category-name"><strong>Gabiony</strong><span>Výrazný prvek zahrady</span><b>↗</b></span></a>
+          <a class="category-card" href="#produkty"><img src="/assets/fence-types/category-metal.webp" alt=""><span class="category-name"><strong>Brány a branky</strong><span>Vstup sladěný s plotem</span><b>↗</b></span></a>
+          <a class="category-card" href="#produkty"><img src="/assets/fence-types/mobile-barrier-clamp.webp" alt=""><span class="category-name"><strong>Komponenty</strong><span>Sloupky, desky a montážní díly</span><b>↗</b></span></a>
+        </div>
+      </div>
+    </section>
+    <section class="config-section" id="konfigurator">
+      <div class="wrap"><div class="config-panel">
+        <div class="config-copy"><div class="section-kicker">Navrhujte chytře</div><h2>Kolik materiálu opravdu potřebujete?</h2><p>Zadejte parametry svého plotu. Konfigurátor spočítá sestavu i cenu a dovede vás k dalšímu kroku.</p><a class="button button-primary" href="/?type=panel#kalkulator">Otevřít konfigurátor <svg viewBox="0 0 24 24"><path d="M4 12h15M13 5l7 7-7 7"/></svg></a><div class="config-steps"><span><b>1</b> Vyberte systém</span><span><b>2</b> Zadejte rozměry</span><span><b>3</b> Získejte nabídku</span></div></div>
+        <img src="/assets/fence-types/panelovy-3d.webp" alt="" aria-hidden="true">
+      </div></div>
+    </section>
+    <section class="section product-section" id="produkty">
+      <div class="wrap">
+        <div class="section-head"><div><div class="section-kicker">Oblíbené položky</div><h2>Začněte u detailů</h2></div><a class="section-link" href="/?type=panel#kalkulator">Prohlédnout nabídku <span>→</span></a></div>
+        <div class="product-grid">
+          <article class="product-card"><div class="product-image"><span class="product-label">Bestseller</span><img src="/assets/fence-types/panelovy-3d.webp" alt="3D plotový panel"></div><div class="product-info"><h3>3D panel 153 cm</h3><p>Pozinkovaný · zelený · antracit</p><div class="product-price"><small>od</small> 329 Kč</div><a class="button button-outline product-button" href="/?type=panel&height=153#kalkulator">Vybrat variantu <span>→</span></a></div></article>
+          <article class="product-card"><div class="product-image"><img src="/assets/fence-types/alu-vertical.webp" alt="Plotový sloupek"></div><div class="product-info"><h3>Sloupek 60 × 40 mm</h3><p>Povrchová úprava pro váš systém</p><div class="product-price"><small>od</small> 189 Kč</div><a class="button button-outline product-button" href="/?type=panel#kalkulator">Vybrat variantu <span>→</span></a></div></article>
+          <article class="product-card"><div class="product-image"><img src="/assets/fence-types/beton-sloupek-hladky.webp" alt="Podhrabová deska"></div><div class="product-info"><h3>Podhrabová deska</h3><p>Různé délky pro snadnou montáž</p><div class="product-price"><small>od</small> 249 Kč</div><a class="button button-outline product-button" href="/?type=panel#kalkulator">Vybrat variantu <span>→</span></a></div></article>
+          <article class="product-card"><div class="product-image"><img src="/assets/fence-types/category-metal.webp" alt="Plotová branka"></div><div class="product-info"><h3>Branka jednokřídlá</h3><p>Vstupní řešení v jednotném stylu</p><div class="product-price"><small>od</small> 4 990 Kč</div><a class="button button-outline product-button" href="/?type=panel#kalkulator">Vybrat variantu <span>→</span></a></div></article>
+        </div>
+        <p id="searchEmpty" class="search-empty" hidden>Nic jsme nenašli. Zkuste „panel“, „branka“ nebo „beton“.</p>
+      </div>
+    </section>
+    <section class="section" id="inspirace">
+      <div class="wrap"><div class="section-head"><div><div class="section-kicker">Z reálných projektů</div><h2>Inspirace pro váš domov</h2></div><a class="section-link" href="/?type=panel#kalkulator">Navrhnout vlastní plot <span>→</span></a></div>
+        <div class="inspiration-grid">
+          <a class="inspiration-card" href="/?type=panel#kalkulator" aria-label="Panelový plot – navrhnout podobné řešení"><img src="/assets/fence-types/panelovy-3d.webp" alt="Panelové oplocení"></a>
+          <a class="inspiration-card" href="/?type=mesh#kalkulator" aria-label="Pletivový plot – navrhnout podobné řešení"><img src="/assets/fence-types/pletivovy.webp" alt="Pletivové oplocení"></a>
+          <a class="inspiration-card" href="/?type=aluminium#kalkulator" aria-label="Hliníkový plot – navrhnout podobné řešení"><img src="/assets/fence-types/hlinikovy.webp" alt="Hliníkové oplocení"></a>
+          <a class="inspiration-card" href="/?type=concrete#kalkulator" aria-label="Betonový plot – navrhnout podobné řešení"><img src="/assets/fence-types/betonovy.webp" alt="Betonové oplocení"></a>
+          <a class="inspiration-card" href="/?type=gabion#kalkulator" aria-label="Gabionový plot – navrhnout podobné řešení"><img src="/assets/fence-types/gabionovy.webp" alt="Gabionové oplocení"></a>
+        </div>
+      </div>
+    </section>
+    <section class="help" id="kontakt"><div class="wrap"><div><h2>Nejste si jistí výběrem?</h2><p>Ozvěte se nám. Pomůžeme sladit plot, bránu i potřebné komponenty.</p></div><div class="help-actions"><a class="phone" href="tel:+420777123456">+420 777 123 456</a><a class="button button-dark" href="/kontakt.html">Poradit s projektem →</a></div></div></section>
   </main>
-  <section class="contact-bar" id="kontakt"><div class="wrap contact-grid"><div class="contact-item"><i>🎧</i><div><b>Potřebujete poradit?</b><br><small>Jsme tu pro vás – pomůžeme s výběrem i kalkulací.</small></div></div><div class="contact-item"><i>☎</i><div><b>+420 777 123 456</b><br><small>Po–Pá 8:00–17:00</small></div></div><a class="btn" href="/#help">Kontaktovat nás</a></div></section>
-  <footer class="bottom"><div class="wrap bottom-grid"><div class="bottom-item"><i>♡</i><div><b>Česká firma</b><small>s tradicí</small></div></div><div class="bottom-item"><i>♢</i><div><b>Kvalitní materiály</b><small>od ověřených výrobců</small></div></div><div class="bottom-item"><i>⚙</i><div><b>Individuální řešení</b><small>pro každý projekt</small></div></div><div class="bottom-item"><i>♧</i><div><b>Stavíte s námi</b><small>už přes 10 000 zákazníků</small></div></div></div></footer>
+  <footer class="footer"><div class="wrap"><a class="footer-brand" href="/"><img src="/assets/logo-plotao-inverse.svg" alt="PLOTAO.cz"></a><div class="footer-note">Česká firma · Oplocení pro váš domov</div></div></footer>
   <script>
-    (()=>{
-      const input=document.querySelector('#shopSearch');
-      const status=document.querySelector('#searchStatus');
-      const empty=document.querySelector('#searchEmpty');
-      const categories=[...document.querySelectorAll('.cat-card')];
-      const products=[...document.querySelectorAll('.product')];
-      if(!input)return;
+    (()=>{const input=document.querySelector('#shopSearch');const status=document.querySelector('#searchStatus');const empty=document.querySelector('#searchEmpty');if(!input)return;
+      const items=[...document.querySelectorAll('.category-card,.product-card')];
       const normalize=value=>value.toLocaleLowerCase('cs').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
-      const searchable=[...categories,...products].map(element=>({element,text:normalize(element.textContent+' '+(element.querySelector('img')?.alt||''))}));
-      const run=()=>{
-        const query=normalize(input.value);
-        let matches=0;
-        searchable.forEach(item=>{const visible=!query||item.text.includes(query);item.element.hidden=!visible;if(visible&&query)matches++});
-        empty.hidden=!query||matches>0;
-        const resultText=matches===1?'Nalezen 1 výsledek.':matches>=2&&matches<=4?`Nalezeny ${matches} výsledky.`:`Nalezeno ${matches} výsledků.`;
-        status.textContent=query?(matches?resultText:'Nebyl nalezen žádný výsledek.'):'Zobrazeny všechny produkty a kategorie.';
-      };
-      input.addEventListener('input',run);
-      input.addEventListener('keydown',event=>{if(event.key==='Escape'){input.value='';run();input.blur()}if(event.key==='Enter'){event.preventDefault();const target=document.querySelector('.cat-card:not([hidden]),.product:not([hidden])');if(target)target.scrollIntoView({behavior:'smooth',block:'center'})}});
+      const searchable=items.map(element=>({element,text:normalize(element.textContent+' '+(element.querySelector('img')?.alt||''))}));
+      const run=()=>{const query=normalize(input.value);let matches=0;searchable.forEach(item=>{const visible=!query||item.text.includes(query);item.element.hidden=!visible;if(visible&&query)matches++});if(empty)empty.hidden=!query||matches>0;status.textContent=query?(matches?'Nalezeno výsledků: '+matches:'Nebyl nalezen žádný výsledek.'):'Zobrazeny všechny kategorie a produkty.'};
+      input.addEventListener('input',run);input.addEventListener('keydown',event=>{if(event.key==='Escape'){input.value='';run();input.blur()}if(event.key==='Enter'){event.preventDefault();const target=document.querySelector('.category-card:not([hidden]),.product-card:not([hidden])');target?.scrollIntoView({behavior:'smooth',block:'center'})}});
       document.querySelector('.mobile-search-icon')?.addEventListener('click',()=>input.focus());
-      const menuButton=document.querySelector('.menu-button');
-      const nav=document.querySelector('.nav');
-      menuButton?.addEventListener('click',()=>{const open=nav.classList.toggle('mobile-open');menuButton.setAttribute('aria-expanded',String(open));menuButton.setAttribute('aria-label',open?'Zavřít menu':'Otevřít menu')});
-      nav?.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{nav.classList.remove('mobile-open');menuButton?.setAttribute('aria-expanded','false')}));
+      const button=document.querySelector('.menu-button');const nav=document.querySelector('.main-nav');button?.addEventListener('click',()=>{const open=nav.classList.toggle('open');button.setAttribute('aria-expanded',String(open));button.setAttribute('aria-label',open?'Zavřít menu':'Otevřít menu')});
+      nav?.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{nav.classList.remove('open');button?.setAttribute('aria-expanded','false')}));
     })();
   </script>
 </body>
