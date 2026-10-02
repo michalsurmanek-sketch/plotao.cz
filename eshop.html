@@ -62,6 +62,25 @@
     @media(max-width:800px){.config-panel.config-hero{min-height:500px}.config-hero .config-copy{width:60%;padding:42px 0 30px 4%}.config-hero .config-copy h2{font-size:44px}.config-hero .config-copy p{font-size:14px}.config-highlights{left:49%;top:34%;width:235px}.config-highlight{min-height:58px;padding:8px 11px}.config-products{right:3%;bottom:14px}.config-products img{width:60px;height:60px}.config-products b{font-size:10px;padding:7px 9px}.config-steps{gap:7px}.config-steps>span:not(.step-line){min-width:76px}.step-line{width:18px}}
     @media(max-width:600px){.config-section{padding:0 0 40px}.config-panel.config-hero{min-height:760px;border-radius:12px}.config-hero .config-bg{object-position:61% center}.config-hero .config-shade{background:linear-gradient(180deg,#063d32f5 0%,#063d32ec 36%,#063d32a8 57%,#063d3230 100%),linear-gradient(90deg,#063d3270,transparent)}.config-hero .config-copy{width:100%;padding:28px 20px 0}.config-eyebrow{gap:9px;margin-bottom:14px;font-size:10px}.config-eyebrow:before{width:28px;height:4px}.config-hero .config-copy h2{font-size:36px;line-height:1.05}.config-hero .config-copy p{max-width:360px;margin-bottom:17px;font-size:13px}.config-cta{min-width:0;width:100%;min-height:54px;border-radius:12px;font-size:15px}.config-steps{justify-content:space-between;gap:0;margin-top:22px}.config-steps>span:not(.step-line){grid-template-columns:29px 22px;grid-template-rows:28px auto;min-width:0;column-gap:4px}.config-steps b{width:28px;height:28px;font-size:13px}.config-steps i{font-size:19px}.config-steps strong{margin-left:32px;font-size:10px}.step-line{width:14px;margin-top:14px}.config-highlights{left:15px;right:15px;top:auto;bottom:124px;width:auto;gap:6px}.config-highlight{min-height:47px;gap:10px;padding:5px 11px;border-radius:10px}.config-highlight i{width:26px;font-size:22px}.config-highlight strong{font-size:11px}.config-highlight small{font-size:10px}.config-dimension{display:none}.config-products{right:10px;left:10px;bottom:10px;justify-content:space-between;gap:3px}.config-products img{width:48px;height:48px;border-width:3px}.config-products b{margin-top:-1px;padding:5px 6px;font-size:8px}.config-products>div{max-width:25%}}
 
+        /* Keep the heading and copy in their own column, clear of the feature chips. */
+    .config-hero .config-copy{width:58%;padding-left:5%}
+    .config-hero .config-copy h2{max-width:740px;font-size:clamp(42px,3.4vw,60px)}
+    .config-highlights{left:52%;top:34%;width:300px}
+    @media(max-width:1150px){
+      .config-hero .config-copy{width:58%;padding-left:4%}
+      .config-hero .config-copy h2{font-size:clamp(40px,4.2vw,52px)}
+      .config-highlights{left:58%;top:34%;width:260px}
+    }
+    @media(max-width:800px){
+      .config-hero .config-copy{width:63%;padding-left:4%}
+      .config-hero .config-copy h2{font-size:38px}
+      .config-hero .config-copy p{max-width:100%}
+      .config-highlights{left:63%;top:31%;width:34%}
+      .config-highlight{gap:8px;padding-inline:9px}
+      .config-highlight i{width:25px;font-size:23px}
+      .config-highlight strong{font-size:11px}
+      .config-highlight small{font-size:10px}
+    }
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
   </style>
 </head>
