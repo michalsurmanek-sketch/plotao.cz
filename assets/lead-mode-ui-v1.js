@@ -8,7 +8,7 @@
     if(name){name.required=true;name.autocomplete='name';name.enterKeyHint='next';name.minLength=2;name.maxLength=120}
     if(phone){phone.type='tel';phone.required=true;phone.autocomplete='tel';phone.inputMode='tel';phone.enterKeyHint='next';phone.maxLength=32}
     if(email){email.type='email';email.required=true;email.autocomplete='email';email.inputMode='email';email.autocapitalize='none';email.spellcheck=false;email.enterKeyHint='next';email.maxLength=254}
-    if(place)place.maxLength=160;if(note)note.maxLength=2000;const ico=form.elements.namedItem('ico'),company=form.elements.namedItem('companyName'),address=form.elements.namedItem('companyAddress');if(ico){ico.maxLength=8;ico.inputMode='numeric';ico.autocomplete='off'}if(company){company.maxLength=160;company.readOnly=true}if(address){address.maxLength=200;address.readOnly=true}setupAresLookup(form)
+    if(place)place.maxLength=160;if(note)note.maxLength=2000;const ico=form.elements.namedItem('ico'),company=form.elements.namedItem('companyName'),address=form.elements.namedItem('companyAddress');if(ico){ico.maxLength=8;ico.inputMode='numeric';ico.autocomplete='off';ico.disabled=false;ico.readOnly=false}if(company){company.maxLength=160;company.readOnly=false}if(address){address.maxLength=200;address.readOnly=false}setupAresLookup(form)
   }
   function setupAresLookup(form){
     const ico=form.elements.namedItem('ico'),company=form.elements.namedItem('companyName'),address=form.elements.namedItem('companyAddress'),status=$('#partnerAresStatus');if(!ico||!company||!address||!status)return;let timer=0,controller;
