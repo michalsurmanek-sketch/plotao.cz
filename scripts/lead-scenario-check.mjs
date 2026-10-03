@@ -84,7 +84,7 @@ ok(v.valid===false&&v.errors.some(e=>e.code==='help-question'),'help mode must r
 v=core.validateLead({...base,mode:'help',phone:'1234',fenceType:'',height:0,segments:[],note:'Potřebuji poradit'});
 ok(v.valid===false&&v.errors.some(e=>e.code==='phone'),'help mode must still validate contact information');
 
-v=core.validateLead({...base,mode:'partner',place:'Zlínský kraj',fenceType:'',height:0,segments:[],priceKind:'neplatné zadání',gate:true,gateSection:99});
+v=core.validateLead({...base,mode:'partner',ico:'12345678',place:'Zlínský kraj',fenceType:'',height:0,segments:[],priceKind:'neplatné zadání',gate:true,gateSection:99});
 ok(v.valid===true,'partner request must ignore customer fence geometry and price state');
 v=core.validateLead({...base,mode:'partner',place:'',placeFromCalculator:'',fenceType:'',height:0,segments:[]});
 ok(v.valid===false&&v.errors.some(e=>e.code==='partner-area'),'partner request must require an area of operation');
