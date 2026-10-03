@@ -24,7 +24,7 @@ const r=raw||{},segments=normalizeSegments(r.segments),priceKind=PRICE_KINDS.has
 return{
 schemaVersion:SCHEMA_VERSION,mode,
 savedAt:text(r.savedAt,40)||text(now,40)||new Date().toISOString(),
-name:text(r.name,120),phone:normalizePhone(r.phone),email:normalizeEmail(r.email),place:text(r.place,160),ico:String(r.ico??'').replace(/\D/g,'').slice(0,8),note:multiline(r.note,2000),
+name:text(r.name,120),phone:normalizePhone(r.phone),email:normalizeEmail(r.email),place:text(r.place,160),ico:String(r.ico??'').replace(/\D/g,'').slice(0,8),companyName:text(r.companyName,160),companyAddress:text(r.companyAddress,200),note:multiline(r.note,2000),
 fenceType:text(r.fenceType,120),height:num(r.height,0,10000,0),segments,options:normalizeOptions(r.options),
 gate:!!r.gate,gateType:text(r.gateType,40),gateWidth:bounded(r.gateWidth,0,20,-1),gateDrive:text(r.gateDrive,40),gateSection:int(r.gateSection,0,11,-1),gatePos:bounded(r.gatePos,0,1000,-1),
 wicket:!!r.wicket,wicketWidth:bounded(r.wicketWidth,0,10,-1),wicketSection:int(r.wicketSection,0,11,-1),wicketPos:bounded(r.wicketPos,0,1000,-1),
@@ -74,7 +74,7 @@ return['Plot: '+(d.fenceType||'—'),'Výška: '+(d.height||'—')+' cm','Úseky
 }
 function toText(raw){
 const d=normalizeLead(raw);
-if(d.mode==='partner')return['PLOTAO.CZ – zájem montážní firmy','','Kontakt:',d.name||'—',d.phone||'—',d.email||'—','IČO: '+(d.ico||'—'),'Oblast působnosti: '+(d.place||'—'),'','Poznámka:',d.note||'—'].join('\n');
+if(d.mode==='partner')return['PLOTAO.CZ – zájem montážní firmy','','Kontakt:',d.name||'—',d.phone||'—',d.email||'—','IČO: '+(d.ico||'—'),'Firma: '+(d.companyName||'—'),'Sídlo: '+(d.companyAddress||'—'),'Oblast působnosti: '+(d.place||'—'),'','Poznámka:',d.note||'—'].join('\n');
 if(d.mode==='help')return['PLOTAO.CZ – žádost o radu','','Kontakt:',d.name||'—',d.phone||'—',d.email||'—','Místo: '+(d.place||'—'),'','Dotaz:',d.note||'—'].join('\n');
 const place=d.place||d.placeFromCalculator||'—',lines=['PLOTAO.CZ – podklady poptávky','','Kontakt:',d.name||'—',d.phone||'—',d.email||'—','Místo: '+place,'',...fenceLines(d),'','Poznámka:',d.note||'—'];
 return lines.join('\n');

@@ -33,6 +33,8 @@ export function validateEnvelope(input){
   if(tooLong(l.place,200))errors.push('place');
   if(tooLong(l.region,100))errors.push('region');
   if(tooLong(l.ico,20))errors.push('ico');
+  if(tooLong(l.companyName,160))errors.push('companyName');
+  if(tooLong(l.companyAddress,200))errors.push('companyAddress');
   if(tooLong(l.note,4000))errors.push('note');
   const name=text(l.name,120),phoneValue=phone(l.phone),email=rawText(l.email,254).toLowerCase(),place=text(l.place,200),ico=rawText(l.ico,20),note=rawText(l.note,4000),regionValue=text(l.region,100);
   if(name.length<2)errors.push('name');
@@ -42,7 +44,7 @@ export function validateEnvelope(input){
   if(mode==='help'&&note.length<5)errors.push('note');
   if(mode==='partner'&&place.length<2)errors.push('place');
   if(mode==='partner'&&!/^\d{8}$/.test(ico))errors.push('ico');
-  const lead={schemaVersion:2,mode,name,phone:phoneValue,email,place,ico:mode==='partner'?ico:'',note,region:REGIONS.has(regionValue)?regionValue:'',partner_share_consent:bool(l.partner_share_consent)};
+  const lead={schemaVersion:2,mode,name,phone:phoneValue,email,place,ico:mode==='partner'?ico:'',companyName:mode==='partner'?text(l.companyName,160):'',companyAddress:mode==='partner'?text(l.companyAddress,200):'',note,region:REGIONS.has(regionValue)?regionValue:'',partner_share_consent:bool(l.partner_share_consent)};
   if(mode==='lead'){
     if(tooLong(l.fenceType,120))errors.push('fenceType');
     if(tooLong(l.gateType,80))errors.push('gateType');
