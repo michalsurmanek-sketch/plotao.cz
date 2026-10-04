@@ -17,3 +17,5 @@ footer.foot{max-width:none;width:100%;margin:45px 0 0;padding:27px 17px;display:
 .slab-options{margin:10px 0 6px 30px;padding:13px 14px;border:1px solid #dce8de;border-radius:10px;background:#f5faf6}.slab-options[hidden]{display:none}.slab-options label{font-weight:600}.slab-options select{margin-top:6px}
 
 .scope-hint{margin:0 0 8px}.scope label>span{position:relative;padding-right:44px;transition:border-color .15s,background-color .15s,box-shadow .15s}.scope label>span i{position:absolute;right:12px;top:50%;transform:translateY(-50%);display:none;place-items:center;width:25px;height:25px;border-radius:50%;background:var(--green);color:#fff;font-size:15px;font-style:normal;font-weight:800}.scope input:checked+span{border:2px solid var(--green);padding-right:43px;background:#edf7ef;box-shadow:0 0 0 2px rgba(23,106,68,.08)}.scope input:checked+span strong{color:var(--green);font-weight:700}.scope input:checked+span i{display:grid}.scope input:focus-visible+span{outline:3px solid #e9a435;outline-offset:3px}
+
+@media(max-width:760px){header{position:sticky;top:0;z-index:50}}
