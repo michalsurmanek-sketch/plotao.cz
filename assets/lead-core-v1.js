@@ -24,6 +24,7 @@ function normalizeLead(raw,now){
 const r=raw||{},segments=normalizeSegments(r.segments),priceKind=PRICE_KINDS.has(r.priceKind)?r.priceKind:'individuální nabídka',mode=MODES.has(r.mode)?r.mode:'lead',scopeValue=SCOPES.has(r.scopeValue)?r.scopeValue:'material';
 return{
 schemaVersion:SCHEMA_VERSION,mode,
+partner_share_consent:r.partner_share_consent===true,
 savedAt:text(r.savedAt,40)||text(now,40)||new Date().toISOString(),
 name:text(r.name,120),phone:normalizePhone(r.phone),email:normalizeEmail(r.email),place:text(r.place,160),ico:String(r.ico??'').replace(/\D/g,'').slice(0,8),companyName:text(r.companyName,160),companyAddress:text(r.companyAddress,200),note:multiline(r.note,2000),
 fenceType:text(r.fenceType,120),height:num(r.height,0,10000,0),segments,options:normalizeOptions(r.options),

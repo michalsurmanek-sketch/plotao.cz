@@ -7,6 +7,8 @@ const adapter=fs.readFileSync('assets/lead-safety-v1.js','utf8'),modeUi=fs.readF
 ok(adapter.includes('PLOTAO_LEAD_CORE')&&adapter.includes('normalizeLead')&&adapter.includes('validateLead')&&adapter.includes('core.toText'),'lead browser adapter must delegate payload normalization, validation and text export to shared core');
 ok(core.shortRequestNumber('3266cac7-538b-4abd-867e-3432f18531a2')==='P-3266-CAC7-538B','public request number must be a stable readable code derived from the internal UUID');
 ok(adapter.includes('core.shortRequestNumber(result?.id)'),'submission confirmation must display the short public request number');
+ok(core.normalizeLead({...base,partner_share_consent:true}).partner_share_consent===true,'shared lead core must preserve explicit partner-sharing consent');
+ok(adapter.includes('partner_share_consent:partnerShareConsent(form)')&&adapter.includes('partnerShareConsent'),'lead submission must carry the checked partner-sharing consent into the stored payload');
 ok(admin.includes('shortRequestNumber(x.id)')&&admin.includes('idLike')&&admin.includes("String(x.id||'')"),'admin lead search and list must support and display the short code plus internal UUID');
 ok(crm.includes('shortRequestNumber(x.id)')&&crm.includes('idMatch'),'customer search must resolve a short or full request ID to the same customer');
 ok(adminHtml.indexOf('/assets/lead-core-v1.js')<adminHtml.indexOf('/assets/admin/admin-v1.js'),'shared request-number helper must load before admin scripts');
