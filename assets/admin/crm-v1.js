@@ -2,7 +2,7 @@
  const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const statusLabels={new:'Nová',review:'Prověřit',waiting_customer:'Čekáme na zákazníka',preparing_quote:'Připravuje se nabídka',quote_sent:'Nabídka odeslána',waiting_decision:'Čekáme na rozhodnutí',ordered:'Objednáno',partner_assigned:'Předáno partnerovi',completed:'Vyřízeno',closed:'Uzavřeno',contacted:'Kontaktováno'};
  let sourceLeads=[],expanded=new Set(),selected=new Set();
- const normalized=value=>String(value||'').trim().toLocaleLowerCase('cs-CZ');
+ const normalized=value=>String(value||'').trim().toLocaleLowerCase('cs-CZ');const shortRequestNumber=id=>window.PLOTAO_LEAD_CORE?.shortRequestNumber?.(id)||'';
  const customerKey=lead=>{if(lead.email&&lead.email.trim())return 'email:'+normalized(lead.email);const digits=String(lead.phone||'').replace(/\D/g,'');return digits?'phone:'+digits:'lead:'+lead.id};
  const received=value=>{const d=new Date(value);return Number.isNaN(d.getTime())?'—':d.toLocaleString('cs-CZ',{timeZone:'Europe/Prague',dateStyle:'short',timeStyle:'short'})};
  function groups(){
@@ -18,7 +18,7 @@
  function render(){
   const body=document.querySelector('#customerRows');if(!body)return;
   const query=normalized(document.querySelector('#customerSearch')?.value),all=groups();
-  const filtered=all.filter(group=>{const l=group.leads[0]||{};return !query||[l.name,l.email,l.phone,...group.leads.map(x=>x.place)].some(v=>normalized(v).includes(query))});
+  const idQuery=query.replaceAll('-','').replaceAll(' ','').toLowerCase(),idLike=/^(?:p)?[a-f0-9]{4,36}$/i.test(idQuery);const filtered=all.filter(group=>{const l=group.leads[0]||{},textMatch=[l.name,l.email,l.phone,...group.leads.map(x=>x.place)].some(v=>normalized(v).includes(query)),idMatch=idLike&&group.leads.some(x=>[String(x.id||''),shortRequestNumber(x.id)].some(v=>v.replaceAll('-','').replaceAll(' ','').toLowerCase().includes(idQuery)));return !query||textMatch||idMatch});
   const count=document.querySelector('#customerCount');if(count)count.textContent=filtered.length+' zákazníků · '+filtered.reduce((n,g)=>n+g.leads.length,0)+' poptávek';
   body.innerHTML=filtered.map(group=>{
    const latest=group.leads[0],email=group.leads.find(x=>x.email)?.email||'',phone=group.leads.find(x=>x.phone)?.phone||'',opened=expanded.has(group.key);

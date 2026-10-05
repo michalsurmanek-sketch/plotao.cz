@@ -14,6 +14,7 @@ function multiline(v,max=2000){return String(v??'').replace(/\r\n?/g,'\n').trim(
 function num(v,min=0,max=Number.MAX_SAFE_INTEGER,fallback=0){const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback}
 function bounded(v,min,max,fallback=-1){const n=Number(v);return Number.isFinite(n)&&n>=min&&n<=max?n:fallback}
 function int(v,min=0,max=Number.MAX_SAFE_INTEGER,fallback=-1){const n=Number(v);return Number.isInteger(n)&&n>=min&&n<=max?n:fallback}
+function shortRequestNumber(id){const hex=String(id??'').replace(/[^a-f0-9]/gi,'').toUpperCase();return hex.length>=12?'P-'+hex.slice(0,4)+'-'+hex.slice(4,8)+'-'+hex.slice(8,12):''}
 function normalizePhone(v){const raw=text(v,80),plus=raw.startsWith('+'),digits=raw.replace(/\D/g,'').slice(0,32);return(plus?'+':'')+digits}
 function normalizeEmail(v){return text(v,320).toLowerCase()}
 function normalizeSegments(items){return(Array.isArray(items)?items:[]).slice(0,100).map((x,i)=>({name:text(x?.name,100)||('Úsek '+(i+1)),length:num(x?.length,0,1000000,0),connection:i===0?'začátek':CONNECTIONS.has(x?.connection)?x.connection:'navazuje rohem'}))}
@@ -80,5 +81,5 @@ const place=d.place||d.placeFromCalculator||'—',lines=['PLOTAO.CZ – podklady
 return lines.join('\n');
 }
 
-return{SCHEMA_VERSION,MODES,normalizePhone,normalizeEmail,normalizeSegments,normalizeLead,validateLead,toText};
+return{SCHEMA_VERSION,MODES,shortRequestNumber,normalizePhone,normalizeEmail,normalizeSegments,normalizeLead,validateLead,toText};
 });
