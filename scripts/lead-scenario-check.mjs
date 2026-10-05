@@ -17,6 +17,7 @@ ok(modeUi.includes("Napište kontakt a oblast, ve které montujete ploty.")&&mod
 ok(modeUi.includes("mode==='help'")&&modeUi.includes("Obec / PSČ (volitelné)")&&modeUi.includes('place.required=false'),'help modal must keep location optional');
 ok(modeUi.includes('Výpočet plotu nemusíte dokončit.')&&modeUi.includes('note.required=true')&&modeUi.includes('Stručně popište svůj dotaz'),'help modal must clearly request an actual question without requiring fence completion');
 ok(modeUi.includes("scope==='delivery'||scope==='turnkey'")&&modeUi.includes("labelText(placeLabel,scope==='material'?'Obec / PSČ (volitelné)':'Obec / PSČ')"),'customer modal must require location only for delivery/turnkey scopes');
+ok(modeUi.includes("if(quoteLink)quoteLink.hidden=true")&&modeUi.includes('Konfiguraci z kalkulátoru připojíme automaticky.'),'customer quote modal must attach the calculator data and avoid an extra detailed-form step');
 ok(server.includes("if(!Array.isArray(v)||v.length>50||v.some(x=>typeof x!=='string'||tooLong(x,200)))return null"),'server must keep the canonical 50-option / 200-character option contract');
 
 let d=core.normalizeLead(base,'2026-09-12T20:00:00.000Z');
