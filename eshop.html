@@ -219,6 +219,14 @@
       .hero-callout small{font-size:10px}
       .hero-callout-arrow{display:none}
     }
+
+    @media(min-width:601px){
+      .hero-trust{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px;margin-top:26px;max-width:560px}
+      .hero-trust-item{min-width:0;gap:12px;padding:10px 13px;border:1px solid #dce8df;border-radius:13px;background:#ffffffdf;box-shadow:0 4px 16px #17231d12;backdrop-filter:blur(5px)}
+      .hero-trust-item svg{width:36px;height:36px}
+      .hero-trust-item strong{color:#17231d;font-size:14px;line-height:1.3}
+      .hero-trust-item small{color:#405047;font-size:12px;line-height:1.35}
+    }
 </style>
 </head>
 <body>
