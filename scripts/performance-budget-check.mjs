@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 import {activeScripts} from './pages-manifest.mjs';
 
-// Re-reviewed baseline: 61 modules including the existing header branding module.
+// Re-reviewed 329 KiB budget covers calculator preselection for shop product variants.
 // Guide scripts load only on the guide page; the homepage adds no new requests.
 const MAX_SCRIPT_COUNT=61;
-const MAX_TOTAL_BYTES=327*1024;
+const MAX_TOTAL_BYTES=329*1024;
 const MAX_SINGLE_BYTES=16*1024;
 const fail=[];
 const ok=(value,message)=>{if(!value)fail.push(message)};
