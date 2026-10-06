@@ -85,7 +85,26 @@
   .site-header{position:sticky;top:0;z-index:50}
     .mobile-network-card{display:none}
     @media(max-width:600px){
-      .announcement{position:sticky;top:0;z-index:60;height:34px;font-size:11px}
+      .announcement{height:34px;font-size:10px;white-space:nowrap}
+      .announcement-content{width:100%;justify-content:flex-start;gap:7px;padding:0 12px;white-space:nowrap}
+      .announcement-content>span{white-space:nowrap}
+      .announcement-arrow{margin-left:auto}
+      .hero-photo{object-position:76% center}
+      .hero:after{background:linear-gradient(90deg,#f7f6efd9 0%,#f7f6efb8 38%,#f7f6ef55 61%,#f7f6ef08 100%),linear-gradient(180deg,#f7f6ef30,transparent 55%)}
+      .hero-lead{max-width:310px;font-size:13px;line-height:1.55}
+      .button{min-height:53px;padding:0 19px;gap:10px}
+      .button-leading{flex:none;width:26px!important;height:26px!important;stroke-width:2.6!important}
+      .hero-ctas .button{justify-content:initial}
+      .hero-ctas .button span{flex:1;text-align:center}
+      .hero-trust-item svg{box-sizing:content-box;width:30px;height:30px;padding:6px;border-radius:12px;background:#ffffffd9}
+      .mobile-network-card{grid-template-columns:1fr 1fr 1fr;gap:0 5px;margin:24px 0 24px;padding:13px 12px}
+      .mobile-network-copy{grid-column:1}
+      .mobile-network-copy small{font-size:8px}
+      .mobile-network-map{grid-column:2;grid-row:1;width:100%;height:72px}
+      .mobile-network-card>a{grid-column:3;grid-row:1;justify-self:stretch;min-height:34px;gap:4px;padding:0 6px;font-size:9px}
+      .mobile-network-card>a b{font-size:14px}
+      .hero-callout{bottom:7px;right:13px}
+
       .site-header{position:sticky;top:34px;z-index:59}
       .header-main{height:64px;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:48px;padding:8px 0}
       .brand img{width:154px}
@@ -160,8 +179,8 @@
           <h1>Plot, který<br><em>sedne vašemu</em><br>domovu.</h1>
           <p class="hero-lead">Od prvního panelu po poslední šroubek. Vyberte si celý plot a nechte konfigurátor spočítat vše potřebné, nebo sáhněte jen po konkrétním dílu.</p>
           <div class="hero-ctas">
-            <a class="button button-primary" href="/?type=panel#kalkulator">Chci celý plot <svg viewBox="0 0 24 24"><path d="M4 12h15M13 5l7 7-7 7"/></svg></a>
-            <a class="button button-secondary" href="#produkty">Chci komponenty <svg viewBox="0 0 24 24"><path d="M4 12h15M13 5l7 7-7 7"/></svg></a>
+            <a class="button button-primary" href="/?type=panel#kalkulator"><svg class="button-leading" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 2v20M10 2v20M15 2v20M20 2v20M2 7h20M2 17h20"/></svg><span>Chci celý plot</span><svg viewBox="0 0 24 24"><path d="M4 12h15M13 5l7 7-7 7"/></svg></a>
+            <a class="button button-secondary" href="#produkty"><svg class="button-leading" viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6 4-4 4 4-4 4M3 21l11-11M8 5l11 11"/></svg><span>Chci komponenty</span><svg viewBox="0 0 24 24"><path d="M4 12h15M13 5l7 7-7 7"/></svg></a>
           </div>
           <div class="hero-trust" id="doprava" aria-label="Výhody PLOTAO">
             <div class="hero-trust-item"><svg viewBox="0 0 24 24"><path d="M3 6h12v11H3zM15 10h4l3 4v3h-7z"/><circle cx="7" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg><div><strong>Rychlé dodání</strong><small>díky síti poboček</small></div></div>
