@@ -18,7 +18,7 @@ ok(topview.includes("if(rectActive()&&ss.length===4)")&&topview.includes('const 
 ok(topview.includes('perimeter>1000.001'),'rectangle mode must respect the calculator 1000 m perimeter boundary');
 ok(connections.includes('window.PLOTAO_SET_SEGMENT_CONNECTIONS=setConnections'),'shared connection owner must expose the reviewed rectangle setter');
 ok(geometry.includes("closed:shape?.mode==='rectangle'&&shape?.closed===true"),'geometry adapter must pass closed rectangle state to shared geometry');
-ok(core.includes('const closed=!!input.closed')&&core.includes("if(closed)add('closure','corner')"),'shared geometry core must model the closing corner');
+ok(core.includes('const closed=(!!input.closed')&&core.includes('||autoClosed')&&core.includes("if(closed)add('closure','corner')"),'shared geometry core must model explicit and inferred closing corners');
 ok(core.includes('const prevLinked=i=>i>0?linked(i):closed')&&core.includes('const nextLinked=i=>i<segments.length-1?linked(i+1):closed'),'closed geometry must wrap first/last segment adjacency');
 ok(browser.includes("await page.locator('[data-shape-mode=\"rectangle\"]').click()"),'browser E2E must actually enter rectangle mode');
 ok(browser.includes("fill('20')")&&browser.includes("fill('15')")&&browser.includes('window.PLOTAO_GEOMETRY?.corner===4')&&browser.includes('window.PLOTAO_GEOMETRY?.end===0'),'browser E2E must verify a 20 × 15 closed rectangle with four corner and zero end posts');
