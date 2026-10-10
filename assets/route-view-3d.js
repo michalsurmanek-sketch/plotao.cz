@@ -23,6 +23,18 @@
     const poly=(points,fill,stroke)=>{ctx.beginPath();points.forEach((p,i)=>{const q=proj(p.x,p.y,p.z);i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y)});ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.stroke()}};
     const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#dce9e3');bg.addColorStop(.36,'#eaf1eb');bg.addColorStop(.37,'#27824b');bg.addColorStop(1,'#075b39');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
     poly([{x:cx-span*1.8,y:0,z:cz-span*1.8},{x:cx+span*1.8,y:0,z:cz-span*1.8},{x:cx+span*1.8,y:0,z:cz+span*1.8},{x:cx-span*1.8,y:0,z:cz+span*1.8}],'#138348');
+    // Subtle garden context stays outside the configurable fence footprint.
+    const pathZ=minZ-span*.72,pathHalf=.34;
+    poly([{x:minX-span*.95,y:0,z:pathZ-pathHalf},{x:maxX+span*.95,y:0,z:pathZ-pathHalf},{x:maxX+span*.95,y:0,z:pathZ+pathHalf},{x:minX-span*.95,y:0,z:pathZ+pathHalf}],'#c9c6b5');
+    const pavingCount=Math.max(8,Math.ceil((maxX-minX+span*1.9)/1.25));
+    for(let i=0;i<pavingCount;i++){
+      const x0=minX-span*.95+(maxX-minX+span*1.9)*i/pavingCount;
+      const x1=minX-span*.95+(maxX-minX+span*1.9)*(i+1)/pavingCount;
+      poly([{x:x0+.035,y:0,z:pathZ-pathHalf+.035},{x:x1-.035,y:0,z:pathZ-pathHalf+.035},{x:x1-.035,y:0,z:pathZ+pathHalf-.035},{x:x0+.035,y:0,z:pathZ+pathHalf-.035}],i%2?'#d8d5c5':'#dedbcc','#c1beaf');
+    }
+    const shrub=(x,z,r)=>{const p=proj(x,0,z),k=Math.max(4,scale*r);ctx.save();ctx.fillStyle='#315f3b';ctx.beginPath();ctx.ellipse(p.x+2,p.y,k*1.12,k*.58,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#5c8a50';ctx.beginPath();ctx.ellipse(p.x,p.y-k*.22,k,k*.56,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#79a663';ctx.beginPath();ctx.arc(p.x-k*.22,p.y-k*.28,k*.28,0,Math.PI*2);ctx.fill();ctx.restore()};
+    shrub(minX-span*.62,minZ-span*.38,.42);shrub(maxX+span*.62,minZ-span*.34,.48);
+    shrub(minX-span*.58,maxZ+span*.42,.38);shrub(maxX+span*.6,maxZ+span*.38,.44);
     ctx.save();ctx.globalAlpha=.13;ctx.strokeStyle='#d8f0dc';ctx.lineWidth=1;for(let i=-8;i<=8;i++){let a=proj(cx-span*1.7,0,cz+i*span*.22),b=proj(cx+span*1.7,0,cz+i*span*.22);ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()}ctx.restore();
     const selected=$('.type.on')?.dataset.id||'panel',surface=selected==='panel'?($('#fenceVisualRoot [data-pc].on')?.dataset.pc||'green'):selected==='mesh'?($('#fenceVisualRoot [data-ms].on')?.dataset.ms||'green'):selected==='concrete'?($('#concreteConfig [data-cg="color"].on')?.dataset.cv||'gray'):selected==='aluminium'?($('#aluColor')?.value||'anthracite'):window.PLOTAO_METAL?.finish||'green',color=colors[surface]||colors.green,postFill=color;
     const gateWidth=()=>Math.max(.5,+$('#gateWidth')?.value||4),doorWidth=()=>Math.max(.5,+$('#doorWidth')?.value||1),opens=[];if($('#gate')?.checked)opens.push({kind:'gate',sec:+(window.PLOTAO_PLACEMENT?.gate?.section??$('#gateSection')?.value??0),pos:+(window.PLOTAO_PLACEMENT?.gate?.pos??$('#gatePos')?.value??0),w:gateWidth()});if($('#door')?.checked)opens.push({kind:'door',sec:+(window.PLOTAO_PLACEMENT?.door?.section??$('#doorSection')?.value??0),pos:+(window.PLOTAO_PLACEMENT?.door?.pos??$('#doorPos')?.value??0),w:doorWidth()});
