@@ -2,8 +2,8 @@
 const prio={line:1,strain:2,end:3,corner:4,wicket:5,gate:6};
 const near=(a,b)=>Math.abs(a-b)<.001;
 function solveGeometry(input={}){
-  const type=input.type||'panel',gap=Math.max(.1,+input.gap||2.5),segments=(input.segments||[]).map((s,i)=>({i,len:Math.max(0,+s.len||0),connected:i>0&&s.connected!==false})),openings=(input.openings||[]).map(o=>({kind:o.kind==='door'||o.kind==='wicket'?'wicket':'gate',s:Math.max(0,+o.s||0),p:Math.max(0,+o.p||0),w:Math.max(0,+o.w||0)})),nodes=new Map,runs=[];
-  const closed=!!input.closed&&segments.length>2&&segments.slice(1).every(s=>s.connected);
+  const type=input.type||'panel',gap=Math.max(.1,+input.gap||2.5),segments=(input.segments||[]).map((s,i)=>({i,len:Math.max(0,+s.len||0),connected:i>0&&s.connected!==false,turn:s.turn==='left'?'left':s.turn==='right'?'right':null})),openings=(input.openings||[]).map(o=>({kind:o.kind==='door'||o.kind==='wicket'?'wicket':'gate',s:Math.max(0,+o.s||0),p:Math.max(0,+o.p||0),w:Math.max(0,+o.w||0)})),nodes=new Map,runs=[];
+  const hasTurns=segments.length>2&&segments.slice(1).every(s=>s.connected&&s.turn),autoClosed=hasTurns&&(()=>{const d=[[1,0],[0,1],[-1,0],[0,-1]];let x=0,y=0,dir=0;for(let i=0;i<segments.length;i++){if(i)dir=(dir+(segments[i].turn==='left'?3:1))%4;x+=d[dir][0]*segments[i].len;y+=d[dir][1]*segments[i].len}return near(x,0)&&near(y,0)})(),closed=(!!input.closed&&segments.length>2&&segments.slice(1).every(s=>s.connected))||autoClosed;
   const linked=i=>i>0&&!!segments[i]?.connected;
   const prevLinked=i=>i>0?linked(i):closed;
   const nextLinked=i=>i<segments.length-1?linked(i+1):closed;
