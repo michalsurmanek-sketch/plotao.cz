@@ -15,7 +15,8 @@ const segments=[
 ];
 const open=core.solveGeometry({type:'panel',gap:2.5,segments,openings:[],closed:false});
 const closed=core.solveGeometry({type:'panel',gap:2.5,segments,openings:[],closed:true});
-const inferred=core.solveGeometry({type:'panel',gap:2.5,segments:segments.map((s,i)=>({...s,turn:i===0?null:'right'})),openings:[],closed:false});
+const turns=[null,'right','right','right'];
+const inferred=core.solveGeometry({type:'panel',gap:2.5,segments,openings:[],closed:core.isClosedRoute(segments,turns)});
 
 const fail=[];
 const ok=(v,m)=>{if(!v)fail.push(m)};

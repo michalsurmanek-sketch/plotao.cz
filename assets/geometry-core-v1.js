@@ -1,9 +1,10 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;if(root)root.PLOTAO_GEOMETRY_CORE=api;})(typeof globalThis!=='undefined'?globalThis:this,function(){
 const prio={line:1,strain:2,end:3,corner:4,wicket:5,gate:6};
 const near=(a,b)=>Math.abs(a-b)<.001;
+function isClosedRoute(s,t=[]){if(s.length<3||s.slice(1).some(q=>!q.connected))return false;let x=0,y=0,d=0;for(let i=0;i<s.length;i++){if(i)d=(d+(t[i]==='left'?3:1))%4;let l=s[i].len;d%2?y+=d===1?l:-l:x+=d===0?l:-l}return near(x,0)&&near(y,0)}
 function solveGeometry(input={}){
-  const type=input.type||'panel',gap=Math.max(.1,+input.gap||2.5),segments=(input.segments||[]).map((s,i)=>({i,len:Math.max(0,+s.len||0),connected:i>0&&s.connected!==false,turn:s.turn==='left'?'left':s.turn==='right'?'right':null})),openings=(input.openings||[]).map(o=>({kind:o.kind==='door'||o.kind==='wicket'?'wicket':'gate',s:Math.max(0,+o.s||0),p:Math.max(0,+o.p||0),w:Math.max(0,+o.w||0)})),nodes=new Map,runs=[];
-  const hasTurns=segments.length>2&&segments.slice(1).every(s=>s.connected&&s.turn),autoClosed=hasTurns&&(()=>{const d=[[1,0],[0,1],[-1,0],[0,-1]];let x=0,y=0,dir=0;for(let i=0;i<segments.length;i++){if(i)dir=(dir+(segments[i].turn==='left'?3:1))%4;x+=d[dir][0]*segments[i].len;y+=d[dir][1]*segments[i].len}return near(x,0)&&near(y,0)})(),closed=(!!input.closed&&segments.length>2&&segments.slice(1).every(s=>s.connected))||autoClosed;
+  const type=input.type||'panel',gap=Math.max(.1,+input.gap||2.5),segments=(input.segments||[]).map((s,i)=>({i,len:Math.max(0,+s.len||0),connected:i>0&&s.connected!==false})),openings=(input.openings||[]).map(o=>({kind:o.kind==='door'||o.kind==='wicket'?'wicket':'gate',s:Math.max(0,+o.s||0),p:Math.max(0,+o.p||0),w:Math.max(0,+o.w||0)})),nodes=new Map,runs=[];
+  const closed=!!input.closed&&segments.length>2&&segments.slice(1).every(s=>s.connected);
   const linked=i=>i>0&&!!segments[i]?.connected;
   const prevLinked=i=>i>0?linked(i):closed;
   const nextLinked=i=>i<segments.length-1?linked(i+1):closed;
@@ -22,5 +23,5 @@ function solveGeometry(input={}){
   const c={line:0,strain:0,end:0,corner:0,gate:0,wicket:0};for(const r of nodes.values())c[r]++;const total=Object.values(c).reduce((a,b)=>a+b,0),corners=segments.slice(1).filter(s=>s.connected).length+(closed?1:0),gross=segments.reduce((a,s)=>a+s.len,0);
   return{...c,total,fields,fenceLen,gross,gap,runs,gateSides,wicketSides,corners,segments,closed};
 }
-return{solveGeometry};
+return{solveGeometry,isClosedRoute};
 });
