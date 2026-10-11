@@ -50,26 +50,26 @@ async function readBodyLimited(req: Request) {
 }
 
 function cleanText(value: unknown, max: number) {
-  return typeof value === 'string' ? value.trim().replace(/\\s+/g, ' ').slice(0, max) : ''
+  return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ').slice(0, max) : ''
 }
 function validEmail(value: string) {
-  return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/u.test(value) && value.length <= 254
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/u.test(value) && value.length <= 254
 }
 function cleanPhone(value: unknown) {
   const raw = String(value ?? '').trim()
   const prefix = raw.startsWith('+') ? '+' : ''
-  const digits = raw.replace(/\\D/g, '')
+  const digits = raw.replace(/\D/g, '')
   return digits.length >= 9 && digits.length <= 15 ? prefix + digits : ''
 }
 function inferRegion(place: string) {
-  const normalized = place.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+  const normalized = place.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
   const regions = [
     'Hlavní město Praha', 'Středočeský kraj', 'Jihočeský kraj', 'Plzeňský kraj',
     'Karlovarský kraj', 'Ústecký kraj', 'Liberecký kraj', 'Královéhradecký kraj',
     'Pardubický kraj', 'Kraj Vysočina', 'Jihomoravský kraj', 'Olomoucký kraj',
     'Zlínský kraj', 'Moravskoslezský kraj',
   ]
-  const explicit = regions.find((value) => normalized.includes(value.normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase()))
+  const explicit = regions.find((value) => normalized.includes(value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()))
   if (explicit) return explicit
   const cities: Array<[string, string]> = [
     ['uherske hradiste', 'Zlínský kraj'], ['uhersky brod', 'Zlínský kraj'],
@@ -147,8 +147,8 @@ export default {
         const result = await crypto.subtle.digest('SHA-256', encoder.encode(value))
         return [...new Uint8Array(result)].map((byte) => byte.toString(16).padStart(2, '0')).join('')
       }
-      if (address) keys.add(await digest(rateSalt + '\\nnetwork\\n' + address + '\\n' + userAgent))
-      keys.add(await digest(rateSalt + '\\ncontact\\n' + phone + '\\n' + email))
+      if (address) keys.add(await digest(rateSalt + '\nnetwork\n' + address + '\n' + userAgent))
+      keys.add(await digest(rateSalt + '\ncontact\n' + phone + '\n' + email))
       const rateKeys = [...keys]
       const since = new Date(Date.now() - RATE_WINDOW_MS).toISOString()
       const counts = await Promise.all(rateKeys.map((key_hash) => ctx.supabaseAdmin
