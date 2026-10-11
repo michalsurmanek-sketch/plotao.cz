@@ -205,6 +205,8 @@ jobs:
           const errors=[];
           page.on('pageerror',e=>errors.push(String(e)));
           await page.goto(`https://plotao.cz/?sha=${process.env.EXPECTED_SHA}`,{waitUntil:'networkidle',timeout:60000});
+          const launchClose=page.locator('#launchClose');
+          if(await launchClose.isVisible().catch(()=>false)) await launchClose.click();
           await page.locator('.region').first().press('Enter');
           await page.locator('#locationNext').click();
           const mobile=page.locator('.type[data-id="mobile"]');
