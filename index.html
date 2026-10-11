@@ -188,7 +188,7 @@
 .launch-close:hover{background:#eaf5ee}
 .launch-kicker{display:inline-flex;align-items:center;gap:8px;margin:0 auto 15px;padding:8px 13px;border-radius:99px;background:#eaf5ee;color:var(--lc-green-dark);font:800 13px/1.3 Arial,sans-serif;letter-spacing:.05em;text-transform:uppercase}
 .launch-kicker i{width:9px;height:9px;border-radius:50%;background:var(--lc-accent)}
-.launch-dialog h2{margin:0 auto 12px;color:var(--lc-green-dark);font:800 clamp(30px,6vw,42px)/1.08 Arial,sans-serif;letter-spacing:-1.2px}
+.launch-dialog .launch-title{margin:0 auto 12px;color:var(--lc-green-dark);font:800 clamp(30px,6vw,42px)/1.08 Arial,sans-serif;letter-spacing:-1.2px}
 .launch-copy{max-width:430px;margin:0 auto 22px;color:#536159;font:400 17px/1.55 Arial,sans-serif}
 .launch-timer{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 24px}
 .launch-unit{min-width:0;padding:14px 8px 12px;border:1px solid #dce6df;border-radius:14px;background:#fff}
@@ -209,7 +209,7 @@ body.launch-modal-open{overflow:hidden}
   <section class="launch-dialog" role="dialog" aria-modal="true" aria-labelledby="launchTitle" aria-describedby="launchDescription">
     <button class="launch-close" type="button" id="launchClose" aria-label="Zavřít oznámení">×</button>
     <p class="launch-kicker"><i aria-hidden="true"></i>Už brzy online</p>
-    <h2 id="launchTitle">Startujeme 1. ledna 2027</h2>
+    <p class="launch-title" id="launchTitle">Startujeme 1. ledna 2027</p>
     <p class="launch-copy" id="launchDescription">Nová etapa PLOTAO.cz začíná už za:</p>
     <div class="launch-timer" role="timer" aria-label="Odpočet do spuštění">
       <div class="launch-unit"><strong id="launchDays">00</strong><span id="launchDaysLabel">dnů</span></div>
