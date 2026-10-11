@@ -51,11 +51,24 @@ function regionForLead(lead){
  const value=String(lead.region||lead.payload?.region||"")+" "+String(lead.place||"")+" "+String(lead.payload?.placeFromCalculator||"");
  return PARTNER_REGIONS.find(region=>norm(value).includes(norm(region)))||"";
 }
+function validPriceShape(next,prev){if(typeof prev==="number")return typeof next==="number"&&Number.isFinite(next)&&next>=0&&next<=10000000;if(Array.isArray(prev))return Array.isArray(next)&&next.length===prev.length&&prev.every((v,i)=>validPriceShape(next[i],v));if(prev&&typeof prev==="object"){if(!next||typeof next!=="object"||Array.isArray(next))return false;const a=Object.keys(prev),b=Object.keys(next);return a.length===b.length&&a.every(k=>Object.prototype.hasOwnProperty.call(next,k)&&validPriceShape(next[k],prev[k]))}return typeof next===typeof prev&&next===prev}
 Deno.serve(async req=>{
  if(req.method==="OPTIONS")return json({ok:true});
  if(!allowed(req))return json({error:"admin_forbidden"},403);
  const base=Deno.env.get("SUPABASE_URL"),key=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
  if(!base||!key)return json({error:"server_config"},500);
+ if(req.method==="POST"){
+  let b;try{b=await req.clone().json()}catch{return json({error:"invalid_json"},400)}
+  if(b?.action==="update_calculator_prices"){
+   const current=await fetch(base+"/rest/v1/plotao_calculator_prices?id=eq.default&select=config",{headers:apiHeaders(key)});
+   if(!current.ok)return json({error:"calculator_prices_read_failed"},current.status);
+   const rows=await current.json(),config=b.config;
+   if(!rows[0]?.config||!validPriceShape(config,rows[0].config))return json({error:"invalid_calculator_prices"},422);
+   const saved=await fetch(base+"/rest/v1/plotao_calculator_prices?id=eq.default",{method:"PATCH",headers:{...apiHeaders(key),"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify({config,updated_at:new Date().toISOString()})});
+   if(!saved.ok){console.error("calculator prices update failed",saved.status);return json({error:"calculator_prices_save_failed"},saved.status)}
+   return json({ok:true,updated_at:new Date().toISOString()});
+  }
+ }
  if(req.method==="DELETE"){
   let b;try{b=await req.json()}catch{return json({error:"invalid_json"},400)}
   const ids=Array.isArray(b.lead_ids)?[...new Set(b.lead_ids.filter(validId))]:[];
