@@ -125,7 +125,7 @@ export default {
 
       const errors: string[] = []
       if (rawLead.schemaVersion !== 2 || rawLead.mode !== 'lead') errors.push('mode')
-      if (rawLead.admin_processing_consent !== true) errors.push('admin_processing_consent')
+      if (rawLead.admin_processing_acknowledged !== true) errors.push('admin_processing_acknowledged')
       if (name.length < 2) errors.push('name')
       if (!validEmail(email)) errors.push('email')
       if (!phone) errors.push('phone')
@@ -194,7 +194,7 @@ export default {
         priceReason: '',
         placeFromCalculator: '',
         partner_share_consent: partnerShareConsent,
-        admin_processing_consent: true,
+        admin_processing_acknowledged: true,
         sourceLabel: 'PoptejPlot.cz',
       }
       const { data, error } = await ctx.supabaseAdmin
