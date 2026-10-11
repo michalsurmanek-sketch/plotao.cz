@@ -1,11 +1,11 @@
 import fs from 'node:fs';
 import {activeScripts} from './pages-manifest.mjs';
 
-// Re-reviewed 329 KiB budget covers calculator preselection for shop product variants.
+// Re-reviewed 332 KiB budget covers calculator preselection and Supabase-backed editable prices.
 // The 256-byte allowance covers automatic closed-route corner detection in 3D.
-// Guide scripts load only on the guide page; the homepage adds no new requests.
-const MAX_SCRIPT_COUNT=61;
-const MAX_TOTAL_BYTES=329*1024+256;
+// Guide scripts load only on the guide page.
+const MAX_SCRIPT_COUNT=62;
+const MAX_TOTAL_BYTES=332*1024+256;
 const MAX_SINGLE_BYTES=16*1024;
 const fail=[];
 const ok=(value,message)=>{if(!value)fail.push(message)};
