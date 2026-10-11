@@ -41,7 +41,9 @@ const deno=JSON.parse(fs.readFileSync('supabase/functions/submit-lead/deno.json'
 ok(validation.includes('v.length<1||v.length>12')&&validation.includes('if(total>1000+.001)return null'),'server validation must mirror calculator segment count and total-length boundaries');
 ok(validation.includes('function validateOpening(')&&validation.includes("errors.push('openingsOverlap')"),'server validation must independently enforce opening placement and non-overlap');
 ok(validation.includes('const integer=')&&validation.includes("gateSection=integer(l.gateSection,0,11,-1)")&&validation.includes("wicketSection=integer(l.wicketSection,0,11,-1)"),'opening section indexes must be bounded integers, not arbitrary numeric values');
-ok(index.includes("const ALLOWED_ORIGINS = new Set(['https://plotao.cz', 'https://www.plotao.cz'])"),'Edge Function must allow both canonical site hosts and reject all other origins');
+const allowedOrigins=['https://plotao.cz','https://www.plotao.cz','https://poptejplot.cz','https://www.poptejplot.cz','https://poptejcenu.cz','https://www.poptejcenu.cz'];
+ok(allowedOrigins.every(origin=>index.includes("['"+origin+"', '"+origin.replace('https://www.','https://').replace('https://','')+"']")), 'Edge Function must allow the three approved sites and map each origin to its canonical source label');
+ok(index.includes('const source = ORIGIN_SOURCES.get(origin)')&&index.includes('mode: lead.mode,')&&index.includes('source,'),'stored source must come from the validated request origin, not the client payload');
 ok(!index.includes("Access-Control-Allow-Origin': '*'"),'Edge Function must never use wildcard CORS');
 ok(index.includes("{ auth: 'none', cors: 'disabled' }")&&config.includes('[functions.submit-lead]')&&config.includes('verify_jwt = false'),'public form function must use explicit custom security with verify_jwt=false');
 ok(index.includes('MAX_BODY_BYTES = 64 * 1024')&&index.includes('readBodyLimited'),'request body size limit must be enforced before JSON parsing');

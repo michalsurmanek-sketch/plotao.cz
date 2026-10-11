@@ -1,7 +1,15 @@
 import { withSupabase } from '@supabase/server'
 import { validateEnvelope } from './validation.mjs'
 
-const ALLOWED_ORIGINS = new Set(['https://plotao.cz', 'https://www.plotao.cz'])
+const ORIGIN_SOURCES = new Map([
+  ['https://plotao.cz', 'plotao.cz'],
+  ['https://www.plotao.cz', 'plotao.cz'],
+  ['https://poptejplot.cz', 'poptejplot.cz'],
+  ['https://www.poptejplot.cz', 'poptejplot.cz'],
+  ['https://poptejcenu.cz', 'poptejcenu.cz'],
+  ['https://www.poptejcenu.cz', 'poptejcenu.cz'],
+])
+const ALLOWED_ORIGINS = new Set(ORIGIN_SOURCES.keys())
 const MAX_BODY_BYTES = 64 * 1024
 const RATE_WINDOW_MS = 15 * 60 * 1000
 const RATE_LIMIT = 8
@@ -131,6 +139,8 @@ export default {
       const lead = validated.lead
       if (!lead.region) lead.region = inferRegionFromPlace(lead.place)
       const receivedAt = new Date().toISOString()
+      // Use the validated request origin, never a client supplied label.
+      const source = ORIGIN_SOURCES.get(origin) || 'plotao.cz'
 
       let rateKeys: string[] = []
       try {
@@ -168,7 +178,7 @@ export default {
 
       const row = {
         submitted_at: receivedAt,
-        source: 'plotao.cz',
+        source,
         mode: lead.mode,
         name: lead.name,
         phone: lead.phone,
@@ -256,7 +266,7 @@ export default {
         console.error('plotao admin notification unavailable: RESEND_API_KEY missing')
       } else {
         const adminNotice = [
-          'Na webu PLOTAO.cz dorazila nová žádost.',
+          'Na webu ' + source + ' dorazila nová žádost.',
           '',
           'Čas přijetí: ' + receivedAt,
           'ID žádosti: ' + data.id,
@@ -275,7 +285,7 @@ export default {
             body: JSON.stringify({
               from: 'PLOTAO.cz <odpovedi@plotao.cz>',
               to: ['michalsurmanek@seznam.cz'],
-              subject: 'Nová poptávka v administraci PLOTAO.cz',
+              subject: 'Nová poptávka z ' + source + ' v administraci PLOTAO.cz',
               text: adminNotice,
             }),
           })
