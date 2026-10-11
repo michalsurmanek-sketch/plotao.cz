@@ -4,7 +4,7 @@
   if(root)root.PLOTAO_STRUCTURAL_PRICING_CORE=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   const concrete={b50one:450,b50both:515,b25one:340,b25both:390,color:{gray:{board:1,post:1},sand:{board:1.20,post:1.16},anthracite:{board:1.30,post:1.25}},postStyle:{smooth:1,design:1.20},posts:{50:[420,434,481],75:[457,481,516],100:[492,516,564],125:[530,564,578],150:[552,578,601],175:[578,625,674],200:[601,648,696],225:[648,696,842],250:[901,961,1082],275:[1381,1442,1682],300:[1562,1622,1802]}};
-  const gabion={cLo:1500,cHi:3000,stoneQ:[1400,2500],stoneD:[2800,4500],density:1.7};
+  const gabion={cLo:1500,cHi:3000,stoneQ:[1400,2500],stoneD:[2800,4500],density:1.7,twoDLow:1400,twoDHigh:1900};
   function postUnit(materialH,role){const arr=concrete.posts[materialH];if(!arr)return null;const idx=role==='corner'?2:role==='end'?1:0;return arr[idx]}
   function computeConcretePrice(input={}){
     const requested=Math.max(40,+input.requestedHeight||153),materialH=Math.max(50,Math.ceil(requested/25)*25),cfg={side:'one',post:'smooth',color:'gray',...(input.config||{})},g=input.geometry||{};
@@ -19,6 +19,6 @@
     const height=Math.max(.4,(+input.height||153)/100),fence=Math.max(0,+input.fence||0),width=Math.max(0,+input.width||.30),kind=input.kind==='display'?'display':'quarry',sp=kind==='display'?gabion.stoneD:gabion.stoneQ,volume=fence*height*width,tons=volume*gabion.density,constructionLow=volume*gabion.cLo,constructionHigh=volume*gabion.cHi,stoneLow=tons*sp[0],stoneHigh=tons*sp[1],low=constructionLow+stoneLow,high=constructionHigh+stoneHigh;
     return{unsupported:false,low,high,volume,tons,height,fence,width,kind,constructionLow,constructionHigh,stoneLow,stoneHigh,density:gabion.density};
   }
-  function computeGabion2DPrice(i={}){i.width=.19;const r=computeGabionPrice(i),k=r.height/1.03;r.constructionLow=r.fence*1400*k;r.constructionHigh=r.fence*1900*k;r.low=r.constructionLow+r.stoneLow;r.high=r.constructionHigh+r.stoneHigh;return r;}
+  function computeGabion2DPrice(i={}){i.width=.19;const r=computeGabionPrice(i),k=r.height/1.03;r.constructionLow=r.fence*gabion.twoDLow*k;r.constructionHigh=r.fence*gabion.twoDHigh*k;r.low=r.constructionLow+r.stoneLow;r.high=r.constructionHigh+r.stoneHigh;return r;}
   return{concrete,gabion,postUnit,computeConcretePrice,computeGabionPrice,computeGabion2DPrice};
 });
