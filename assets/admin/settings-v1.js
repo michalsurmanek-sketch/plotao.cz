@@ -25,4 +25,12 @@
   button.disabled=true;status.textContent='Bezpečně odhlašuji tento prohlížeč…';
   await api().signOut();window.location.reload();
  });
+
+ const faviconForm=$('#settingsFaviconForm'),faviconFile=$('#settingsFaviconFile'),faviconPreview=$('#settingsFaviconPreview'),faviconStatus=$('#settingsFaviconStatus'),faviconSubmit=$('#settingsFaviconSubmit');
+ const showFavicon=(url)=>{if(faviconPreview&&url)faviconPreview.src=url};
+ const currentFavicon=document.querySelector('link[rel~="icon"]');if(currentFavicon)showFavicon(currentFavicon.href);
+ window.addEventListener('plotao:favicon-loaded',event=>showFavicon(event.detail?.url));
+ faviconFile?.addEventListener('change',()=>{const file=faviconFile.files?.[0];if(!file)return;if(!['image/png','image/x-icon','image/vnd.microsoft.icon'].includes(file.type)||file.size>524288){faviconStatus.textContent='Vyberte PNG nebo ICO do velikosti 512 KB.';faviconStatus.className='settings-message error';faviconFile.value='';return}showFavicon(URL.createObjectURL(file));faviconStatus.textContent='Náhled je připravený. Uložte změnu.';faviconStatus.className='settings-message'});
+ faviconForm?.addEventListener('submit',async event=>{event.preventDefault();const file=faviconFile?.files?.[0];if(!file)return;if(!api()?.session?.access_token){faviconStatus.textContent='Nejdřív se přihlaste jako administrátor.';faviconStatus.className='settings-message error';return}if(!['image/png','image/x-icon','image/vnd.microsoft.icon'].includes(file.type)||file.size>524288){faviconStatus.textContent='Vyberte PNG nebo ICO do velikosti 512 KB.';faviconStatus.className='settings-message error';return}faviconSubmit.disabled=true;faviconStatus.textContent='Nahrávám faviconu…';faviconStatus.className='settings-message';try{const bytes=new Uint8Array(await file.arrayBuffer());let binary='';for(let i=0;i<bytes.length;i+=32768)binary+=String.fromCharCode(...bytes.subarray(i,Math.min(i+32768,bytes.length)));const result=await api().request('/functions/v1/admin-leads','POST',{action:'update_favicon',mime_type:file.type,data:btoa(binary)});showFavicon(result.favicon_url);window.dispatchEvent(new CustomEvent('plotao:favicon-update',{detail:{url:result.favicon_url}}));faviconForm.reset();faviconStatus.textContent='Favicona byla uložena. Pokud ji hned nevidíte, obnovte stránku.';faviconStatus.className='settings-message success'}catch(error){faviconStatus.textContent=error.message||'Faviconu se nepodařilo uložit.';faviconStatus.className='settings-message error'}finally{faviconSubmit.disabled=false}});
+ 
 })();

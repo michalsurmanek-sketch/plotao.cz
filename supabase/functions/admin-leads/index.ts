@@ -59,6 +59,25 @@ Deno.serve(async req=>{
  if(!base||!key)return json({error:"server_config"},500);
  if(req.method==="POST"){
   let b;try{b=await req.clone().json()}catch{return json({error:"invalid_json"},400)}
+  if(b?.action==="update_favicon"){
+   const mime=String(b.mime_type||"").toLowerCase(),data=String(b.data||"");
+   if(!["image/png","image/x-icon","image/vnd.microsoft.icon"].includes(mime)||!data||data.length>700000||!/^[A-Za-z0-9+/]+={0,2}$/.test(data))return json({error:"invalid_favicon"},422);
+   let binary;try{binary=atob(data)}catch{return json({error:"invalid_favicon"},422)}
+   const bytes=Uint8Array.from(binary,c=>c.charCodeAt(0)),png=mime==="image/png",ext=png?"png":"ico";
+   if(bytes.length<=(png?24:22)||bytes.length>524288)return json({error:"invalid_favicon_size"},422);
+   if(png){
+    if(bytes[0]!==137||bytes[1]!==80||bytes[2]!==78||bytes[3]!==71||bytes[4]!==13||bytes[5]!==10||bytes[6]!==26||bytes[7]!==10)return json({error:"invalid_favicon"},422);
+    const width=(bytes[16]<<24)|(bytes[17]<<16)|(bytes[18]<<8)|bytes[19],height=(bytes[20]<<24)|(bytes[21]<<16)|(bytes[22]<<8)|bytes[23];
+    if(width<1||height<1||width>512||height>512||width!==height)return json({error:"favicon_must_be_square"},422);
+   }else if(bytes[0]!==0||bytes[1]!==0||bytes[2]!==1||bytes[3]!==0)return json({error:"invalid_favicon"},422);
+   const path="favicon/current."+ext;
+   const uploaded=await fetch(base+"/storage/v1/object/plotao-site-assets/"+path,{method:"POST",headers:{...apiHeaders(key),"Content-Type":mime,"x-upsert":"true"},body:bytes});
+   if(!uploaded.ok){console.error("favicon upload failed",uploaded.status);return json({error:"favicon_upload_failed"},502)}
+   const favicon_url=base+"/storage/v1/object/public/plotao-site-assets/"+path+"?v="+Date.now();
+   const saved=await fetch(base+"/rest/v1/plotao_site_settings?id=eq.default",{method:"PATCH",headers:{...apiHeaders(key),"Content-Type":"application/json","Prefer":"return=minimal"},body:JSON.stringify({favicon_url,updated_at:new Date().toISOString()})});
+   if(!saved.ok){console.error("favicon settings save failed",saved.status);return json({error:"favicon_settings_save_failed"},502)}
+   return json({ok:true,favicon_url});
+  }
   if(b?.action==="update_calculator_prices"){
    const current=await fetch(base+"/rest/v1/plotao_calculator_prices?id=eq.default&select=config",{headers:apiHeaders(key)});
    if(!current.ok)return json({error:"calculator_prices_read_failed"},current.status);

@@ -1,0 +1,6 @@
+(()=>{'use strict';
+const S='https://jmukoccjqykyoqsypuwb.supabase.co',K='sb_publishable_FSrTbgu1LeF9DNeam3ztwA_3dNHGq-V',API=S+'/rest/v1/plotao_site_settings?id=eq.default&select=favicon_url';
+function apply(url){try{const u=new URL(url);if(u.origin!==S||!u.pathname.startsWith('/storage/v1/object/public/plotao-site-assets/favicon/'))return;let icons=[...document.querySelectorAll('link[rel~="icon"]')],link=icons.shift();for(const old of icons)old.remove();if(!link){link=document.createElement('link');link.rel='icon';document.head.append(link)}link.href=u.href;link.type=u.pathname.endsWith('.ico')?'image/x-icon':'image/png';for(const apple of document.querySelectorAll('link[rel="apple-touch-icon"]'))apple.href=u.href;window.dispatchEvent(new CustomEvent('plotao:favicon-loaded',{detail:{url:u.href}}))}catch{}}
+window.addEventListener('plotao:favicon-update',event=>apply(event.detail?.url));
+fetch(API,{headers:{apikey:K},cache:'no-store'}).then(response=>response.ok?response.json():[]).then(rows=>{if(rows?.[0]?.favicon_url)apply(rows[0].favicon_url)}).catch(()=>{});
+})();

@@ -144,7 +144,12 @@ fs.writeFileSync('deploy-marker.txt',sha+'\n','utf8');
 const dist='dist';
 fs.rmSync(dist,{recursive:true,force:true});
 fs.mkdirSync(dist,{recursive:true});
-for(const file of fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort())fs.copyFileSync(file,`${dist}/${file}`);
+for(const file of fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort()){
+  let page=fs.readFileSync(file,'utf8');
+  if(!page.includes('</head>'))throw new Error('Favicon loader: missing </head> in '+file);
+  if(!page.includes('data-plotao-favicon-loader="1"'))page=page.replace('</head>','<script defer data-plotao-favicon-loader="1" src="'+versionedScript('/assets/favicon-loader-v1.js')+'"></script></head>');
+  fs.writeFileSync(dist+'/'+file,page,'utf8');
+}
 for(const file of ['robots.txt','sitemap.xml','CNAME','deploy-marker.txt'])if(fs.existsSync(file))fs.copyFileSync(file,`${dist}/${file}`);
 fs.cpSync('assets',`${dist}/assets`,{recursive:true});
 

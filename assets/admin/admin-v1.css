@@ -509,3 +509,16 @@ input::placeholder,textarea::placeholder{color:#98a69e}
 .calc-price-input small{color:#718078}
 .calculator-price-actions{position:sticky;bottom:0;display:flex;justify-content:flex-end;gap:10px;margin-top:18px;padding:12px;background:#f4f7f4ed;border:1px solid #dce6df;border-radius:12px;backdrop-filter:blur(8px)}
 @media(max-width:760px){.calculator-price-toolbar{grid-template-columns:1fr}.calc-price-list{grid-template-columns:1fr}.calculator-price-actions{flex-direction:column}.calculator-price-actions button{width:100%}}
+
+#settings .settings-favicon{grid-column:1/-1}
+#settings .settings-favicon-form{display:grid;gap:14px}
+#settings .settings-favicon-preview{display:flex;align-items:center;gap:14px;padding:14px;border:1px solid var(--line);border-radius:12px;background:#f7faf8}
+#settings .settings-favicon-preview img{width:64px;height:64px;object-fit:contain;padding:8px;border-radius:12px;background:#fff;border:1px solid var(--line)}
+#settings .settings-favicon-preview>div{display:grid;gap:5px}
+#settings .settings-favicon-preview small{color:var(--muted);line-height:1.45}
+#settings .settings-favicon-form>label{display:grid;gap:7px;color:var(--muted);font-size:12px;font-weight:700}
+#settings .settings-favicon-form input[type=file]{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}
+#settings .settings-favicon-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+#settings .settings-favicon-actions .settings-message{flex:1}
+#settings #settingsFaviconSubmit:disabled{opacity:.65;cursor:wait}
+@media(max-width:560px){#settings .settings-favicon-actions{align-items:stretch;flex-direction:column}#settings .settings-favicon-actions button{width:100%}}

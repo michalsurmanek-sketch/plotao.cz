@@ -17,6 +17,7 @@ const social=fs.readFileSync(socialPath,'utf8');
 const socialArtifactPath='scripts/social-artifact-check.mjs';
 const socialArtifact=fs.readFileSync(socialArtifactPath,'utf8');
 const performancePath='scripts/performance-budget-check.mjs';
+const pagesPrepare=fs.readFileSync('scripts/prepare-pages.mjs','utf8');
 const performance=fs.readFileSync(performancePath,'utf8');
 const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
 const socialPages=[
@@ -40,6 +41,7 @@ const structuredPages=[
 const fail=[];
 const ok=(v,m)=>{if(!v)fail.push(m)};
 ok(fs.existsSync('scripts/public-link-integrity-check.mjs'),'public link integrity checker must exist and run from the build gate');
+ok(pagesPrepare.includes('data-plotao-favicon-loader')&&pagesPrepare.includes('favicon-loader-v1.js')&&fs.existsSync('assets/favicon-loader-v1.js'),'Pages build must install the dynamic favicon loader in every HTML page');
 ok(workflow.includes('uses: actions/checkout@v7'),'Pages workflow must use the Node 24 checkout major');
 ok(workflow.includes('uses: actions/configure-pages@v6'),'Pages workflow must use the Node 24 configure-pages major');
 ok(workflow.includes('node scripts/prepare-pages.mjs'),'Pages workflow must use prepare-pages.mjs');
