@@ -7,7 +7,7 @@ create table if not exists public.plotao_leads (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
   submitted_at timestamptz not null,
-  source text not null default 'plotao.cz' check (source = 'plotao.cz'),
+  source text not null default 'plotao.cz' check (source in ('plotao.cz', 'poptejplot.cz')),
   mode text not null check (mode in ('lead','help','partner')),
   name text not null check (char_length(name) between 2 and 120),
   phone text not null default '' check (char_length(phone) = 0 or char_length(phone) between 9 and 20),
