@@ -4,11 +4,12 @@
   if(root)root.PLOTAO_EXTRA_FENCE_PRICING_CORE=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   const mobile={panelLength:3.5,panelHeight:1.9,panelUnit:1286,footUnit:176,connectorUnit:78,solid:{panelLength:2.8,panelHeight:2,panelUnit:2536.16,footUnit:176,connectorUnit:78},barrier:{panelLength:2.17,panelHeight:1.1,panelUnit:2249.39,integratedHardware:true}};
+  const masonry={lowPerMeter:6000,highPerMeter:11000};
   function cleanRuns(runs){return(Array.isArray(runs)?runs:[]).map(Number).filter(x=>Number.isFinite(x)&&x>.001)}
   function computeExtraFencePrice(input={}){
     const type=input.type||'',config=input.config||{},runs=cleanRuns(input.runs),length=Math.max(0,+input.length||runs.reduce((a,b)=>a+b,0)),height=Math.max(.4,(+input.height||150)/100);
     if(type==='masonry'){
-      if(config.variant==='blocks'&&config.finish!=='premium')return{unsupported:false,kind:'masonry-reference',low:length*6000,high:length*11000,length,height};
+      if(config.variant==='blocks'&&config.finish!=='premium')return{unsupported:false,kind:'masonry-reference',low:length*masonry.lowPerMeter,high:length*masonry.highPerMeter,length,height};
       return{unsupported:true,kind:'masonry',reason:'configuration',length,height};
     }
     if(type==='mobile'){
@@ -21,5 +22,5 @@
     if(type==='other')return{unsupported:true,kind:'other',reason:'atypical',length,height};
     return{unsupported:true,kind:type||'unknown',reason:'type',length,height};
   }
-  return{mobile,cleanRuns,computeExtraFencePrice};
+  return{mobile,masonry,cleanRuns,computeExtraFencePrice};
 });
