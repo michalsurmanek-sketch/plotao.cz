@@ -3,6 +3,7 @@ const api=factory();
 if(typeof module==='object'&&module.exports)module.exports=api;
 if(root)root.PLOTAO_GATE_PRICING_CORE=api;
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
+const prices={panelGate:{"2d-green-103":15448,"2d-green-123":17547,"3d-green-153":8490,"3d-anthracite-153":8490,"3d-zinc-153":18321},panelDoor:{"2d-green-103":6141,"2d-green-143":7243,"3d-green-153":3990,"3d-anthracite-153":3990,"3d-zinc-153":7657},meshGate:{"green-125":8072,"green-150":9472,"green-160":10075},meshDoor:{"slab20-100":4000,"slab20-125":4477,"green-125":4000,"green-150":4477,"green-160":4630}};
 function exact(a,b,tol=.02){return Math.abs(Number(a)-Number(b))<=tol}
 
 function panelGate(c){
@@ -10,14 +11,14 @@ if(c.slabWith||c.gateType!=='double'||!exact(c.gateWidth,4))return null;
 const h=Number(c.actualHeight);
 if(c.panelVariant==='2d'){
 if(c.panelSurface!=='green')return null;
-if(h===103)return{price:15448,label:'Ploty Dobrý 2D · 4,0 × 1,00 m · RAL 6005'};
-if(h===123)return{price:17547,label:'Ploty Dobrý 2D · 4,0 × 1,20 m · RAL 6005'};
+if(h===103)return{price:prices.panelGate['2d-green-103'],label:'Ploty Dobrý 2D · 4,0 × 1,00 m · RAL 6005'};
+if(h===123)return{price:prices.panelGate['2d-green-123'],label:'Ploty Dobrý 2D · 4,0 × 1,20 m · RAL 6005'};
 return null;
 }
 if(h!==153)return null;
-if(c.panelSurface==='green')return{price:8490,label:'BAUHAUS 3D · 4,0 × 1,53 m · RAL 6005'};
-if(c.panelSurface==='anthracite')return{price:8490,label:'BAUHAUS 3D · 4,0 × 1,53 m · RAL 7016'};
-if(c.panelSurface==='zinc')return{price:18321,label:'BRAVO 3D ZN · 4,0 × 1,53 m'};
+if(c.panelSurface==='green')return{price:prices.panelGate['3d-green-153'],label:'BAUHAUS 3D · 4,0 × 1,53 m · RAL 6005'};
+if(c.panelSurface==='anthracite')return{price:prices.panelGate['3d-anthracite-153'],label:'BAUHAUS 3D · 4,0 × 1,53 m · RAL 7016'};
+if(c.panelSurface==='zinc')return{price:prices.panelGate['3d-zinc-153'],label:'BRAVO 3D ZN · 4,0 × 1,53 m'};
 return null;
 }
 
@@ -26,23 +27,23 @@ if(c.slabWith||!exact(c.doorWidth,1))return null;
 const h=Number(c.actualHeight);
 if(c.panelVariant==='2d'){
 if(c.panelSurface!=='green')return null;
-if(h===103)return{price:6141,label:'Ploty Dobrý 2D · 1,0 × 1,00 m · RAL 6005'};
-if(h===143)return{price:7243,label:'Ploty Dobrý 2D · 1,0 × 1,40 m · RAL 6005'};
+if(h===103)return{price:prices.panelDoor['2d-green-103'],label:'Ploty Dobrý 2D · 1,0 × 1,00 m · RAL 6005'};
+if(h===143)return{price:prices.panelDoor['2d-green-143'],label:'Ploty Dobrý 2D · 1,0 × 1,40 m · RAL 6005'};
 return null;
 }
 if(h!==153)return null;
-if(c.panelSurface==='green')return{price:3990,label:'BAUHAUS 3D · 1,0 × 1,53 m · RAL 6005'};
-if(c.panelSurface==='anthracite')return{price:3990,label:'BAUHAUS 3D · 1,0 × 1,53 m · RAL 7016'};
-if(c.panelSurface==='zinc')return{price:7657,label:'BRAVO 3D ZN · 1,0 × 1,53 m'};
+if(c.panelSurface==='green')return{price:prices.panelDoor['3d-green-153'],label:'BAUHAUS 3D · 1,0 × 1,53 m · RAL 6005'};
+if(c.panelSurface==='anthracite')return{price:prices.panelDoor['3d-anthracite-153'],label:'BAUHAUS 3D · 1,0 × 1,53 m · RAL 7016'};
+if(c.panelSurface==='zinc')return{price:prices.panelDoor['3d-zinc-153'],label:'BRAVO 3D ZN · 1,0 × 1,53 m'};
 return null;
 }
 
 function meshGate(c){
 if(c.meshVariant!=='classic'||c.meshSurface!=='green'||c.gateType!=='double'||!exact(c.gateWidth,4)||c.slabWith)return null;
 const h=Number(c.actualHeight);
-if(h===125)return{price:8072,label:'UNIVERSAL · 4,0 × 1,20 m · zelená · pro pletivo 125 cm',leafLength:1.91,totalWeight:35};
-if(h===150)return{price:9472,label:'UNIVERSAL · 4,0 × 1,45 m · zelená · pro pletivo 150 cm',leafLength:1.91,totalWeight:44};
-if(h===160)return{price:10075,label:'UNIVERSAL · 4,0 × 1,55 m · zelená · pro pletivo 160 cm',leafLength:1.91,totalWeight:30};
+if(h===125)return{price:prices.meshGate['green-125'],label:'UNIVERSAL · 4,0 × 1,20 m · zelená · pro pletivo 125 cm',leafLength:1.91,totalWeight:35};
+if(h===150)return{price:prices.meshGate['green-150'],label:'UNIVERSAL · 4,0 × 1,45 m · zelená · pro pletivo 150 cm',leafLength:1.91,totalWeight:44};
+if(h===160)return{price:prices.meshGate['green-160'],label:'UNIVERSAL · 4,0 × 1,55 m · zelená · pro pletivo 160 cm',leafLength:1.91,totalWeight:30};
 return null;
 }
 
@@ -50,13 +51,13 @@ function meshDoor(c){
 if(c.meshVariant!=='classic'||c.meshSurface!=='green'||!exact(c.doorWidth,1))return null;
 const h=Number(c.actualHeight);
 if(c.slabWith){
-if(Number(c.slabHeight)===20&&h===100)return{price:4000,label:'IDEAL · 1,0 × 1,20 m · zelená · pro pletivo 100 cm + podhrab 20 cm'};
-if(Number(c.slabHeight)===20&&h===125)return{price:4477,label:'IDEAL · 1,0 × 1,45 m · zelená · pro pletivo 125 cm + podhrab 20 cm'};
+if(Number(c.slabHeight)===20&&h===100)return{price:prices.meshDoor['slab20-100'],label:'IDEAL · 1,0 × 1,20 m · zelená · pro pletivo 100 cm + podhrab 20 cm'};
+if(Number(c.slabHeight)===20&&h===125)return{price:prices.meshDoor['slab20-125'],label:'IDEAL · 1,0 × 1,45 m · zelená · pro pletivo 125 cm + podhrab 20 cm'};
 return null;
 }
-if(h===125)return{price:4000,label:'IDEAL · 1,0 × 1,20 m · zelená · pro pletivo 125 cm'};
-if(h===150)return{price:4477,label:'IDEAL · 1,0 × 1,45 m · zelená · pro pletivo 150 cm'};
-if(h===160)return{price:4630,label:'IDEAL · 1,0 × 1,55 m · zelená · pro pletivo 160 cm'};
+if(h===125)return{price:prices.meshDoor['green-125'],label:'IDEAL · 1,0 × 1,20 m · zelená · pro pletivo 125 cm'};
+if(h===150)return{price:prices.meshDoor['green-150'],label:'IDEAL · 1,0 × 1,45 m · zelená · pro pletivo 150 cm'};
+if(h===160)return{price:prices.meshDoor['green-160'],label:'IDEAL · 1,0 × 1,55 m · zelená · pro pletivo 160 cm'};
 return null;
 }
 
@@ -79,5 +80,5 @@ if(c.type==='panel'||c.type==='mesh')return'rozměr, skutečně použitá výšk
 return(kind==='gate'?'brána':'branka')+' pro tento typ plotu je zakázková a nemá univerzální cenu';
 }
 
-return{exact,panelGate,panelDoor,meshGate,meshDoor,computeVerifiedGate,unsupportedNote};
+return{prices,exact,panelGate,panelDoor,meshGate,meshDoor,computeVerifiedGate,unsupportedNote};
 });
