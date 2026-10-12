@@ -107,12 +107,13 @@ export default {
       }
 
       const rawLead = input.lead
+      const isPartner = rawLead.mode === 'partner'
       const name = cleanText(rawLead.name, 120)
       const email = cleanText(rawLead.email, 254).toLowerCase()
       const phone = cleanPhone(rawLead.phone)
       const place = cleanText(rawLead.place, 200)
       const fenceType = cleanText(rawLead.fenceType, 120)
-      const note = typeof rawLead.note === 'string' ? rawLead.note.trim().slice(0, 4000) : ''
+      const userNote = typeof rawLead.note === 'string' ? rawLead.note.trim().slice(0, isPartner ? 1500 : 4000) : ''
       const segments = Array.isArray(rawLead.segments) ? rawLead.segments : []
       const length = Number(segments[0]?.length)
       const height = rawLead.height === null ? null : Number(rawLead.height)
@@ -123,19 +124,50 @@ export default {
         : null
       const partnerShareConsent = rawLead.partner_share_consent === true
 
+      const partnerName = cleanText(rawLead.partner_name, 160)
+      const partnerIco = cleanText(rawLead.ico, 8)
+      const partnerWebsite = cleanText(rawLead.website_url, 250)
+      const partnerRegions = cleanText(rawLead.regions, 500)
+      const allowedServices = new Set(['Montáž', 'Materiál', 'Montáž i materiál', 'Zaměření a poradenství'])
+      const allowedFences = new Set(['Panelové', 'Pletivové', 'Betonové', 'Gabionové', 'Dřevěné', 'WPC / hliníkové', 'Brány a branky', 'Jiné'])
+      const partnerServices = Array.isArray(rawLead.services) && rawLead.services.length <= 10
+        ? rawLead.services.map((value: unknown) => cleanText(value, 80)).filter((value: string) => allowedServices.has(value))
+        : []
+      const partnerFences = Array.isArray(rawLead.fences) && rawLead.fences.length <= 20
+        ? rawLead.fences.map((value: unknown) => cleanText(value, 80)).filter((value: string) => allowedFences.has(value))
+        : []
+      let partnerWebsiteValid = !partnerWebsite
+      try {
+        const parsedUrl = new URL(partnerWebsite)
+        partnerWebsiteValid = ['https:', 'http:'].includes(parsedUrl.protocol)
+      } catch {}
+      const note = isPartner
+        ? ['Registrace firmy do sítě dodavatelů PoptejCenu.cz', 'Firma: ' + partnerName, 'IČO: ' + (partnerIco || 'neuvedeno'), 'Web: ' + (partnerWebsite || 'neuveden'), 'Oblasti působení: ' + partnerRegions, 'Služby: ' + partnerServices.join(', '), 'Typy oplocení: ' + partnerFences.join(', '), userNote ? 'Poznámka: ' + userNote : ''].filter(Boolean).join('\n').slice(0, 4000)
+        : userNote
+
       const errors: string[] = []
-      if (rawLead.schemaVersion !== 2 || rawLead.mode !== 'lead') errors.push('mode')
+      if (rawLead.schemaVersion !== 2 || !['lead', 'partner'].includes(rawLead.mode)) errors.push('mode')
       if (rawLead.admin_processing_acknowledged !== true) errors.push('admin_processing_acknowledged')
       if (name.length < 2) errors.push('name')
       if (!validEmail(email)) errors.push('email')
       if (!phone) errors.push('phone')
-      if (place.length < 2) errors.push('place')
-      if (!fenceType) errors.push('fenceType')
-      if (segments.length !== 1 || !Number.isFinite(length) || length < 1 || length > 1000) errors.push('length')
-      if (height !== null && (!Number.isFinite(height) || height < 40 || height > 400)) errors.push('height')
-      if (options === null) errors.push('options')
-      if (!allowedScopes.has(scopeValue)) errors.push('scope')
-      if (note.length > 4000 || cleanText(rawLead.scope, 80).length < 2) errors.push('details')
+      if (isPartner) {
+        if (partnerName.length < 2) errors.push('partner_name')
+        if (partnerIco && !/^\\d{8}$/.test(partnerIco)) errors.push('ico')
+        if (partnerRegions.length < 2) errors.push('regions')
+        if (partnerServices.length < 1) errors.push('services')
+        if (partnerFences.length < 1) errors.push('fences')
+        if (!partnerWebsiteValid) errors.push('website_url')
+        if (rawLead.website) return respond(201, { id: 'filtered', filtered: true }, origin)
+      } else {
+        if (place.length < 2) errors.push('place')
+        if (!fenceType) errors.push('fenceType')
+        if (segments.length !== 1 || !Number.isFinite(length) || length < 1 || length > 1000) errors.push('length')
+        if (height !== null && (!Number.isFinite(height) || height < 40 || height > 400)) errors.push('height')
+        if (options === null) errors.push('options')
+        if (!allowedScopes.has(scopeValue)) errors.push('scope')
+        if (userNote.length > 4000 || cleanText(rawLead.scope, 80).length < 2) errors.push('details')
+      }
       if (errors.length) return respond(422, { error: 'validation_failed', fields: errors }, origin)
 
       const rateSalt = Deno.env.get('PLOTAO_RATE_SALT')?.trim()
@@ -164,49 +196,70 @@ export default {
       if (rateError) return respond(503, { error: 'rate_limit_unavailable' }, origin)
 
       const receivedAt = new Date().toISOString()
-      const lead = {
-        schemaVersion: 2,
-        mode: 'lead',
-        name,
-        phone,
-        email,
-        place,
-        region: inferRegion(place),
-        note,
-        fenceType,
-        height,
-        segments: [{ name: 'Oplocení', length, connection: 'začátek' }],
-        options,
-        gate: false,
-        gateType: '',
-        gateWidth: 0,
-        gateDrive: '',
-        gateSection: 0,
-        gatePos: 0,
-        wicket: false,
-        wicketWidth: 0,
-        wicketSection: 0,
-        wicketPos: 0,
-        scopeValue,
-        scope: cleanText(rawLead.scope, 80),
-        displayedPrice: '',
-        priceKind: 'individuální nabídka',
-        priceReason: '',
-        placeFromCalculator: '',
-        partner_share_consent: partnerShareConsent,
-        admin_processing_acknowledged: true,
-        sourceLabel: 'PoptejCenu.cz',
-      }
+      const lead = isPartner
+        ? {
+            schemaVersion: 2,
+            mode: 'partner',
+            name,
+            phone,
+            email,
+            place: partnerName,
+            region: partnerRegions.slice(0, 200),
+            note,
+            partner_name: partnerName,
+            ico: partnerIco,
+            website_url: partnerWebsite,
+            services: partnerServices,
+            fences: partnerFences,
+            regions: partnerRegions,
+            partner_share_consent: false,
+            admin_processing_acknowledged: true,
+            sourceLabel: 'PoptejCenu.cz',
+          }
+        : {
+            schemaVersion: 2,
+            mode: 'lead',
+            name,
+            phone,
+            email,
+            place,
+            region: inferRegion(place),
+            note,
+            fenceType,
+            height,
+            segments: [{ name: 'Oplocení', length, connection: 'začátek' }],
+            options,
+            gate: false,
+            gateType: '',
+            gateWidth: 0,
+            gateDrive: '',
+            gateSection: 0,
+            gatePos: 0,
+            wicket: false,
+            wicketWidth: 0,
+            wicketSection: 0,
+            wicketPos: 0,
+            scopeValue,
+            scope: cleanText(rawLead.scope, 80),
+            displayedPrice: '',
+            priceKind: 'individuální nabídka',
+            priceReason: '',
+            placeFromCalculator: '',
+            partner_share_consent: partnerShareConsent,
+            admin_processing_acknowledged: true,
+            sourceLabel: 'PoptejCenu.cz',
+          }
       const { data, error } = await ctx.supabaseAdmin
         .from('plotao_leads')
         .insert({
           submitted_at: receivedAt,
           source: 'poptejcenu.cz',
-          mode: 'lead',
+          mode: isPartner ? 'partner' : 'lead',
           name,
           phone,
           email,
-          place,
+          place: isPartner ? partnerName : place,
+          partner_name: isPartner ? partnerName : '',
           region: lead.region,
           note,
           payload: lead,
@@ -222,7 +275,86 @@ export default {
       ctx.supabaseAdmin.from('plotao_lead_rate_events').delete().lt('created_at', cutoff).then(({ error }) => {
         if (error) console.error('poptejcenu rate cleanup failed', error.code || 'unknown')
       })
-      return respond(201, { id: data.id, received_at: receivedAt }, origin)
+      const communication: Record<string, unknown>[] = []
+      const resendKey = Deno.env.get('RESEND_API_KEY')?.trim()
+      let emailSent = false
+      let adminEmailSent = false
+      if (!resendKey) console.error('poptejcenu.cz email unavailable: RESEND_API_KEY missing')
+
+      const sendResend = async (payload: Record<string, unknown>, idempotencyKey: string) => {
+        if (!resendKey) return null
+        try {
+          const mailResponse = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer ' + resendKey,
+              'Content-Type': 'application/json',
+              'Idempotency-Key': idempotencyKey,
+            },
+            body: JSON.stringify(payload),
+            signal: AbortSignal.timeout(8000),
+          })
+          let mailData: Record<string, unknown> = {}
+          try { mailData = await mailResponse.json() } catch {}
+          if (!mailResponse.ok) {
+            console.error('poptejcenu.cz email rejected', mailResponse.status, typeof mailData.name === 'string' ? mailData.name : '')
+            return null
+          }
+          return typeof mailData.id === 'string' ? mailData.id : null
+        } catch (error) {
+          console.error('poptejcenu.cz email request failed', error instanceof Error ? error.message : 'unknown')
+          return null
+        }
+      }
+
+      const customerSubject = isPartner ? 'Potvrzení registrace – PoptejCenu.cz' : 'Potvrzení přijetí poptávky – PoptejCenu.cz'
+      const customerBody = isPartner ? 'Dobrý den, ' + name + ',\n\nVaši registraci dodavatele jsme v pořádku přijali. Ozveme se vám po jejím posouzení.\n\nS pozdravem,\nPoptejCenu.cz\nhttps://poptejcenu.cz' : 'Dobrý den, ' + name + ',\n\nVaši poptávku jsme v pořádku přijali. Prověříme zadané informace a ozveme se vám s dalším postupem.\n\nDěkujeme, že jste se obrátili na PoptejCenu.cz.\n\nS pozdravem,\nPoptejCenu.cz\nhttps://poptejcenu.cz'
+      const adminNotice = [
+        'Na webu poptejcenu.cz dorazila nová žádost.',
+        '',
+        'Čas přijetí: ' + receivedAt,
+        'ID žádosti: ' + data.id,
+        '',
+        'Otevřete administraci PLOTAO.cz a v sekci Poptávky zobrazte detail žádosti.',
+        'Toto upozornění neobsahuje kontaktní údaje zákazníka.',
+      ].join('\n')
+      const [customerProviderId, adminProviderId] = await Promise.all([
+        validEmail(email) ? sendResend({
+          from: 'PLOTAO.cz <odpovedi@plotao.cz>',
+          to: [email],
+          reply_to: 'michalsurmanek@seznam.cz',
+          subject: customerSubject,
+          text: customerBody,
+        }, 'poptejcenu.cz-confirmation-' + data.id) : Promise.resolve(null),
+        sendResend({
+          from: 'PLOTAO.cz <odpovedi@plotao.cz>',
+          to: ['michalsurmanek@seznam.cz'],
+          subject: 'Nová žádost z poptejcenu.cz v administraci PLOTAO.cz',
+          text: adminNotice,
+        }, 'poptejcenu.cz-admin-notice-' + data.id),
+      ])
+      if (customerProviderId) {
+        emailSent = true
+        communication.push({
+          direction: 'out', body: customerBody, sent_at: new Date().toISOString(),
+          provider: 'resend', provider_id: customerProviderId, kind: 'automatic_confirmation',
+        })
+      }
+      if (adminProviderId) {
+        adminEmailSent = true
+        communication.push({
+          direction: 'out', body: adminNotice, sent_at: new Date().toISOString(),
+          provider: 'resend', provider_id: adminProviderId, kind: 'admin_notification',
+        })
+      }
+      if (communication.length) {
+        const { error: communicationError } = await ctx.supabaseAdmin
+          .from('plotao_leads')
+          .update({ communication })
+          .eq('id', data.id)
+        if (communicationError) console.error('poptejcenu.cz communication history save failed', communicationError.code || 'unknown')
+      }
+      return respond(201, { id: data.id, received_at: receivedAt, email_sent: emailSent, admin_email_sent: adminEmailSent }, origin)
     },
   ),
 }
