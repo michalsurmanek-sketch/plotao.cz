@@ -222,7 +222,86 @@ export default {
       ctx.supabaseAdmin.from('plotao_lead_rate_events').delete().lt('created_at', cutoff).then(({ error }) => {
         if (error) console.error('poptejplot rate cleanup failed', error.code || 'unknown')
       })
-      return respond(201, { id: data.id, received_at: receivedAt }, origin)
+      const communication: Record<string, unknown>[] = []
+      const resendKey = Deno.env.get('RESEND_API_KEY')?.trim()
+      let emailSent = false
+      let adminEmailSent = false
+      if (!resendKey) console.error('poptejplot.cz email unavailable: RESEND_API_KEY missing')
+
+      const sendResend = async (payload: Record<string, unknown>, idempotencyKey: string) => {
+        if (!resendKey) return null
+        try {
+          const mailResponse = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': 'Bearer ' + resendKey,
+              'Content-Type': 'application/json',
+              'Idempotency-Key': idempotencyKey,
+            },
+            body: JSON.stringify(payload),
+            signal: AbortSignal.timeout(8000),
+          })
+          let mailData: Record<string, unknown> = {}
+          try { mailData = await mailResponse.json() } catch {}
+          if (!mailResponse.ok) {
+            console.error('poptejplot.cz email rejected', mailResponse.status, typeof mailData.name === 'string' ? mailData.name : '')
+            return null
+          }
+          return typeof mailData.id === 'string' ? mailData.id : null
+        } catch (error) {
+          console.error('poptejplot.cz email request failed', error instanceof Error ? error.message : 'unknown')
+          return null
+        }
+      }
+
+      const customerSubject = 'Potvrzení přijetí poptávky – PoptejPlot.cz'
+      const customerBody = 'Dobrý den, ' + name + ',\n\nVaši poptávku jsme v pořádku přijali. Prověříme zadané informace a ozveme se vám s dalším postupem.\n\nDěkujeme, že jste se obrátili na PoptejPlot.cz.\n\nS pozdravem,\nPoptejPlot.cz\nhttps://poptejplot.cz'
+      const adminNotice = [
+        'Na webu poptejplot.cz dorazila nová žádost.',
+        '',
+        'Čas přijetí: ' + receivedAt,
+        'ID žádosti: ' + data.id,
+        '',
+        'Otevřete administraci PLOTAO.cz a v sekci Poptávky zobrazte detail žádosti.',
+        'Toto upozornění neobsahuje kontaktní údaje zákazníka.',
+      ].join('\n')
+      const [customerProviderId, adminProviderId] = await Promise.all([
+        validEmail(email) ? sendResend({
+          from: 'PLOTAO.cz <odpovedi@plotao.cz>',
+          to: [email],
+          reply_to: 'michalsurmanek@seznam.cz',
+          subject: customerSubject,
+          text: customerBody,
+        }, 'poptejplot.cz-confirmation-' + data.id) : Promise.resolve(null),
+        sendResend({
+          from: 'PLOTAO.cz <odpovedi@plotao.cz>',
+          to: ['michalsurmanek@seznam.cz'],
+          subject: 'Nová žádost z poptejplot.cz v administraci PLOTAO.cz',
+          text: adminNotice,
+        }, 'poptejplot.cz-admin-notice-' + data.id),
+      ])
+      if (customerProviderId) {
+        emailSent = true
+        communication.push({
+          direction: 'out', body: customerBody, sent_at: new Date().toISOString(),
+          provider: 'resend', provider_id: customerProviderId, kind: 'automatic_confirmation',
+        })
+      }
+      if (adminProviderId) {
+        adminEmailSent = true
+        communication.push({
+          direction: 'out', body: adminNotice, sent_at: new Date().toISOString(),
+          provider: 'resend', provider_id: adminProviderId, kind: 'admin_notification',
+        })
+      }
+      if (communication.length) {
+        const { error: communicationError } = await ctx.supabaseAdmin
+          .from('plotao_leads')
+          .update({ communication })
+          .eq('id', data.id)
+        if (communicationError) console.error('poptejplot.cz communication history save failed', communicationError.code || 'unknown')
+      }
+      return respond(201, { id: data.id, received_at: receivedAt, email_sent: emailSent, admin_email_sent: adminEmailSent }, origin)
     },
   ),
 }
