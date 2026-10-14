@@ -9,3 +9,8 @@
 @media(max-width:680px){#modal{padding:10px}#modal .modalbox{padding:18px;max-height:calc(100dvh - 20px)}}
 
 @media(min-width:681px){#modal{overflow-y:hidden}#modal .modalbox{max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);overflow-y:hidden;padding:22px 28px}#modal .modalbox>h2{margin-top:0}#modal .modalbox>p{margin-block:8px}#modal .modalbox>label{display:grid;grid-template-columns:130px minmax(0,1fr);align-items:center;gap:12px;margin-block:9px}#modal .modalbox>label input,#modal .modalbox>label textarea{margin-top:0}#modal .modalbox>label textarea{min-height:54px;resize:vertical}#modal .modalbox>#leadSafetyStatus{margin-top:10px}}
+
+/* Gentle icon pulse without moving footer labels or link rows. */
+@keyframes plotao-footer-icon-pulse{0%,65%,100%{transform:scale(1)}30%{transform:scale(1.1)}}
+#plotaoFooter2026 .pf-nav .ico,#plotaoFooter2026 .pf-benefit-icon{animation:plotao-footer-icon-pulse 3s ease-in-out infinite;transform-origin:center;transform-box:fill-box}
+@media(prefers-reduced-motion:reduce){#plotaoFooter2026 .pf-nav .ico,#plotaoFooter2026 .pf-benefit-icon{animation:none}}
