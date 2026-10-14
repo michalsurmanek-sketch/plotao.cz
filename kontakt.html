@@ -72,12 +72,9 @@ header{position:sticky;top:0;z-index:50}</style><style>
 @media(max-width:800px){.contactQuoteCard{grid-template-columns:46px minmax(0,1fr);gap:10px;margin-top:20px;padding:14px;border-radius:14px}.contactQuoteIcon{width:42px;height:42px;border-radius:11px}.contactQuoteIcon svg{width:25px;height:25px}.contactQuoteCopy strong{font-size:16px}.contactQuoteCopy small{font-size:12px}.contactQuoteButton{grid-column:1/-1;justify-content:center;width:100%;padding:13px 12px;font-size:14px}}
 </style>
 <style id="contact-benefits-sync-pulse">
-@keyframes contact-benefit-highlight{
-0%,40%,100%{background-color:transparent;box-shadow:inset 0 0 0 1px transparent}
-20%{background-color:rgba(8,116,67,.10);box-shadow:inset 0 0 0 1px rgba(8,116,67,.20)}
-}
-.hero .benefits .benefit{border-radius:12px;animation:contact-benefit-highlight 3.2s ease-in-out infinite}
-@media(prefers-reduced-motion:reduce){.hero .benefits .benefit{animation:none}}
+@keyframes contact-icon-pulse{0%,40%,100%{transform:scale(1)}20%{transform:scale(1.15)}}
+.hero .benefits .benefit b svg{transform-origin:center;animation:contact-icon-pulse 3.2s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){.hero .benefits .benefit b svg{animation:none}}
 </style>
 </head><body>
 <header class="top"><a class="logo" href="/" aria-label="PLOTAO.cz – domů"><picture><source media="(max-width: 800px)" srcset="/assets/logo-plotao.svg"><img src="/assets/footer-logo-user.svg?v=20260912-2" alt="PLOTAO.cz"></picture></a><nav class="nav" aria-label="Hlavní navigace"><a href="/typy-plotu.html">Druhy oplocení</a><a href="/#partner">Montáž a služby</a><a href="/doprava.html">Doprava</a><a class="on" href="/kontakt.html">Kontakt</a><a class="cta" href="/#kalkulator"><svg class="ctaIcon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2.5" width="16" height="19" rx="2"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h4"/></svg><span>Kalkulátor plotu</span></a></nav></header>
