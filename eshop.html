@@ -570,6 +570,16 @@ body>main,.site-header,.announcement{width:100%!important;max-width:100vw!import
 .hero .hero-lead{color:#24382d!important}
 }
 </style>
+
+<style id="shop-moving-nav-underline">
+@media(min-width:601px) and (hover:hover) and (pointer:fine){
+.main-nav.has-moving-underline .wrap{position:relative}
+.main-nav.has-moving-underline a.active:after{display:none!important}
+.main-nav .nav-moving-underline{position:absolute;left:0;bottom:0;height:4px;border-radius:4px 4px 0 0;background:var(--orange);pointer-events:none;transition:left .22s ease,width .22s ease}
+}
+@media(max-width:600px),(hover:none),(pointer:coarse){.main-nav .nav-moving-underline{display:none}}
+@media(prefers-reduced-motion:reduce){.main-nav .nav-moving-underline{transition:none}}
+</style>
 </head>
 <body>
   <a class="announcement" href="/#kalkulator" aria-label="Přejít ke konfigurátoru plotu"><div class="announcement-content"><i class="announcement-dot"></i><span><strong>Navrhněte si plot online</strong> — konfigurátor spočítá potřebné díly i cenu</span><span class="announcement-arrow" aria-hidden="true">›</span></div></a>
@@ -706,5 +716,36 @@ body>main,.site-header,.announcement{width:100%!important;max-width:100vw!import
   <script>
     (()=>{const input=document.querySelector('#shopSearch'),status=document.querySelector('#searchStatus'),empty=document.querySelector('#searchEmpty'),suggestions=document.querySelector('#searchSuggestions');if(!input)return;const items=[...document.querySelectorAll('.category-card,.product-card')];const normalize=value=>value.toLocaleLowerCase('cs').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();const searchable=items.map(element=>({element,text:normalize(element.textContent+' '+(element.querySelector('img')?.alt||'')),title:element.querySelector('.category-name strong,.product-info h3')?.textContent.trim()||element.textContent.trim(),image:element.querySelector('img')?.getAttribute('src')||'',href:element.matches('a')?element.getAttribute('href'):element.querySelector('a')?.getAttribute('href'),kind:element.classList.contains('category-card')?'Kategorie':'Produkt'}));const renderSuggestions=(query,results)=>{if(!suggestions)return;suggestions.replaceChildren();if(!query){suggestions.hidden=true;return}const found=results.slice(0,6);if(!found.length){const message=document.createElement('div');message.className='search-suggestion-empty';message.textContent='Nic jsme nenašli. Zkuste jiný výraz.';suggestions.append(message)}else found.forEach(item=>{const link=document.createElement('a');link.className='search-suggestion';link.role='option';link.href=item.href||'#produkty';const image=document.createElement('img');image.src=item.image;image.alt='';image.loading='lazy';const label=document.createElement('span');const title=document.createElement('strong');title.textContent=item.title;const type=document.createElement('small');type.textContent=item.kind;label.append(title,type);const arrow=document.createElement('i');arrow.textContent='›';link.append(image,label,arrow);link.addEventListener('click',()=>{suggestions.hidden=true});suggestions.append(link)});suggestions.hidden=false};const run=()=>{const query=normalize(input.value);const results=searchable.filter(item=>item.text.includes(query));searchable.forEach(item=>{item.element.hidden=!!query&&!item.text.includes(query)});if(empty)empty.hidden=!query||results.length>0;renderSuggestions(query,results);status.textContent=query?(results.length?'Nalezeno návrhů: '+Math.min(results.length,6):'Nebyl nalezen žádný výsledek.'):'Zobrazeny všechny kategorie a produkty.'};const searchToggle=document.querySelector('.mobile-search-icon'),headerMain=document.querySelector('.header-main');const setSearchOpen=(open,focus=false)=>{headerMain.classList.toggle('search-open',open);searchToggle.setAttribute('aria-expanded',String(open));searchToggle.setAttribute('aria-label',open?'Zavřít vyhledávání':'Otevřít vyhledávání');if(open&&focus)input.focus();else if(!open)input.blur()};searchToggle?.addEventListener('click',()=>{const open=!headerMain.classList.contains('search-open');setSearchOpen(open,open)});input.addEventListener('input',run);input.addEventListener('focus',run);input.addEventListener('keydown',event=>{if(event.key==='Escape'){input.value='';run();suggestions.hidden=true;input.blur();if(window.matchMedia('(max-width:600px)').matches)setSearchOpen(false)}if(event.key==='ArrowDown'&&!suggestions.hidden){event.preventDefault();suggestions.querySelector('a')?.focus()}if(event.key==='Enter'){event.preventDefault();if(!suggestions.hidden&&suggestions.querySelector('a')&&input.value.trim()){suggestions.querySelector('a').click();return}document.querySelector('.category-card:not([hidden]),.product-card:not([hidden])')?.scrollIntoView({behavior:'smooth',block:'center'})}});suggestions?.addEventListener('keydown',event=>{if(event.key==='Escape'){suggestions.hidden=true;input.focus()}if(event.key==='ArrowDown'&&event.target.matches('a')){event.preventDefault();event.target.nextElementSibling?.focus()}});document.addEventListener('pointerdown',event=>{if(!event.target.closest('.search-area')&&suggestions)suggestions.hidden=true});const button=document.querySelector('.menu-button'),nav=document.querySelector('.main-nav');button?.addEventListener('click',()=>{const open=nav.classList.toggle('open');button.setAttribute('aria-expanded',String(open));button.setAttribute('aria-label',open?'Zavřít menu':'Otevřít menu')});nav?.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{nav.classList.remove('open');button?.setAttribute('aria-expanded','false')}))})();
   </script>
+
+<script id="shop-moving-nav-underline-script">
+(() => {
+  const nav=document.querySelector('.main-nav');
+  const row=nav?.querySelector('.wrap');
+  const links=row?[...row.querySelectorAll('a')]:[];
+  if(!nav||!row||!links.length)return;
+  const active=links.find(link=>link.classList.contains('active'))||links[0];
+  const line=document.createElement('span');
+  line.className='nav-moving-underline';
+  line.setAttribute('aria-hidden','true');
+  row.appendChild(line);
+  nav.classList.add('has-moving-underline');
+  let current=active;
+  const move=link=>{
+    current=link;
+    const parent=row.getBoundingClientRect(),rect=link.getBoundingClientRect();
+    line.style.left=(rect.left-parent.left+row.scrollLeft)+'px';
+    line.style.width=rect.width+'px';
+  };
+  links.forEach(link=>{
+    link.addEventListener('pointerenter',()=>move(link));
+    link.addEventListener('focus',()=>move(link));
+  });
+  nav.addEventListener('pointerleave',()=>move(links.includes(document.activeElement)?document.activeElement:active));
+  nav.addEventListener('focusout',()=>requestAnimationFrame(()=>move(links.find(link=>link.matches(':hover'))|| (links.includes(document.activeElement)?document.activeElement:active))));
+  window.addEventListener('resize',()=>move(current));
+  move(active);
+  document.fonts?.ready.then(()=>move(current));
+})();
+</script>
 </body>
 </html>
