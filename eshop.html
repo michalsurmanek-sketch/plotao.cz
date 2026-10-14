@@ -547,6 +547,22 @@ body>main,.site-header,.announcement{width:100%!important;max-width:100vw!import
     }
 </style>
 <style id="hero-underline-fix">.hero h1:after{content:none!important;display:none!important}.hero h1 .home-underline{position:relative;display:inline-block;text-decoration:none!important}.hero h1 .home-underline:after{content:"";position:absolute;left:0;right:0;bottom:-.14em;height:.20em;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 16' preserveAspectRatio='none'%3E%3Cpath d='M3 12C73 3 162 1 236 9' fill='none' stroke='%23ff6b16' stroke-width='7' stroke-linecap='round'/%3E%3C/svg%3E") center/100% 100% no-repeat;pointer-events:none}</style>
+
+<style id="eshop-benefits-row-pulse">
+@media(min-width:601px){
+  .hero .hero-trust{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important;width:100%;max-width:100%!important}
+  .hero .hero-trust-item{min-width:0!important;min-height:112px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:12px 6px!important;text-align:center}
+  .hero .hero-trust-item svg{flex-shrink:0}
+  .hero .hero-trust-item strong{font-size:14px!important;line-height:1.25!important}
+  .hero .hero-trust-item small{font-size:12px!important;line-height:1.3!important}
+}
+@keyframes eshop-benefit-pulse{0%,25%,100%{transform:scale(1)}12.5%{transform:scale(1.15)}}
+.hero .hero-trust-item svg{transform-origin:center;animation:eshop-benefit-pulse 4s ease-in-out infinite}
+.hero .hero-trust-item:nth-child(2) svg{animation-delay:1s}
+.hero .hero-trust-item:nth-child(3) svg{animation-delay:2s}
+.hero .hero-trust-item:nth-child(4) svg{animation-delay:3s}
+@media(prefers-reduced-motion:reduce){.hero .hero-trust-item svg{animation:none}}
+</style>
 </head>
 <body>
   <a class="announcement" href="/#kalkulator" aria-label="Přejít ke konfigurátoru plotu"><div class="announcement-content"><i class="announcement-dot"></i><span><strong>Navrhněte si plot online</strong> — konfigurátor spočítá potřebné díly i cenu</span><span class="announcement-arrow" aria-hidden="true">›</span></div></a>
