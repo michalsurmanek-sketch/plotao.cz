@@ -123,3 +123,6 @@ body>header.site-header .menu-button{display:none!important}
 @media(prefers-reduced-motion:reduce){
  body>a.announcement,body>header.site-header,body>header.site-header *{scroll-behavior:auto!important;transition:none!important;animation:none!important}
 }
+
+/* Keep the active-item underline fixed; disable the legacy sliding indicator. */
+body>header.site-header .main-nav .nav-moving-underline{display:none!important;transition:none!important;animation:none!important}
