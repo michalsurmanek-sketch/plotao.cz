@@ -221,6 +221,7 @@ const sharedHeaderController='<script data-plotao-shared-header-controller="1">(
 for(const file of fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort()){
   let page=fs.readFileSync(file,'utf8');
   page=file==='index.html'?applyCalculatorEshopHeader(page):applySharedEshopHeader(page,file);
+  page=page.replace(/(href=["']\/assets\/eshop-header-unified\.css\?v=)[^"']+(["'])/g,(match,prefix,suffix)=>prefix+sha.slice(0,12)+suffix);
   if(page.includes('<header class="site-header">')&&!page.includes('data-plotao-shared-header-controller="1"'))page=page.replace('</body>',sharedHeaderController+'</body>');
   if(!page.includes('</head>'))throw new Error('Favicon loader: missing </head> in '+file);
   if(!page.includes('data-plotao-no-tap-flash="1"'))page=page.replace('</head>','<style data-plotao-no-tap-flash="1">html,body,body *{-webkit-tap-highlight-color:transparent!important}</style></head>');
