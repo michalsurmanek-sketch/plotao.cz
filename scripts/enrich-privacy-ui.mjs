@@ -24,27 +24,27 @@ fs.writeFileSync(indexFile,index,'utf8');
 function splitCssBlocks(css){
   const blocks=[];let i=0;
   while(i<css.length){
-    while(i<css.length&&/\\s/.test(css[i]))i++;
+    while(i<css.length&&/\s/.test(css[i]))i++;
     if(css.startsWith('/*',i)){const end=css.indexOf('*/',i+2);i=end<0?css.length:end+2;continue}
     const start=i;let quote='',comment=false,open=-1;
-    for(;i<css.length;i++){const ch=css[i],next=css[i+1];if(comment){if(ch==='*'&&next==='/'){comment=false;i++}continue}if(quote){if(ch==='\\\\')i++;else if(ch===quote)quote='';continue}if(ch==='/'&&next==='*'){comment=true;i++;continue}if(ch==='"'||ch==="'"){quote=ch;continue}if(ch==='{'){open=i;break}if(ch===';'){i++;break}}
+    for(;i<css.length;i++){const ch=css[i],next=css[i+1];if(comment){if(ch==='*'&&next==='/'){comment=false;i++}continue}if(quote){if(ch==='\\')i++;else if(ch===quote)quote='';continue}if(ch==='/'&&next==='*'){comment=true;i++;continue}if(ch==='"'||ch==="'"){quote=ch;continue}if(ch==='{'){open=i;break}if(ch===';'){i++;break}}
     if(open<0)continue;
     const head=css.slice(start,open).trim();i=open+1;let depth=1;quote='';comment=false;const bodyStart=i;
-    for(;i<css.length&&depth;i++){const ch=css[i],next=css[i+1];if(comment){if(ch==='*'&&next==='/'){comment=false;i++}continue}if(quote){if(ch==='\\\\')i++;else if(ch===quote)quote='';continue}if(ch==='/'&&next==='*'){comment=true;i++;continue}if(ch==='"'||ch==="'"){quote=ch;continue}if(ch==='{')depth++;else if(ch==='}')depth--}
+    for(;i<css.length&&depth;i++){const ch=css[i],next=css[i+1];if(comment){if(ch==='*'&&next==='/'){comment=false;i++}continue}if(quote){if(ch==='\\')i++;else if(ch===quote)quote='';continue}if(ch==='/'&&next==='*'){comment=true;i++;continue}if(ch==='"'||ch==="'"){quote=ch;continue}if(ch==='{')depth++;else if(ch==='}')depth--}
     if(depth===0)blocks.push({head,body:css.slice(bodyStart,i-1)});
   }
   return blocks;
 }
-const footerClassPattern=/(^|[.#\\s>+~])(?:pf|pf-top|pf-logo|pf-sub|pf-brand|pf-slogan|pf-rule|pf-nav|thumb|ico|pf-benefits|pf-news|news-title|pf-bottom|social|pf-icon|pf-benefit-icon|pf-social-icon|sr-only)(?=$|[.#\\s>+~:\\[])/i;
+const footerClassPattern=/(^|[.#\s>+~])(?:pf|pf-top|pf-logo|pf-sub|pf-brand|pf-slogan|pf-rule|pf-nav|thumb|ico|pf-benefits|pf-news|news-title|pf-bottom|social|pf-icon|pf-benefit-icon|pf-social-icon|sr-only)(?=$|[.#\s>+~:\[])/i;
 function selectFooterCss(css){
   return splitCssBlocks(css).map(({head,body})=>{
-    if(/^@(media|supports|container|layer)\\b/i.test(head)){const nested=selectFooterCss(body);return nested?head+'{'+nested+'}':''}
-    if(/^@keyframes\\b/i.test(head))return head+'{'+body+'}';
-    const selected=head.split(',').map(s=>s.trim()).filter(s=>s&&(/#plotaoFooter2026\\b/.test(s)||footerClassPattern.test(s)));
-    return selected.map(s=>/#plotaoFooter2026\\b/.test(s)?s:'#plotaoFooter2026 '+s).map(s=>s+'{'+body+'}').join('');
-  }).filter(Boolean).join('\\n');
+    if(/^@(media|supports|container|layer)\b/i.test(head)){const nested=selectFooterCss(body);return nested?head+'{'+nested+'}':''}
+    if(/^@keyframes\b/i.test(head))return head+'{'+body+'}';
+    const selected=head.split(',').map(s=>s.trim()).filter(s=>s&&(/#plotaoFooter2026\b/.test(s)||footerClassPattern.test(s)));
+    return selected.map(s=>/#plotaoFooter2026\b/.test(s)?s:'#plotaoFooter2026 '+s).map(s=>s+'{'+body+'}').join('');
+  }).filter(Boolean).join('\n');
 }
-const canonicalMatch=index.match(/<footer\\b[^>]*>[\\s\\S]*?<\\/footer>/i);
+const canonicalMatch=index.match(/<footer\b[^>]*>[\s\S]*?<\/footer>/i);
 if(!canonicalMatch)throw new Error('Unified footer: main page footer is missing');
 const canonicalFooter=canonicalMatch[0].replace('href="#kalkulator"','href="/#kalkulator"').replace(/href="#partner"/g,'href="/#partner"');
 const sourceFooterCss=fs.readFileSync(path.join(root,'assets/footer-2026.css'),'utf8');
@@ -55,8 +55,8 @@ for(const file of publicHtml){
   const full=path.join(root,file);
   let html=fs.readFileSync(full,'utf8');
   if(file==='index.html')html=html.replace(canonicalMatch[0],canonicalFooter);
-  else if(/<footer\\b[^>]*>[\\s\\S]*?<\\/footer>/i.test(html))html=html.replace(/<footer\\b[^>]*>[\\s\\S]*?<\\/footer>/i,canonicalFooter);
-  else html=html.replace(/<\\/body>/i,canonicalFooter+'</body>');
+  else if(/<footer\b[^>]*>[\s\S]*?<\/footer>/i.test(html))html=html.replace(/<footer\b[^>]*>[\s\S]*?<\/footer>/i,canonicalFooter);
+  else html=html.replace(/<\/body>/i,canonicalFooter+'</body>');
   if(!html.includes('data-plotao-unified-footer="1"')){
     html=html.replace(canonicalFooter,canonicalFooter.replace('<footer id="plotaoFooter2026">','<footer id="plotaoFooter2026" data-plotao-unified-footer="1">'));
   }
