@@ -160,9 +160,66 @@ function applySharedEshopHeader(page,file){
   if(!newHeader.includes('Poradíme vám')||!newHeader.includes('Košík')||!newHeader.includes('class="active"'))throw new Error('Shared e-shop header: required controls or active item missing in '+file);
   return rendered;
 }
+
+function parseCssBlocks(css){
+  const blocks=[];let i=0;
+  while(i<css.length){
+    while(i<css.length&&/\s/.test(css[i]))i++;
+    if(css.startsWith('/*',i)){const end=css.indexOf('*/',i+2);i=end<0?css.length:end+2;continue}
+    const start=i;let quote='',comment=false,open=-1;
+    for(;i<css.length;i++){
+      const ch=css[i],next=css[i+1];
+      if(comment){if(ch==='*'&&next==='/'){comment=false;i++}continue}
+      if(quote){if(ch==='\\')i++;else if(ch===quote)quote='';continue}
+      if(ch==='/'&&next==='*'){comment=true;i++;continue}
+      if(ch==='"'||ch==="'"){quote=ch;continue}
+      if(ch==='{'){open=i;break}
+      if(ch===';'){i++;break}
+    }
+    if(open<0)continue;
+    const head=css.slice(start,open).trim();i=open+1;let depth=1;quote='';comment=false;
+    const bodyStart=i;
+    for(;i<css.length&&depth;i++){
+      const ch=css[i],next=css[i+1];
+      if(comment){if(ch==='*'&&next==='/'){comment=false;i++}continue}
+      if(quote){if(ch==='\\')i++;else if(ch===quote)quote='';continue}
+      if(ch==='/'&&next==='*'){comment=true;i++;continue}
+      if(ch==='"'||ch==="'"){quote=ch;continue}
+      if(ch==='{')depth++;
+      else if(ch==='}')depth--;
+    }
+    if(depth===0)blocks.push({head,body:css.slice(bodyStart,i-1)});
+  }
+  return blocks;
+}
+const headerClassPattern=/(^|[.#\s>+~])(?:announcement(?:-content|-dot|-arrow)?|site-header|header-main|brand|search-area|search(?:-suggestions|-suggestion(?:-empty)?)?|header-actions|header-action|cart-count|mobile-tools|mobile-search-icon|menu-button|main-nav|sr-only|wrap)(?=$|[.#\s>+~:\[])/i;
+function scopeHeaderCss(css){
+  return parseCssBlocks(css).map(({head,body})=>{
+    if(/^@(media|supports|container|layer)\b/i.test(head)){
+      const nested=scopeHeaderCss(body);
+      return nested?head+'{'+nested+'}':'';
+    }
+    if(/^:root$/i.test(head))return '#eshopContextHeader{'+body+'}';
+    const selected=head.split(',').map(s=>s.trim()).filter(s=>s&&(/^(?:a|button|input|\*|\[hidden\])$/i.test(s)||headerClassPattern.test(s)||/^#(?:shopSearch|searchStatus)\b/i.test(s)));
+    return selected.map(s=>'#eshopContextHeader '+s+'{'+body+'}').join('');
+  }).filter(Boolean).join('\n');
+}
+const shopHeaderCss=(()=>{const source=fs.readFileSync('eshop.html','utf8');const styles=[...source.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map(m=>scopeHeaderCss(m[1])).filter(Boolean).join('\n');return '#eshopContextHeader{display:contents;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}#eshopContextHeader[hidden]{display:none!important}#eshopContextHeader:not([hidden])~header.head{display:none!important}\n'+styles})();
+function applyCalculatorEshopHeader(page){
+  page=page.replace(/<style id="eshop-context-nav-style">[\s\S]*?<\/style>/i,'');
+  page=page.replace(/<script id="eshop-context-nav-loader">[\s\S]*?<\/script>/i,'');
+  if(!page.includes('<header class="head">'))throw new Error('Calculator page: native homepage header missing');
+  if(page.includes('id="eshopContextHeader"'))throw new Error('Calculator page: duplicate e-shop context header');
+  const loader='<script id="eshop-context-header-loader">(()=>{const root=document.getElementById("eshopContextHeader");const show=new URLSearchParams(location.search).get("from")==="eshop";if(!root)return;root.hidden=!show;if(!show)return;const main=root.querySelector(".header-main"),nav=root.querySelector(".main-nav"),searchToggle=root.querySelector(".mobile-search-icon"),menuButton=root.querySelector(".menu-button");const setSearchOpen=(open,focus=false)=>{main.classList.toggle("search-open",open);searchToggle.setAttribute("aria-expanded",String(open));searchToggle.setAttribute("aria-label",open?"Zavřít vyhledávání":"Otevřít vyhledávání");if(open&&focus)root.querySelector("#shopSearch").focus();else if(!open)root.querySelector("#shopSearch").blur()};searchToggle?.addEventListener("click",()=>setSearchOpen(!main.classList.contains("search-open"),!main.classList.contains("search-open")));menuButton?.addEventListener("click",()=>{const open=nav.classList.toggle("open");menuButton.setAttribute("aria-expanded",String(open));menuButton.setAttribute("aria-label",open?"Zavřít menu":"Otevřít menu")});nav?.addEventListener("click",event=>{if(event.target.closest("a")){nav.classList.remove("open");menuButton?.setAttribute("aria-expanded","false")}})})();</script>';
+  const injected='<div id="eshopContextHeader" hidden>'+sharedHeaderTemplate+'</div>'+loader;
+  page=page.replace('<header class="head">',injected+'<header class="head">');
+  page=page.replace('</head>','<style id="eshop-context-header-styles">'+shopHeaderCss+'</style></head>');
+  return page;
+}
+
 for(const file of fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort()){
   let page=fs.readFileSync(file,'utf8');
-  page=applySharedEshopHeader(page,file);
+  page=file==='index.html'?applyCalculatorEshopHeader(page):applySharedEshopHeader(page,file);
   if(!page.includes('</head>'))throw new Error('Favicon loader: missing </head> in '+file);
   if(!page.includes('data-plotao-favicon-loader="1"'))page=page.replace('</head>','<script defer data-plotao-favicon-loader="1" src="'+versionedScript('/assets/favicon-loader-v1.js')+'"></script></head>');
   fs.writeFileSync(dist+'/'+file,page,'utf8');
