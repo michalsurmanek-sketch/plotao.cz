@@ -143,3 +143,5 @@ body>header.site-header .main-nav:has(a[href^="/?from=eshop"].active) a[href^="/
 #eshopContextHeader .main-nav a[href^="/?from=eshop"].active:after{bottom:-30px!important}
 /* Align the mobile logo with the page content column. */
 @media(max-width:1100px){body>header.site-header .header-main{width:calc(100% - clamp(40px,10.5vw,108px))!important;padding-left:0!important;padding-right:0!important}}
+/* Compensate transparent left padding inside the PLOTAO logo artwork on mobile. */
+@media(max-width:800px){body>header.site-header .brand img{transform:translateX(-8.7%)!important}}
