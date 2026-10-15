@@ -126,3 +126,6 @@ body>header.site-header .menu-button{display:none!important}
 
 /* Keep the active-item underline fixed; disable the legacy sliding indicator. */
 body>header.site-header .main-nav .nav-moving-underline{display:none!important;transition:none!important;animation:none!important}
+
+/* Keep the live search status out of the header grid on every page. */
+body>header.site-header #searchStatus.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
