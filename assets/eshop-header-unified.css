@@ -129,3 +129,6 @@ body>header.site-header .main-nav .nav-moving-underline{display:none!important;t
 
 /* Keep the live search status out of the header grid on every page. */
 body>header.site-header #searchStatus.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+
+/* Keep calculator selected after its hash is consumed by the page scroll. */
+body>header.site-header .main-nav:has(a[href^="/?from=eshop"].active) a[href^="/?from=eshop"]:after{display:block!important;content:""!important;position:absolute!important;left:0!important;right:0!important;bottom:0!important;height:4px!important;border-radius:4px 4px 0 0!important;background:#ff6b16!important}
