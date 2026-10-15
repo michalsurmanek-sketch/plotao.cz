@@ -75,7 +75,7 @@ body>header.site-header .menu-button{display:none!important}
  body>header.site-header .main-nav a{font-size:13px!important;gap:8px!important}
 }
 @media(max-width:800px){
- body>header.site-header{top:34px!important}
+ body>header.site-header{top:43px!important}
  body>header.site-header .header-main{
   position:relative!important;width:calc(100% - 32px)!important;height:64px!important;min-height:64px!important;
   grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:64px!important;
