@@ -132,3 +132,6 @@ body>header.site-header #searchStatus.sr-only{position:absolute!important;width:
 
 /* Keep calculator selected after its hash is consumed by the page scroll. */
 body>header.site-header .main-nav:has(a[href^="/?from=eshop"].active) a[href^="/?from=eshop"]:after{display:block!important;content:""!important;position:absolute!important;left:0!important;right:0!important;bottom:0!important;height:4px!important;border-radius:4px 4px 0 0!important;background:#ff6b16!important}
+
+/* Correct the active configurator underline in the nested calculator header. */
+#eshopContextHeader .main-nav a[href^="/?from=eshop"].active:after{bottom:-30px!important}
