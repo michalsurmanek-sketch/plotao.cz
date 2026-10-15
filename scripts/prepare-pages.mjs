@@ -144,7 +144,7 @@ fs.writeFileSync('deploy-marker.txt',sha+'\n','utf8');
 const dist='dist';
 fs.rmSync(dist,{recursive:true,force:true});
 fs.mkdirSync(dist,{recursive:true});
-const sharedHeaderTemplate=fs.readFileSync('partials/eshop-header.html','utf8').trim();
+const sharedHeaderTemplate=fs.readFileSync('partials/eshop-header.html','utf8').trim().replace(/<img\b[^>]*\bsrc=["']\/assets\/logo-plotao\.svg["'][^>]*>/i,tag=>{const cleaned=tag.replace(/\swidth=["'][^"']*["']/i,'').replace(/\sheight=["'][^"']*["']/i,'');return cleaned.replace(/>$/, ' width="2172" height="724">')});
 function applySharedEshopHeader(page,file){
   const headerMatch=page.match(/<header class="site-header">[\s\S]*?<\/header>/i);
   if(!headerMatch)return page;
