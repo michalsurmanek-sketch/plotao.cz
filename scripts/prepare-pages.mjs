@@ -146,19 +146,17 @@ fs.rmSync(dist,{recursive:true,force:true});
 fs.mkdirSync(dist,{recursive:true});
 const sharedHeaderTemplate=fs.readFileSync('partials/eshop-header.html','utf8').trim();
 function applySharedEshopHeader(page,file){
-  const headerMatch=page.match(/<header class="site-header">[\\s\\S]*?<\\/header>/i);
+  const headerMatch=page.match(/<header class="site-header">[\s\S]*?<\/header>/i);
   if(!headerMatch)return page;
-  const navMatch=headerMatch[0].match(/<nav\\b[^>]*class=["'][^"']*\\bmain-nav\\b[^"']*["'][\\s\\S]*?<\\/nav>/i);
-  const active=navMatch?.[0].match(/<a\\b(?=[^>]*\\bclass=["'][^"']*\\bactive\\b[^"']*["'])[^>]*\\bhref=["']([^"']+)["']/i);
+  const navMatch=headerMatch[0].match(/<nav\b[^>]*class=["'][^"']*\bmain-nav\b[^"']*["'][\s\S]*?<\/nav>/i);
+  const active=navMatch?.[0].match(/<a\b(?=[^>]*\bclass=["'][^"']*\bactive\b[^"']*["'])[^>]*\bhref=["']([^"']+)["']/i);
   if(!active)throw new Error('Shared e-shop header: active navigation link missing in '+file);
-  const escapedHref=active[1].replace(/[.*+?^${}()|[\\]\\\\]/g,'\\\\for(const file of fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort()){
-  let page=fs.readFileSync(file,'utf8');');
-  const activeLink=new RegExp(`<a\\\\s+href=["']${escapedHref}["']>`);
-  if(!activeLink.test(sharedHeaderTemplate))throw new Error('Shared e-shop header: active link is not in canonical template: '+active[1]+' ('+file+')');
-  const renderedHeader=sharedHeaderTemplate.replace(activeLink,`<a class="active" href="${active[1]}">`);
-  const withoutOldAnnouncement=page.replace(/<a\\b(?=[^>]*\\bclass=["'][^"']*\\bannouncement\\b[^"']*["'])[^>]*>[\\s\\S]*?<\\/a>/i,'');
+  const activeLink='<a href="'+active[1]+'">';
+  if(!sharedHeaderTemplate.includes(activeLink))throw new Error('Shared e-shop header: active link is not in canonical template: '+active[1]+' ('+file+')');
+  const renderedHeader=sharedHeaderTemplate.replace(activeLink,'<a class="active" href="'+active[1]+'">');
+  const withoutOldAnnouncement=page.replace(/<a\b(?=[^>]*\bclass=["'][^"']*\bannouncement\b[^"']*["'])[^>]*>[\s\S]*?<\/a>/i,'');
   const rendered=withoutOldAnnouncement.replace(headerMatch[0],renderedHeader);
-  const newHeader=rendered.match(/<header class="site-header">[\\s\\S]*?<\\/header>/i)?.[0]||'';
+  const newHeader=rendered.match(/<header class="site-header">[\s\S]*?<\/header>/i)?.[0]||'';
   if(!newHeader.includes('Poradíme vám')||!newHeader.includes('Košík')||!newHeader.includes('class="active"'))throw new Error('Shared e-shop header: required controls or active item missing in '+file);
   return rendered;
 }
