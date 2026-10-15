@@ -221,6 +221,7 @@ for(const file of fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort()){
   let page=fs.readFileSync(file,'utf8');
   page=file==='index.html'?applyCalculatorEshopHeader(page):applySharedEshopHeader(page,file);
   if(!page.includes('</head>'))throw new Error('Favicon loader: missing </head> in '+file);
+  if(!page.includes('data-plotao-no-tap-flash="1"'))page=page.replace('</head>','<style data-plotao-no-tap-flash="1">html,body,body *{-webkit-tap-highlight-color:transparent!important}</style></head>');
   if(!page.includes('data-plotao-favicon-loader="1"'))page=page.replace('</head>','<script defer data-plotao-favicon-loader="1" src="'+versionedScript('/assets/favicon-loader-v1.js')+'"></script></head>');
   fs.writeFileSync(dist+'/'+file,page,'utf8');
 }
