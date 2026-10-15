@@ -204,7 +204,7 @@ function scopeHeaderCss(css){
     return selected.map(s=>'#eshopContextHeader '+s+'{'+body+'}').join('');
   }).filter(Boolean).join('\n');
 }
-const shopHeaderCss=(()=>{const source=fs.readFileSync('eshop.html','utf8');const styles=[...source.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map(m=>scopeHeaderCss(m[1])).filter(Boolean).join('\n');return '#eshopContextHeader{display:contents;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}#eshopContextHeader[hidden]{display:none!important}#eshopContextHeader:not([hidden])~header.head{display:none!important}#eshopContextHeader:not([hidden])~.mobile-price{display:none!important}\n'+styles})();
+const shopHeaderCss=(()=>{const source=fs.readFileSync('eshop.html','utf8');const styles=[...source.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map(m=>scopeHeaderCss(m[1])).filter(Boolean).join('\n');return '#eshopContextHeader{display:contents;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}#eshopContextHeader[hidden]{display:none!important}#eshopContextHeader:not([hidden])~header.head{display:none!important}#eshopContextHeader:not([hidden])~.mobile-price{display:none!important}#eshopContextHeader .main-nav a[href^=\"/?from=eshop\"].active:after{bottom:-30px!important}\n'+styles})();
 function applyCalculatorEshopHeader(page){
   page=page.replace(/<style id="eshop-context-nav-style">[\s\S]*?<\/style>/i,'');
   page=page.replace(/<script id="eshop-context-nav-loader">[\s\S]*?<\/script>/i,'');
