@@ -217,9 +217,11 @@ function applyCalculatorEshopHeader(page){
   return page;
 }
 
+const sharedHeaderController='<script data-plotao-shared-header-controller="1">(()=>{const header=document.querySelector("body>header.site-header");if(!header)return;const nav=header.querySelector(".main-nav"),menu=header.querySelector(".menu-button"),searchToggle=header.querySelector(".mobile-search-icon"),main=header.querySelector(".header-main"),search=header.querySelector("#shopSearch");if(!nav)return;const setMenuOpen=open=>{nav.classList.toggle("open",open);if(menu){menu.setAttribute("aria-expanded",String(open));menu.setAttribute("aria-label",open?"Zavřít menu":"Otevřít menu")}};menu?.addEventListener("click",()=>setMenuOpen(!nav.classList.contains("open")));nav.addEventListener("click",event=>{if(event.target.closest("a"))setMenuOpen(false)});document.addEventListener("click",event=>{if(!header.contains(event.target))setMenuOpen(false)});document.addEventListener("keydown",event=>{if(event.key==="Escape")setMenuOpen(false)});searchToggle?.addEventListener("click",()=>{const open=!main.classList.contains("search-open");main.classList.toggle("search-open",open);searchToggle.setAttribute("aria-expanded",String(open));searchToggle.setAttribute("aria-label",open?"Zavřít vyhledávání":"Otevřít vyhledávání");if(open)search?.focus();else search?.blur()})})();</script>';
 for(const file of fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort()){
   let page=fs.readFileSync(file,'utf8');
   page=file==='index.html'?applyCalculatorEshopHeader(page):applySharedEshopHeader(page,file);
+  if(page.includes('<header class="site-header">')&&!page.includes('data-plotao-shared-header-controller="1"'))page=page.replace('</body>',sharedHeaderController+'</body>');
   if(!page.includes('</head>'))throw new Error('Favicon loader: missing </head> in '+file);
   if(!page.includes('data-plotao-no-tap-flash="1"'))page=page.replace('</head>','<style data-plotao-no-tap-flash="1">html,body,body *{-webkit-tap-highlight-color:transparent!important}</style></head>');
   if(!page.includes('data-plotao-favicon-loader="1"'))page=page.replace('</head>','<script defer data-plotao-favicon-loader="1" src="'+versionedScript('/assets/favicon-loader-v1.js')+'"></script></head>');
