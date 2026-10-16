@@ -568,3 +568,34 @@ input::placeholder,textarea::placeholder{color:#98a69e}
 #productForm #productNotice.error{color:#a83a30}
 @media(max-width:850px){#productForm .catalog-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){#productFormPanel>.panel-head{padding:16px}#productForm{padding:13px}#productForm .catalog-fields,#productForm .catalog-price-fields{grid-template-columns:1fr;padding:13px}#productForm .catalog-wide{grid-column:auto}#productForm .catalog-active-toggle{grid-column:auto}#productForm .catalog-form-actions{display:grid;grid-template-columns:1fr 1fr}#productForm .catalog-form-actions #productNotice{grid-column:1/-1}}
+
+/* Product editor layout and live customer preview */
+.catalog-editor-layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(265px,.82fr);gap:18px;align-items:start;padding:18px 22px 22px}
+#productForm{padding:0;min-width:0}
+.catalog-live-preview{position:sticky;top:16px;min-width:0;padding:14px;border:1px solid var(--line);border-radius:14px;background:#f8fbf9}
+.catalog-live-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:11px}
+.catalog-live-heading>span{display:flex;align-items:center;gap:7px;color:var(--deep);font-size:10px;font-weight:900;letter-spacing:.08em}
+.catalog-live-heading>span i{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 3px #f078281a}
+.catalog-live-heading small{color:var(--muted);font-size:10px;text-align:right}
+.catalog-live-card{overflow:hidden;border:1px solid #dfe8e2;border-radius:12px;background:#fff;box-shadow:0 5px 18px #12392b0a}
+.catalog-live-image{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;height:205px;padding:12px;background:linear-gradient(145deg,#f7faf8,#eef4f0);color:#84988b}
+.catalog-live-image svg{width:54px;height:54px;fill:none;stroke:#8da497;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.catalog-live-image small{font-size:11px}
+.catalog-live-image img{width:100%;height:100%;object-fit:contain}
+.catalog-live-info{display:grid;gap:8px;padding:14px}
+.catalog-live-info>small{color:var(--green);font-size:11px;font-weight:800}
+.catalog-live-info h4{margin:0;color:var(--ink);font-size:17px;line-height:1.3}
+.catalog-live-info p{min-height:18px;margin:0;color:var(--muted);font-size:12px}
+.catalog-live-info>strong{color:var(--deep);font-size:22px;letter-spacing:-.03em}
+.catalog-live-info>strong small{font-size:12px;font-weight:500;letter-spacing:0}
+.catalog-live-stock{display:inline-flex;align-items:center;gap:6px;justify-self:start;padding:5px 8px;border-radius:99px;background:#e8f5ec;color:#087443;font-size:11px;font-weight:800}
+.catalog-live-stock i{width:7px;height:7px;border-radius:50%;background:currentColor}
+.catalog-live-stock.is-unavailable{background:#fff0ee;color:#a3392d}
+.catalog-live-stock.is-pending{background:#fff6e8;color:#8a5a0b}
+.catalog-live-publish{display:grid;gap:7px;margin-top:11px;padding:11px;border:1px solid #e3ebe5;border-radius:10px;background:#fff}
+.catalog-live-state{display:flex;align-items:center;gap:7px;color:#8a5a0b;font-size:12px;font-weight:800}
+.catalog-live-state::before{width:8px;height:8px;border-radius:50%;background:currentColor;content:""}
+.catalog-live-state.is-active{color:var(--green)}
+.catalog-live-publish>small{color:var(--muted);font-size:11px}
+@media(max-width:1000px){.catalog-editor-layout{grid-template-columns:1fr}.catalog-live-preview{position:static;order:-1}.catalog-live-card{display:grid;grid-template-columns:minmax(140px,.8fr) 1fr}.catalog-live-image{height:auto;min-height:170px}.catalog-live-info{align-content:center}}
+@media(max-width:600px){.catalog-editor-layout{gap:12px;padding:12px}.catalog-live-preview{padding:10px}.catalog-live-heading{align-items:flex-start}.catalog-live-heading small{max-width:120px}.catalog-live-card{grid-template-columns:38% 1fr}.catalog-live-image{min-height:145px;padding:8px}.catalog-live-info{gap:6px;padding:10px}.catalog-live-info h4{font-size:14px}.catalog-live-info>strong{font-size:18px}.catalog-live-info>p{font-size:11px}}
