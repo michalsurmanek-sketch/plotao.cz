@@ -156,6 +156,14 @@ Deno.serve(async req=>{
  }
  if(req.method==="POST"){
   let b;try{b=await req.json()}catch{return json({error:"invalid_json"},400)}
+  if(b.action==="set_products_active"){
+   const raw=Array.isArray(b.product_ids)?b.product_ids:[],ids=[...new Set(raw)];
+   if(typeof b.active!=="boolean"||!ids.length||ids.length>200||ids.length!==raw.length||!ids.every(validId))return json({error:"invalid_product_selection"},422);
+   const filter=ids.map(encodeURIComponent).join(",");
+   const r=await fetch(base+"/rest/v1/plotao_products?id=in.("+filter+")&select=id",{method:"PATCH",headers:{...apiHeaders(key),"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify({active:b.active,updated_by:ADMIN_EMAIL,updated_at:new Date().toISOString()})});
+   let rows;try{rows=await r.json()}catch{rows=null}if(!r.ok||!Array.isArray(rows))return json({error:"products_update_failed"},r.status||502);
+   return json({updated:rows.length});
+  }
   if(b.action==="save_product"){
    if(b.product_id!=null&&!validId(b.product_id))return json({error:"invalid_product_id"},422);
    const product=cleanProduct(b.product);if(!product)return json({error:"invalid_product"},422);
