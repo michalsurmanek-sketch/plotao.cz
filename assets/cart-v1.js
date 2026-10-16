@@ -78,7 +78,7 @@
     const parsed=Number(String(raw||'').replace(',','.'));
     const price=options?null:(Number.isFinite(parsed)&&parsed>0?Math.round(parsed*100):null);
     const detail=[base,options].filter(Boolean).join(' · ').slice(0,800);
-    const unit=/\/\s*m(?:\s|$)/i.test(card.querySelector('.product-price')?.textContent||'')?'m':'ks';
+    const unit=card.querySelector('.product-price')?.textContent?.match(/\/\s*(bm|m|sada|ks)\b/i)?.[1]?.toLowerCase()||'ks';
     return {id:JSON.stringify([name,detail,price,unit]),name,detail,price,unit,qty:1,image:safeImage(card.querySelector('img')?.getAttribute('src'))};
   }
   function add(card, form) {
