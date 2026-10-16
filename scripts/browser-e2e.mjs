@@ -284,3 +284,18 @@ if(failures.length){
   process.exit(1);
 }
 console.log('Browser E2E OK: all 10 fence types plus desktop, 390px mobile, closed rectangle/square plot mode, keyboard skip navigation and privacy flows passed without browser-console or same-origin request failures');
+
+
+await runScenario('mobile-search-toggle',{width:390,height:844},async page=>{
+  await page.goto(baseUrl+'/?e2e=1&from=eshop',{waitUntil:'networkidle'});
+  await page.waitForFunction(()=>window.PLOTAO_UI_READY===true,null,{timeout:10000});
+  const header=page.locator('#eshopContextHeader .header-main');
+  const toggle=page.locator('#eshopContextHeader .mobile-search-icon');
+  const search=page.locator('#eshopContextHeader #shopSearch');
+  await toggle.click();
+  assert(await header.evaluate(el=>el.classList.contains('search-open')),'mobile search tap must open the shared header search row');
+  assert(await toggle.getAttribute('aria-expanded')==='true','mobile search button must expose its open state');
+  assert(await search.isVisible(),'mobile search input must be visible after tapping the search icon');
+  await toggle.click();
+  assert(!(await header.evaluate(el=>el.classList.contains('search-open'))),'second mobile search tap must close the search row');
+});
