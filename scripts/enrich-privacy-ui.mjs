@@ -6,7 +6,7 @@ const privacyPage='ochrana-osobnich-udaju.html';
 const noPublicFooterPages=new Set([privacyPage,'nabidka-rozhodnuti.html']);
 const privacyHref='/ochrana-osobnich-udaju.html';
 const footerLink=`<a data-plotao-privacy-link="1" href="${privacyHref}">Ochrana osobních údajů</a>`;
-const publicHtml=fs.readdirSync(root).filter(name=>name.endsWith('.html')).sort();
+const publicHtml=fs.readdirSync(root).filter(name=>name.endsWith('.html')&&name!=='admin.html').sort();
 let injectedCount=0;
 for(const file of publicHtml){const full=path.join(root,file);let html=fs.readFileSync(full,'utf8');if(!noPublicFooterPages.has(file)&&!html.includes('data-plotao-privacy-link="1"')){if(html.includes('class="foot-bottom"'))html=html.replace(/(<div class="foot-bottom">\s*<span>[^<]*<\/span>)/i,`$1${footerLink}`);else if(/<footer\b[^>]*>[\s\S]*?<\/footer>/i.test(html))html=html.replace(/<\/footer>/i,` · ${footerLink}</footer>`);else throw new Error(`Privacy UI: public page has no supported footer for privacy link: ${file}`);if(!html.includes('data-plotao-privacy-link="1"'))throw new Error(`Privacy UI: could not inject footer link into ${file}`);injectedCount++}fs.writeFileSync(full,html,'utf8')}
 const indexFile=path.join(root,'index.html');let index=fs.readFileSync(indexFile,'utf8');
