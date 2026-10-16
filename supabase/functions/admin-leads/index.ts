@@ -130,8 +130,12 @@ Deno.serve(async req=>{
    return json(await r.json(),r.status)
   }
   if(resource==="products"){
-   const r=await fetch(base+"/rest/v1/plotao_products?select=*,plotao_suppliers(id,company_name)&order=name.asc&limit=2000",{headers:apiHeaders(key)});
-   return json(await r.json(),r.status)
+   const rows=[];let offset=0,status=200;
+   while(offset<10000){
+    const r=await fetch(base+"/rest/v1/plotao_products?select=*,plotao_suppliers(id,company_name)&order=name.asc&limit=1000&offset="+offset,{headers:{...apiHeaders(key),Range:`${offset}-${offset+999}`,"Range-Unit":"items"}});
+    status=r.status;const batch=await r.json();if(!r.ok)return json(batch,r.status);if(!Array.isArray(batch))return json({error:"products_load_failed"},502);rows.push(...batch);if(batch.length<1000)break;offset+=1000;
+   }
+   return json(rows,status)
   }
   if(resource==="suppliers"){
    const r=await fetch(base+"/rest/v1/plotao_suppliers?select=*&order=company_name.asc&limit=1000",{headers:apiHeaders(key)});

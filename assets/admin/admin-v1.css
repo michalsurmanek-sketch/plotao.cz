@@ -525,3 +525,5 @@ input::placeholder,textarea::placeholder{color:#98a69e}
 #settings .settings-favicon-actions .settings-message{flex:1}
 #settings #settingsFaviconSubmit:disabled{opacity:.65;cursor:wait}
 @media(max-width:560px){#settings .settings-favicon-actions{align-items:stretch;flex-direction:column}#settings .settings-favicon-actions button{width:100%}}
+
+.catalog-pagination{display:flex;justify-content:center;align-items:center;gap:14px;padding:14px 0}.catalog-pagination[hidden]{display:none!important}
