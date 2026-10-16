@@ -10,6 +10,13 @@ try {
   page.on('pageerror',error=>errors.push(error.message));
   await page.goto(base+'/komponenty.html');
   await page.waitForFunction(()=>window.PLOTAO_CART_READY===true);
+  const contained=await page.locator('.product-card').evaluateAll(cards=>cards.every(card=>{
+    const image=card.querySelector('.product-image img').getBoundingClientRect();
+    const frame=card.querySelector('.product-image').getBoundingClientRect();
+    const info=card.querySelector('.product-info').getBoundingClientRect();
+    return image.top>=frame.top-.5&&image.bottom<=frame.bottom+.5&&image.bottom<=info.top+.5;
+  }));
+  assert(contained,'Desktop product images must stay inside image area and above product text');
   const card=page.locator('.product-card').first();
   await card.locator('.pc-add').click();
   await card.locator('.pc-add').click();
