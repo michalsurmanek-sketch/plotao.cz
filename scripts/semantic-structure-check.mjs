@@ -1,7 +1,8 @@
 import fs from 'node:fs';
 
 const file='index.html';
-const html=fs.readFileSync(file,'utf8');
+const sharedFooter=fs.readFileSync('partials/plotao-footer.html','utf8').trim();
+const html=fs.readFileSync(file,'utf8').replaceAll('<!-- PLOTAO_SHARED_FOOTER -->',sharedFooter);
 const cleaned=html
   .replace(/<script\b[\s\S]*?<\/script>/gi,' ')
   .replace(/<style\b[\s\S]*?<\/style>/gi,' ');

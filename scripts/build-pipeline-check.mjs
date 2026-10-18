@@ -49,9 +49,9 @@ ok(workflow.includes('node scripts/prepare-pages.mjs'),'Pages workflow must use 
 ok(fs.existsSync(privacyPath),'privacy UI enrichment script must exist');
 ok(fs.existsSync('ochrana-osobnich-udaju.html'),'public privacy information page must exist');
 ok(workflow.includes('- name: Enrich production privacy UI')&&workflow.includes(`node ${privacyPath}`),'Pages workflow must enrich the prepared artifact with privacy UI');
-ok(privacy.includes('/ochrana-osobnich-udaju.html')&&privacy.includes('data-plotao-privacy-notice="1"')&&privacy.includes('data-plotao-privacy-link="1"'),'privacy enrichment must publish both lead-form notice and footer link');
-ok(privacy.includes('public page has no supported footer for privacy link')&&privacy.includes('public pages missing privacy footer link'),'privacy enrichment must hard-fail when any public HTML page cannot expose the footer privacy link');
-ok(privacy.includes('linkedPages.length!==expectedLinked.length')&&privacy.includes('privacy footer link on ${linkedPages.length}/${expectedLinked.length} public pages'),'privacy enrichment must verify complete public-page footer coverage after injection');
+ok(privacy.includes('/ochrana-osobnich-udaju.html')&&privacy.includes('data-plotao-privacy-notice="1"')&&privacy.includes('data-plotao-privacy-link="1"')&&privacy.includes('partials')&&privacy.includes('plotao-footer.html'),'privacy enrichment must publish lead-form notice and use the single shared footer partial');
+ok(privacy.includes('shared footer partial is missing its canonical markup or privacy link')&&privacy.includes('public pages missing privacy footer link'),'privacy enrichment must hard-fail if the shared footer is incomplete or any public page lacks its privacy link');
+ok(privacy.includes('actualFooter!==expectedFooter')&&privacy.includes('linkedPages.length!==expectedLinked.length')&&privacy.includes('privacy footer link on ${linkedPages.length}/${expectedLinked.length} public pages'),'privacy enrichment must verify complete public-page footer coverage after injection');
 ok(privacyPage.includes('Radek Šurmánek')&&privacyPage.includes('IČO 21138885')&&privacyPage.includes('Ochrana osobních údajů')&&privacyPage.includes('Vyřízení poptávky a příprava nabídky')&&privacyPage.includes('Vaše práva'),'privacy page must identify Radek Šurmánek as controller and explain purpose and data-subject rights');
 ok(privacyPage.includes('href="mailto:info@plotao.cz"')&&privacyPage.includes('>info@plotao.cz</a>'),'privacy page must expose the verified privacy contact email as a clickable mailto link');
 ok(privacyPage.includes('<!--email_off-->')&&privacyPage.includes('<!--/email_off-->'),'privacy controller mailto must be protected from Cloudflare email-obfuscation rewriting');
@@ -109,6 +109,11 @@ ok(!workflow.includes('npx playwright install --with-deps chromium'),'browser E2
 ok(workflow.includes('python3 -m http.server 4173 --directory dist'),'browser E2E must run against the exact prepared dist directory');
 ok(workflow.includes('PLOTAO_E2E_URL=http://127.0.0.1:4173 npm run browser:e2e'),'browser E2E must execute the repository smoke script against local dist');
 ok(fs.existsSync('scripts/browser-e2e.mjs'),'browser E2E smoke script must exist');
+ok(pagesPrepare.includes('partials/plotao-footer.html')&&pagesPrepare.includes('PLOTAO_SHARED_FOOTER'),'Pages build must expand the shared footer partial into every marked source page');
+for(const page of ['index.html','eshop.html','eshop-beton.html','eshop-brany.html','eshop-gabiony.html','eshop-hlinik.html','eshop-panely.html','eshop-pletivo.html','eshop-produkty.html','eshop-soukromi.html','komponenty.html']){
+  const source=fs.readFileSync(page,'utf8');
+  ok(source.includes('<!-- PLOTAO_SHARED_FOOTER -->')&&!source.includes('<footer id="plotaoFooter2026"'),page+' must use the shared footer partial instead of copied footer markup');
+}
 ok(pagesPrepare.includes('document.addEventListener("click",event=>{const menu=event.target.closest("header.site-header .menu-button")')&&pagesPrepare.includes('event.stopImmediatePropagation()'),'shared header must handle hamburger clicks in capture phase and suppress legacy duplicate handlers');
 ok(browser.includes("runScenario('mobile-menu-contact'")&&browser.includes("runScenario('mobile-menu-eshop-context'")&&browser.includes("second contextual menu tap must close navigation despite legacy page listeners"),'browser E2E must verify hamburger open/close behavior on contact and contextual e-shop headers');
 ok(browser.includes("runScenario('mobile-header-consistency-delivery-components'")&&browser.includes('mobile ${key} ${dimension} must match between delivery and components pages'),'browser E2E must enforce matching mobile header geometry on delivery and components pages');

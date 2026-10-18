@@ -4,6 +4,9 @@ import path from 'node:path';
 const htmlFiles=fs.readdirSync('.').filter(file=>file.endsWith('.html')).sort();
 const publicFiles=new Set([...htmlFiles,'robots.txt','sitemap.xml','CNAME']);
 const failures=[];
+const sharedFooterMarker='<!-- PLOTAO_SHARED_FOOTER -->';
+const sharedFooter=fs.readFileSync('partials/plotao-footer.html','utf8');
+const sharedFooterIds=new Set([...sharedFooter.matchAll(/\bid=["']([^"']+)["']/gi)].map(match=>match[1]));
 const forbiddenPrefixes=['/scripts/','/docs/','/supabase/','/.github/','/.git/'];
 const decode=value=>{try{return decodeURIComponent(value)}catch{return value}};
 
@@ -25,6 +28,7 @@ function existsPublic(target){
 for(const file of htmlFiles){
   const html=fs.readFileSync(file,'utf8');
   const ids=new Set([...html.matchAll(/\bid=["']([^"']+)["']/gi)].map(m=>m[1]));
+  if(html.includes(sharedFooterMarker))for(const id of sharedFooterIds)ids.add(id);
   for(const match of html.matchAll(/<a\b[^>]*\bhref=["']([^"']*)["'][^>]*>/gi)){
     const href=match[1].trim();
     if(!href||href.startsWith('mailto:')||href.startsWith('tel:')||href.startsWith('https://')||href.startsWith('http://'))continue;
@@ -39,6 +43,7 @@ for(const file of htmlFiles){
       if(targetHtml.endsWith('.html')){
         const targetSource=targetHtml===file?html:fs.readFileSync(targetHtml,'utf8');
         const targetIds=targetHtml===file?ids:new Set([...targetSource.matchAll(/\bid=["']([^"']+)["']/gi)].map(m=>m[1]));
+        if(targetSource.includes(sharedFooterMarker))for(const id of sharedFooterIds)targetIds.add(id);
         if(!targetIds.has(fragment))failures.push(`${file}: missing fragment #${fragment} in ${targetHtml}`);
       }
     }

@@ -4,21 +4,23 @@ const root='dist';
 if(!fs.existsSync(root))throw new Error('Privacy UI: dist/ is missing');
 const privacyPage='ochrana-osobnich-udaju.html';
 const noPublicFooterPages=new Set([privacyPage,'nabidka-rozhodnuti.html']);
-const privacyHref='/ochrana-osobnich-udaju.html';
-const footerLink=`<a data-plotao-privacy-link="1" href="${privacyHref}">Ochrana osobních údajů</a>`;
 const publicHtml=fs.readdirSync(root).filter(name=>name.endsWith('.html')&&name!=='admin.html').sort();
 let injectedCount=0;
-for(const file of publicHtml){const full=path.join(root,file);let html=fs.readFileSync(full,'utf8');if(!noPublicFooterPages.has(file)&&!html.includes('data-plotao-privacy-link="1"')){if(html.includes('class="foot-bottom"'))html=html.replace(/(<div class="foot-bottom">\s*<span>[^<]*<\/span>)/i,`$1${footerLink}`);else if(/<footer\b[^>]*>[\s\S]*?<\/footer>/i.test(html))html=html.replace(/<\/footer>/i,` · ${footerLink}</footer>`);else throw new Error(`Privacy UI: public page has no supported footer for privacy link: ${file}`);if(!html.includes('data-plotao-privacy-link="1"'))throw new Error(`Privacy UI: could not inject footer link into ${file}`);injectedCount++}fs.writeFileSync(full,html,'utf8')}
+const sharedFooterPath=path.join('partials','plotao-footer.html');
+const sharedFooterSource=fs.readFileSync(sharedFooterPath,'utf8').trim();
+if(!sharedFooterSource.startsWith('<footer id="plotaoFooter2026"')||!sharedFooterSource.includes('data-plotao-privacy-link="1"'))throw new Error('Unified footer: shared footer partial is missing its canonical markup or privacy link');
+const canonicalFooter=sharedFooterSource.replace('href="#kalkulator"','href="/#kalkulator"').replace(/href="#partner"/g,'href="/#partner"');
 const indexFile=path.join(root,'index.html');let index=fs.readFileSync(indexFile,'utf8');
 const notice='<p class="privacy-note" data-plotao-privacy-notice="1">Údaje použijeme pouze k vyřízení vašeho požadavku. <a href="/ochrana-osobnich-udaju.html">Jak chráníme osobní údaje</a>.</p>';
 if(!index.includes('data-plotao-privacy-notice="1"'))index=index.replace('<button class="send" type="submit">Připravit poptávku</button>',`${notice}<button class="send" type="submit">Připravit poptávku</button>`);
 if(!index.includes('data-plotao-privacy-notice="1"'))throw new Error('Privacy UI: lead-form privacy notice could not be injected');
 if(!index.includes('data-plotao-privacy-style="1"'))index=index.replace('</head>','<style data-plotao-privacy-style="1">.privacy-note{margin:2px 0 12px;color:#5d6f65;font-size:12px;line-height:1.45}.privacy-note a{color:#087443;font-weight:800}</style></head>');
-const footer=`<footer id="plotaoFooter2026"><div class="pf"><div class="pf-top"><div class="pf-brand"><a class="pf-logo" href="/"><img src="/assets/logo-plotao-inverse.svg" alt="PLOTAO.CZ"></a><div class="pf-sub">Kalkulátor plotů pro celou ČR</div><p>Spočítejte potřebný materiál a orientační cenu oplocení. Přesnou nabídku doladíme podle terénu, přístupu a místa realizace.</p></div><div class="pf-slogan">Lepší<br>ploty pro<br>lepší domov<i></i></div></div><div class="pf-rule"></div><div class="pf-nav"><nav><h3>Druhy oplocení</h3><a href="/panelovy-plot.html"><span class="thumb panel"></span><span>Panelové ploty<br>2D a 3D</span><em>›</em></a><a href="/pletivovy-plot.html"><span class="thumb mesh"></span><span>Pletivové ploty</span><em>›</em></a><a href="/betonovy-plot.html"><span class="thumb concrete"></span><span>Betonové ploty</span><em>›</em></a><a href="/gabionovy-plot.html"><span class="thumb gabion"></span><span>Gabionové ploty</span><em>›</em></a><a href="/hlinikovy-plot.html"><span class="thumb alu"></span><span>Hliníkové ploty</span><em>›</em></a></nav><nav><h3>Další možnosti</h3><a href="#kalkulator"><span class="ico">▦</span><span>Kalkulátor plotu</span><em>›</em></a><a href="#partner"><span class="ico">⚙</span><span>Montáž a služby</span><em>›</em></a><a href="#partner"><span class="ico">▱</span><span>Doprava</span><em>›</em></a><a href="/navody-a-rady.html"><span class="ico">▤</span><span>Návody a rady</span><em>›</em></a><a href="/ochrana-osobnich-udaju.html"><span class="ico">♢</span><span>Ochrana osobních údajů</span><em>›</em></a><a href="/kontakt.html"><span class="ico">✉</span><span>Kontakt</span><em>›</em></a><a href="/"><span class="ico">ⓘ</span><span>O nás</span><em>›</em></a></nav></div><div class="pf-benefits"><div><b>♜</b><span>Rychlá<br>kalkulace</span></div><div><b>♢</b><span>Ověřené<br>produkty</span></div><div><b>⌖</b><span>Dodání<br>po celé ČR</span></div></div><div class="pf-rule"></div><div class="pf-news"><div class="news-title"><b>✉</b><span><strong>Novinky a slevy</strong><small>Buďte první, kdo ví o akcích</small></span></div><form onsubmit="return false"><input type="email" aria-label="Váš e-mail" placeholder="Váš e-mail"><button type="submit">Přihlásit se</button></form></div><div class="pf-rule"></div><div class="pf-bottom"><div class="social"><a href="#" aria-label="Facebook">f</a><a href="#" aria-label="Instagram">◎</a><a href="#" aria-label="YouTube">▶</a></div><div>© 2026 Plotao.cz<br>Kalkulátor plotů pro celou ČR</div></div></div></footer>`;
-if(!index.includes('id="plotaoFooter2026"'))index=index.replace(/<footer\b[^>]*>[\s\S]*?<\/footer>/i,footer);
-if(!index.includes('id="plotaoFooter2026"'))throw new Error('Footer 2026 injection failed');
 if(!index.includes('data-plotao-footer-2026-css="1"'))index=index.replace('</head>','<link data-plotao-footer-2026-css="1" rel="stylesheet" href="/assets/footer-2026.css"></head>');
 index=index.replace('<span>Orientačně</span><strong id="stickyTotal">—</strong>','<span>Cena materiálu</span><strong id="stickyTotal">—</strong>').replace('<button id="continueBtn">Výsledek →</button>','<button id="continueBtn">Zobrazit rozpis →</button>');
+const indexFooterPattern=/<footer\b[^>]*>[\s\S]*?<\/footer>/i;
+if(indexFooterPattern.test(index))index=index.replace(indexFooterPattern,canonicalFooter);
+else index=index.replace(/<\/body>/i,canonicalFooter+'</body>');
+if(!index.includes('id="plotaoFooter2026"'))throw new Error('Unified footer: canonical footer could not be placed on homepage');
 fs.writeFileSync(indexFile,index,'utf8');
 
 function splitCssBlocks(css){
@@ -44,9 +46,6 @@ function selectFooterCss(css){
     return selected.map(s=>/#plotaoFooter2026\b/.test(s)?s:'#plotaoFooter2026 '+s).map(s=>s+'{'+body+'}').join('');
   }).filter(Boolean).join('\n');
 }
-const canonicalMatch=index.match(/<footer\b[^>]*>[\s\S]*?<\/footer>/i);
-if(!canonicalMatch)throw new Error('Unified footer: main page footer is missing');
-const canonicalFooter=canonicalMatch[0].replace('href="#kalkulator"','href="/#kalkulator"').replace(/href="#partner"/g,'href="/#partner"');
 const sourceFooterCss=fs.readFileSync(path.join(root,'assets/footer-2026.css'),'utf8');
 const unifiedFooterCss=selectFooterCss(sourceFooterCss);
 if(!unifiedFooterCss.includes('#plotaoFooter2026')||unifiedFooterCss.includes('.mobile-price')||unifiedFooterCss.includes('.more '))throw new Error('Unified footer: footer CSS scoping validation failed');
@@ -54,8 +53,7 @@ let unifiedFooterCount=0;
 for(const file of publicHtml){
   const full=path.join(root,file);
   let html=fs.readFileSync(full,'utf8');
-  if(file==='index.html')html=html.replace(canonicalMatch[0],canonicalFooter);
-  else if(/<footer\b[^>]*>[\s\S]*?<\/footer>/i.test(html))html=html.replace(/<footer\b[^>]*>[\s\S]*?<\/footer>/i,canonicalFooter);
+  if(/<footer\b[^>]*>[\s\S]*?<\/footer>/i.test(html))html=html.replace(/<footer\b[^>]*>[\s\S]*?<\/footer>/i,canonicalFooter);
   else html=html.replace(/<\/body>/i,canonicalFooter+'</body>');
   if(!html.includes('data-plotao-unified-footer="1"')){
     html=html.replace(canonicalFooter,canonicalFooter.replace('<footer id="plotaoFooter2026">','<footer id="plotaoFooter2026" data-plotao-unified-footer="1">'));
@@ -63,6 +61,9 @@ for(const file of publicHtml){
   if(!html.includes('</head>'))throw new Error('Unified footer: missing </head> in '+file);
   if(!html.includes('data-plotao-unified-footer-css="1"'))html=html.replace('</head>','<style data-plotao-unified-footer-css="1">'+unifiedFooterCss+'</style></head>');
   if(!html.includes('data-plotao-unified-footer="1"'))throw new Error('Unified footer: canonical footer missing in '+file);
+  const actualFooter=html.match(/<footer\b[^>]*>[\s\S]*?<\/footer>/i)?.[0];
+  const expectedFooter=canonicalFooter.replace('<footer id="plotaoFooter2026">','<footer id="plotaoFooter2026" data-plotao-unified-footer="1">');
+  if(actualFooter!==expectedFooter)throw new Error('Unified footer: rendered footer differs from shared source on '+file);
   fs.writeFileSync(full,html,'utf8');
   unifiedFooterCount++;
 }

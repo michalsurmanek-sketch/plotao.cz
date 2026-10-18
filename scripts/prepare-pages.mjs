@@ -3,8 +3,11 @@ import {createHash} from 'node:crypto';
 import {deflateSync,inflateSync} from 'node:zlib';
 import {activeScripts,requiredArtifact,forbiddenArtifact} from './pages-manifest.mjs';
 
+const sharedFooterMarker='<!-- PLOTAO_SHARED_FOOTER -->';
+const sharedFooterTemplate=fs.readFileSync('partials/plotao-footer.html','utf8').trim();
+if(!sharedFooterTemplate.startsWith('<footer id="plotaoFooter2026"'))throw new Error('Shared footer partial is missing or malformed');
 const path='index.html';
-let html=fs.readFileSync(path,'utf8');
+let html=fs.readFileSync(path,'utf8').replaceAll(sharedFooterMarker,sharedFooterTemplate);
 const sha=process.env.GITHUB_SHA||'unknown';
 const structuredData={
   '@context':'https://schema.org',
@@ -219,7 +222,7 @@ function applyCalculatorEshopHeader(page){
 
 const sharedHeaderController='<script data-plotao-shared-header-controller="1">(()=>{const headers=[...document.querySelectorAll("header.site-header")];if(!headers.length)return;const setMenuOpen=(header,open)=>{const nav=header.querySelector(".main-nav"),menu=header.querySelector(".menu-button");if(!nav)return;nav.classList.toggle("open",open);if(menu){menu.setAttribute("aria-expanded",String(open));menu.setAttribute("aria-label",open?"Zavřít menu":"Otevřít menu")}};document.addEventListener("click",event=>{const menu=event.target.closest("header.site-header .menu-button");if(menu){const header=menu.closest("header.site-header"),nav=header?.querySelector(".main-nav");if(!nav)return;setMenuOpen(header,!nav.classList.contains("open"));event.preventDefault();event.stopImmediatePropagation();return}const link=event.target.closest("header.site-header .main-nav a");if(link){setMenuOpen(link.closest("header.site-header"),false);return}headers.forEach(header=>{if(!header.contains(event.target))setMenuOpen(header,false)})},true);document.addEventListener("keydown",event=>{if(event.key==="Escape")headers.forEach(header=>setMenuOpen(header,false))});const header=document.querySelector("body>header.site-header");if(!header)return;const searchToggle=header.querySelector(".mobile-search-icon"),main=header.querySelector(".header-main"),search=header.querySelector("#shopSearch");searchToggle?.addEventListener("click",event=>{event.stopImmediatePropagation();const open=!main.classList.contains("search-open");main.classList.toggle("search-open",open);searchToggle.setAttribute("aria-expanded",String(open));searchToggle.setAttribute("aria-label",open?"Zavřít vyhledávání":"Otevřít vyhledávání");if(open)search?.focus();else search?.blur()},true)})();</script>';
 for(const file of fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort()){
-  let page=fs.readFileSync(file,'utf8');
+  let page=fs.readFileSync(file,'utf8').replaceAll(sharedFooterMarker,sharedFooterTemplate);
   page=page.replace('</head>','<style data-plotao-desktop-product-images="1">@media(min-width:801px){.product-card>.product-image{overflow:hidden;min-height:0;grid-template-rows:minmax(0,1fr)}.product-card>.product-image>img{display:block;min-width:0;min-height:0;max-height:100%}}</style></head>');
   page=page.replace('</body>','<script defer src="'+versionedScript('/assets/cart-v1.js')+'"></script></body>');
   page=page.replace('</head>','<style data-plotao-header-divider="1">body>header,#eshopContextHeader>header.site-header{box-shadow:0 1px 0 #08744366!important}</style></head>');
