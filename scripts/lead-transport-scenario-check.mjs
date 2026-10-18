@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import {createRequire} from 'node:module';
 import vm from 'node:vm';
+import {activeScripts} from './pages-manifest.mjs';
 const require=createRequire(import.meta.url),core=require('../assets/lead-transport-core-v1.js');
 const fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 const payload={schemaVersion:2,mode:'lead',name:'Jan Novák',phone:'+420777123456',email:'jan@example.cz',place:'Praha',note:'Test'};
@@ -47,7 +48,7 @@ ok(modalCss.includes('#modal .modalbox{max-height:calc(100vh - 30px);max-height:
 const corePos=manifest.indexOf('/assets/lead-transport-core-v1.js'),configPos=manifest.indexOf('/assets/lead-transport-config-v1.js'),adapterPos=manifest.indexOf('/assets/lead-transport-v1.js'),safetyPos=manifest.indexOf('/assets/lead-safety-v1.js');
 ok(corePos>=0&&corePos<configPos&&configPos<adapterPos&&adapterPos<safetyPos,'production build must load transport core, explicit config, adapter, then form safety');
 ok(!index.includes('PLOTAO_LEAD_TRANSPORT_CONFIG'),'HTML must not inline backend configuration or secrets');
-ok((index.match(/src="\/assets\/lead-transport-v1\.js/g)||[]).length===1,'homepage must load exactly one active network transport implementation');
+ok(activeScripts.filter(src=>src==='/assets/lead-transport-v1.js').length===1,'homepage manifest must load exactly one active network transport implementation');
 ok(!index.includes('v=body-20260930'),'homepage must not reload the transport later and replace its hardened implementation');
 
 if(fail.length){console.error('Lead transport scenario checks failed:\n- '+fail.join('\n- '));process.exit(1)}

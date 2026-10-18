@@ -18,6 +18,7 @@ const socialArtifactPath='scripts/social-artifact-check.mjs';
 const socialArtifact=fs.readFileSync(socialArtifactPath,'utf8');
 const performancePath='scripts/performance-budget-check.mjs';
 const pagesPrepare=fs.readFileSync('scripts/prepare-pages.mjs','utf8');
+const sharedFooterPartial=fs.readFileSync('partials/plotao-footer.html','utf8');
 const leadTransportScenario=fs.readFileSync('scripts/lead-transport-scenario-check.mjs','utf8');
 const unifiedHeaderCss=fs.readFileSync('assets/eshop-header-unified.css','utf8');
 const performance=fs.readFileSync(performancePath,'utf8');
@@ -111,6 +112,7 @@ ok(workflow.includes('python3 -m http.server 4173 --directory dist'),'browser E2
 ok(workflow.includes('PLOTAO_E2E_URL=http://127.0.0.1:4173 npm run browser:e2e'),'browser E2E must execute the repository smoke script against local dist');
 ok(fs.existsSync('scripts/browser-e2e.mjs'),'browser E2E smoke script must exist');
 ok(pagesPrepare.includes('partials/plotao-footer.html')&&pagesPrepare.includes('PLOTAO_SHARED_FOOTER'),'Pages build must expand the shared footer partial into every marked source page');
+ok(!sharedFooterPartial.includes('<script'),'shared footer partial must contain markup only; page scripts load once from the production asset manifest');
 ok(leadTransportScenario.includes('PLOTAO_SHARED_FOOTER')&&leadTransportScenario.includes('indexSource.replace'),'lead transport source check must inspect the expanded shared footer when counting homepage network scripts');
 for(const page of ['index.html','eshop.html','eshop-beton.html','eshop-brany.html','eshop-gabiony.html','eshop-hlinik.html','eshop-panely.html','eshop-pletivo.html','eshop-produkty.html','eshop-soukromi.html','komponenty.html']){
   const source=fs.readFileSync(page,'utf8');
