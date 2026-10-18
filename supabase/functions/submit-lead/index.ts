@@ -223,7 +223,7 @@ export default {
             : lead.mode === 'partner'
               ? 'Děkujeme za zájem o spolupráci. Vaši zprávu jsme předali k vyřízení a ozveme se vám.'
               : 'Vaši poptávku jsme v pořádku přijali. Prověříme zadané informace a ozveme se vám s dalším postupem.'
-          const message = 'Dobrý den, ' + lead.name + ',\n\n' + detail + '\n\nDěkujeme, že jste se obrátili na PLOTAO.cz.\n\nS pozdravem,\nPLOTAO.cz\nPlotové centrum\nhttps://plotao.cz'
+          const message = 'Dobrý den, ' + lead.name + ',\n\n' + detail + '\n\nDěkujeme, že jste se obrátili na PLOTAO.cz.\n\nNajděte nejbližší prodejnu: https://plotao.cz/doprava.html\n\nS pozdravem,\nPLOTAO.cz\nPlotové centrum\nhttps://plotao.cz'
           try {
             const mailResponse = await fetch('https://api.resend.com/emails', {
               method: 'POST',
@@ -238,6 +238,7 @@ export default {
                 reply_to: 'michalsurmanek@seznam.cz',
                 subject,
                 text: message,
+                html: `<div style="font-family:Arial,Helvetica,sans-serif;color:#24312c;line-height:1.6;max-width:680px;margin:0 auto"><p>Dobrý den, ${lead.name},</p><p>${detail}</p><p>Děkujeme, že jste se obrátili na <a href="https://plotao.cz" style="color:#d86c19">PLOTAO.cz</a>.</p><a href="https://plotao.cz/doprava.html" style="display:block;text-decoration:none"><img src="https://plotao.cz/assets/email-network-banner.png" alt="Největší síť prodejen PLOTAO v ČR. Kliknutím najdete nejbližší prodejnu." width="691" style="display:block;width:100%;max-width:691px;height:auto;border:0;border-radius:16px"></a><p style="text-align:center;margin:12px 0 24px"><a href="https://plotao.cz/doprava.html" style="display:inline-block;background:#f47712;color:#fff;text-decoration:none;font-weight:bold;padding:12px 20px;border-radius:8px">Najít nejbližší prodejnu →</a></p><p>S pozdravem,<br>PLOTAO.cz<br>Plotové centrum<br><a href="https://plotao.cz">https://plotao.cz</a></p></div>`,
               }),
             })
             let mailData: Record<string, unknown> = {}
