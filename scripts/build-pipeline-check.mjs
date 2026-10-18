@@ -108,6 +108,8 @@ ok(!workflow.includes('npx playwright install --with-deps chromium'),'browser E2
 ok(workflow.includes('python3 -m http.server 4173 --directory dist'),'browser E2E must run against the exact prepared dist directory');
 ok(workflow.includes('PLOTAO_E2E_URL=http://127.0.0.1:4173 npm run browser:e2e'),'browser E2E must execute the repository smoke script against local dist');
 ok(fs.existsSync('scripts/browser-e2e.mjs'),'browser E2E smoke script must exist');
+ok(pagesPrepare.includes('document.addEventListener("click",event=>{const menu=event.target.closest("header.site-header .menu-button")')&&pagesPrepare.includes('event.stopImmediatePropagation()'),'shared header must handle hamburger clicks in capture phase and suppress legacy duplicate handlers');
+ok(browser.includes("runScenario('mobile-menu-contact'")&&browser.includes("runScenario('mobile-menu-eshop-context'")&&browser.includes("second contextual menu tap must close navigation despite legacy page listeners"),'browser E2E must verify hamburger open/close behavior on contact and contextual e-shop headers');
 ok(pkg?.private===true&&pkg?.scripts?.['browser:e2e']==='node scripts/browser-e2e.mjs','package.json must keep browser E2E tooling private and expose the expected smoke command');
 ok(pkg?.devDependencies?.playwright==='1.63.0','Playwright must stay pinned to the reviewed 1.63.0 version instead of floating latest');
 for(const type of ['panel','mesh','concrete','privacy','aluminium','gabion','metal','masonry','mobile','other'])ok(browser.includes(`selectType(page,'${type}'`),`browser E2E must exercise fence type ${type}`);

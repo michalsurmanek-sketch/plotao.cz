@@ -286,6 +286,35 @@ if(failures.length){
 console.log('Browser E2E OK: all 10 fence types plus desktop, 390px mobile, closed rectangle/square plot mode, keyboard skip navigation and privacy flows passed without browser-console or same-origin request failures');
 
 
+await runScenario('mobile-menu-contact',{width:390,height:844},async page=>{
+  await page.goto(baseUrl+'/kontakt.html',{waitUntil:'networkidle'});
+  const header=page.locator('body>header.site-header');
+  const button=header.locator('.menu-button');
+  const nav=header.locator('.main-nav');
+  await button.click();
+  assert(await nav.evaluate(el=>el.classList.contains('open')),'mobile menu tap on contact page must open the navigation');
+  assert(await button.getAttribute('aria-expanded')==='true','open mobile menu must expose aria-expanded=true');
+  await button.click();
+  assert(!(await nav.evaluate(el=>el.classList.contains('open'))),'second mobile menu tap on contact page must close the navigation');
+  assert(await button.getAttribute('aria-expanded')==='false','closed mobile menu must expose aria-expanded=false');
+  await button.click();
+  await page.keyboard.press('Escape');
+  assert(!(await nav.evaluate(el=>el.classList.contains('open'))),'Escape must close the mobile navigation');
+});
+
+await runScenario('mobile-menu-eshop-context',{width:390,height:844},async page=>{
+  await page.goto(baseUrl+'/?e2e=1&from=eshop',{waitUntil:'networkidle'});
+  await page.waitForFunction(()=>window.PLOTAO_UI_READY===true,null,{timeout:10000});
+  const header=page.locator('#eshopContextHeader');
+  const button=header.locator('.menu-button');
+  const nav=header.locator('.main-nav');
+  await button.click();
+  assert(await nav.evaluate(el=>el.classList.contains('open')),'mobile menu tap on contextual e-shop header must open navigation');
+  assert(await button.getAttribute('aria-expanded')==='true','contextual open menu must expose aria-expanded=true');
+  await button.click();
+  assert(!(await nav.evaluate(el=>el.classList.contains('open'))),'second contextual menu tap must close navigation despite legacy page listeners');
+});
+
 await runScenario('mobile-search-toggle',{width:390,height:844},async page=>{
   await page.goto(baseUrl+'/?e2e=1&from=eshop',{waitUntil:'networkidle'});
   await page.waitForFunction(()=>window.PLOTAO_UI_READY===true,null,{timeout:10000});
