@@ -271,11 +271,11 @@ await runScenario('mobile-390',{width:390,height:844},async page=>{
   assert(await privacyH1.isVisible(),'privacy page H1 must be visible in browser');
   assert((await text(privacyH1))==='Ochrana osobních údajů','privacy page must expose the expected H1');
   const privacyBody=await text(page.locator('body'));
-  assert(privacyBody.includes('AO Holding s.r.o.'),'privacy page must identify AO Holding s.r.o. as controller');
+  assert(privacyBody.includes('Radek Šurmánek, podnikající fyzická osoba')&&privacyBody.includes('IČO 21138885')&&privacyBody.includes('Halenkovice 551, 763 63'),'privacy page must identify registered controller Radek Šurmánek with IČO and address');
   const controllerEmail=page.locator('a[href="mailto:info@slevao.cz"]');
   assert(await controllerEmail.isVisible(),'privacy page must expose a visible verified controller email');
   assert((await text(controllerEmail))==='info@slevao.cz','privacy controller email text must match the verified address');
-  assert(privacyBody.includes('Poptávkový formulář PLOTAO.cz není určen pro žádosti týkající se ochrany osobních údajů.'),'privacy page must not route data-subject requests into the disabled lead form');
+  assert(privacyBody.includes('Supabase')&&privacyBody.includes('žádosti o uplatnění vašich práv'),'privacy page must explain data storage and provide a privacy request route');
   assert(await page.locator('a[href="/#kalkulator"]').first().isVisible(),'privacy page must offer a visible route back to the calculator');
 });
 
