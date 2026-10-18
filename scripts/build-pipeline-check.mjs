@@ -112,7 +112,7 @@ ok(pkg?.private===true&&pkg?.scripts?.['browser:e2e']==='node scripts/browser-e2
 ok(pkg?.devDependencies?.playwright==='1.63.0','Playwright must stay pinned to the reviewed 1.63.0 version instead of floating latest');
 for(const type of ['panel','mesh','concrete','privacy','aluminium','gabion','metal','masonry','mobile','other'])ok(browser.includes(`selectType(page,'${type}'`),`browser E2E must exercise fence type ${type}`);
 ok(browser.includes("runScenario('desktop',{width:1440,height:1000}")&&browser.includes("runScenario('mobile-390',{width:390,height:844}"),'browser E2E must protect both desktop and 390px mobile flows');
-ok(browser.includes('data-plotao-privacy-notice=')&&browser.includes('/ochrana-osobnich-udaju.html')&&browser.includes('AO Holding s.r.o.')&&browser.includes('mailto:info@slevao.cz')&&browser.includes('Poptávkový formulář PLOTAO.cz není určen'),'browser E2E must verify the privacy notice, controller, verified email and disabled-form boundary');
+ok(browser.includes('data-plotao-privacy-notice=')&&browser.includes('/ochrana-osobnich-udaju.html')&&browser.includes('Radek Šurmánek')&&browser.includes('IČO 21138885')&&browser.includes('mailto:info@slevao.cz'),'browser E2E must verify the privacy notice, correct controller identity and contact email');
 ok(workflow.includes('uses: actions/upload-pages-artifact@v5')&&workflow.includes('path: dist'),'Pages workflow must upload only the strict public dist directory with the Node 24 Pages artifact action');
 ok(workflow.includes('uses: actions/deploy-pages@v5'),'Pages workflow must deploy with the Node 24 deploy-pages major');
 ok(workflow.includes('name: github-pages-${{ github.run_attempt }}'),'Pages artifact name must include run_attempt so a retry cannot create ambiguous duplicate github-pages artifacts');
@@ -135,8 +135,8 @@ ok(smoke.includes('https://plotao.cz/?sha=${EXPECTED_SHA}'),'standalone live smo
 ok(smoke.includes('name=\\"plotao-deploy\\" content=\\"${EXPECTED_SHA}\\"'),'standalone live smoke must require the exact deploy SHA meta tag in HTML');
 ok(smoke.includes('privacy_url="https://plotao.cz/ochrana-osobnich-udaju.html?sha=${EXPECTED_SHA}"'),'standalone live smoke must fetch the public privacy page with cache busting');
 ok(smoke.includes('expected_privacy_href=')&&smoke.includes('expected_privacy_link=')&&smoke.includes('expected_privacy_notice='),'standalone live smoke must verify privacy href, footer marker and lead-form notice on the live homepage');
-ok(smoke.includes('expected_controller_email=')&&smoke.includes('mailto:info@slevao.cz')&&smoke.includes('expected_form_boundary='),'standalone live smoke must require the verified controller email and disabled-form privacy boundary');
-ok(smoke.includes('<h1>Ochrana osobních údajů</h1>')&&smoke.includes('AO Holding s.r.o.'),'standalone live smoke must verify privacy page identity and controller');
+ok(smoke.includes('expected_controller_identity=')&&smoke.includes('Radek Šurmánek')&&smoke.includes('expected_controller_ico=')&&smoke.includes('IČO 21138885')&&smoke.includes('expected_controller_address=')&&smoke.includes('Halenkovice 551, 763 63')&&smoke.includes('expected_controller_email=')&&smoke.includes('mailto:info@slevao.cz')&&smoke.includes('expected_form_boundary='),'standalone live smoke must verify correct controller identity and contact');
+ok(smoke.includes('<h1>Ochrana osobních údajů</h1>')&&smoke.includes('expected_controller_identity')&&smoke.includes('expected_controller_ico')&&smoke.includes('expected_controller_address'),'standalone live smoke must verify privacy page identity and controller');
 ok(smoke.includes('privacy_ok=0')&&smoke.includes('[ "$privacy_ok" = 1 ]'),'standalone live smoke must make privacy information a hard success condition');
 const unique=new Set(activeScripts);
 ok(unique.size===activeScripts.length,'Pages manifest must not contain duplicate script entries');
