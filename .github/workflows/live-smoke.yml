@@ -27,8 +27,11 @@ jobs:
           expected_privacy_link='data-plotao-privacy-link="1"'
           expected_privacy_notice='data-plotao-privacy-notice="1"'
           expected_privacy_robots='<meta name="robots" content="noindex,follow">'
+          expected_controller_identity='Radek Šurmánek, podnikající fyzická osoba'
+          expected_controller_ico='IČO 21138885'
+          expected_controller_address='Halenkovice 551, 763 63'
           expected_controller_email='<a href="mailto:info@slevao.cz">info@slevao.cz</a>'
-          expected_form_boundary='Poptávkový formulář PLOTAO.cz není určen pro žádosti týkající se ochrany osobních údajů.'
+          expected_form_boundary='Pro dotazy k ochraně osobních údajů nebo uplatnění vašich práv napište správci'
           social_pages=(
             "/|panelovy-3d.webp"
             "/typy-plotu.html|panelovy-3d.webp"
@@ -160,7 +163,9 @@ jobs:
             contains "$page" "$expected_privacy_link" && home_privacy_link_ok=1 || true
             contains "$page" "$expected_privacy_notice" && home_privacy_notice_ok=1 || true
             contains "$privacy" '<h1>Ochrana osobních údajů</h1>' && privacy_h1_ok=1 || true
-            contains "$privacy" 'AO Holding s.r.o.' && privacy_controller_ok=1 || true
+            contains "$privacy" "$expected_controller_identity" \
+              && contains "$privacy" "$expected_controller_ico" \
+              && contains "$privacy" "$expected_controller_address" && privacy_controller_ok=1 || true
             contains "$privacy" "$expected_controller_email" && privacy_email_ok=1 || true
             contains "$privacy" "$expected_form_boundary" && privacy_boundary_ok=1 || true
             contains "$privacy" "$expected_privacy_robots" && privacy_robots_ok=1 || true
@@ -184,5 +189,5 @@ jobs:
             echo "Attempt $attempt: marker_ok=$marker_ok html_ok=$html_ok privacy_ok=$privacy_ok home_href=$home_privacy_href_ok home_link=$home_privacy_link_ok home_notice=$home_privacy_notice_ok privacy_h1=$privacy_h1_ok privacy_controller=$privacy_controller_ok privacy_email=$privacy_email_ok privacy_boundary=$privacy_boundary_ok privacy_robots=$privacy_robots_ok expected=$EXPECTED_SHA actual=${actual:-<empty>}"
             sleep 10
           done
-          echo "plotao.cz did not expose the expected deploy marker, HTML identity, privacy noindex/sitemap state, verified controller contact, privacy information, social previews and sanitized landing structured data consistently"
+          echo "plotao.cz did not expose the expected deploy marker, HTML identity, privacy noindex/sitemap state, verified controller identity and contact, privacy information, social previews and sanitized landing structured data consistently"
           exit 1
