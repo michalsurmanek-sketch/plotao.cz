@@ -79,7 +79,8 @@ body>header.site-header .menu-button{display:none!important}
 @media(max-width:800px){
  body>header.site-header{top:43px!important}
  body>header.site-header .header-main{
-  position:relative!important;width:calc(100% - 32px)!important;height:64px!important;min-height:64px!important;
+  position:relative!important;width:calc(100% - 40px)!important;min-width:0!important;margin-left:auto!important;margin-right:auto!important;
+  height:64px!important;min-height:64px!important;
   grid-template-columns:minmax(0,1fr) auto!important;grid-template-rows:64px!important;
   grid-template-areas:"brand tools"!important;gap:0 10px!important;padding:0!important;
  }
@@ -87,8 +88,8 @@ body>header.site-header .menu-button{display:none!important}
  body>header.site-header .brand img{width:min(56vw,220px)!important;max-height:54px!important;object-fit:contain!important}
  body>header.site-header .search-area{display:none!important}
  body>header.site-header .header-actions{display:none!important}
- body>header.site-header .mobile-tools{grid-area:tools!important;display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:14px!important}
- body>header.site-header .mobile-search-icon,body>header.site-header .menu-button{
+ body>header.site-header .mobile-tools{grid-area:tools!important;display:flex!important;align-items:center!important;justify-content:flex-end!important;width:auto!important;gap:14px!important}
+ body>header.site-header .pa-mobile-advice,body>header.site-header .mobile-search-icon,body>header.site-header .menu-button{
   display:grid!important;place-items:center!important;width:42px!important;height:42px!important;margin:0!important;padding:0!important;
   border:0!important;border-radius:10px!important;background:transparent!important;color:#075846!important;box-shadow:none!important;
  }
@@ -154,8 +155,7 @@ body>header.site-header .main-nav:has(a[href^="/?from=eshop"].active) a[href^="/
 
 /* Correct the active configurator underline in the nested calculator header. */
 #eshopContextHeader .main-nav a[href^="/?from=eshop"].active:after{bottom:-30px!important}
-/* Align the mobile logo with the page content column. */
-@media(max-width:1100px){body>header.site-header .header-main{width:calc(100% - clamp(40px,10.5vw,108px))!important;padding-left:0!important;padding-right:0!important}}
+/* Keep the mobile header grid identical on every page, regardless of its page-level .wrap styles. */
 /* Compensate transparent left padding inside the PLOTAO logo artwork on mobile. */
 @media(max-width:800px){body>header.site-header .brand img{transform:translateX(-8.7%)!important}}
 

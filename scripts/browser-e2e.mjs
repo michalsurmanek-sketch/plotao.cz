@@ -312,6 +312,20 @@ await runScenario('mobile-menu-contact',{width:390,height:844},async page=>{
   assert(!(await nav.evaluate(el=>el.classList.contains('open'))),'Escape must close the mobile navigation');
 });
 
+await runScenario('mobile-header-consistency-delivery-components',{width:390,height:844},async page=>{
+  const readGeometry=async()=>page.locator('body>header.site-header').evaluate(header=>{
+    const rect=selector=>{const element=header.querySelector(selector),box=element.getBoundingClientRect();return{x:box.x,y:box.y,width:box.width,height:box.height}};
+    return{header:rect('.header-main'),logo:rect('.brand img'),advice:rect('.pa-mobile-advice'),search:rect('.mobile-search-icon'),menu:rect('.menu-button')};
+  });
+  await page.goto(baseUrl+'/doprava.html',{waitUntil:'networkidle'});
+  const delivery=await readGeometry();
+  await page.goto(baseUrl+'/komponenty.html',{waitUntil:'networkidle'});
+  const components=await readGeometry();
+  for(const key of Object.keys(delivery))for(const dimension of ['x','y','width','height']){
+    assert(Math.abs(delivery[key][dimension]-components[key][dimension])<=1,`mobile ${key} ${dimension} must match between delivery and components pages`);
+  }
+});
+
 await runScenario('mobile-menu-eshop-context',{width:390,height:844},async page=>{
   await page.goto(baseUrl+'/?e2e=1&from=eshop',{waitUntil:'networkidle'});
   await page.waitForFunction(()=>window.PLOTAO_UI_READY===true,null,{timeout:10000});
