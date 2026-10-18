@@ -94,6 +94,11 @@ body>header.site-header .menu-button{display:none!important}
  }
  body>header.site-header .mobile-tools svg{display:block!important;width:25px!important;height:25px!important;fill:none!important;stroke:currentColor!important;stroke-width:2!important}
  body>header.site-header .search-close-icon{display:none!important}
+ body>header.site-header .mobile-search-icon[aria-expanded="true"] svg circle,
+ body>header.site-header .mobile-search-icon[aria-expanded="true"] svg path:not(.search-close-icon){display:none!important}
+ body>header.site-header .mobile-search-icon[aria-expanded="true"] .search-close-icon{
+  display:block!important;stroke:currentColor!important;stroke-width:2.2!important;stroke-linecap:round!important;stroke-linejoin:round!important
+ }
  body>header.site-header .header-main.search-open{height:112px!important;min-height:112px!important;grid-template-rows:64px 48px!important;grid-template-areas:"brand tools" "search search"!important}
  body>header.site-header .header-main.search-open .search-area{grid-area:search!important;display:block!important;position:relative!important;align-self:center!important}
  body>header.site-header .header-main.search-open .search{height:42px!important}
@@ -115,6 +120,14 @@ body>header.site-header .menu-button{display:none!important}
  }
  body>header.site-header .main-nav a.active:after{display:none!important}
  body>header.site-header .main-nav a svg{width:20px!important;height:20px!important;flex-basis:20px!important}
+}
+@media(max-width:800px){
+ #eshopContextHeader .mobile-search-icon .search-close-icon{display:none!important}
+ #eshopContextHeader .mobile-search-icon[aria-expanded="true"] svg circle,
+ #eshopContextHeader .mobile-search-icon[aria-expanded="true"] svg path:not(.search-close-icon){display:none!important}
+ #eshopContextHeader .mobile-search-icon[aria-expanded="true"] .search-close-icon{
+  display:block!important;stroke:currentColor!important;stroke-width:2.2!important;stroke-linecap:round!important;stroke-linejoin:round!important
+ }
 }
 @media(max-width:600px){
  body>a.announcement .announcement-content>span.announcement-desktop-copy{display:none!important}
