@@ -18,9 +18,11 @@ function json(status: number, body: Record<string, unknown>, origin = '') {
     },
   })
 }
-function htmlPage(title: string, message: string, status = 200) {
-  return new Response(`<!doctype html><html lang="cs"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title} – PLOTAO.cz</title><body style="font:16px Arial,sans-serif;background:#f4f7f4;color:#18372b;margin:0;padding:40px 16px"><main style="max-width:620px;margin:8vh auto;background:white;border:1px solid #dbe5de;border-radius:18px;padding:28px;box-shadow:0 8px 32px #12372612"><h1 style="color:#087443">${title}</h1><p style="line-height:1.6">${message}</p><a href="https://plotao.cz/#news" style="display:inline-block;margin-top:12px;background:#087443;color:white;padding:12px 18px;border-radius:9px;text-decoration:none;font-weight:bold">Zpět na PLOTAO.cz</a></main></body></html>`, {
-    status, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' },
+function resultRedirect(state: string) {
+  const location = 'https://plotao.cz/newsletter-stav.html?stav=' + encodeURIComponent(state)
+  return new Response(null, {
+    status: 303,
+    headers: { 'Location': location, 'Cache-Control': 'no-store' },
   })
 }
 async function digest(value: string) {
@@ -45,7 +47,7 @@ export default {
 
     if (req.method === 'GET' && url.searchParams.get('action') === 'confirm') {
       const token = url.searchParams.get('token') || ''
-      if (token.length < 30 || token.length > 100) return htmlPage('Odkaz není platný', 'Odkaz pro potvrzení přihlášení není platný nebo už vypršel.', 400)
+      if (token.length < 30 || token.length > 100) return resultRedirect('neplatny-odkaz')
       const tokenHash = await digest(token)
       const { data, error } = await ctx.supabaseAdmin
         .from('plotao_newsletter_subscribers')
@@ -54,19 +56,19 @@ export default {
         .eq('status', 'pending')
         .gt('token_expires_at', new Date().toISOString())
         .maybeSingle()
-      if (error || !data?.id) return htmlPage('Odběr už nelze potvrdit', 'Odkaz už byl použit nebo vypršel. Pokud jste se přihlásili právě teď, odběr je již aktivní.', 404)
+      if (error || !data?.id) return resultRedirect('potvrzeni-jiz-probehlo')
       const { error: updateError } = await ctx.supabaseAdmin
         .from('plotao_newsletter_subscribers')
         .update({ status: 'confirmed', confirmed_at: new Date().toISOString(), token_hash: null, token_expires_at: null, updated_at: new Date().toISOString() })
         .eq('id', data.id)
         .eq('status', 'pending')
-      if (updateError) return htmlPage('Potvrzení se nepodařilo', 'Zkuste odkaz otevřít znovu později nebo napište na info@plotao.cz.', 503)
-      return htmlPage('Odběr potvrzen', 'Děkujeme. Přihlášení k novinkám a slevám PLOTAO.cz je potvrzené. Z odběru se můžete kdykoli odhlásit e-mailem na info@plotao.cz.')
+      if (updateError) return resultRedirect('chyba')
+      return resultRedirect('potvrzeno')
     }
 
     if (req.method === 'GET' && url.searchParams.get('action') === 'unsubscribe') {
       const token = url.searchParams.get('token') || ''
-      if (token.length < 30 || token.length > 100) return htmlPage('Odkaz není platný', 'Odkaz pro ukončení odběru není platný.', 400)
+      if (token.length < 30 || token.length > 100) return resultRedirect('neplatny-odkaz')
       const tokenHash = await digest(token)
       const { data, error } = await ctx.supabaseAdmin
         .from('plotao_newsletter_subscribers')
@@ -74,14 +76,14 @@ export default {
         .eq('unsubscribe_token_hash', tokenHash)
         .in('status', ['pending', 'confirmed'])
         .maybeSingle()
-      if (error || !data?.id) return htmlPage('Odběr už nelze změnit', 'Odkaz už byl použit nebo odběr byl již ukončen.', 404)
+      if (error || !data?.id) return resultRedirect('odhlaseni-jiz-probehlo')
       const { error: updateError } = await ctx.supabaseAdmin
         .from('plotao_newsletter_subscribers')
         .update({ status: 'unsubscribed', unsubscribed_at: new Date().toISOString(), token_hash: null, token_expires_at: null, unsubscribe_token_hash: null, updated_at: new Date().toISOString() })
         .eq('id', data.id)
         .in('status', ['pending', 'confirmed'])
-      if (updateError) return htmlPage('Odhlášení se nepodařilo', 'Zkuste to prosím později nebo napište na info@plotao.cz.', 503)
-      return htmlPage('Odběr ukončen', 'E-mailová adresa byla odhlášena z novinek a slev PLOTAO.cz.')
+      if (updateError) return resultRedirect('chyba')
+      return resultRedirect('odhlaseno')
     }
 
     if (!ALLOWED_ORIGINS.has(origin)) return json(403, { error: 'origin_not_allowed' }, origin)
