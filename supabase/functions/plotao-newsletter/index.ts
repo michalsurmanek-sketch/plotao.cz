@@ -87,10 +87,9 @@ export default {
       return json(503, { error: 'service_unavailable' }, origin)
     }
 
-    const rateKeys = [...new Set([
-      await digest(salt + '\\nnetwork\\n' + address(req)),
-      await digest(salt + '\\nemail\\n' + email),
-    ])]
+    const clientAddress = address(req)
+    const rateKeys = [await digest(salt + "\nemail\n" + email)]
+    if (clientAddress !== 'unknown') rateKeys.unshift(await digest(salt + "\nnetwork\n" + clientAddress))
     const since = new Date(Date.now() - 60 * 60 * 1000).toISOString()
     const checks = await Promise.all(rateKeys.map((key) => ctx.supabaseAdmin
       .from('plotao_newsletter_rate_events')
@@ -101,6 +100,10 @@ export default {
     if (checks.some((x) => (x.count || 0) >= 5)) return json(429, { error: 'rate_limited' }, origin)
     const { error: rateError } = await ctx.supabaseAdmin.from('plotao_newsletter_rate_events').insert(rateKeys.map((key_hash) => ({ key_hash })))
     if (rateError) return json(503, { error: 'service_unavailable' }, origin)
+    ctx.supabaseAdmin.from('plotao_newsletter_rate_events')
+      .delete()
+      .lt('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+      .then(({ error }) => { if (error) console.error('newsletter rate cleanup failed', error.code || 'unknown') })
 
     const { data: existing, error: lookupError } = await ctx.supabaseAdmin
       .from('plotao_newsletter_subscribers')
