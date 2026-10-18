@@ -28,7 +28,8 @@ ok(r.ok===false&&r.code==='disabled','missing runtime config must keep server de
 r=core.prepare({...payload,schemaVersion:1},{enabled:true,endpoint:'https://api.example.cz/leads',allowedOrigins:['https://api.example.cz']});
 ok(r.ok===false&&r.code==='payload','unexpected payload schema must be blocked before network access');
 
-const adapter=fs.readFileSync('assets/lead-transport-v1.js','utf8'),config=fs.readFileSync('assets/lead-transport-config-v1.js','utf8'),safety=fs.readFileSync('assets/lead-safety-v1.js','utf8'),manifest=fs.readFileSync('scripts/pages-manifest.mjs','utf8'),index=fs.readFileSync('index.html','utf8');
+const adapter=fs.readFileSync('assets/lead-transport-v1.js','utf8'),config=fs.readFileSync('assets/lead-transport-config-v1.js','utf8'),safety=fs.readFileSync('assets/lead-safety-v1.js','utf8'),manifest=fs.readFileSync('scripts/pages-manifest.mjs','utf8'),indexSource=fs.readFileSync('index.html','utf8'),sharedFooter=fs.readFileSync('partials/plotao-footer.html','utf8');
+const index=indexSource.includes('<!-- PLOTAO_SHARED_FOOTER -->')?indexSource.replace('<!-- PLOTAO_SHARED_FOOTER -->',sharedFooter):indexSource;
 const modalCss=fs.readFileSync('assets/footer-2026.css','utf8');
 ok(config.includes('enabled:true')&&config.includes("endpoint:'https://jmukoccjqykyoqsypuwb.supabase.co/functions/v1/submit-lead'")&&config.includes("allowedOrigins:['https://jmukoccjqykyoqsypuwb.supabase.co']"),'production transport config must allow the Supabase endpoint origin');
 const productionWindow={};vm.runInNewContext(config,{window:productionWindow});
