@@ -3,3 +3,6 @@ verify_jwt = false
 
 [functions.submit-poptejplot-lead]
 verify_jwt = false
+
+[functions.plotao-newsletter]
+verify_jwt = false
