@@ -30,7 +30,7 @@ jobs:
           expected_controller_identity='Radek Šurmánek, podnikající fyzická osoba'
           expected_controller_ico='IČO 21138885'
           expected_controller_address='Halenkovice 551, 763 63'
-          expected_controller_email='<a href="mailto:info@slevao.cz">info@slevao.cz</a>'
+          expected_controller_email='<a href="mailto:info@plotao.cz">info@plotao.cz</a>'
           expected_form_boundary='Pro dotazy k ochraně osobních údajů nebo uplatnění vašich práv napište správci'
           social_pages=(
             "/|panelovy-3d.webp"
