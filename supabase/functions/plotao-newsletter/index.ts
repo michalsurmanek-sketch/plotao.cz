@@ -52,15 +52,36 @@ export default {
         .select('id')
         .eq('token_hash', tokenHash)
         .eq('status', 'pending')
+        .gt('token_expires_at', new Date().toISOString())
         .maybeSingle()
       if (error || !data?.id) return htmlPage('Odběr už nelze potvrdit', 'Odkaz už byl použit nebo vypršel. Pokud jste se přihlásili právě teď, odběr je již aktivní.', 404)
       const { error: updateError } = await ctx.supabaseAdmin
         .from('plotao_newsletter_subscribers')
-        .update({ status: 'confirmed', confirmed_at: new Date().toISOString(), token_hash: null, updated_at: new Date().toISOString() })
+        .update({ status: 'confirmed', confirmed_at: new Date().toISOString(), token_hash: null, token_expires_at: null, updated_at: new Date().toISOString() })
         .eq('id', data.id)
         .eq('status', 'pending')
       if (updateError) return htmlPage('Potvrzení se nepodařilo', 'Zkuste odkaz otevřít znovu později nebo napište na info@plotao.cz.', 503)
       return htmlPage('Odběr potvrzen', 'Děkujeme. Přihlášení k novinkám a slevám PLOTAO.cz je potvrzené. Z odběru se můžete kdykoli odhlásit e-mailem na info@plotao.cz.')
+    }
+
+    if (req.method === 'GET' && url.searchParams.get('action') === 'unsubscribe') {
+      const token = url.searchParams.get('token') || ''
+      if (token.length < 30 || token.length > 100) return htmlPage('Odkaz není platný', 'Odkaz pro ukončení odběru není platný.', 400)
+      const tokenHash = await digest(token)
+      const { data, error } = await ctx.supabaseAdmin
+        .from('plotao_newsletter_subscribers')
+        .select('id')
+        .eq('unsubscribe_token_hash', tokenHash)
+        .in('status', ['pending', 'confirmed'])
+        .maybeSingle()
+      if (error || !data?.id) return htmlPage('Odběr už nelze změnit', 'Odkaz už byl použit nebo odběr byl již ukončen.', 404)
+      const { error: updateError } = await ctx.supabaseAdmin
+        .from('plotao_newsletter_subscribers')
+        .update({ status: 'unsubscribed', unsubscribed_at: new Date().toISOString(), token_hash: null, token_expires_at: null, unsubscribe_token_hash: null, updated_at: new Date().toISOString() })
+        .eq('id', data.id)
+        .in('status', ['pending', 'confirmed'])
+      if (updateError) return htmlPage('Odhlášení se nepodařilo', 'Zkuste to prosím později nebo napište na info@plotao.cz.', 503)
+      return htmlPage('Odběr ukončen', 'E-mailová adresa byla odhlášena z novinek a slev PLOTAO.cz.')
     }
 
     if (!ALLOWED_ORIGINS.has(origin)) return json(403, { error: 'origin_not_allowed' }, origin)
@@ -114,13 +135,15 @@ export default {
     if (existing?.status === 'confirmed') return json(200, { ok: true, message: 'already_confirmed' }, origin)
 
     const token = randomToken()
+    const unsubscribeToken = randomToken()
     const tokenHash = await digest(token)
+    const unsubscribeTokenHash = await digest(unsubscribeToken)
     const now = new Date().toISOString()
     const { error: saveError } = await ctx.supabaseAdmin
       .from('plotao_newsletter_subscribers')
       .upsert({
         email, status: 'pending', consent_at: now, consent_text_version: 'newsletter-2026-10',
-        confirmed_at: null, unsubscribed_at: null, token_hash: tokenHash, source: 'plotao.cz', updated_at: now,
+        confirmed_at: null, unsubscribed_at: null, token_hash: tokenHash, token_expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), unsubscribe_token_hash: unsubscribeTokenHash, source: 'plotao.cz', updated_at: now,
       }, { onConflict: 'email' })
     if (saveError) {
       console.error('newsletter subscription save failed', saveError.code || 'unknown')
@@ -128,6 +151,8 @@ export default {
     }
 
     const confirmUrl = FUNCTION_URL + '?action=confirm&token=' + encodeURIComponent(token)
+    const unsubscribeUrl = FUNCTION_URL + '?action=unsubscribe&token=' + encodeURIComponent(unsubscribeToken)
+    const unsubscribeUrlHtml = unsubscribeUrl.replace(/&/g, '&amp;')
     const mail = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + resendKey, 'Content-Type': 'application/json', 'Idempotency-Key': 'plotao-newsletter-confirm-' + tokenHash },
@@ -136,8 +161,8 @@ export default {
         to: [email],
         reply_to: 'info@plotao.cz',
         subject: 'Potvrďte přihlášení k novinkám PLOTAO.cz',
-        text: 'Dobrý den,\n\nPro potvrzení přihlášení k novinkám a slevám PLOTAO.cz otevřete tento odkaz:\n' + confirmUrl + '\n\nPokud jste o přihlášení nežádali, tento e-mail ignorujte. Bez potvrzení vám novinky zasílat nebudeme.\n\nPLOTAO.cz\nhttps://plotao.cz',
-        html: '<div style="font-family:Arial,Helvetica,sans-serif;color:#24312c;line-height:1.6;max-width:600px;margin:0 auto"><h2 style="color:#087443">Potvrďte přihlášení</h2><p>Pro aktivaci odběru novinek a slev PLOTAO.cz klikněte na tlačítko:</p><p><a href="' + confirmUrl + '" style="display:inline-block;background:#087443;color:#fff;text-decoration:none;font-weight:bold;padding:12px 20px;border-radius:8px">Potvrdit odběr</a></p><p>Pokud jste o přihlášení nežádali, tento e-mail ignorujte. Bez potvrzení vám novinky zasílat nebudeme.</p><p>PLOTAO.cz · <a href="https://plotao.cz/ochrana-osobnich-udaju.html">Ochrana osobních údajů</a></p></div>',
+        text: 'Dobrý den,\n\nPro potvrzení přihlášení k novinkám a slevám PLOTAO.cz otevřete tento odkaz:\n' + confirmUrl + '\n\nPokud jste o přihlášení nežádali, tento e-mail ignorujte. Bez potvrzení vám novinky zasílat nebudeme.\n\nOdběr můžete ukončit zde: ' + unsubscribeUrl + '\n\nPLOTAO.cz\nhttps://plotao.cz',
+        html: '<div style="font-family:Arial,Helvetica,sans-serif;color:#24312c;line-height:1.6;max-width:600px;margin:0 auto"><h2 style="color:#087443">Potvrďte přihlášení</h2><p>Pro aktivaci odběru novinek a slev PLOTAO.cz klikněte na tlačítko:</p><p><a href="' + confirmUrl + '" style="display:inline-block;background:#087443;color:#fff;text-decoration:none;font-weight:bold;padding:12px 20px;border-radius:8px">Potvrdit odběr</a></p><p>Pokud jste o přihlášení nežádali, tento e-mail ignorujte. Bez potvrzení vám novinky zasílat nebudeme.</p><p><a href="' + unsubscribeUrlHtml + '">Ukončit odběr novinek</a></p><p>PLOTAO.cz · <a href="https://plotao.cz/ochrana-osobnich-udaju.html">Ochrana osobních údajů</a></p></div>',
       }),
     }).catch((error) => {
       console.error('newsletter mail network failure', error instanceof Error ? error.message : 'unknown')
