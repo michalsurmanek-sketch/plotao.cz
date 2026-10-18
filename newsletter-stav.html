@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Stav odběru – PLOTAO.cz</title>
+<style>
+:root{color-scheme:light;font-family:Arial,Helvetica,sans-serif;color:#18372b;background:#f4f7f4}
+*{box-sizing:border-box}body{margin:0;padding:32px 16px;min-height:100vh;display:grid;place-items:center}
+main{width:min(100%,620px);background:#fff;border:1px solid #dbe5de;border-radius:18px;padding:30px;box-shadow:0 8px 32px #12372612}
+h1{color:#087443;font-size:1.7rem;margin:0 0 14px}p{line-height:1.65;margin:0 0 20px}
+a{display:inline-block;background:#087443;color:#fff;padding:12px 18px;border-radius:9px;text-decoration:none;font-weight:bold}
+</style>
+</head>
+<body><main><h1 id="title">Stav odběru</h1><p id="message">Načítám stav…</p><a href="https://plotao.cz/">Zpět na PLOTAO.cz</a></main>
+<script>
+const states={
+  'potvrzeno':['Odběr potvrzen','Děkujeme. Přihlášení k novinkám a slevám PLOTAO.cz je potvrzené.'],
+  'potvrzeni-jiz-probehlo':['Odběr už je vyřízený','Odkaz už byl použit nebo vypršel. Pokud jste potvrzení právě dokončili, odběr je aktivní.'],
+  'odhlaseno':['Odběr ukončen','E-mailová adresa byla odhlášena z novinek a slev PLOTAO.cz.'],
+  'odhlaseni-jiz-probehlo':['Odběr už je ukončený','Odkaz už byl použit nebo byl odběr již ukončen.'],
+  'neplatny-odkaz':['Odkaz není platný','Odkaz není platný nebo už vypršel.'],
+  'chyba':['Akci se nepodařilo dokončit','Zkuste to prosím později nebo napište na info@plotao.cz.']
+};
+const [title,message]=states[new URLSearchParams(location.search).get('stav')]||states['chyba'];
+document.getElementById('title').textContent=title;
+document.getElementById('message').textContent=message;
+</script></body></html>
