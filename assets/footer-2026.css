@@ -14,3 +14,8 @@
 @keyframes plotao-footer-icon-pulse{0%,65%,100%{transform:scale(1)}30%{transform:scale(1.1)}}
 #plotaoFooter2026 .pf-nav .ico,#plotaoFooter2026 .pf-benefit-icon{animation:plotao-footer-icon-pulse 3s ease-in-out infinite;transform-origin:center;transform-box:fill-box}
 @media(prefers-reduced-motion:reduce){#plotaoFooter2026 .pf-nav .ico,#plotaoFooter2026 .pf-benefit-icon{animation:none}}
+
+/* Keep newsletter consent on one full-width row; checkbox stays beside its text on every phone. */
+#plotaoFooter2026 .pf-news form .newsletter-consent{grid-column:1/-1!important;display:flex!important;flex-direction:row!important;align-items:flex-start!important;width:100%!important;min-width:0!important;}
+#plotaoFooter2026 .pf-news form .newsletter-consent>input{display:block!important;flex:0 0 18px!important;width:18px!important;min-width:18px!important;margin:2px 0 0!important;}
+#plotaoFooter2026 .pf-news form .newsletter-consent>span{display:block!important;flex:1 1 auto!important;min-width:0!important;}
