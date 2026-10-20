@@ -10,6 +10,7 @@ const ORIGIN_SOURCES = new Map([
   ['https://www.poptejplot.cz', 'poptejplot.cz'],
   ['https://poptejcenu.cz', 'poptejcenu.cz'],
   ['https://www.poptejcenu.cz', 'poptejcenu.cz'],
+  ['https://montao.cz', 'montao.cz'],
 ])
 const ALLOWED_ORIGINS = new Set(ORIGIN_SOURCES.keys())
 const MAX_BODY_BYTES = 64 * 1024
