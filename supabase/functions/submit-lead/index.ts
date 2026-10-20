@@ -3,6 +3,8 @@ import { validateEnvelope } from './validation.mjs'
 
 const ORIGIN_SOURCES = new Map([
   ['https://plotao.cz', 'plotao.cz'],
+  ['https://profiplot.cz', 'profiplot.cz'],
+  ['https://www.profiplot.cz', 'profiplot.cz'],
   ['https://www.plotao.cz', 'plotao.cz'],
   ['https://poptejplot.cz', 'poptejplot.cz'],
   ['https://www.poptejplot.cz', 'poptejplot.cz'],
