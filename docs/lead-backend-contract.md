@@ -1,6 +1,6 @@
 # PLOTAO lead backend contract
 
-Tento kontrakt popisuje jediný podporovaný způsob serverového příjmu formulářů z `https://plotao.cz`.
+Tento kontrakt popisuje podporovaný způsob serverového příjmu formulářů z `https://plotao.cz` a `https://montao.cz`.
 
 ## Stav na frontendu
 
@@ -37,7 +37,7 @@ Samotné vyplnění endpointu bez `enabled: true` transport nezapne.
 - request credentials: `omit`
 - `Content-Type: application/json`
 - `Accept: application/json`
-- očekávaný CORS origin webu: `https://plotao.cz`
+- povolené CORS originy: přesný allowlist `https://plotao.cz` a `https://montao.cz`
 
 Tělo:
 
@@ -64,7 +64,7 @@ Server musí znovu validovat minimálně:
 3. Kontakt, délkové limity textů a datové typy; klientská validace není bezpečnostní hranice.
 4. Maximální velikost request body.
 5. Rate limit / anti-abuse ochranu bez nutnosti posílat browser cookies.
-6. CORS pouze pro schválený origin `https://plotao.cz`; nepoužívat `*` pro produkční endpoint s osobními údaji.
+6. CORS pouze pro přesný allowlist schválených originů `https://plotao.cz` a `https://montao.cz`; nepoužívat `*` pro produkční endpoint s osobními údaji.
 7. Server nesmí důvěřovat `displayedPrice` jako účetní nebo smluvní ceně. Je to snapshot UI pro zpracování poptávky.
 8. Logy nesmí zbytečně vypisovat celé telefonní číslo, e-mail, poznámku ani celý request body.
 
@@ -131,7 +131,7 @@ Serverové odesílání se smí aktivovat teprve po současném splnění všech
 
 - existuje samostatný schválený PLOTAO backend,
 - endpoint je HTTPS,
-- CORS je omezený na PLOTAO,
+- CORS je omezený na explicitní allowlist webů PLOTAO a Montao.cz,
 - serverová validace a rate limiting jsou nasazené,
 - perzistence byla ověřena testovacím požadavkem,
 - produkční konfigurace má přesný endpoint, správný origin a `enabled:true`,
