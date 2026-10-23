@@ -161,7 +161,7 @@ function applySharedEshopHeader(page,file){
   const rendered=withoutOldAnnouncement.replace(headerMatch[0],renderedHeader);
   const newHeader=rendered.match(/<header class="site-header">[\s\S]*?<\/header>/i)?.[0]||'';
   if(!newHeader.includes('Poradíme vám')||!newHeader.includes('Košík')||!newHeader.includes('class="active"'))throw new Error('Shared e-shop header: required controls or active item missing in '+file);
-  return rendered.replace('href="/?from=eshop#kalkulator"','href="/?from=eshop&v=20261023#kalkulator');
+  return rendered.replace('href="/?from=eshop#kalkulator"','href="/?from=eshop&v=20261023#kalkulator"');
 }
 
 function parseCssBlocks(css){
