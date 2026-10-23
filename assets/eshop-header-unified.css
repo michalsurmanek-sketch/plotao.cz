@@ -184,3 +184,28 @@ body>header.site-header .main-nav:has(a[href^="/?from=eshop"].active) a[href^="/
   body>header.site-header .main-nav{top:98px!important}
   body>header.site-header .header-main.search-open~.main-nav{top:146px!important}
 }
+
+
+/* Desktop product filters stay below the full sticky shop navigation. Keep them
+   in the catalog grid so the product column remains offset and stop at the
+   catalog boundary before the shared footer. */
+@media(min-width:801px){
+ body .catalog-layout>.filters{
+  position:sticky!important;
+  top:208px!important;
+  align-self:start!important;
+  max-height:calc(100vh - 218px)!important;
+  overflow-y:auto!important;
+  overscroll-behavior:auto!important;
+  z-index:998!important;
+ }
+}
+@media(max-width:800px){
+ body .catalog-layout>.filters{
+  position:relative!important;
+  top:auto!important;
+  max-height:none!important;
+  overflow:visible!important;
+  overscroll-behavior:auto!important;
+ }
+}
