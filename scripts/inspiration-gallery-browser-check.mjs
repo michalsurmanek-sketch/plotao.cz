@@ -8,8 +8,8 @@ try {
   await page.goto(base+'/eshop.html');
   await page.locator('.inspiration-gallery-link a').click();
   await page.locator('.ig-card').first().waitFor();
-  assert(await page.locator('.ig-card:visible').count()===14,'Gallery link must show all 14 inspirations');
-  await page.locator('[data-gallery-filter="panel"]').click();
+  assert(await page.locator('.ig-card:visible').count()===15,'Gallery link must show all 15 inspirations');
+  await page.locator('.ig-filters [data-gallery-filter="panel"]').click();
   assert(await page.locator('.ig-card:visible').count()===3,'Panel filter must show only panel images');
   assert(new URL(page.url()).searchParams.get('typ')==='panel','Filter must be shareable in URL');
   await page.locator('.ig-card:visible [data-gallery-open]').first().click();
@@ -21,9 +21,9 @@ try {
   await page.keyboard.press('Escape');
   assert(!await page.locator('.ig-lightbox').isVisible(),'Escape must close preview');
   assert(await page.locator('.ig-card:visible [data-gallery-open]').first().evaluate(el=>el===document.activeElement),'Closing preview must restore focus');
-  await page.locator('[data-gallery-filter="aluminium"]').click();
+  await page.locator('.ig-filters [data-gallery-filter="aluminium"]').click();
   assert(await page.locator('.ig-card:visible').count()===5,'Aluminium filter must show five styles');
-  await page.locator('[data-gallery-filter="gabion"]').click();
+  await page.locator('.ig-filters [data-gallery-filter="gabion"]').click();
   await page.reload();
   await page.locator('.ig-card[data-kind="gabion"]').waitFor();
   assert(await page.locator('.ig-card:visible').count()===1,'Selected gallery category must survive reload');

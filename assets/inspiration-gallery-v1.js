@@ -3,7 +3,15 @@
   const gallery=document.querySelector('.ig-gallery');
   if(!gallery)return;
   const cards=[...gallery.querySelectorAll('.ig-card')];
-  const filters=[...gallery.querySelectorAll('[data-gallery-filter]')];
+  const side=document.querySelector('.ig-side-filters');
+  const tabs=[...gallery.querySelectorAll('[data-gallery-filter]')];
+  tabs.forEach(tab=>{const button=tab.cloneNode(true);side?.append(button);});
+  const filters=[...document.querySelectorAll('[data-gallery-filter]')];
+  const shortLabels={all:'Vše',panel:'Panelové',mesh:'Pletivové',concrete:'Betonové',aluminium:'Hliníkové',gabion:'Gabiony',gates:'Brány a branky'};
+  tabs.forEach(tab=>{tab.textContent=shortLabels[tab.dataset.galleryFilter]||tab.textContent;});
+  const savedKey='plotao-inspiration-favorites-v1';
+  let saved=[];try{const value=JSON.parse(localStorage.getItem(savedKey)||'[]');if(Array.isArray(value))saved=value;}catch{}
+  cards.forEach(card=>{const key=card.querySelector('.ig-photo').getAttribute('href');const button=document.createElement('button');button.type='button';button.className='ig-save';const sync=()=>{const selected=saved.includes(key);button.textContent=selected?'♥':'♡';button.setAttribute('aria-pressed',String(selected));button.setAttribute('aria-label',(selected?'Odebrat inspiraci: ':'Uložit inspiraci: ')+card.querySelector('h2').textContent);};sync();button.addEventListener('click',()=>{saved=saved.includes(key)?saved.filter(item=>item!==key):[...saved,key];try{localStorage.setItem(savedKey,JSON.stringify(saved));}catch{}sync();});card.append(button);});
   const count=gallery.querySelector('.ig-count');
   const dialog=document.querySelector('.ig-lightbox');
   const image=dialog.querySelector('#ig-lightbox-image');
