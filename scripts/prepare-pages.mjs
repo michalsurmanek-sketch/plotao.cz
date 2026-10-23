@@ -148,6 +148,18 @@ const dist='dist';
 fs.rmSync(dist,{recursive:true,force:true});
 fs.mkdirSync(dist,{recursive:true});
 const sharedHeaderTemplate=fs.readFileSync('partials/eshop-header.html','utf8').trim().replace(/<img\b[^>]*\bsrc=["']\/assets\/logo-plotao\.svg["'][^>]*>/i,tag=>{const cleaned=tag.replace(/\swidth=["'][^"']*["']/i,'').replace(/\sheight=["'][^"']*["']/i,'');return cleaned.replace(/>$/, ' width="2172" height="724">')});
+
+// All shared-header destinations must select the same deployment, including
+// Inspiration, which is an anchor on the shop landing page.
+function versionSharedHeader(markup){
+  return markup.replace(/href="(\/[^"]*)"/g,(attribute,href)=>{
+    const url=new URL(href,'https://plotao.cz');
+    if(!url.pathname.endsWith('.html')&&!(url.pathname==='/'&&url.searchParams.get('from')==='eshop'))return attribute;
+    url.searchParams.set('v',sha.slice(0,12));
+    return 'href="'+url.pathname+url.search+url.hash+'"';
+  });
+}
+
 function applySharedEshopHeader(page,file){
   const headerMatch=page.match(/<header class="site-header">[\s\S]*?<\/header>/i);
   if(!headerMatch)return page;
@@ -156,7 +168,7 @@ function applySharedEshopHeader(page,file){
   if(!active)throw new Error('Shared e-shop header: active navigation link missing in '+file);
   const activeLink='<a href="'+active[1]+'">';
   if(!sharedHeaderTemplate.includes(activeLink))throw new Error('Shared e-shop header: active link is not in canonical template: '+active[1]+' ('+file+')');
-  const renderedHeader=sharedHeaderTemplate.replace(activeLink,'<a class="active" href="'+active[1]+'">');
+  const renderedHeader=versionSharedHeader(sharedHeaderTemplate.replace(activeLink,'<a class="active" href="'+active[1]+'">'));
   const withoutOldAnnouncement=page.replace(/<a\b(?=[^>]*\bclass=["'][^"']*\bannouncement\b[^"']*["'])[^>]*>[\s\S]*?<\/a>/i,'');
   const rendered=withoutOldAnnouncement.replace(headerMatch[0],renderedHeader);
   const newHeader=rendered.match(/<header class="site-header">[\s\S]*?<\/header>/i)?.[0]||'';
@@ -214,7 +226,7 @@ function applyCalculatorEshopHeader(page){
   if(!page.includes('<header class="head">'))throw new Error('Calculator page: native homepage header missing');
   if(page.includes('id="eshopContextHeader"'))throw new Error('Calculator page: duplicate e-shop context header');
   const loader='<script id="eshop-context-header-loader">(()=>{const root=document.getElementById("eshopContextHeader");const show=new URLSearchParams(location.search).get("from")==="eshop";if(!root)return;root.hidden=!show;if(!show)return;document.body.classList.add("from-eshop");const announcement=root.querySelector(".announcement"),siteHeader=root.querySelector(".site-header");const syncHeaderLayout=()=>{const bannerHeight=announcement?.getBoundingClientRect().height||0;const headerHeight=siteHeader?.getBoundingClientRect().height||0;document.documentElement.style.setProperty("--eshop-context-announcement-height",bannerHeight+"px");document.documentElement.style.setProperty("--eshop-context-header-height",headerHeight+"px");document.documentElement.style.setProperty("--eshop-context-top-offset",bannerHeight+headerHeight+"px")};syncHeaderLayout();window.addEventListener("resize",syncHeaderLayout);const main=root.querySelector(".header-main"),nav=root.querySelector(".main-nav"),searchToggle=root.querySelector(".mobile-search-icon"),menuButton=root.querySelector(".menu-button");const configLink=[...nav.querySelectorAll("a")].find(link=>{const url=new URL(link.href,location.href);return url.pathname==="/"&&url.searchParams.get("from")==="eshop"});if(configLink){const setConfigActive=()=>nav.querySelectorAll("a").forEach(link=>link.classList.toggle("active",link===configLink));setConfigActive();window.addEventListener("hashchange",setConfigActive)}const setSearchOpen=(open,focus=false)=>{main.classList.toggle("search-open",open);searchToggle.setAttribute("aria-expanded",String(open));searchToggle.setAttribute("aria-label",open?"Zavřít vyhledávání":"Otevřít vyhledávání");if(open&&focus)root.querySelector("#shopSearch").focus();else if(!open)root.querySelector("#shopSearch").blur()};searchToggle?.addEventListener("click",event=>{event.stopImmediatePropagation();const open=!main.classList.contains("search-open");setSearchOpen(open,open)},true);menuButton?.addEventListener("click",()=>{const open=nav.classList.toggle("open");menuButton.setAttribute("aria-expanded",String(open));menuButton.setAttribute("aria-label",open?"Zavřít menu":"Otevřít menu")});nav?.addEventListener("click",event=>{if(event.target.closest("a")){nav.classList.remove("open");menuButton?.setAttribute("aria-expanded","false")}})})();</script>';
-  const injected='<div id="eshopContextHeader" hidden>'+sharedHeaderTemplate+'</div>'+loader;
+  const injected='<div id="eshopContextHeader" hidden>'+versionSharedHeader(sharedHeaderTemplate)+'</div>'+loader;
   page=page.replace('<header class="head">',injected+'<header class="head">');
 
   // Reuse the canonical header rules inside the calculator wrapper too.
