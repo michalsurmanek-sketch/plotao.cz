@@ -242,3 +242,10 @@ body>header.site-header .main-nav:has(a[href^="/?from=eshop"].active) a[href^="/
 @media (max-width:800px){
   main>.shop-desktop-layout{display:block!important;width:auto!important;margin:0!important}
 }
+
+/* Favorites use the same counter and placement in every shared header. */
+header.site-header .favorites-toggle{position:relative!important;display:grid!important;place-items:center!important;flex:0 0 32px!important;width:32px!important;height:36px!important;padding:0!important;border:0!important;background:transparent!important;color:#075846!important;cursor:pointer!important}
+header.site-header .favorites-count{position:absolute!important;top:-5px!important;right:-10px!important;display:grid!important;place-items:center!important;min-width:20px!important;height:20px!important;padding:0 4px!important;border-radius:999px!important;background:#ff6b16!important;color:white!important;font:800 11px/1 Arial,sans-serif!important}
+header.site-header .favorites-toggle svg{width:24px!important;height:24px!important;fill:none!important;stroke:currentColor!important;stroke-width:2!important}
+@media(max-width:1150px) and (min-width:801px){header.site-header .header-actions{gap:14px!important}header.site-header .header-action{gap:8px!important}}
+@media(max-width:800px){header.site-header .mobile-tools{gap:6px!important}header.site-header .mobile-tools button,header.site-header .mobile-tools .pa-mobile-advice{width:32px!important;height:38px!important}header.site-header .brand img{width:min(44vw,190px)!important}header.site-header .favorites-count{right:-4px!important;top:-2px!important;min-width:17px!important;height:17px!important;font-size:10px!important}}

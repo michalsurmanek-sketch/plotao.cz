@@ -233,7 +233,8 @@ const sharedHeaderController='<script data-plotao-shared-header-controller="1">(
 for(const file of fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort()){
   let page=fs.readFileSync(file,'utf8').replaceAll(sharedFooterMarker,sharedFooterTemplate);
   page=page.replace('</head>','<style data-plotao-desktop-product-images="1">@media(min-width:801px){.product-card>.product-image{overflow:hidden;min-height:0;grid-template-rows:minmax(0,1fr)}.product-card>.product-image>img{display:block;min-width:0;min-height:0;max-height:100%}}</style></head>');
-  page=page.replace('</body>','<script defer src="'+versionedScript('/assets/cart-v1.js')+'"></script></body>');
+  page=page.replace(/<script\b[^>]*\bsrc=["']\/assets\/product-cards\.js(?:\?[^"']*)?["'][^>]*><\/script>/gi,'');
+  page=page.replace('</body>','<script defer src="'+versionedScript('/assets/product-cards.js')+'"></script><script defer src="'+versionedScript('/assets/cart-v1.js')+'"></script></body>');
   page=page.replace('</head>','<style data-plotao-header-divider="1">body>header,#eshopContextHeader>header.site-header{box-shadow:0 1px 0 #08744366!important}</style></head>');
   page=page.replace('</head>','<style data-plotao-scrollbars="1">html,*{scrollbar-color:#087443 #edf2ee}::-webkit-scrollbar{width:12px;height:12px}::-webkit-scrollbar-track{background:#edf2ee}::-webkit-scrollbar-thumb{background:#087443;border:3px solid #edf2ee;border-radius:999px}::-webkit-scrollbar-thumb:hover{background:#064737}::-webkit-scrollbar-corner{background:#edf2ee}@media(forced-colors:active){html,*{scrollbar-color:auto}}</style></head>');
   page=file==='index.html'?applyCalculatorEshopHeader(page):applySharedEshopHeader(page,file);
