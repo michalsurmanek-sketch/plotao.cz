@@ -209,3 +209,36 @@ body>header.site-header .main-nav:has(a[href^="/?from=eshop"].active) a[href^="/
   overscroll-behavior:auto!important;
  }
 }
+
+
+/* Desktop: keep the filter beside the page content from the first screenful. */
+@media (min-width:801px){
+  main>.shop-desktop-layout{
+    display:grid!important;
+    grid-template-columns:232px minmax(0,1fr)!important;
+    align-items:stretch!important;
+    gap:24px!important;
+    width:min(1500px,calc(100% - 80px))!important;
+    margin:0 auto!important;
+  }
+  main>.shop-desktop-layout>.shop-desktop-sidebar{min-width:0!important}
+  main>.shop-desktop-layout>.shop-desktop-sidebar>.filters{
+    position:sticky!important;
+    top:208px!important;
+    align-self:start!important;
+    max-height:calc(100vh - 218px)!important;
+    overflow-y:auto!important;
+    overscroll-behavior:contain!important;
+    z-index:998!important;
+  }
+  main>.shop-desktop-layout>.shop-desktop-main{min-width:0!important}
+  main>.shop-desktop-layout>.shop-desktop-main>.category-section .category-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  }
+  main>.shop-desktop-layout>.shop-desktop-main>.catalog .catalog-layout{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+}
+@media (max-width:800px){
+  main>.shop-desktop-layout{display:block!important;width:auto!important;margin:0!important}
+}
