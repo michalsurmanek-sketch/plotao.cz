@@ -37,3 +37,13 @@
 .product-card .product-info .panel3d-color-choice[data-panel3d-color="zinc"]{--swatch:#adb1b0}
 @media(max-width:800px){.product-card .product-image{height:210px!important}.product-card .product-info{padding:12px}.product-card .product-favorite{top:10px;right:10px}.product-card .product-image .panel3d-color-thumb{width:37px;height:37px}}
 @media(max-width:600px){.product-card .product-image{height:220px!important}.product-card .product-info{padding:12px}.product-card .product-info h3{font-size:16px}.product-card .product-price{font-size:20px}.product-card .button.product-button{min-height:44px}}
+
+/* Keep the expanded 3D panel card inside the mobile product column. */
+@media(max-width:600px){
+ .product-card--panel3d .product-info{min-width:0}
+ .product-card--panel3d .panel3d-heights{gap:5px}
+ .product-card--panel3d .panel3d-height{min-width:0;flex:1 0 56px;padding:0 5px;font-size:10px}
+ .product-card--panel3d .panel3d-color-options{gap:8px}
+ .product-card--panel3d .panel3d-color-choice{font-size:11px}
+ .product-card--panel3d .panel3d-price-note{max-width:100%;overflow-wrap:anywhere}
+}
