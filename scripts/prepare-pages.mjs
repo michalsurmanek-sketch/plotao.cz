@@ -203,6 +203,7 @@ function applySharedEshopHeader(page,file){
   const announcementCount=(rendered.match(/<a\b(?=[^>]*\bclass=["'][^"']*\bannouncement\b[^"']*["'])/gi)||[]).length;
   const headerCount=(rendered.match(/<header class="site-header">/gi)||[]).length;
   if(announcementCount!==1||headerCount!==1)throw new Error('Shared e-shop header: expected one promo bar and one shared header in '+file);
+  if(/<header\b[^>]*class=["'][^"']*\bguide-header\b/i.test(rendered))throw new Error('Shared e-shop header: legacy guide header remains in '+file);
   if(!newHeader.includes('Poradíme vám')||!newHeader.includes('Košík'))throw new Error('Shared e-shop header: required controls missing in '+file);
   return rendered;
 }
@@ -293,6 +294,8 @@ for(const file of fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort()){
   }
   page=page.replace(/(href=["']\/assets\/eshop-header-unified\.css\?v=)[^"']+(["'])/g,(match,prefix,suffix)=>prefix+sha.slice(0,12)+suffix);
   page=page.replace(/(href=["']\/assets\/guides\.css\?v=)[^"']+(["'])/g,(match,prefix,suffix)=>prefix+sha.slice(0,12)+suffix);
+  page=page.replace(/(href=["']\/assets\/assembly-hub-v1\.css)(?:\?[^"']*)?(["'])/g,(match,path,suffix)=>path+'?v='+sha.slice(0,12)+suffix);
+  page=page.replace(/(src=["']\/assets\/assembly-hub-v1\.js)(?:\?[^"']*)?(["'])/g,(match,path,suffix)=>path+'?v='+sha.slice(0,12)+suffix);
   if(page.includes('<header class="site-header">')&&!page.includes('data-plotao-shared-header-controller="1"'))page=page.replace('</body>',sharedHeaderController+'</body>');
   if(!page.includes('</head>'))throw new Error('Favicon loader: missing </head> in '+file);
   if(!page.includes('data-plotao-no-tap-flash="1"'))page=page.replace('</head>','<style data-plotao-no-tap-flash="1">html,body,body *{-webkit-tap-highlight-color:transparent!important}</style></head>');
