@@ -168,6 +168,9 @@ jobs:
           echo "plotao.cz did not expose the expected deploy marker consistently in both marker file and HTML"
           exit 1
 
+      - name: Install Playwright for live visual proof
+        run: npm install --no-audit --no-fund --package-lock=false
+
       - name: Capture live mobile configurator screenshot
         env:
           EXPECTED_SHA: ${{ github.sha }}
