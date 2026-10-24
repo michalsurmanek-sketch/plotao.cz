@@ -108,12 +108,12 @@
 #plotaoFooter2026 .pf-news form .newsletter-consent>input{display:block!important;flex:0 0 18px!important;width:18px!important;min-width:18px!important;margin:2px 0 0!important;}
 #plotaoFooter2026 .pf-news form .newsletter-consent>span{display:block!important;flex:1 1 auto!important;min-width:0!important;}
 #plotaoFooter2026 .pf-news form label.newsletter-consent{
-  font-size:16px!important;
+  font-size: 12px!important;
   line-height:1.45!important;
   -webkit-text-size-adjust:none!important;
   text-size-adjust:none!important;
 }#plotaoFooter2026 .pf-news form label.newsletter-consent > span{
-  font-size:16px!important;
+  font-size: 12px!important;
   line-height:1.45!important;
   -webkit-text-size-adjust:none!important;
   text-size-adjust:none!important;
