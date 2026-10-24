@@ -125,3 +125,5 @@
 #plotaoFooter2026 .pf-news form button{margin:0!important;font-family:inherit!important;font-size:16px!important;line-height:1.2!important}
 #plotaoFooter2026 .pf-news form .newsletter-consent>input{height:18px!important}
 #plotaoFooter2026 .pf-news form .newsletter-status{margin:0!important;line-height:1.5!important}
+
+#plotaoFooter2026 .newsletter-consent a,#plotaoFooter2026 .newsletter-consent a:visited,#plotaoFooter2026 .newsletter-consent a:hover,#plotaoFooter2026 .newsletter-consent a:active{color:#e8efeb!important;text-decoration:none!important}
