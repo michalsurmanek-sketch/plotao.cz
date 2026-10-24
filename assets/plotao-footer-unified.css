@@ -118,3 +118,7 @@
   -webkit-text-size-adjust:none!important;
   text-size-adjust:none!important;
 }
+/* Keep shared footer spacing stable against page level heading and form styles. */
+#plotaoFooter2026 .pf-nav h3{line-height:1.5!important}
+#plotaoFooter2026 .pf-news input{margin:0!important}
+#plotaoFooter2026 .pf-news form label.newsletter-consent{margin:0!important}
