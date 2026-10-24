@@ -364,7 +364,7 @@ header.site-header .favorites-toggle svg{width:24px!important;height:24px!import
   gap:0 10px!important;
  }
  :is(body,#eshopContextHeader)>header.site-header .brand{
-  width:min(56vw,220px,calc(100vw - 260px))!important;
+  width:min(56vw,220px,calc(100vw - 50px - min(48vw,320px)))!important;
  }
  :is(body,#eshopContextHeader)>header.site-header .brand img{width:100%!important}
  :is(body,#eshopContextHeader)>header.site-header .mobile-tools{
