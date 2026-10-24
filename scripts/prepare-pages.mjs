@@ -292,6 +292,7 @@ for(const file of fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort()){
     page=page.replace('</head>','<link rel="stylesheet" href="/assets/eshop-header-unified.css?v='+sha.slice(0,12)+'"></head>');
   }
   page=page.replace(/(href=["']\/assets\/eshop-header-unified\.css\?v=)[^"']+(["'])/g,(match,prefix,suffix)=>prefix+sha.slice(0,12)+suffix);
+  page=page.replace(/(href=["']\/assets\/guides\.css\?v=)[^"']+(["'])/g,(match,prefix,suffix)=>prefix+sha.slice(0,12)+suffix);
   if(page.includes('<header class="site-header">')&&!page.includes('data-plotao-shared-header-controller="1"'))page=page.replace('</body>',sharedHeaderController+'</body>');
   if(!page.includes('</head>'))throw new Error('Favicon loader: missing </head> in '+file);
   if(!page.includes('data-plotao-no-tap-flash="1"'))page=page.replace('</head>','<style data-plotao-no-tap-flash="1">html,body,body *{-webkit-tap-highlight-color:transparent!important}</style></head>');

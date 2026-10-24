@@ -35,8 +35,3 @@
   .mistakes li strong{font-size:16px;line-height:1.35}
   .mistakes li p{font-size:13px;line-height:1.5;margin:6px 0 0}
 }
-@media(max-width:760px){header{position:sticky;top:0;z-index:50}}
-
-/* The shared announcement bar is fixed at the top of the document flow.
-   Keep guide pages' sticky header directly beneath it on mobile. */
-@media(max-width:760px){body>header.site-header{top:34px!important;z-index:999!important}}
