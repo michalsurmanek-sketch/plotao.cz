@@ -1,6 +1,12 @@
 /* Shared, stable e-shop header. Loaded after each page's legacy styles. */
+:root{
+  --plotao-shop-promo-height:43px;
+  --plotao-shop-header-main-height:100px;
+  --plotao-shop-header-nav-height:65px;
+  --plotao-shop-header-stack-height:208px;
+}
 body>a.announcement{
-  position:sticky!important;top:0!important;z-index:1000!important;
+  position:fixed!important;inset:0 0 auto!important;z-index:1200!important;
   display:flex!important;align-items:center!important;justify-content:center!important;
   width:100%!important;max-width:100vw!important;height:43px!important;min-height:43px!important;
   box-sizing:border-box!important;margin:0!important;padding:0 12px!important;
@@ -22,9 +28,11 @@ body>a.announcement .announcement-content>span.announcement-mobile-copy{display:
 body>a.announcement strong{font-weight:800!important}
 body>a.announcement .announcement-arrow{display:block!important;flex:0 0 auto!important;margin-left:8px!important;font-size:24px!important;line-height:1!important}
 body>header.site-header{
-  position:sticky!important;top:43px!important;z-index:999!important;width:100%!important;
+  position:fixed!important;top:var(--plotao-shop-promo-height)!important;left:0!important;right:0!important;z-index:1199!important;width:100%!important;
   margin:0!important;background:#fff!important;isolation:isolate!important;
 }
+body{padding-top:var(--plotao-shop-header-stack-height)!important}
+html{scroll-padding-top:var(--plotao-shop-header-stack-height)!important}
 body>header.site-header .header-main{
   width:min(1500px,calc(100% - 80px))!important;height:100px!important;min-height:100px!important;
   margin:0 auto!important;padding:0!important;display:grid!important;
@@ -77,7 +85,14 @@ body>header.site-header .menu-button{display:none!important}
  body>header.site-header .main-nav a{font-size:13px!important;gap:8px!important}
 }
 @media(max-width:800px){
- body>header.site-header{top:43px!important}
+ :root{
+  --plotao-shop-header-main-height:64px;
+  --plotao-shop-header-nav-height:0px;
+  --plotao-shop-header-stack-height:107px;
+ }
+ body{padding-top:var(--plotao-shop-header-stack-height)!important}
+ html{scroll-padding-top:var(--plotao-shop-header-stack-height)!important}
+ body>header.site-header{top:var(--plotao-shop-promo-height)!important}
  body>header.site-header .header-main{
   position:relative!important;width:calc(100% - 40px)!important;min-width:0!important;margin-left:auto!important;margin-right:auto!important;
   height:64px!important;min-height:64px!important;
@@ -131,6 +146,12 @@ body>header.site-header .menu-button{display:none!important}
  }
 }
 @media(max-width:600px){
+ :root{
+  --plotao-shop-promo-height:34px;
+  --plotao-shop-header-stack-height:98px;
+ }
+ body{padding-top:var(--plotao-shop-header-stack-height)!important}
+ html{scroll-padding-top:var(--plotao-shop-header-stack-height)!important}
  body>a.announcement .announcement-content>span.announcement-desktop-copy{display:none!important}
  body>a.announcement .announcement-content>span.announcement-mobile-copy{display:flex!important;flex:1 1 auto!important;align-items:center!important;gap:5px!important;min-width:0!important;overflow:hidden!important;white-space:nowrap!important}
  body>a.announcement .announcement-mobile-text{display:block!important;flex:1 1 auto!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
@@ -159,30 +180,15 @@ body>header.site-header .main-nav:has(a[href^="/?from=eshop"].active) a[href^="/
 /* Compensate transparent left padding inside the PLOTAO logo artwork on mobile. */
 @media(max-width:800px){body>header.site-header .brand img{transform:translateX(-8.7%)!important}}
 
-/* Mobile promo bar is 34px high; keep the sticky site header flush below it. */
-@media(max-width:600px){body>header.site-header{top:34px!important}}
-
-/* Mobile: keep the promo strip and shared header pinned to the viewport across all shop pages. */
+/* Keep the complete shared header stack fixed at the same measured position. */
 @media(max-width:800px){
-  body>a.announcement{
-    position:fixed!important;inset:0 0 auto 0!important;z-index:1200!important;
-  }
-  body>header.site-header{
-    position:fixed!important;top:43px!important;left:0!important;right:0!important;z-index:1199!important;
-  }
-  body{padding-top:108px!important}
   body>header.site-header .main-nav{
-    position:fixed!important;top:107px!important;left:10px!important;right:10px!important;
-    z-index:1300!important;max-height:calc(100dvh - 120px)!important;
+    position:fixed!important;top:var(--plotao-shop-header-stack-height)!important;left:10px!important;right:10px!important;
+    z-index:1300!important;max-height:calc(100dvh - var(--plotao-shop-header-stack-height) - 12px)!important;
   }
-  body>header.site-header .header-main.search-open~.main-nav{top:155px!important}
-}
-@media(max-width:600px){
-  body>a.announcement{height:34px!important;min-height:34px!important}
-  body>header.site-header{top:34px!important}
-  body{padding-top:98px!important}
-  body>header.site-header .main-nav{top:98px!important}
-  body>header.site-header .header-main.search-open~.main-nav{top:146px!important}
+  body>header.site-header .header-main.search-open~.main-nav{top:calc(var(--plotao-shop-header-stack-height) + 48px)!important}
+  body.eshop-search-open{padding-top:calc(var(--plotao-shop-header-stack-height) + 48px)!important}
+  html.eshop-search-open{scroll-padding-top:calc(var(--plotao-shop-header-stack-height) + 48px)!important}
 }
 
 
