@@ -111,7 +111,26 @@ h2{font-size:clamp(30px,3.5vw,46px);margin:12px 0 14px}
 .footer .legal a{color:#edf3f0;text-decoration:none;font-size:14px}
 @media(max-width:640px){.footer{grid-template-columns:1fr;padding:26px 24px 24px;gap:18px}.footer>div:first-child p{margin:8px 0 0;font-size:15px}.footer nav{grid-template-columns:1fr;gap:0}.footer nav a{min-height:50px;padding:10px 0;font-size:16px}.footer .legal{flex-direction:row;padding-top:14px;gap:8px;flex-wrap:nowrap;width:100%;justify-content:space-between;align-items:center}.footer .legal small,.footer .legal a{font-size:12px}.footer .legal a{margin-left:auto;text-align:right;font-size:11px;line-height:1.2}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
-header{position:sticky;top:0;z-index:50}</style>
+header{position:sticky;top:0;z-index:50}
+/* Doprava – říjen 2026: nové rozvržení, bez zásahu do sdílené hlavičky */
+.hero{background:linear-gradient(90deg,rgba(246,250,247,.97) 0%,rgba(246,250,247,.9) 42%,rgba(227,241,235,.87) 100%),linear-gradient(145deg,#d1e4e5,#f9f4e7 60%,#8dbca8);color:var(--ink)}
+.hero:after{border-color:#08744318;box-shadow:0 0 0 42px #08744308,0 0 0 84px #08744306}
+.hero-inner{max-width:1480px;grid-template-columns:minmax(0,1fr) minmax(390px,.85fr);gap:clamp(24px,4vw,65px);min-height:550px;padding:28px 42px 75px}
+.hero .crumb{color:#34564c;margin-bottom:28px}.hero .eyebrow{color:#e8660b}.hero h1{font-size:clamp(45px,5.1vw,72px);letter-spacing:-.055em;margin:14px 0 18px}.hero h1 em{color:#f36b0b}
+.hero-copy>p{color:#263b34;font-size:18px;max-width:500px}.hero-promise{color:#31564a}.hero-promise svg{color:var(--g)}.hero .button.secondary{color:var(--g);border:1px solid var(--g);background:#ffffffad}
+.map-card{background:#fff;border:1px solid #e7edeb;z-index:1;box-shadow:0 20px 60px #0036241c}.map-card>p{font-size:15px;color:#29483d}
+.delivery-highlights{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:-38px;margin-bottom:20px;width:min(1450px,calc(100% - 38px))}
+.transport-card{display:grid;grid-template-columns:135px minmax(0,1fr);gap:17px;padding:14px;background:#fff;border:1px solid #e9eeec;border-radius:18px;box-shadow:0 12px 34px #002a1714;align-items:center}
+.transport-card h2{font-size:18px;line-height:1.18;letter-spacing:-.03em;margin:0 0 7px}.transport-card p{font-size:13px;line-height:1.5;color:#53655e;margin:0}
+.transport-illustration{height:108px;border-radius:12px;position:relative;overflow:hidden;background:linear-gradient(155deg,#cfe0da,#eff3f0 65%,#9ebdae)}
+.transport-illustration:before{content:'';position:absolute;left:9%;right:9%;bottom:15%;height:12px;background:repeating-linear-gradient(90deg,#b18553 0 12px,#e2b980 12px 29px,#9d7544 29px 36px);box-shadow:0 3px 4px #0002}
+.transport-illustration span{position:absolute;left:10%;width:80%;height:14px;background:#c6c9c7;border:1px solid #8e9693;border-radius:2px;box-shadow:0 2px 3px #0002}.transport-illustration span:nth-child(1){bottom:28%}.transport-illustration span:nth-child(2){bottom:43%}.transport-illustration span:nth-child(3){bottom:58%}
+.transport-illustration.panels span{height:14px;background:repeating-linear-gradient(0deg,#13231e 0 2px,#96aca3 2px 3px);border-color:#476157}.transport-illustration.secured:after{content:'';position:absolute;top:21%;bottom:14%;left:38%;width:7px;background:#f47712;box-shadow:42px 0 #f47712}
+.steps-section{background:#fff;padding:30px 0 60px}.steps-section .section-head{margin-bottom:20px}.steps-grid{grid-template-columns:repeat(4,1fr);gap:12px}.step{border:0;border-right:1px solid #e6ece8;border-radius:0;padding:15px 22px;min-height:150px}.step:last-child{border-right:0}.step-no{background:var(--o)}
+@media(max-width:1100px){.hero-inner{grid-template-columns:1fr 1fr;padding-inline:25px}.delivery-highlights{grid-template-columns:1fr 1fr}.transport-card{grid-template-columns:115px 1fr}.steps-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.hero-inner{display:flex;flex-direction:column;min-height:0;gap:18px;padding:20px 17px 62px}.hero .crumb{margin-bottom:20px}.hero h1{font-size:clamp(40px,10vw,55px)}.hero-copy>p{font-size:16px}.map-card{width:100%}.delivery-highlights{grid-template-columns:1fr;margin-top:-35px;width:calc(100% - 30px)}.transport-card{grid-template-columns:105px 1fr;gap:12px;padding:10px}.transport-illustration{height:94px}.steps-grid{grid-template-columns:1fr 1fr}.step{padding:15px 10px}.step:nth-child(even){border-right:0}}
+@media(max-width:480px){.steps-grid{grid-template-columns:1fr}.step{border-right:0;border-bottom:1px solid #e6ece8}.step:last-child{border-bottom:0}}
+</style>
 <link rel="stylesheet" href="/assets/eshop-header-unified.css?v=20261015-4"></head>
 <body>
   <a class="announcement" href="/eshop.html#konfigurator" aria-label="Přejít ke konfigurátoru plotu"><div class="announcement-content"><i class="announcement-dot"></i><span><strong>Navrhněte si plot online</strong> — konfigurátor spočítá potřebné díly i cenu</span><span class="announcement-arrow" aria-hidden="true">›</span></div></a>
@@ -144,10 +163,10 @@ header{position:sticky;top:0;z-index:50}</style>
 <div class="hero-copy">
 <div class="crumb"><a href="/">Domů</a>　›　Doprava</div>
 <span class="eyebrow">PLOTAO CENTRA PO CELÉ ČR</span>
-<h1>Největší síť.<br><em>Vše blízko.</em></h1>
-<p>Díky největší síti prodejen plotů v ČR máte výběr, odbornou pomoc i cestu k materiálu blízko. Dopravu a montáž naceníme podle místa, přístupu a skutečných podmínek realizace.</p>
+<h1>Spolehlivá<br><em>doprava plotů.</em></h1>
+<p>Panely, sloupky, podhrabové desky a další plotové komponenty doručíme podle možností dopravy po celé České republice. Cenu a termín potvrdíme podle místa a skutečných podmínek.</p>
 <div class="actions"><a class="button primary" href="/#kalkulator">Spočítat materiál <span aria-hidden="true">→</span></a><a class="button secondary" href="/poptavka.html">Poptat plot</a></div>
-<div class="hero-promise"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Stejná síť. Jednotné podmínky. Pobočka blízko vašeho projektu.</span></div>
+<div class="hero-promise"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Materiál na paletách, bezpečně zajištěný pro přepravu.</span></div>
 </div>
 <div class="map-card">
 <div class="map-head"><strong>Síť PLOTAO center po celé ČR</strong><span class="map-tag"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>Po celé ČR</span></div>
@@ -156,21 +175,18 @@ header{position:sticky;top:0;z-index:50}</style>
 </div>
 </div>
 </section>
-<section class="section wrap">
-<div class="section-head"><span class="eyebrow">PLOTAO CENTRA</span><h2>Váš plot začíná blízko.</h2><p>Propojujeme výběr materiálu, odbornou pomoc a lokální zázemí. Jednotné podmínky v síti doplňuje doprava a montáž podle skutečného místa realizace.</p></div>
-<div class="benefits">
-<article class="benefit"><span class="benefit-icon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span><h3>Blízko vašeho projektu</h3><p>Nejbližší PLOTAO centrum vám pomůže navázat na kalkulaci a vybrat vhodný další krok.</p></article>
-<article class="benefit"><span class="benefit-icon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg></span><h3>Doprava podle místa</h3><p>Podmínky a cenu dopravy upřesníme podle lokality, objemu materiálu a přístupu na pozemek.</p></article>
-<article class="benefit"><span class="benefit-icon"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Z"/></svg></span><h3>Stejné podmínky</h3><p>Materiál za jednotných podmínek v celé síti. Místní dopravu a montáž řešíme individuálně.</p></article>
-</div>
+<section class="delivery-highlights wrap" aria-label="Přeprava plotového materiálu">
+<article class="transport-card"><div class="transport-illustration concrete" aria-hidden="true"><span></span><span></span><span></span></div><div><h2>Doprava podhrabových desek</h2><p>Betonové desky ukládáme vodorovně na podklady a svazky zajišťujeme proti posunutí.</p></div></article>
+<article class="transport-card"><div class="transport-illustration panels" aria-hidden="true"><span></span><span></span><span></span></div><div><h2>Doprava plotových panelů</h2><p>Panely přepravujeme naležato ve svazcích, pevně stažené a chráněné při manipulaci.</p></div></article>
+<article class="transport-card"><div class="transport-illustration secured" aria-hidden="true"><span></span><span></span><span></span></div><div><h2>Bezpečně naloženo</h2><p>Náklad rozložíme podle hmotnosti, zajistíme a nepřekročíme povolenou výšku vozidla.</p></div></article>
 </section>
 <section class="steps-section">
 <div class="wrap">
-<div class="section-head"><span class="eyebrow">JEDNODUŠE A PŘEHLEDNĚ</span><h2>Jak se materiál dostane k vám?</h2><p>Začněte lokalitou. My s vámi doladíme, jak nejlépe navázat.</p></div>
+<div class="section-head"><span class="eyebrow">JEDNODUŠE A PŘEHLEDNĚ</span><h2>Jak to funguje?</h2><p>Od výběru materiálu až po doručení na stavbu.</p></div>
 <div class="steps-grid">
-<article class="step"><span class="step-no">01</span><h3>Zadejte místo realizace</h3><p>Obec nebo PSČ pomůže určit nejbližší PLOTAO centrum a podmínky dopravy.</p></article>
-<article class="step"><span class="step-no">02</span><h3>Spočítejte svůj plot</h3><p>Získáte orientační rozpis materiálu a cenu podle zvoleného typu a rozměrů.</p></article>
-<article class="step"><span class="step-no">03</span><h3>Upřesníme dopravu</h3><p>Podle lokality a rozsahu zakázky společně ověříme cenu i možnosti realizace.</p></article>
+<article class="step"><span class="step-no">01</span><h3>Vyberete materiál</h3><p>V e-shopu nebo konfigurátoru si připravíte potřebné díly.</p></article>
+<article class="step"><span class="step-no">02</span><h3>Zadáte lokalitu</h3><p>Podle obce ověříme dostupnost materiálu a podmínky dopravy.</p></article>
+<article class="step"><span class="step-no">03</span><h3>Doručíme na místo</h3><p>Po potvrzení nabídky zajistíme vhodný způsob přepravy.</p></article><article class="step"><span class="step-no">04</span><h3>Pomůžeme s montáží</h3><p>Podle lokality lze poptat také odbornou montáž oplocení.</p></article>
 </div>
 </div>
 </section>
