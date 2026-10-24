@@ -323,3 +323,9 @@ header.site-header .favorites-toggle svg{width:24px!important;height:24px!import
   border:0!important;border-radius:10px!important;background:transparent!important;color:#075846!important;box-shadow:none!important;
  }
 }
+
+/* Give the original mobile logo the same available width on every page. */
+@media(max-width:800px){
+ body>header.site-header .brand{width:min(56vw,220px,calc(100vw - 204px))!important}
+ body>header.site-header .brand img{width:100%!important}
+}
