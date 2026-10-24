@@ -1,4 +1,4 @@
-#plotaoFooter2026{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif!important;background:#063428 url('/assets/footer-bg.webp?v=53b8742') center top/cover no-repeat;color:#e8efeb;padding:28px 20px 24px!important;position:relative;isolation:isolate}
+#plotaoFooter2026{display:block!important;box-sizing:border-box!important;width:100%!important;max-width:100vw!important;margin:0!important;float:none!important;clear:both!important;position:relative!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif!important;font-size:16px!important;line-height:1.5!important;background:#063428 url('/assets/footer-bg.webp?v=53b8742') center top/cover no-repeat;color:#e8efeb;padding:28px 20px 24px!important;position:relative;isolation:isolate}
 #plotaoFooter2026:before{content:"";position:absolute;inset:0;z-index:-1;background:rgba(3,48,36,.55)}
 #plotaoFooter2026 *{box-sizing:border-box}
 #plotaoFooter2026 .pf{max-width:1080px;margin:auto}
