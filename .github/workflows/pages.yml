@@ -169,7 +169,9 @@ jobs:
           exit 1
 
       - name: Install Playwright for live visual proof
-        run: npm install --no-audit --no-fund --package-lock=false
+        run: |
+          npm install --no-audit --no-fund --package-lock=false
+          npx playwright install --with-deps --only-shell chromium
 
       - name: Capture live mobile configurator screenshot
         env:
