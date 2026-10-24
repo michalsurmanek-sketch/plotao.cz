@@ -103,6 +103,7 @@
     const link=event.target.closest('a');if(link&&(link.hash==='#kosik'||link.querySelector('.cart-count'))){event.preventDefault();open();}
   },true);
   document.querySelectorAll('header.site-header .mobile-tools').forEach(tools=>{
+    if(tools.querySelector('.pc-mobile-cart'))return;
     const original=tools.closest('header').querySelector('.cart-count')?.closest('a');if(!original)return;
     const link=original.cloneNode(true);link.className='pc-mobile-cart';link.querySelector('span')?.remove();link.href='#kosik';tools.prepend(link);
   });
