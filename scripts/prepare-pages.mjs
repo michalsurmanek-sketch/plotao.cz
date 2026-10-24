@@ -161,9 +161,9 @@ function versionSharedHeader(markup){
 }
 
 function sharedHeaderActiveHref(page,file){
-  const sourceHeader=page.match(/<header\\b[^>]*>[\\s\\S]*?<\\/header>/i)?.[0]||'';
-  const nav=sourceHeader.match(/<nav\\b[^>]*class=["'][^"']*\\bmain-nav\\b[^"']*["'][\\s\\S]*?<\\/nav>/i)?.[0];
-  const active=nav?.match(/<a\\b(?=[^>]*\\bclass=["'][^"']*\\bactive\\b[^"']*["'])[^>]*\\bhref=["']([^"']+)["']/i);
+  const sourceHeader=page.match(/<header\b[^>]*>[\s\S]*?<\/header>/i)?.[0]||'';
+  const nav=sourceHeader.match(/<nav\b[^>]*class=["'][^"']*\bmain-nav\b[^"']*["'][\s\S]*?<\/nav>/i)?.[0];
+  const active=nav?.match(/<a\b(?=[^>]*\bclass=["'][^"']*\bactive\b[^"']*["'])[^>]*\bhref=["']([^"']+)["']/i);
   if(active)return active[1];
   const exact={
     'eshop.html':'/eshop.html','eshop-produkty.html':'/eshop-produkty.html',
@@ -172,9 +172,9 @@ function sharedHeaderActiveHref(page,file){
     'kontakt.html':'/kontakt.html','inspirace.html':'/inspirace.html'
   };
   if(exact[file])return exact[file];
-  if(/^eshop-(?:beton|gabiony|hlinik|pletivo|soukromi)\\.html$/.test(file))return '/eshop-panely.html';
+  if(/^eshop-(?:beton|gabiony|hlinik|pletivo|soukromi)\.html$/.test(file))return '/eshop-panely.html';
   if(/^navod-/.test(file)||file==='navody-a-rady.html')return '/navod-montaz-paneloveho-plotu.html';
-  if(/^(?:betonovy|gabionovy|hlinikovy|kovovy|panelovy|pletivovy|zdeny)-plot\\.html$/.test(file)||file==='specialni-oploceni.html'||file==='mobilni-oploceni.html'||file==='plot-na-soukromi.html')return '/eshop-panely.html';
+  if(/^(?:betonovy|gabionovy|hlinikovy|kovovy|panelovy|pletivovy|zdeny)-plot\.html$/.test(file)||file==='specialni-oploceni.html'||file==='mobilni-oploceni.html'||file==='plot-na-soukromi.html')return '/eshop-panely.html';
   if(file==='typy-plotu.html')return '/eshop-produkty.html';
   return null;
 }
@@ -189,17 +189,17 @@ function applySharedEshopHeader(page,file){
     renderedHeader=sharedHeaderTemplate.replace(activeLink,'<a class="active" href="'+activeHref+'">');
   }
   renderedHeader=versionSharedHeader(renderedHeader);
-  let rendered=page.replace(/<a\\b(?=[^>]*\\bclass=["'][^"']*\\bannouncement\\b[^"']*["'])[^>]*>[\\s\\S]*?<\\/a>/gi,'');
-  const oldHeader=rendered.match(/<header\\b[^>]*>[\\s\\S]*?<\\/header>/i);
+  let rendered=page.replace(/<a\b(?=[^>]*\bclass=["'][^"']*\bannouncement\b[^"']*["'])[^>]*>[\s\S]*?<\/a>/gi,'');
+  const oldHeader=rendered.match(/<header\b[^>]*>[\s\S]*?<\/header>/i);
   if(oldHeader)rendered=rendered.replace(oldHeader[0],'');
-  const body=rendered.match(/<body\\b[^>]*>/i);
+  const body=rendered.match(/<body\b[^>]*>/i);
   if(!body)throw new Error('Shared e-shop header: body element missing in '+file);
   let insertAt=body.index+body[0].length;
   const afterBody=rendered.slice(insertAt);
-  const skip=afterBody.match(/^\\s*<a\\b(?=[^>]*\\bclass=["'][^"']*\\bskip\\b[^"']*["'])[^>]*>[\\s\\S]*?<\\/a>/i);
+  const skip=afterBody.match(/^\s*<a\b(?=[^>]*\bclass=["'][^"']*\bskip\b[^"']*["'])[^>]*>[\s\S]*?<\/a>/i);
   if(skip)insertAt+=skip[0].length;
   rendered=rendered.slice(0,insertAt)+renderedHeader+rendered.slice(insertAt);
-  const newHeader=rendered.match(/<header class="site-header">[\\s\\S]*?<\\/header>/i)?.[0]||'';
+  const newHeader=rendered.match(/<header class="site-header">[\s\S]*?<\/header>/i)?.[0]||'';
   if(!newHeader.includes('Poradíme vám')||!newHeader.includes('Košík'))throw new Error('Shared e-shop header: required controls missing in '+file);
   return rendered;
 }
@@ -278,7 +278,7 @@ for(const file of fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort()){
   page=page.replace('</head>','<style data-plotao-header-divider="1">body>header,#eshopContextHeader>header.site-header{box-shadow:0 1px 0 #08744366!important}</style></head>');
   page=page.replace('</head>','<style data-plotao-scrollbars="1">html,*{scrollbar-color:#087443 #edf2ee}::-webkit-scrollbar{width:12px;height:12px}::-webkit-scrollbar-track{background:#edf2ee}::-webkit-scrollbar-thumb{background:#087443;border:3px solid #edf2ee;border-radius:999px}::-webkit-scrollbar-thumb:hover{background:#064737}::-webkit-scrollbar-corner{background:#edf2ee}@media(forced-colors:active){html,*{scrollbar-color:auto}}</style></head>');
   page=file==='index.html'?applyCalculatorEshopHeader(page):applySharedEshopHeader(page,file);
-  if(file!=='index.html'&&file!=='admin.html'&&file!=='partner-odpoved.html'&&!/href=["'][^"']*eshop-header-unified\\.css/i.test(page)){
+  if(file!=='index.html'&&file!=='admin.html'&&file!=='partner-odpoved.html'&&!/href=["'][^"']*eshop-header-unified\.css/i.test(page)){
     page=page.replace('</head>','<link rel="stylesheet" href="/assets/eshop-header-unified.css?v='+sha.slice(0,12)+'"></head>');
   }
   page=page.replace(/(href=["']\/assets\/eshop-header-unified\.css\?v=)[^"']+(["'])/g,(match,prefix,suffix)=>prefix+sha.slice(0,12)+suffix);
