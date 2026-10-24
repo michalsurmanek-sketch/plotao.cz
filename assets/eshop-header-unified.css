@@ -388,3 +388,19 @@ header.site-header .favorites-toggle svg{width:24px!important;height:24px!import
   display:none!important;content:none!important;
  }
 }
+
+/* Fix the mobile cart badge before first paint so it never drops below the icon. */
+@media(max-width:800px){
+ :is(body,#eshopContextHeader)>header.site-header .mobile-tools>a.pc-mobile-cart{
+  position:relative!important;display:grid!important;place-items:center!important;width:32px!important;height:35px!important;
+  margin:0!important;padding:0!important;color:#087443!important;text-decoration:none!important;
+ }
+ :is(body,#eshopContextHeader)>header.site-header .mobile-tools>a.pc-mobile-cart svg{
+  display:block!important;width:23px!important;height:23px!important;fill:none!important;stroke:currentColor!important;stroke-width:2!important;
+ }
+ :is(body,#eshopContextHeader)>header.site-header .mobile-tools>a.pc-mobile-cart .cart-count{
+  position:absolute!important;right:-2px!important;top:-7px!important;display:grid!important;place-items:center!important;
+  min-width:18px!important;width:auto!important;height:18px!important;margin:0!important;padding:0 3px!important;
+  border-radius:50%!important;background:#f07828!important;color:#fff!important;font-size:11px!important;font-weight:800!important;line-height:1!important;
+ }
+}
