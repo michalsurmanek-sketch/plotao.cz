@@ -380,3 +380,11 @@ header.site-header .favorites-toggle svg{width:24px!important;height:24px!import
   display:grid!important;place-items:center!important;width:min(42px,100%)!important;height:42px!important;
  }
 }
+
+
+/* Mobile dropdown items do not use the desktop active underline. */
+@media(max-width:800px){
+ :is(body,#eshopContextHeader)>header.site-header .main-nav:has(a[href^="/?from=eshop"].active) a[href^="/?from=eshop"]:after{
+  display:none!important;content:none!important;
+ }
+}
