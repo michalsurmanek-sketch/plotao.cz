@@ -23,7 +23,7 @@ async function selectType(page,id,visibleSelector){
   if(visibleSelector)await page.locator(visibleSelector).waitFor({state:'visible',timeout:5000});
 }
 
-async function runScenario(name,viewport,scenario){
+async function runScenario(name,viewport,scenario,ready=waitForReady,checkBrowserErrors=true){
   const browser=await chromium.launch({headless:true});
   const context=await browser.newContext({viewport});
   const page=await context.newPage();
@@ -33,9 +33,9 @@ async function runScenario(name,viewport,scenario){
   page.on('console',message=>{if(message.type()==='error')browserErrors.push('console: '+message.text())});
   page.on('requestfailed',request=>{if(request.url().startsWith(baseOrigin))browserErrors.push('requestfailed: '+request.url()+' '+(request.failure()?.errorText||''))});
   try{
-    await waitForReady(page);
+    await ready(page);
     await scenario(page);
-    if(browserErrors.length)throw new Error(browserErrors.join('\n'));
+    if(checkBrowserErrors&&browserErrors.length)throw new Error(browserErrors.join('\n'));
     console.log(`Browser E2E ${name} OK`);
   }catch(error){
     failures.push(`${name}: ${error.stack||error.message||error}\n${browserErrors.join('\n')}`);
@@ -43,6 +43,37 @@ async function runScenario(name,viewport,scenario){
     await context.close();
     await browser.close();
   }
+}
+
+for(const [device,viewport] of [['mobile',{width:390,height:844}],['tablet',{width:1024,height:900}],['desktop',{width:1440,height:1000}]]){
+  await runScenario(`header-consistency-${device}-all-page-types`,viewport,async page=>{
+    const routes=[
+      ['/doprava.html','body>header.site-header'],
+      ['/komponenty.html','body>header.site-header'],
+      ['/eshop.html','body>header.site-header'],
+      ['/kontakt.html','body>header.site-header'],
+      ['/navody-a-rady.html','body>header.site-header'],
+      ['/poptavka.html','body>header.site-header'],
+      ['/ochrana-osobnich-udaju.html','body>header.site-header'],
+      ['/navod-betonove-desky.html','body>header.site-header'],
+      ['/','#eshopContextHeader>header.site-header']
+    ];
+    const readGeometry=async selector=>page.locator(selector).evaluate(header=>{
+      const rect=selector=>{const element=header.querySelector(selector);if(!element)return null;const box=element.getBoundingClientRect();return{x:box.x,y:box.y,width:box.width,height:box.height}};
+      return{header:rect('.header-main'),logo:rect('.brand img'),nav:rect('.main-nav'),navWrap:rect('.main-nav .wrap'),search:rect('.search'),actions:rect('.header-actions'),tools:rect('.mobile-tools')};
+    });
+    let reference=null,referenceRoute='';
+    for(const [route,selector] of routes){
+      await page.goto(baseUrl+route,{waitUntil:'networkidle'});
+      const geometry=await readGeometry(selector);
+      assert(geometry.header&&geometry.logo&&geometry.nav&&geometry.navWrap,`${route} must render the complete canonical header`);
+      if(!reference){reference=geometry;referenceRoute=route;continue}
+      for(const key of Object.keys(reference))for(const dimension of ['x','y','width','height']){
+        const a=reference[key]?.[dimension],b=geometry[key]?.[dimension];
+        assert(a===null&&b===null||Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=1,`${device} ${key} ${dimension} must match between ${referenceRoute} and ${route}`);
+      }
+    }
+  },async page=>{await page.goto(baseUrl+'/',{waitUntil:'networkidle'})},false);
 }
 
 await runScenario('help-submit-confirmation-mobile',{width:390,height:740},async page=>{
@@ -311,37 +342,6 @@ await runScenario('mobile-menu-contact',{width:390,height:844},async page=>{
   await page.keyboard.press('Escape');
   assert(!(await nav.evaluate(el=>el.classList.contains('open'))),'Escape must close the mobile navigation');
 });
-
-for(const [device,viewport] of [['mobile',{width:390,height:844}],['tablet',{width:1024,height:900}],['desktop',{width:1440,height:1000}]]){
-  await runScenario(`header-consistency-${device}-all-page-types`,viewport,async page=>{
-    const routes=[
-      ['/doprava.html','body>header.site-header'],
-      ['/komponenty.html','body>header.site-header'],
-      ['/eshop.html','body>header.site-header'],
-      ['/kontakt.html','body>header.site-header'],
-      ['/navody-a-rady.html','body>header.site-header'],
-      ['/poptavka.html','body>header.site-header'],
-      ['/ochrana-osobnich-udaju.html','body>header.site-header'],
-      ['/navod-betonove-desky.html','body>header.site-header'],
-      ['/','#eshopContextHeader>header.site-header']
-    ];
-    const readGeometry=async selector=>page.locator(selector).evaluate(header=>{
-      const rect=selector=>{const element=header.querySelector(selector);if(!element)return null;const box=element.getBoundingClientRect();return{x:box.x,y:box.y,width:box.width,height:box.height}};
-      return{header:rect('.header-main'),logo:rect('.brand img'),nav:rect('.main-nav'),navWrap:rect('.main-nav .wrap'),search:rect('.search'),actions:rect('.header-actions'),tools:rect('.mobile-tools')};
-    });
-    let reference=null,referenceRoute='';
-    for(const [route,selector] of routes){
-      await page.goto(baseUrl+route,{waitUntil:'networkidle'});
-      const geometry=await readGeometry(selector);
-      assert(geometry.header&&geometry.logo&&geometry.nav&&geometry.navWrap,`${route} must render the complete canonical header`);
-      if(!reference){reference=geometry;referenceRoute=route;continue}
-      for(const key of Object.keys(reference))for(const dimension of ['x','y','width','height']){
-        const a=reference[key]?.[dimension],b=geometry[key]?.[dimension];
-        assert(a===null&&b===null||Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=1,`${device} ${key} ${dimension} must match between ${referenceRoute} and ${route}`);
-      }
-    }
-  });
-}
 
 await runScenario('mobile-menu-eshop-context',{width:390,height:844},async page=>{
   await page.goto(baseUrl+'/?e2e=1&from=eshop',{waitUntil:'networkidle'});
