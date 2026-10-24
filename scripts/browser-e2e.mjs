@@ -312,19 +312,36 @@ await runScenario('mobile-menu-contact',{width:390,height:844},async page=>{
   assert(!(await nav.evaluate(el=>el.classList.contains('open'))),'Escape must close the mobile navigation');
 });
 
-await runScenario('mobile-header-consistency-delivery-components',{width:390,height:844},async page=>{
-  const readGeometry=async()=>page.locator('body>header.site-header').evaluate(header=>{
-    const rect=selector=>{const element=header.querySelector(selector),box=element.getBoundingClientRect();return{x:box.x,y:box.y,width:box.width,height:box.height}};
-    return{header:rect('.header-main'),logo:rect('.brand img'),advice:rect('.pa-mobile-advice'),search:rect('.mobile-search-icon'),menu:rect('.menu-button')};
+for(const [device,viewport] of [['mobile',{width:390,height:844}],['tablet',{width:1024,height:900}],['desktop',{width:1440,height:1000}]]){
+  await runScenario(`header-consistency-${device}-all-page-types`,viewport,async page=>{
+    const routes=[
+      ['/doprava.html','body>header.site-header'],
+      ['/komponenty.html','body>header.site-header'],
+      ['/eshop.html','body>header.site-header'],
+      ['/kontakt.html','body>header.site-header'],
+      ['/navody-a-rady.html','body>header.site-header'],
+      ['/poptavka.html','body>header.site-header'],
+      ['/ochrana-osobnich-udaju.html','body>header.site-header'],
+      ['/navod-betonove-desky.html','body>header.site-header'],
+      ['/','#eshopContextHeader>header.site-header']
+    ];
+    const readGeometry=async selector=>page.locator(selector).evaluate(header=>{
+      const rect=selector=>{const element=header.querySelector(selector);if(!element)return null;const box=element.getBoundingClientRect();return{x:box.x,y:box.y,width:box.width,height:box.height}};
+      return{header:rect('.header-main'),logo:rect('.brand img'),nav:rect('.main-nav'),navWrap:rect('.main-nav .wrap'),search:rect('.search'),actions:rect('.header-actions'),tools:rect('.mobile-tools')};
+    });
+    let reference=null,referenceRoute='';
+    for(const [route,selector] of routes){
+      await page.goto(baseUrl+route,{waitUntil:'networkidle'});
+      const geometry=await readGeometry(selector);
+      assert(geometry.header&&geometry.logo&&geometry.nav&&geometry.navWrap,`${route} must render the complete canonical header`);
+      if(!reference){reference=geometry;referenceRoute=route;continue}
+      for(const key of Object.keys(reference))for(const dimension of ['x','y','width','height']){
+        const a=reference[key]?.[dimension],b=geometry[key]?.[dimension];
+        assert(a===null&&b===null||Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=1,`${device} ${key} ${dimension} must match between ${referenceRoute} and ${route}`);
+      }
+    }
   });
-  await page.goto(baseUrl+'/doprava.html',{waitUntil:'networkidle'});
-  const delivery=await readGeometry();
-  await page.goto(baseUrl+'/komponenty.html',{waitUntil:'networkidle'});
-  const components=await readGeometry();
-  for(const key of Object.keys(delivery))for(const dimension of ['x','y','width','height']){
-    assert(Math.abs(delivery[key][dimension]-components[key][dimension])<=1,`mobile ${key} ${dimension} must match between delivery and components pages`);
-  }
-});
+}
 
 await runScenario('mobile-menu-eshop-context',{width:390,height:844},async page=>{
   await page.goto(baseUrl+'/?e2e=1&from=eshop',{waitUntil:'networkidle'});
