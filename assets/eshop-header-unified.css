@@ -355,3 +355,28 @@ header.site-header .favorites-toggle svg{width:24px!important;height:24px!import
 
 /* Keep the shared header divider in the canonical stylesheet. */
 :is(body,#eshopContextHeader)>header.site-header{box-shadow:0 1px 0 #08744366!important}
+
+
+/* Keep the mobile cart, favorites, search, and menu evenly distributed at the right edge. */
+@media(max-width:800px){
+ :is(body,#eshopContextHeader)>header.site-header .header-main{
+  grid-template-columns:minmax(0,1fr) minmax(0,min(48vw,320px))!important;
+  gap:0 10px!important;
+ }
+ :is(body,#eshopContextHeader)>header.site-header .brand{
+  width:min(56vw,220px,calc(100vw - 260px))!important;
+ }
+ :is(body,#eshopContextHeader)>header.site-header .brand img{width:100%!important}
+ :is(body,#eshopContextHeader)>header.site-header .mobile-tools{
+  display:grid!important;grid-auto-flow:column!important;grid-auto-columns:minmax(0,1fr)!important;
+  align-items:center!important;justify-content:stretch!important;width:min(48vw,320px)!important;
+  gap:0!important;margin:0!important;
+ }
+ :is(body,#eshopContextHeader)>header.site-header .mobile-tools>*{
+  justify-self:center!important;flex:none!important;width:min(42px,100%)!important;height:42px!important;
+  margin:0!important;padding:0!important;
+ }
+ :is(body,#eshopContextHeader)>header.site-header .mobile-tools .pc-mobile-cart{
+  display:grid!important;place-items:center!important;width:min(42px,100%)!important;height:42px!important;
+ }
+}
