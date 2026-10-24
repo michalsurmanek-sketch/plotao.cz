@@ -239,48 +239,27 @@ function parseCssBlocks(css){
   }
   return blocks;
 }
-function stripAnnouncementCss(css){
+const headerClassPattern=/(^|[.#\s>+~])(?:announcement(?:-content|-dot|-arrow|-desktop-copy|-mobile-copy|-mobile-text|-free)?|site-header|header-main|brand|search-area|search(?:-suggestions|-suggestion(?:-empty)?)?|header-actions|header-action|cart-count|mobile-tools|mobile-search-icon|menu-button|main-nav|sr-only)(?=$|[.#\s>+~:\[])/i;
+function stripSharedHeaderCss(css){
   return parseCssBlocks(css).map(({head,body})=>{
     if(/^@(media|supports|container|layer)\b/i.test(head)){
-      const nested=stripAnnouncementCss(body);
+      const nested=stripSharedHeaderCss(body);
       return nested?head+'{'+nested+'}':'';
     }
     if(head.startsWith('@'))return head+'{'+body+'}';
-    const selectors=head.split(',').map(selector=>selector.trim()).filter(selector=>selector&&!/(^|[.#\s>+~])announcement(?:-content|-dot|-arrow|-desktop-copy|-mobile-copy|-mobile-text|-free)?(?=$|[.#\s>+~:\[])/i.test(selector));
+    const selectors=head.split(',').map(selector=>selector.trim()).filter(selector=>selector&&!headerClassPattern.test(selector)&&!/(^|[.#\s>+~])header(?=$|[.#\s>+~:\[])/i.test(selector));
     return selectors.length?selectors.join(',')+'{'+body+'}':'';
   }).filter(Boolean).join('\n');
 }
-const headerClassPattern=/(^|[.#\s>+~])(?:announcement(?:-content|-dot|-arrow)?|site-header|header-main|brand|search-area|search(?:-suggestions|-suggestion(?:-empty)?)?|header-actions|header-action|cart-count|mobile-tools|mobile-search-icon|menu-button|main-nav|sr-only|wrap)(?=$|[.#\s>+~:\[])/i;
-function scopeHeaderCss(css){
-  return parseCssBlocks(css).map(({head,body})=>{
-    if(/^@(media|supports|container|layer)\b/i.test(head)){
-      const nested=scopeHeaderCss(body);
-      return nested?head+'{'+nested+'}':'';
-    }
-    if(/^:root$/i.test(head))return '#eshopContextHeader{'+body+'}';
-    const selected=head.split(',').map(s=>s.trim()).filter(s=>s&&!/(^|[.#\\s>+~])announcement(?:-content|-dot|-arrow|-desktop-copy|-mobile-copy|-mobile-text|-free)?(?=$|[.#\\s>+~:\\[])/i.test(s)&&!/^(?:a|\\*)$/i.test(s)&&(/^(?:button|input|\\[hidden\\])$/i.test(s)||headerClassPattern.test(s)||/^#(?:shopSearch|searchStatus)\\b/i.test(s)));
-    return selected.map(s=>'#eshopContextHeader '+s+'{'+body+'}').join('');
-  }).filter(Boolean).join('\n');
-}
-const shopHeaderCss=(()=>{const source=fs.readFileSync('eshop.html','utf8');const styles=[...source.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map(m=>scopeHeaderCss(m[1])).filter(Boolean).join('\n');return '#eshopContextHeader{display:contents;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:normal}#eshopContextHeader[hidden]{display:none!important}#eshopContextHeader:not([hidden])~header.head{display:none!important}#eshopContextHeader:not([hidden])~.mobile-price{display:none!important}#eshopContextHeader .main-nav a[href^=\"/?from=eshop\"].active:after{bottom:-30px!important}\n'+styles+'\n#eshopContextHeader:not([hidden]) .site-header{position:fixed!important;top:var(--eshop-context-announcement-height,43px)!important;left:0!important;right:0!important;z-index:1199!important}body.from-eshop{padding-top:calc(var(--eshop-context-announcement-height,43px) + var(--eshop-context-header-height,165px))!important}body.from-eshop #kalkulator{scroll-margin-top:calc(var(--eshop-context-announcement-height,43px) + var(--eshop-context-header-height,165px) + 16px)}@media(max-width:1100px){#eshopContextHeader .header-main{width:calc(100% - clamp(40px,10.5vw,108px))!important;padding-left:0!important;padding-right:0!important}}@media(max-width:800px){#eshopContextHeader .brand img{transform:translateX(-8.7%)!important}}@media(min-width:801px){#eshopContextHeader .header-main{padding:0!important}#eshopContextHeader .main-nav .wrap{padding:0!important;height:100%!important}#eshopContextHeader .main-nav a{line-height:1.2!important}#eshopContextHeader .header-action{line-height:1.55!important}}'})();
 function applyCalculatorEshopHeader(page){
   page=page.replace(/<style id="eshop-context-nav-style">[\s\S]*?<\/style>/i,'');
   page=page.replace(/<script id="eshop-context-nav-loader">[\s\S]*?<\/script>/i,'');
   if(!page.includes('<header class="head">'))throw new Error('Calculator page: native homepage header missing');
   if(page.includes('id="eshopContextHeader"'))throw new Error('Calculator page: duplicate e-shop context header');
-  const loader='<script id="eshop-context-header-loader">(()=>{const root=document.getElementById("eshopContextHeader");const show=true;if(!root)return;root.hidden=!show;if(!show)return;document.body.classList.add("from-eshop");const announcement=root.querySelector(".announcement"),siteHeader=root.querySelector(".site-header");const syncHeaderLayout=()=>{const bannerHeight=announcement?.getBoundingClientRect().height||0;const headerHeight=siteHeader?.getBoundingClientRect().height||0;document.documentElement.style.setProperty("--eshop-context-announcement-height",bannerHeight+"px");document.documentElement.style.setProperty("--eshop-context-header-height",headerHeight+"px");document.documentElement.style.setProperty("--eshop-context-top-offset",bannerHeight+headerHeight+"px")};syncHeaderLayout();window.addEventListener("resize",syncHeaderLayout);const main=root.querySelector(".header-main"),nav=root.querySelector(".main-nav"),searchToggle=root.querySelector(".mobile-search-icon"),menuButton=root.querySelector(".menu-button");const configLink=[...nav.querySelectorAll("a")].find(link=>{const url=new URL(link.href,location.href);return url.pathname==="/"&&url.searchParams.get("from")==="eshop"});if(configLink){const setConfigActive=()=>nav.querySelectorAll("a").forEach(link=>link.classList.toggle("active",link===configLink));setConfigActive();window.addEventListener("hashchange",setConfigActive)}const setSearchOpen=(open,focus=false)=>{main.classList.toggle("search-open",open);document.body.classList.toggle("eshop-search-open",open);searchToggle.setAttribute("aria-expanded",String(open));searchToggle.setAttribute("aria-label",open?"Zavřít vyhledávání":"Otevřít vyhledávání");if(open&&focus)root.querySelector("#shopSearch").focus();else if(!open)root.querySelector("#shopSearch").blur()};searchToggle?.addEventListener("click",event=>{event.stopImmediatePropagation();const open=!main.classList.contains("search-open");setSearchOpen(open,open)},true);menuButton?.addEventListener("click",()=>{const open=nav.classList.toggle("open");menuButton.setAttribute("aria-expanded",String(open));menuButton.setAttribute("aria-label",open?"Zavřít menu":"Otevřít menu")});nav?.addEventListener("click",event=>{if(event.target.closest("a")){nav.classList.remove("open");menuButton?.setAttribute("aria-expanded","false")}})})();</script>';
+  const loader='<script id="eshop-context-header-loader">(()=>{const root=document.getElementById("eshopContextHeader");const show=true;if(!root)return;root.hidden=!show;if(!show)return;document.body.classList.add("from-eshop");const main=root.querySelector(".header-main"),nav=root.querySelector(".main-nav"),searchToggle=root.querySelector(".mobile-search-icon"),menuButton=root.querySelector(".menu-button");const configLink=[...nav.querySelectorAll("a")].find(link=>{const url=new URL(link.href,location.href);return url.pathname==="/"&&url.searchParams.get("from")==="eshop"});if(configLink){const setConfigActive=()=>nav.querySelectorAll("a").forEach(link=>link.classList.toggle("active",link===configLink));setConfigActive();window.addEventListener("hashchange",setConfigActive)}const setSearchOpen=(open,focus=false)=>{main.classList.toggle("search-open",open);document.body.classList.toggle("eshop-search-open",open);searchToggle.setAttribute("aria-expanded",String(open));searchToggle.setAttribute("aria-label",open?"Zavřít vyhledávání":"Otevřít vyhledávání");if(open&&focus)root.querySelector("#shopSearch").focus();else if(!open)root.querySelector("#shopSearch").blur()};searchToggle?.addEventListener("click",event=>{event.stopImmediatePropagation();const open=!main.classList.contains("search-open");setSearchOpen(open,open)},true);menuButton?.addEventListener("click",()=>{const open=nav.classList.toggle("open");menuButton.setAttribute("aria-expanded",String(open));menuButton.setAttribute("aria-label",open?"Zavřít menu":"Otevřít menu")});nav?.addEventListener("click",event=>{if(event.target.closest("a")){nav.classList.remove("open");menuButton?.setAttribute("aria-expanded","false")}})})();</script>';
   const injected='<div id="eshopContextHeader" hidden>'+versionSharedHeader(sharedHeaderTemplate)+'</div>'+loader;
   page=page.replace('<header class="head">',injected+'<header class="head">');
 
-  // Reuse the canonical header rules inside the calculator wrapper too.
-  // The body-child selectors otherwise never match this nested header.
-  const canonicalCss=fs.readFileSync('assets/eshop-header-unified.css','utf8')
-    .replaceAll('body>header.site-header','#eshopContextHeader>header.site-header')
-    .replaceAll('body>a.announcement','#eshopContextHeader>a.announcement')
-    .replace(/bottom:-30px!important/g,'bottom:0!important');
-  const contextReset='#eshopContextHeader{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:normal}#eshopContextHeader .header-main,#eshopContextHeader .main-nav .wrap{max-width:none!important}#eshopContextHeader .main-nav a[href^="/?from=eshop"].active:after{bottom:0!important}';
-
-  page=page.replace('</head>','<style id="eshop-context-header-styles">'+shopHeaderCss+'\n'+canonicalCss+'\n'+contextReset+'</style></head>');
   return page;
 }
 
@@ -294,15 +273,14 @@ const sharedHeaderController='<script data-plotao-shared-header-controller="1">(
 for(const file of fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort()){
   let page=fs.readFileSync(file,'utf8').replaceAll(sharedFooterMarker,sharedFooterTemplate);
   // Strip page-local promo-bar CSS. Its appearance is owned by the shared header stylesheet.
-  page=page.replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi,(tag,css)=>'<style>'+stripAnnouncementCss(css)+'</style>');
+  page=page.replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi,(tag,css)=>'<style>'+stripSharedHeaderCss(css)+'</style>');
   page=page.replace('</head>','<style data-plotao-desktop-product-images="1">@media(min-width:801px){.product-card>.product-image{overflow:hidden;min-height:0;grid-template-rows:minmax(0,1fr)}.product-card>.product-image>img{display:block;min-width:0;min-height:0;max-height:100%}}</style></head>');
   page=page.replace(/<script\b[^>]*\bsrc=["']\/assets\/product-cards\.js(?:\?[^"']*)?["'][^>]*><\/script>/gi,'');
   page=page.replace('</body>','<script defer src="'+versionedScript('/assets/product-cards.js')+'"></script><script defer src="'+versionedScript('/assets/cart-v1.js')+'"></script></body>');
-  page=page.replace('</head>','<style data-plotao-header-divider="1">body>header,#eshopContextHeader>header.site-header{box-shadow:0 1px 0 #08744366!important}</style></head>');
   page=page.replace('</head>','<style data-plotao-scrollbars="1">html,*{scrollbar-color:#087443 #edf2ee}::-webkit-scrollbar{width:12px;height:12px}::-webkit-scrollbar-track{background:#edf2ee}::-webkit-scrollbar-thumb{background:#087443;border:3px solid #edf2ee;border-radius:999px}::-webkit-scrollbar-thumb:hover{background:#064737}::-webkit-scrollbar-corner{background:#edf2ee}@media(forced-colors:active){html,*{scrollbar-color:auto}}</style></head>');
   page=file==='index.html'?applyCalculatorEshopHeader(page):applySharedEshopHeader(page,file);
   page=applySharedHeaderThemeColor(page,file);
-  if(file!=='index.html'&&file!=='admin.html'&&file!=='partner-odpoved.html'&&!/href=["'][^"']*eshop-header-unified\.css/i.test(page)){
+  if(file!=='admin.html'&&file!=='partner-odpoved.html'&&!/href=["'][^"']*eshop-header-unified\.css/i.test(page)){
     page=page.replace('</head>','<link rel="stylesheet" href="/assets/eshop-header-unified.css?v='+sha.slice(0,12)+'"></head>');
   }
   page=page.replace(/(href=["']\/assets\/eshop-header-unified\.css\?v=)[^"']+(["'])/g,(match,prefix,suffix)=>prefix+sha.slice(0,12)+suffix);
