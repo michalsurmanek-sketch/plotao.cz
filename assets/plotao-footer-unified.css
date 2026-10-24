@@ -122,3 +122,6 @@
 #plotaoFooter2026 .pf-nav h3{line-height:1.5!important}
 #plotaoFooter2026 .pf-news input{margin:0!important}
 #plotaoFooter2026 .pf-news form label.newsletter-consent{margin:0!important}
+#plotaoFooter2026 .pf-news form button{margin:0!important;font-family:inherit!important;font-size:16px!important;line-height:1.2!important}
+#plotaoFooter2026 .pf-news form .newsletter-consent>input{height:18px!important}
+#plotaoFooter2026 .pf-news form .newsletter-status{margin:0!important;line-height:1.5!important}
