@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import {createHash} from 'node:crypto';
 const root='dist';
 if(!fs.existsSync(root))throw new Error('Privacy UI: dist/ is missing');
 const privacyPage='ochrana-osobnich-udaju.html';
@@ -37,29 +38,31 @@ function splitCssBlocks(css){
   }
   return blocks;
 }
-const footerClassPattern=/(^|[.#\s>+~])(?:pf|pf-top|pf-logo|pf-sub|pf-brand|pf-slogan|pf-rule|pf-nav|thumb|ico|pf-benefits|pf-news|news-title|pf-bottom|social|pf-icon|pf-benefit-icon|pf-social-icon|sr-only)(?=$|[.#\s>+~:\[])/i;
-function selectFooterCss(css){
+const footerClassPattern=/(^|[.#\s>+~])(?:pf|pf-top|pf-logo|pf-sub|pf-brand|pf-slogan|pf-rule|pf-nav|thumb|ico|pf-benefits|pf-news|news-title|pf-bottom|social|pf-icon|pf-benefit-icon|pf-social-icon)(?=$|[.#\s>+~:\[])/i;
+function stripFooterCss(css){
   return splitCssBlocks(css).map(({head,body})=>{
-    if(/^@(media|supports|container|layer)\b/i.test(head)){const nested=selectFooterCss(body);return nested?head+'{'+nested+'}':''}
-    if(/^@keyframes\b/i.test(head))return head+'{'+body+'}';
-    const selected=head.split(',').map(s=>s.trim()).filter(s=>s&&(/#plotaoFooter2026\b/.test(s)||footerClassPattern.test(s)));
-    return selected.map(s=>/#plotaoFooter2026\b/.test(s)?s:'#plotaoFooter2026 '+s).map(s=>s+'{'+body+'}').join('');
+    if(/^@(media|supports|container|layer)\b/i.test(head)){const nested=stripFooterCss(body);return nested?head+'{'+nested+'}':''}
+    if(/^@keyframes\s+plotao-footer-icon-pulse\b/i.test(head))return '';
+    if(head.startsWith('@'))return head+'{'+body+'}';
+    const selectors=head.split(',').map(selector=>selector.trim()).filter(selector=>selector&&!/#plotaoFooter2026\b/.test(selector)&&!footerClassPattern.test(selector)&&!/(^|[.#\s>+~])footer(?=$|[.#\s>+~:\[])/i.test(selector));
+    return selectors.length?selectors.join(',')+'{'+body+'}':'';
   }).filter(Boolean).join('\n');
 }
-const sourceFooterCss=fs.readFileSync(path.join(root,'assets/footer-2026.css'),'utf8');
-const unifiedFooterCss=selectFooterCss(sourceFooterCss);
+const unifiedFooterCss=fs.readFileSync(path.join(root,'assets','plotao-footer-unified.css'),'utf8');
 if(!unifiedFooterCss.includes('#plotaoFooter2026')||unifiedFooterCss.includes('.mobile-price')||unifiedFooterCss.includes('.more '))throw new Error('Unified footer: footer CSS scoping validation failed');
+const footerCssVersion=createHash('sha256').update(unifiedFooterCss).digest('hex').slice(0,12);
 let unifiedFooterCount=0;
 for(const file of publicHtml){
   const full=path.join(root,file);
   let html=fs.readFileSync(full,'utf8');
+  html=html.replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi,(tag,css)=>tag.replace(css,stripFooterCss(css)));
   if(/<footer\b[^>]*>[\s\S]*?<\/footer>/i.test(html))html=html.replace(/<footer\b[^>]*>[\s\S]*?<\/footer>/i,canonicalFooter);
   else html=html.replace(/<\/body>/i,canonicalFooter+'</body>');
   if(!html.includes('data-plotao-unified-footer="1"')){
     html=html.replace(canonicalFooter,canonicalFooter.replace('<footer id="plotaoFooter2026">','<footer id="plotaoFooter2026" data-plotao-unified-footer="1">'));
   }
   if(!html.includes('</head>'))throw new Error('Unified footer: missing </head> in '+file);
-  if(!html.includes('data-plotao-unified-footer-css="1"'))html=html.replace('</head>','<style data-plotao-unified-footer-css="1">'+unifiedFooterCss+'</style></head>');
+  if(!html.includes('data-plotao-unified-footer-css="1"'))html=html.replace('</head>','<link data-plotao-unified-footer-css="1" rel="stylesheet" href="/assets/plotao-footer-unified.css?v='+footerCssVersion+'"></head>');
   if(!html.includes('data-plotao-unified-footer="1"'))throw new Error('Unified footer: canonical footer missing in '+file);
   const actualFooter=html.match(/<footer\b[^>]*>[\s\S]*?<\/footer>/i)?.[0];
   const expectedFooter=canonicalFooter.replace('<footer id="plotaoFooter2026">','<footer id="plotaoFooter2026" data-plotao-unified-footer="1">');
