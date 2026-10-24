@@ -160,20 +160,48 @@ function versionSharedHeader(markup){
   });
 }
 
+function sharedHeaderActiveHref(page,file){
+  const sourceHeader=page.match(/<header\\b[^>]*>[\\s\\S]*?<\\/header>/i)?.[0]||'';
+  const nav=sourceHeader.match(/<nav\\b[^>]*class=["'][^"']*\\bmain-nav\\b[^"']*["'][\\s\\S]*?<\\/nav>/i)?.[0];
+  const active=nav?.match(/<a\\b(?=[^>]*\\bclass=["'][^"']*\\bactive\\b[^"']*["'])[^>]*\\bhref=["']([^"']+)["']/i);
+  if(active)return active[1];
+  const exact={
+    'eshop.html':'/eshop.html','eshop-produkty.html':'/eshop-produkty.html',
+    'eshop-panely.html':'/eshop-panely.html','komponenty.html':'/komponenty.html',
+    'eshop-brany.html':'/eshop-brany.html','doprava.html':'/doprava.html',
+    'kontakt.html':'/kontakt.html','inspirace.html':'/inspirace.html'
+  };
+  if(exact[file])return exact[file];
+  if(/^eshop-(?:beton|gabiony|hlinik|pletivo|soukromi)\\.html$/.test(file))return '/eshop-panely.html';
+  if(/^navod-/.test(file)||file==='navody-a-rady.html')return '/navod-montaz-paneloveho-plotu.html';
+  if(/^(?:betonovy|gabionovy|hlinikovy|kovovy|panelovy|pletivovy|zdeny)-plot\\.html$/.test(file)||file==='specialni-oploceni.html'||file==='mobilni-oploceni.html'||file==='plot-na-soukromi.html')return '/eshop-panely.html';
+  if(file==='typy-plotu.html')return '/eshop-produkty.html';
+  return null;
+}
 function applySharedEshopHeader(page,file){
-  const headerMatch=page.match(/<header class="site-header">[\s\S]*?<\/header>/i);
-  if(!headerMatch)return page;
-  const navMatch=headerMatch[0].match(/<nav\b[^>]*class=["'][^"']*\bmain-nav\b[^"']*["'][\s\S]*?<\/nav>/i);
-  const active=navMatch?.[0].match(/<a\b(?=[^>]*\bclass=["'][^"']*\bactive\b[^"']*["'])[^>]*\bhref=["']([^"']+)["']/i);
-  if(!active)throw new Error('Shared e-shop header: active navigation link missing in '+file);
-  const activeLink='<a href="'+active[1]+'">';
-  if(!sharedHeaderTemplate.includes(activeLink))throw new Error('Shared e-shop header: active link is not in canonical template: '+active[1]+' ('+file+')');
-  const renderedHeader=versionSharedHeader(sharedHeaderTemplate.replace(activeLink,'<a class="active" href="'+active[1]+'">'));
-  const withoutOldAnnouncement=page.replace(/<a\b(?=[^>]*\bclass=["'][^"']*\bannouncement\b[^"']*["'])[^>]*>[\s\S]*?<\/a>/i,'');
-  const rendered=withoutOldAnnouncement.replace(headerMatch[0],renderedHeader);
-  const newHeader=rendered.match(/<header class="site-header">[\s\S]*?<\/header>/i)?.[0]||'';
-  if(!newHeader.includes('Poradíme vám')||!newHeader.includes('Košík')||!newHeader.includes('class="active"'))throw new Error('Shared e-shop header: required controls or active item missing in '+file);
-  return rendered.replace('href="/?from=eshop#kalkulator"','href="/?from=eshop&v='+sha.slice(0,12)+'#kalkulator"');
+  // Private workspaces and partner response flows keep their dedicated shells.
+  if(file==='admin.html'||file==='partner-odpoved.html')return page;
+  const activeHref=sharedHeaderActiveHref(page,file);
+  let renderedHeader=sharedHeaderTemplate;
+  if(activeHref){
+    const activeLink='<a href="'+activeHref+'">';
+    if(!sharedHeaderTemplate.includes(activeLink))throw new Error('Shared e-shop header: active link is not in canonical template: '+activeHref+' ('+file+')');
+    renderedHeader=sharedHeaderTemplate.replace(activeLink,'<a class="active" href="'+activeHref+'">');
+  }
+  renderedHeader=versionSharedHeader(renderedHeader);
+  let rendered=page.replace(/<a\\b(?=[^>]*\\bclass=["'][^"']*\\bannouncement\\b[^"']*["'])[^>]*>[\\s\\S]*?<\\/a>/gi,'');
+  const oldHeader=rendered.match(/<header\\b[^>]*>[\\s\\S]*?<\\/header>/i);
+  if(oldHeader)rendered=rendered.replace(oldHeader[0],'');
+  const body=rendered.match(/<body\\b[^>]*>/i);
+  if(!body)throw new Error('Shared e-shop header: body element missing in '+file);
+  let insertAt=body.index+body[0].length;
+  const afterBody=rendered.slice(insertAt);
+  const skip=afterBody.match(/^\\s*<a\\b(?=[^>]*\\bclass=["'][^"']*\\bskip\\b[^"']*["'])[^>]*>[\\s\\S]*?<\\/a>/i);
+  if(skip)insertAt+=skip[0].length;
+  rendered=rendered.slice(0,insertAt)+renderedHeader+rendered.slice(insertAt);
+  const newHeader=rendered.match(/<header class="site-header">[\\s\\S]*?<\\/header>/i)?.[0]||'';
+  if(!newHeader.includes('Poradíme vám')||!newHeader.includes('Košík'))throw new Error('Shared e-shop header: required controls missing in '+file);
+  return rendered;
 }
 
 function parseCssBlocks(css){
@@ -225,7 +253,7 @@ function applyCalculatorEshopHeader(page){
   page=page.replace(/<script id="eshop-context-nav-loader">[\s\S]*?<\/script>/i,'');
   if(!page.includes('<header class="head">'))throw new Error('Calculator page: native homepage header missing');
   if(page.includes('id="eshopContextHeader"'))throw new Error('Calculator page: duplicate e-shop context header');
-  const loader='<script id="eshop-context-header-loader">(()=>{const root=document.getElementById("eshopContextHeader");const show=new URLSearchParams(location.search).get("from")==="eshop";if(!root)return;root.hidden=!show;if(!show)return;document.body.classList.add("from-eshop");const announcement=root.querySelector(".announcement"),siteHeader=root.querySelector(".site-header");const syncHeaderLayout=()=>{const bannerHeight=announcement?.getBoundingClientRect().height||0;const headerHeight=siteHeader?.getBoundingClientRect().height||0;document.documentElement.style.setProperty("--eshop-context-announcement-height",bannerHeight+"px");document.documentElement.style.setProperty("--eshop-context-header-height",headerHeight+"px");document.documentElement.style.setProperty("--eshop-context-top-offset",bannerHeight+headerHeight+"px")};syncHeaderLayout();window.addEventListener("resize",syncHeaderLayout);const main=root.querySelector(".header-main"),nav=root.querySelector(".main-nav"),searchToggle=root.querySelector(".mobile-search-icon"),menuButton=root.querySelector(".menu-button");const configLink=[...nav.querySelectorAll("a")].find(link=>{const url=new URL(link.href,location.href);return url.pathname==="/"&&url.searchParams.get("from")==="eshop"});if(configLink){const setConfigActive=()=>nav.querySelectorAll("a").forEach(link=>link.classList.toggle("active",link===configLink));setConfigActive();window.addEventListener("hashchange",setConfigActive)}const setSearchOpen=(open,focus=false)=>{main.classList.toggle("search-open",open);searchToggle.setAttribute("aria-expanded",String(open));searchToggle.setAttribute("aria-label",open?"Zavřít vyhledávání":"Otevřít vyhledávání");if(open&&focus)root.querySelector("#shopSearch").focus();else if(!open)root.querySelector("#shopSearch").blur()};searchToggle?.addEventListener("click",event=>{event.stopImmediatePropagation();const open=!main.classList.contains("search-open");setSearchOpen(open,open)},true);menuButton?.addEventListener("click",()=>{const open=nav.classList.toggle("open");menuButton.setAttribute("aria-expanded",String(open));menuButton.setAttribute("aria-label",open?"Zavřít menu":"Otevřít menu")});nav?.addEventListener("click",event=>{if(event.target.closest("a")){nav.classList.remove("open");menuButton?.setAttribute("aria-expanded","false")}})})();</script>';
+  const loader='<script id="eshop-context-header-loader">(()=>{const root=document.getElementById("eshopContextHeader");const show=true;if(!root)return;root.hidden=!show;if(!show)return;document.body.classList.add("from-eshop");const announcement=root.querySelector(".announcement"),siteHeader=root.querySelector(".site-header");const syncHeaderLayout=()=>{const bannerHeight=announcement?.getBoundingClientRect().height||0;const headerHeight=siteHeader?.getBoundingClientRect().height||0;document.documentElement.style.setProperty("--eshop-context-announcement-height",bannerHeight+"px");document.documentElement.style.setProperty("--eshop-context-header-height",headerHeight+"px");document.documentElement.style.setProperty("--eshop-context-top-offset",bannerHeight+headerHeight+"px")};syncHeaderLayout();window.addEventListener("resize",syncHeaderLayout);const main=root.querySelector(".header-main"),nav=root.querySelector(".main-nav"),searchToggle=root.querySelector(".mobile-search-icon"),menuButton=root.querySelector(".menu-button");const configLink=[...nav.querySelectorAll("a")].find(link=>{const url=new URL(link.href,location.href);return url.pathname==="/"&&url.searchParams.get("from")==="eshop"});if(configLink){const setConfigActive=()=>nav.querySelectorAll("a").forEach(link=>link.classList.toggle("active",link===configLink));setConfigActive();window.addEventListener("hashchange",setConfigActive)}const setSearchOpen=(open,focus=false)=>{main.classList.toggle("search-open",open);searchToggle.setAttribute("aria-expanded",String(open));searchToggle.setAttribute("aria-label",open?"Zavřít vyhledávání":"Otevřít vyhledávání");if(open&&focus)root.querySelector("#shopSearch").focus();else if(!open)root.querySelector("#shopSearch").blur()};searchToggle?.addEventListener("click",event=>{event.stopImmediatePropagation();const open=!main.classList.contains("search-open");setSearchOpen(open,open)},true);menuButton?.addEventListener("click",()=>{const open=nav.classList.toggle("open");menuButton.setAttribute("aria-expanded",String(open));menuButton.setAttribute("aria-label",open?"Zavřít menu":"Otevřít menu")});nav?.addEventListener("click",event=>{if(event.target.closest("a")){nav.classList.remove("open");menuButton?.setAttribute("aria-expanded","false")}})})();</script>';
   const injected='<div id="eshopContextHeader" hidden>'+versionSharedHeader(sharedHeaderTemplate)+'</div>'+loader;
   page=page.replace('<header class="head">',injected+'<header class="head">');
 
@@ -250,6 +278,9 @@ for(const file of fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort()){
   page=page.replace('</head>','<style data-plotao-header-divider="1">body>header,#eshopContextHeader>header.site-header{box-shadow:0 1px 0 #08744366!important}</style></head>');
   page=page.replace('</head>','<style data-plotao-scrollbars="1">html,*{scrollbar-color:#087443 #edf2ee}::-webkit-scrollbar{width:12px;height:12px}::-webkit-scrollbar-track{background:#edf2ee}::-webkit-scrollbar-thumb{background:#087443;border:3px solid #edf2ee;border-radius:999px}::-webkit-scrollbar-thumb:hover{background:#064737}::-webkit-scrollbar-corner{background:#edf2ee}@media(forced-colors:active){html,*{scrollbar-color:auto}}</style></head>');
   page=file==='index.html'?applyCalculatorEshopHeader(page):applySharedEshopHeader(page,file);
+  if(file!=='index.html'&&file!=='admin.html'&&file!=='partner-odpoved.html'&&!/href=["'][^"']*eshop-header-unified\\.css/i.test(page)){
+    page=page.replace('</head>','<link rel="stylesheet" href="/assets/eshop-header-unified.css?v='+sha.slice(0,12)+'"></head>');
+  }
   page=page.replace(/(href=["']\/assets\/eshop-header-unified\.css\?v=)[^"']+(["'])/g,(match,prefix,suffix)=>prefix+sha.slice(0,12)+suffix);
   if(page.includes('<header class="site-header">')&&!page.includes('data-plotao-shared-header-controller="1"'))page=page.replace('</body>',sharedHeaderController+'</body>');
   if(!page.includes('</head>'))throw new Error('Favicon loader: missing </head> in '+file);
