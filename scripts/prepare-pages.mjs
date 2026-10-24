@@ -239,6 +239,17 @@ function parseCssBlocks(css){
   }
   return blocks;
 }
+function stripAnnouncementCss(css){
+  return parseCssBlocks(css).map(({head,body})=>{
+    if(/^@(media|supports|container|layer)\b/i.test(head)){
+      const nested=stripAnnouncementCss(body);
+      return nested?head+'{'+nested+'}':'';
+    }
+    if(head.startsWith('@'))return head+'{'+body+'}';
+    const selectors=head.split(',').map(selector=>selector.trim()).filter(selector=>selector&&!/(^|[.#\s>+~])announcement(?:-content|-dot|-arrow|-desktop-copy|-mobile-copy|-mobile-text|-free)?(?=$|[.#\s>+~:\[])/i.test(selector));
+    return selectors.length?selectors.join(',')+'{'+body+'}':'';
+  }).filter(Boolean).join('\n');
+}
 const headerClassPattern=/(^|[.#\s>+~])(?:announcement(?:-content|-dot|-arrow)?|site-header|header-main|brand|search-area|search(?:-suggestions|-suggestion(?:-empty)?)?|header-actions|header-action|cart-count|mobile-tools|mobile-search-icon|menu-button|main-nav|sr-only|wrap)(?=$|[.#\s>+~:\[])/i;
 function scopeHeaderCss(css){
   return parseCssBlocks(css).map(({head,body})=>{
@@ -282,6 +293,8 @@ function applySharedHeaderThemeColor(page,file){
 const sharedHeaderController='<script data-plotao-shared-header-controller="1">(()=>{const headers=[...document.querySelectorAll("header.site-header")];if(!headers.length)return;const setMenuOpen=(header,open)=>{const nav=header.querySelector(".main-nav"),menu=header.querySelector(".menu-button");if(!nav)return;nav.classList.toggle("open",open);if(menu){menu.setAttribute("aria-expanded",String(open));menu.setAttribute("aria-label",open?"Zavřít menu":"Otevřít menu")}};document.addEventListener("click",event=>{const menu=event.target.closest("header.site-header .menu-button");if(menu){const header=menu.closest("header.site-header"),nav=header?.querySelector(".main-nav");if(!nav)return;setMenuOpen(header,!nav.classList.contains("open"));event.preventDefault();event.stopImmediatePropagation();return}const link=event.target.closest("header.site-header .main-nav a");if(link){setMenuOpen(link.closest("header.site-header"),false);return}headers.forEach(header=>{if(!header.contains(event.target))setMenuOpen(header,false)})},true);document.addEventListener("keydown",event=>{if(event.key==="Escape")headers.forEach(header=>setMenuOpen(header,false))});const header=document.querySelector("body>header.site-header");if(!header)return;const searchToggle=header.querySelector(".mobile-search-icon"),main=header.querySelector(".header-main"),search=header.querySelector("#shopSearch");searchToggle?.addEventListener("click",event=>{event.stopImmediatePropagation();const open=!main.classList.contains("search-open");main.classList.toggle("search-open",open);document.body.classList.toggle("eshop-search-open",open);searchToggle.setAttribute("aria-expanded",String(open));searchToggle.setAttribute("aria-label",open?"Zavřít vyhledávání":"Otevřít vyhledávání");if(open)search?.focus();else search?.blur()},true)})();</script>';
 for(const file of fs.readdirSync('.').filter(f=>f.endsWith('.html')).sort()){
   let page=fs.readFileSync(file,'utf8').replaceAll(sharedFooterMarker,sharedFooterTemplate);
+  // Strip page-local promo-bar CSS. Its appearance is owned by the shared header stylesheet.
+  page=page.replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gi,(tag,css)=>'<style>'+stripAnnouncementCss(css)+'</style>');
   page=page.replace('</head>','<style data-plotao-desktop-product-images="1">@media(min-width:801px){.product-card>.product-image{overflow:hidden;min-height:0;grid-template-rows:minmax(0,1fr)}.product-card>.product-image>img{display:block;min-width:0;min-height:0;max-height:100%}}</style></head>');
   page=page.replace(/<script\b[^>]*\bsrc=["']\/assets\/product-cards\.js(?:\?[^"']*)?["'][^>]*><\/script>/gi,'');
   page=page.replace('</body>','<script defer src="'+versionedScript('/assets/product-cards.js')+'"></script><script defer src="'+versionedScript('/assets/cart-v1.js')+'"></script></body>');
