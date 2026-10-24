@@ -54,3 +54,29 @@
 @media(max-width:900px){.assembly-layout{grid-template-columns:205px minmax(0,1fr)}.assembly-guide{grid-template-columns:1fr}.assembly-photo{min-height:240px;max-height:300px}.assembly-photo>img{position:static;height:280px}.assembly-checks>div{grid-template-columns:24px 1fr}.assembly-step{gap:8px;padding:9px 7px}.assembly-step>span{font-size:13px}}
 @media(max-width:800px){.assembly-hub{width:calc(100% - 32px);padding-top:21px}.assembly-crumb{margin-bottom:18px}.assembly-intro h1{font-size:34px}.assembly-types{display:flex;overflow-x:auto;gap:10px;padding:2px 1px 10px;margin-bottom:14px;scroll-snap-type:x mandatory;scrollbar-width:thin}.assembly-type{flex:0 0 145px;padding:8px 8px 11px;scroll-snap-align:start}.assembly-type img{height:100px}.assembly-type span{font-size:13px}.assembly-layout{grid-template-columns:1fr}.assembly-sidebar{padding:15px}.assembly-sidebar h2{font-size:20px;margin:0 0 11px}.assembly-sidebar nav{display:flex;overflow-x:auto;gap:6px;padding-bottom:5px}.assembly-step{display:flex;gap:8px;width:auto;flex:0 0 auto;min-height:44px;padding:7px 10px;white-space:nowrap}.assembly-step>b{width:27px;height:27px}.assembly-step>i{display:none}.assembly-guide{padding:18px;gap:18px}.assembly-copy h2{font-size:25px}.assembly-lead{font-size:17px}.assembly-checks{gap:8px}.assembly-checks>div{grid-template-columns:1fr;padding:10px}.assembly-checks strong{font-size:12px}.assembly-checks p{font-size:11px}.assembly-controls{gap:10px}.assembly-calculate{font-size:13px!important}.assembly-photo{min-height:270px}.assembly-photo>img{height:320px;object-position:center 63%}.assembly-original{margin-top:20px}.assembly-kicker{margin-bottom:12px}}
 @media(prefers-reduced-motion:reduce){.assembly-hub *{transition:none!important}}
+
+
+/* Keep the mobile assembly guide readable and its controls easy to tap. */
+@media(max-width:600px){
+ .assembly-hub{padding-bottom:34px}
+ .assembly-checks{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
+ .assembly-checks>div{grid-template-columns:24px minmax(0,1fr);gap:8px 7px;padding:12px}
+ .assembly-checks strong{font-size:13px}
+ .assembly-checks p{font-size:12px}
+ .assembly-checks>div:last-child{grid-column:1/-1}
+ .assembly-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .assembly-back{grid-column:1;min-width:0;min-height:48px}
+ .assembly-next{grid-column:2;min-width:0;gap:8px;padding-inline:10px}
+ .assembly-back[hidden]~.assembly-next{grid-column:1/-1}
+ .assembly-calculate,.assembly-finish{grid-column:1/-1;min-width:0;white-space:normal}
+ .assembly-photo{min-height:230px;max-height:280px}
+ .assembly-photo>img{height:280px;object-position:center 62%}
+}
+@media(max-width:360px){
+ .assembly-hub{width:calc(100% - 24px)}
+ .assembly-guide{padding:14px}
+ .assembly-checks{grid-template-columns:1fr}
+ .assembly-checks>div:last-child{grid-column:auto}
+ .assembly-controls{grid-template-columns:1fr}
+ .assembly-back,.assembly-next,.assembly-back[hidden]~.assembly-next,.assembly-calculate,.assembly-finish{grid-column:1}
+}
