@@ -64,7 +64,7 @@ for(const [device,viewport] of [['mobile',{width:390,height:844}],['tablet',{wid
     });
     let reference=null,referenceRoute='';
     for(const [route,selector] of routes){
-      await page.goto(baseUrl+route,{waitUntil:'networkidle'});
+      await page.goto(baseUrl+route,{waitUntil:'domcontentloaded'});
       const geometry=await readGeometry(selector);
       assert(geometry.header&&geometry.logo&&geometry.nav&&geometry.navWrap,`${route} must render the complete canonical header`);
       if(!reference){reference=geometry;referenceRoute=route;continue}
@@ -73,7 +73,7 @@ for(const [device,viewport] of [['mobile',{width:390,height:844}],['tablet',{wid
         assert(a===null&&b===null||Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=1,`${device} ${key} ${dimension} must match between ${referenceRoute} and ${route}`);
       }
     }
-  },async page=>{await page.goto(baseUrl+'/',{waitUntil:'networkidle'})},false);
+  },async page=>{await page.goto(baseUrl+'/',{waitUntil:'domcontentloaded'})},false);
 }
 
 await runScenario('help-submit-confirmation-mobile',{width:390,height:740},async page=>{
