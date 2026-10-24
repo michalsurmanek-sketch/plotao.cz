@@ -65,13 +65,14 @@ for(const [device,viewport] of [['mobile',{width:390,height:844}],['tablet',{wid
     let reference=null,referenceRoute='';
     for(const [route,selector] of routes){
       await page.goto(baseUrl+route,{waitUntil:'domcontentloaded'});
+      await page.waitForFunction(selector=>{const header=document.querySelector(selector),logo=header?.querySelector('.brand img'),main=header?.querySelector('.header-main');return Boolean(logo?.complete&&logo.naturalWidth>0&&main&&getComputedStyle(main).display==='grid')},selector,{timeout:10000});
       if(route==='/doprava.html')assert(await page.locator('.plotao-delivery-truck').count()===1&&(await page.locator('.plotao-delivery-truck').getAttribute('aria-label'))?.includes('PLOTAO'),'delivery hero must show one accessible branded curtain-side truck illustration');
       const geometry=await readGeometry(selector);
       assert(geometry.header&&geometry.logo&&geometry.nav&&geometry.navWrap,`${route} must render the complete canonical header`);
       if(!reference){reference=geometry;referenceRoute=route;continue}
       for(const key of Object.keys(reference))for(const dimension of ['x','y','width','height']){
         const a=reference[key]?.[dimension],b=geometry[key]?.[dimension];
-        assert(a===null&&b===null||Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=1,`${device} ${key} ${dimension} must match between ${referenceRoute} and ${route}`);
+        assert(a===null&&b===null||Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=1,`${device} ${key} ${dimension} must match between ${referenceRoute} and ${route} (${a} vs ${b})`);
       }
     }
   },async page=>{await page.goto(baseUrl+'/',{waitUntil:'domcontentloaded'})},false);
