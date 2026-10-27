@@ -11,6 +11,8 @@ const ORIGIN_SOURCES = new Map([
   ['https://poptejcenu.cz', 'poptejcenu.cz'],
   ['https://www.poptejcenu.cz', 'poptejcenu.cz'],
   ['https://montao.cz', 'montao.cz'],
+  ['https://betonao.cz', 'betonao.cz'],
+  ['https://www.betonao.cz', 'betonao.cz'],
   ['https://www.montao.cz', 'montao.cz'],
 ])
 const ALLOWED_ORIGINS = new Set(ORIGIN_SOURCES.keys())
