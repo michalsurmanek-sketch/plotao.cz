@@ -14,6 +14,8 @@ const ORIGIN_SOURCES = new Map([
   ['https://betonao.cz', 'betonao.cz'],
   ['https://www.betonao.cz', 'betonao.cz'],
   ['https://www.montao.cz', 'montao.cz'],
+  ['https://czbeton.cz', 'czbeton.cz'],
+  ['https://www.czbeton.cz', 'czbeton.cz'],
 ])
 const ALLOWED_ORIGINS = new Set(ORIGIN_SOURCES.keys())
 const MAX_BODY_BYTES = 64 * 1024
