@@ -3,10 +3,12 @@ import { validateEnvelope } from '../supabase/functions/submit-lead/validation.m
 
 const fail=[];const ok=(v,m)=>{if(!v)fail.push(m)};
 const baseLead={schemaVersion:2,mode:'lead',name:'Jan Novák',phone:'+420 777 123 456',email:'JAN@EXAMPLE.CZ',place:'',note:'',fenceType:'Panelový plot',height:153,segments:[{name:'Úsek 1',length:20,connection:'začátek'}],options:['3D panel'],gate:false,gateType:'',gateWidth:0,gateDrive:'',gateSection:0,gatePos:0,wicket:false,wicketWidth:0,wicketSection:0,wicketPos:0,scopeValue:'material',scope:'Materiál',displayedPrice:'30 000 Kč',priceKind:'ověřená cena',priceReason:'',placeFromCalculator:''};
-const env=lead=>({transportVersion:1,source:'plotao.cz',submittedAt:'2026-09-12T20:30:00.000Z',lead});
+const env=(lead,source='plotao.cz')=>({transportVersion:1,source,submittedAt:'2026-09-12T20:30:00.000Z',lead});
 
 let r=validateEnvelope(env(baseLead));
 ok(r.ok===true,'valid material lead must pass');
+r=validateEnvelope(env({...baseLead,height:20,fenceType:'Podhrabová deska z vibrovaného betonu',priceKind:'individuální nabídka'},'vibrao.cz'));
+ok(r.ok===true&&r.lead.height===20,'Vibrao board leads with 20 cm product height must pass');
 ok(r.ok&&r.lead.email==='jan@example.cz'&&r.lead.phone==='+420777123456','contact normalization must be deterministic');
 r=validateEnvelope(env({...baseLead,scopeValue:'delivery',place:''}));
 ok(r.ok===false&&r.errors.includes('place'),'delivery lead must require place');
@@ -41,8 +43,8 @@ const deno=JSON.parse(fs.readFileSync('supabase/functions/submit-lead/deno.json'
 ok(validation.includes('v.length<1||v.length>12')&&validation.includes('if(total>1000+.001)return null'),'server validation must mirror calculator segment count and total-length boundaries');
 ok(validation.includes('function validateOpening(')&&validation.includes("errors.push('openingsOverlap')"),'server validation must independently enforce opening placement and non-overlap');
 ok(validation.includes('const integer=')&&validation.includes("gateSection=integer(l.gateSection,0,11,-1)")&&validation.includes("wicketSection=integer(l.wicketSection,0,11,-1)"),'opening section indexes must be bounded integers, not arbitrary numeric values');
-const allowedOrigins=['https://plotao.cz','https://www.plotao.cz','https://poptejplot.cz','https://www.poptejplot.cz','https://poptejcenu.cz','https://www.poptejcenu.cz'];
-ok(allowedOrigins.every(origin=>index.includes("['"+origin+"', '"+origin.replace('https://www.','https://').replace('https://','')+"']")), 'Edge Function must allow the three approved sites and map each origin to its canonical source label');
+const allowedOrigins=['https://plotao.cz','https://www.plotao.cz','https://profiplot.cz','https://www.profiplot.cz','https://poptejplot.cz','https://www.poptejplot.cz','https://poptejcenu.cz','https://www.poptejcenu.cz','https://montao.cz','https://www.montao.cz','https://betonao.cz','https://www.betonao.cz','https://vibrao.cz','https://www.vibrao.cz'];
+ok(allowedOrigins.every(origin=>index.includes("['"+origin+"', '"+origin.replace('https://www.','https://').replace('https://','')+"']")), 'Edge Function must allow all connected lead sites and map each origin to its canonical source label');
 ok(index.includes('const source = ORIGIN_SOURCES.get(origin)')&&index.includes('mode: lead.mode,')&&index.includes('source,'),'stored source must come from the validated request origin, not the client payload');
 ok(!index.includes("Access-Control-Allow-Origin': '*'"),'Edge Function must never use wildcard CORS');
 ok(index.includes("{ auth: 'none', cors: 'disabled' }")&&config.includes('[functions.submit-lead]')&&config.includes('verify_jwt = false'),'public form function must use explicit custom security with verify_jwt=false');
