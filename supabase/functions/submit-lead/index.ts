@@ -16,6 +16,8 @@ const ORIGIN_SOURCES = new Map([
   ['https://www.montao.cz', 'montao.cz'],
   ['https://vibrao.cz', 'vibrao.cz'],
   ['https://www.vibrao.cz', 'vibrao.cz'],
+  ['https://renovao.cz', 'renovao.cz'],
+  ['https://www.renovao.cz', 'renovao.cz'],
 ])
 const ALLOWED_ORIGINS = new Set(ORIGIN_SOURCES.keys())
 const MAX_BODY_BYTES = 64 * 1024
