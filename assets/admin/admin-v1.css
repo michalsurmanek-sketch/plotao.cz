@@ -599,3 +599,22 @@ input::placeholder,textarea::placeholder{color:#98a69e}
 .catalog-live-publish>small{color:var(--muted);font-size:11px}
 @media(max-width:1000px){.catalog-editor-layout{grid-template-columns:1fr}.catalog-live-preview{position:static;order:-1}.catalog-live-card{display:grid;grid-template-columns:minmax(140px,.8fr) 1fr}.catalog-live-image{height:auto;min-height:170px}.catalog-live-info{align-content:center}}
 @media(max-width:600px){.catalog-editor-layout{gap:12px;padding:12px}.catalog-live-preview{padding:10px}.catalog-live-heading{align-items:flex-start}.catalog-live-heading small{max-width:120px}.catalog-live-card{grid-template-columns:38% 1fr}.catalog-live-image{min-height:145px;padding:8px}.catalog-live-info{gap:6px;padding:10px}.catalog-live-info h4{font-size:14px}.catalog-live-info>strong{font-size:18px}.catalog-live-info>p{font-size:11px}}
+
+
+/* Branded shortcuts for incoming lead sources */
+.lead-source-shortcuts{display:grid;gap:5px;margin:0 4px 8px;padding:10px 7px;border:1px solid #ffffff18;border-radius:12px;background:#ffffff08}
+.lead-source-shortcuts:before{content:"Poptávky podle webu";padding:2px 8px 5px;color:#a9c3b5;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.lead-source-shortcuts button{width:100%;min-height:34px;padding:7px 9px;border:1px solid transparent;border-radius:8px;background:transparent;color:#d6e5dc;text-align:left;font-size:12px;font-weight:700;cursor:pointer;transition:background .18s,border-color .18s,color .18s}
+.lead-source-shortcuts button:hover,.lead-source-shortcuts button:focus-visible{outline:none;background:#ffffff12;color:#fff}
+.lead-source-shortcuts [data-lead-source="plotao.cz"]{border-color:#2d805c;background:#087443;color:#fff}
+.lead-source-shortcuts [data-lead-source="poptejplot.cz"]{border-color:#d79a50;background:#5b3d21;color:#ffe5c0}
+.lead-source-shortcuts [data-lead-source="poptejcenu.cz"]{border-color:#8b79b6;background:#42365f;color:#e8ddff}
+.lead-source-shortcuts [data-lead-source="montao.cz"]{border-color:#a2ac87;background:#3b4934;color:#e4edcf}
+.lead-source-shortcuts [data-lead-source="betonao.cz"]{border-color:#9b9185;background:#48413a;color:#f2e9df}
+.lead-source-shortcuts [data-lead-source="czbeton.cz"]{border-color:#8396a2;background:#34444e;color:#e0eef5}
+.lead-source-shortcuts [data-lead-source="profiplot.cz"]{border-color:#a5a5a5;background:#3d3d3d;color:#f0f0f0}
+.lead-source[data-source="montao.cz"]{border-color:#b8c59c;background:#f2f6e9;color:#495c31}
+.lead-source[data-source="betonao.cz"]{border-color:#d9cec1;background:#f7f2eb;color:#665341}
+.lead-source[data-source="czbeton.cz"]{border-color:#c5d4dc;background:#eef5f8;color:#3d5967}
+.lead-source[data-source="profiplot.cz"]{border-color:#d1d1d1;background:#f4f4f4;color:#4d4d4d}
+@media(max-width:900px){.lead-source-shortcuts{margin:0 0 12px}.lead-source-shortcuts button{font-size:0;min-height:34px;text-align:center}.lead-source-shortcuts button:after{content:"";font-size:11px}.lead-source-shortcuts [data-lead-source="plotao.cz"]:after{content:"PLOTAO"}.lead-source-shortcuts [data-lead-source="poptejplot.cz"]:after{content:"Poptěj plot"}.lead-source-shortcuts [data-lead-source="poptejcenu.cz"]:after{content:"Poptěj cenu"}.lead-source-shortcuts [data-lead-source="montao.cz"]:after{content:"Montao"}.lead-source-shortcuts [data-lead-source="betonao.cz"]:after{content:"Betonao"}.lead-source-shortcuts [data-lead-source="czbeton.cz"]:after{content:"CZ Beton"}.lead-source-shortcuts [data-lead-source="profiplot.cz"]:after{content:"ProfiPlot"}}
