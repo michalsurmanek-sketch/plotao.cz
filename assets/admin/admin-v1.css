@@ -637,3 +637,7 @@ input::placeholder,textarea::placeholder{color:#98a69e}
 .top-lead-sources [data-lead-source="profiplot.cz"]{border-color:#a5a5a5;background:#3d3d3d;color:#f0f0f0}
 @media(max-width:1100px){.top{gap:10px;padding-left:16px;padding-right:16px}.top-lead-sources{justify-content:flex-start;flex:1}.top-lead-sources button{padding:8px 8px;font-size:10px}.top .user{flex:none}}
 @media(max-width:700px){.top{height:auto;min-height:74px;flex-wrap:wrap;padding-top:12px;padding-bottom:12px;row-gap:8px}.top h1{flex:1}.top .user{margin-left:auto}.top-lead-sources{order:3;flex:0 0 100%;margin:0 -2px;justify-content:flex-start}.top-lead-sources button{font-size:11px;padding:9px 11px}}
+
+.top-lead-sources [data-lead-source="renovao.cz"]{border-color:#71947a;background:#244832;color:#e5f1e6}
+.lead-source[data-source="renovao.cz"]{border-color:#c3d9c8;background:#edf5ef;color:#315b3c}
+@media(max-width:900px){.top-lead-sources [data-lead-source="renovao.cz"]:after{content:"Renovao"}}
