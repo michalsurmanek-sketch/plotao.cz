@@ -611,13 +611,13 @@ input::placeholder,textarea::placeholder{color:#98a69e}
 .lead-source-shortcuts [data-lead-source="poptejcenu.cz"]{border-color:#8b79b6;background:#42365f;color:#e8ddff}
 .lead-source-shortcuts [data-lead-source="montao.cz"]{border-color:#a2ac87;background:#3b4934;color:#e4edcf}
 .lead-source-shortcuts [data-lead-source="betonao.cz"]{border-color:#9b9185;background:#48413a;color:#f2e9df}
-.lead-source-shortcuts [data-lead-source="czbeton.cz"]{border-color:#8396a2;background:#34444e;color:#e0eef5}
+.lead-source-shortcuts [data-lead-source="vibrao.cz"]{border-color:#56765f;background:#294536;color:#e2ebdf}
 .lead-source-shortcuts [data-lead-source="profiplot.cz"]{border-color:#a5a5a5;background:#3d3d3d;color:#f0f0f0}
 .lead-source[data-source="montao.cz"]{border-color:#b8c59c;background:#f2f6e9;color:#495c31}
 .lead-source[data-source="betonao.cz"]{border-color:#d9cec1;background:#f7f2eb;color:#665341}
-.lead-source[data-source="czbeton.cz"]{border-color:#c5d4dc;background:#eef5f8;color:#3d5967}
+.lead-source[data-source="vibrao.cz"]{border-color:#c9d8d2;background:#edf4ef;color:#385a46}
 .lead-source[data-source="profiplot.cz"]{border-color:#d1d1d1;background:#f4f4f4;color:#4d4d4d}
-@media(max-width:900px){.lead-source-shortcuts{margin:0 0 12px}.lead-source-shortcuts button{font-size:0;min-height:34px;text-align:center}.lead-source-shortcuts button:after{content:"";font-size:11px}.lead-source-shortcuts [data-lead-source="plotao.cz"]:after{content:"PLOTAO"}.lead-source-shortcuts [data-lead-source="poptejplot.cz"]:after{content:"Poptěj plot"}.lead-source-shortcuts [data-lead-source="poptejcenu.cz"]:after{content:"Poptěj cenu"}.lead-source-shortcuts [data-lead-source="montao.cz"]:after{content:"Montao"}.lead-source-shortcuts [data-lead-source="betonao.cz"]:after{content:"Betonao"}.lead-source-shortcuts [data-lead-source="czbeton.cz"]:after{content:"CZ Beton"}.lead-source-shortcuts [data-lead-source="profiplot.cz"]:after{content:"ProfiPlot"}}
+@media(max-width:900px){.lead-source-shortcuts{margin:0 0 12px}.lead-source-shortcuts button{font-size:0;min-height:34px;text-align:center}.lead-source-shortcuts button:after{content:"";font-size:11px}.lead-source-shortcuts [data-lead-source="plotao.cz"]:after{content:"PLOTAO"}.lead-source-shortcuts [data-lead-source="poptejplot.cz"]:after{content:"Poptěj plot"}.lead-source-shortcuts [data-lead-source="poptejcenu.cz"]:after{content:"Poptěj cenu"}.lead-source-shortcuts [data-lead-source="montao.cz"]:after{content:"Montao"}.lead-source-shortcuts [data-lead-source="betonao.cz"]:after{content:"Betonao"}.lead-source-shortcuts [data-lead-source="vibrao.cz"]:after{content:"Vibrao"}.lead-source-shortcuts [data-lead-source="profiplot.cz"]:after{content:"ProfiPlot"}}
 
 
 /* Lead source switcher in the top bar, between page title and account */
@@ -633,7 +633,7 @@ input::placeholder,textarea::placeholder{color:#98a69e}
 .top-lead-sources [data-lead-source="poptejcenu.cz"]{border-color:#8b79b6;background:#42365f;color:#e8ddff}
 .top-lead-sources [data-lead-source="montao.cz"]{border-color:#a2ac87;background:#3b4934;color:#e4edcf}
 .top-lead-sources [data-lead-source="betonao.cz"]{border-color:#9b9185;background:#48413a;color:#f2e9df}
-.top-lead-sources [data-lead-source="czbeton.cz"]{border-color:#8396a2;background:#34444e;color:#e0eef5}
+.top-lead-sources [data-lead-source="vibrao.cz"]{border-color:#8396a2;background:#34444e;color:#e0eef5}
 .top-lead-sources [data-lead-source="profiplot.cz"]{border-color:#a5a5a5;background:#3d3d3d;color:#f0f0f0}
 @media(max-width:1100px){.top{gap:10px;padding-left:16px;padding-right:16px}.top-lead-sources{justify-content:flex-start;flex:1}.top-lead-sources button{padding:8px 8px;font-size:10px}.top .user{flex:none}}
 @media(max-width:700px){.top{height:auto;min-height:74px;flex-wrap:wrap;padding-top:12px;padding-bottom:12px;row-gap:8px}.top h1{flex:1}.top .user{margin-left:auto}.top-lead-sources{order:3;flex:0 0 100%;margin:0 -2px;justify-content:flex-start}.top-lead-sources button{font-size:11px;padding:9px 11px}}
