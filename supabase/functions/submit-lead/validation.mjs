@@ -20,7 +20,7 @@ export function validateEnvelope(input){
   const errors=[];
   if(!isObj(input))return{ok:false,errors:['body']};
   if(input.transportVersion!==1)errors.push('transportVersion');
-  if(!['plotao.cz','betonao.cz','czbeton.cz'].includes(input.source))errors.push('source');
+  if(!['plotao.cz','poptejplot.cz','poptejcenu.cz','montao.cz','betonao.cz','vibrao.cz','profiplot.cz'].includes(input.source))errors.push('source');
   const submittedAt=typeof input.submittedAt==='string'&&Number.isFinite(Date.parse(input.submittedAt))?new Date(input.submittedAt).toISOString():'';
   if(!submittedAt)errors.push('submittedAt');
   const l=isObj(input.lead)?input.lead:null;
@@ -53,11 +53,11 @@ export function validateEnvelope(input){
     if(tooLong(l.displayedPrice,100))errors.push('displayedPrice');
     if(tooLong(l.priceReason,500))errors.push('priceReason');
     if(tooLong(l.placeFromCalculator,200))errors.push('placeFromCalculator');
-    const fenceType=text(l.fenceType,120),height=num(l.height,40,400,-1),segments=cleanSegments(l.segments),options=cleanOptions(l.options),scopeValue=SCOPES.has(l.scopeValue)?l.scopeValue:'material',priceKind=PRICE_KINDS.has(l.priceKind)?l.priceKind:'';
+    const minHeight=input.source==='vibrao.cz'?20:40;const fenceType=text(l.fenceType,120),height=num(l.height,minHeight,400,-1),segments=cleanSegments(l.segments),options=cleanOptions(l.options),scopeValue=SCOPES.has(l.scopeValue)?l.scopeValue:'material',priceKind=PRICE_KINDS.has(l.priceKind)?l.priceKind:'';
     const gate=bool(l.gate),gateType=text(l.gateType,80),gateWidth=num(l.gateWidth,0,20,-1),gateDrive=text(l.gateDrive,80),gateSection=integer(l.gateSection,0,11,-1),gatePos=num(l.gatePos,0,1000,-1);
     const wicket=bool(l.wicket),wicketWidth=num(l.wicketWidth,0,10,-1),wicketSection=integer(l.wicketSection,0,11,-1),wicketPos=num(l.wicketPos,0,1000,-1);
     if(!fenceType)errors.push('fenceType');
-    if(height<40)errors.push('height');
+    if(height<minHeight)errors.push('height');
     if(!segments)errors.push('segments');
     if(options===null)errors.push('options');
     if(!priceKind)errors.push('priceKind');
