@@ -20,7 +20,7 @@ export function validateEnvelope(input){
   const errors=[];
   if(!isObj(input))return{ok:false,errors:['body']};
   if(input.transportVersion!==1)errors.push('transportVersion');
-  if(!['plotao.cz','poptejplot.cz','poptejcenu.cz','montao.cz','betonao.cz','vibrao.cz','profiplot.cz'].includes(input.source))errors.push('source');
+  if(!['plotao.cz','poptejplot.cz','poptejcenu.cz','montao.cz','betonao.cz','vibrao.cz','renovao.cz','profiplot.cz'].includes(input.source))errors.push('source');
   const submittedAt=typeof input.submittedAt==='string'&&Number.isFinite(Date.parse(input.submittedAt))?new Date(input.submittedAt).toISOString():'';
   if(!submittedAt)errors.push('submittedAt');
   const l=isObj(input.lead)?input.lead:null;
