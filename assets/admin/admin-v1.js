@@ -107,8 +107,7 @@ document.querySelector('#leadSearch')?.addEventListener('input',render);document
 function syncLeadSourceButtons(){const source=document.querySelector('#leadSource')?.value||'';document.querySelectorAll('[data-lead-source]').forEach(button=>{const active=button.dataset.leadSource===source;button.classList.toggle('is-active',active);button.setAttribute('aria-pressed',active?'true':'false')})}
 document.querySelectorAll('[data-lead-source]').forEach(button=>button.addEventListener('click',()=>{const source=document.querySelector('#leadSource');if(!source)return;source.value=button.dataset.leadSource||'';syncLeadSourceButtons();render();const leadsView=document.querySelector('#leads');if(leadsView&&!leadsView.classList.contains('on'))document.querySelector('[data-view="leads"]')?.click();}));
 document.querySelector('#leadSource')?.addEventListener('change',syncLeadSourceButtons);
-document.querySelectorAll('[data-view="leads"]').forEach(button=>button.addEventListener('click',()=>{const top=document.querySelector('#topLeadSources');if(top)top.hidden=false;}));
-document.querySelectorAll('[data-view]:not([data-view="leads"])').forEach(button=>button.addEventListener('click',()=>{const top=document.querySelector('#topLeadSources');if(top)top.hidden=true;}));
+
 syncLeadSourceButtons();
 document.addEventListener('click',async e=>{const open=e.target.closest('[data-open]');if(open){const row=document.querySelector('[data-detail="'+CSS.escape(open.dataset.open)+'"]');row.hidden=!row.hidden;open.textContent=row.hidden?'Otevřít':'Zavřít';}
 
