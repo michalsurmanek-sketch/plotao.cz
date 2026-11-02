@@ -6,3 +6,6 @@ verify_jwt = false
 
 [functions.plotao-newsletter]
 verify_jwt = false
+
+[functions.submit-opravao-lead]
+verify_jwt = false
