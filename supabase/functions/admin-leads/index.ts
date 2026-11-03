@@ -483,18 +483,22 @@ Deno.serve(async req=>{
    if(typeof b.request_id!=="string"||!/^[0-9a-f-]{36}$/i.test(b.request_id))return json({error:"invalid_request_id"},422);
    const resendKey=Deno.env.get("RESEND_API_KEY");
    if(!resendKey)return json({error:"resend_not_configured"},503);
-   const current=await fetch(leadUrl(base,b.id,"id,email,name,communication,status"),{headers:apiHeaders(key)});
+   const current=await fetch(leadUrl(base,b.id,"id,email,name,communication,status,source"),{headers:apiHeaders(key)});
    if(!current.ok)return json({error:"lead_read_failed"},current.status);
    const rows=await current.json(),lead=rows[0];
    if(!lead)return json({error:"lead_not_found"},404);
    if(typeof lead.email!=="string"||!/^\S+@\S+\.\S+$/.test(lead.email))return json({error:"invalid_lead_email"},422);
    const text=b.send_reply.trim();
+   const isOpravao=lead.source==="opravao.cz";
+   const sender=isOpravao?"Opravao.cz <info@opravao.cz>":FROM_EMAIL;
+   const replyTo=isOpravao?"info@opravao.cz":ADMIN_EMAIL;
+   const brand=isOpravao?"Opravao.cz":"PLOTAO.cz";
    let sendResponse;
    try{
     sendResponse=await fetch("https://api.resend.com/emails",{
      method:"POST",
      headers:{"Authorization":"Bearer "+resendKey,"Content-Type":"application/json","Idempotency-Key":b.request_id},
-     body:JSON.stringify({from:FROM_EMAIL,to:[lead.email],reply_to:ADMIN_EMAIL,subject:"Re: Poptávka na oplocení – PLOTAO.cz",text:"Dobrý den,\n\n"+text+"\n\nS pozdravem,\nPLOTAO.cz"})
+     body:JSON.stringify({from:sender,to:[lead.email],reply_to:replyTo,subject:isOpravao?"Re: Vaše poptávka opravy – Opravao.cz":"Re: Poptávka na oplocení – PLOTAO.cz",text:"Dobrý den,\n\n"+text+"\n\nS pozdravem,\n"+brand})
     })
    }catch(error){console.error("resend network failure",error instanceof Error?error.message:"unknown");return json({error:"email_send_failed"},502)}
    let sent:Record<string,any>={};try{sent=await sendResponse.json()}catch{}
