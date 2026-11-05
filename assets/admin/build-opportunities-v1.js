@@ -69,7 +69,7 @@ function exportCsv(){
  const cell=v=>{let s=String(v??"");if(/^[\s]*[=+\-@]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""').replace(/\r?\n/g," ")+'"'};
  const header=["Název","Lokalita","Kraj","Typ","Fáze","Jednotky","Zdroj","URL zdroje","EIA kód","Stav EIA","Stav oslovení","Ověřeno"];
  const data=shown.map(x=>{const code=String(x.external_ref||"").startsWith("EIA:")?String(x.external_ref).slice(4):"";const status=(String(x.notes||"").match(/(?:^|\n)Stav EIA:\s*([^\n]+)/)||[])[1]||"";return [x.title,x.location,x.region,labels.project_type[x.project_type]||x.project_type,labels.stage[x.stage]||x.stage,x.units,x.source_name,x.source_url,code,status,labels.outreach_status[x.outreach_status]||x.outreach_status,x.verified_at?"Ano":"Ne"]});
- const csv="\uFEFF"+[header,...data].map(row=>row.map(cell).join(";")).join("\r\n");const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));const a=document.createElement("a");a.href=url;a.download="plotao-prilezitosti-"+new Date().toISOString().slice(0,10)+".csv";a.click();URL.revokeObjectURL(url);message("Exportováno "+shown.length+" příležitostí podle aktuálního filtrování.");
+ const csv="\uFEFF"+[header,...data].map(row=>row.map(cell).join(";")).join("\r\n");const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));const a=document.createElement("a");a.href=url;a.download="plotao-prilezitosti-"+new Date().toISOString().slice(0,10)+".csv";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);message("Exportováno "+shown.length+" příležitostí podle aktuálního filtrování.");
 }
 function render(){
  const shown=filteredRows();
