@@ -122,7 +122,7 @@ document.addEventListener("click",e=>{
  if(e.target.closest("#buildExport"))exportCsv();
  if(e.target.closest("#buildReload"))load();
  if(e.target.closest("#buildDiscover"))discoverEia();
- const verify=e.target.closest("[data-verify-build]");if(verify){const row=rows.find(x=>x.id===verify.dataset.verifyBuild);if(row){verify.disabled=true;api("PATCH",{opportunity:{...row,verified:!row.verified_at,external_ref:row.external_ref||""}},row.id).then(load).catch(err=>{message("Změnu ověření se nepodařilo uložit: "+err.message,true);load()})}}
+ const verify=e.target.closest("[data-verify-build]");if(verify){const row=rows.find(x=>x.id===verify.dataset.verifyBuild);if(row){verify.disabled=true;api("PATCH",{op:"set_verification",verified:!row.verified_at},row.id).then(load).catch(err=>{message("Změnu ověření se nepodařilo uložit: "+err.message,true);load()})}}
  const imported=e.target.closest("[data-import-eia]");if(imported)importEiaCandidate(imported.dataset.importEia);
 });
 document.addEventListener("change",e=>{
