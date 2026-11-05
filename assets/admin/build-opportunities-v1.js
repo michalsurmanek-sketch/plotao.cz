@@ -62,7 +62,7 @@ async function importEiaCandidate(ref){
 }
 function filteredRows(){
  const q=($("#buildSearch")?.value||"").toLocaleLowerCase("cs-CZ"),stage=$("#buildStage")?.value||"",type=$("#buildType")?.value||"",reach=$("#buildOutreach")?.value||"";
- return rows.filter(x=>(!q||(x.title+" "+x.location+" "+x.region+" "+x.source_name).toLocaleLowerCase("cs-CZ").includes(q))&&(!stage||x.stage===stage)&&(!type||x.project_type===type)&&(!reach||x.outreach_status===reach));
+ return rows.filter(x=>(!q||(x.title+" "+x.location+" "+x.region+" "+x.source_name+" "+x.external_ref+" "+x.notes+" "+(labels.stage[x.stage]||x.stage)+" "+(labels.project_type[x.project_type]||x.project_type)).toLocaleLowerCase("cs-CZ").includes(q))&&(!stage||x.stage===stage)&&(!type||x.project_type===type)&&(!reach||x.outreach_status===reach));
 }
 function exportCsv(){
  const shown=filteredRows();if(!shown.length){message("Pro export nejsou vybrané žádné příležitosti.",true);return}
