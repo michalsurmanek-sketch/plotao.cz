@@ -63,7 +63,7 @@ async function save(e){
 }
 document.addEventListener("plotao:admin-data",()=>{if(!ready)load()});
 document.addEventListener("click",e=>{
- if(e.target.closest('[data-view="build-opportunities"]'))setTimeout(()=>{if(window.L&&map)map.invalidateSize();else setupMap()},80);
+ if(e.target.closest('[data-view="build-opportunities"]'))setTimeout(()=>{if(!ready&&window.PLOTAOAdmin?.request)load();if(window.L&&map)map.invalidateSize();else setupMap()},80);
  if(e.target.closest("#buildAdd"))openForm();
  const edit=e.target.closest("[data-edit-build]");if(edit)openForm(rows.find(x=>x.id===edit.dataset.editBuild));
  if(e.target.closest("#buildCancel")||e.target.id==="buildDialog")closeForm();
