@@ -2,7 +2,7 @@
 const API="/functions/v1/build-opportunities-admin";
 const labels={project_type:{rodinne_domy:"Rodinné domy",bytove_domy:"Bytové domy",komercni:"Komerční areál",verejne:"Veřejná stavba",jine:"Jiné"},stage:{uzemni_plan:"Územní plán",zamer:"Záměr",povoleno:"Povoleno",realizace:"Ve výstavbě",dokonceno:"Dokončeno",pozastaveno:"Pozastaveno"},outreach_status:{neosloveno:"Neosloveno",pripraveno:"Připraveno k oslovení",osloveno:"Osloveno",jednani:"Probíhá jednání",zakazka:"Zakázka",bez_zajmu:"Bez zájmu"}};
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-let rows=[],map=null,markers=[],editing=null,ready=false;
+let rows=[],candidates=[],map=null,markers=[],editing=null,ready=false;
 const $=s=>document.querySelector(s);
 const fmtDate=s=>s?new Date(s+"T00:00:00").toLocaleDateString("cs-CZ"):"—";
 function message(s,bad=false){const el=$("#buildNotice");if(el){el.textContent=s;el.classList.toggle("error",bad)}}
@@ -28,6 +28,37 @@ function renderMap(){
  });
  if(located.length){const group=L.featureGroup(markers);map.fitBounds(group.getBounds().pad(.2),{maxZoom:12})}
 }
+async function discoverEia(){
+ const query=$("#buildDiscoveryQuery").value.trim(),region=$("#buildDiscoveryRegion").value||"";
+ if(query.length<3){message("Zadejte alespoň 3 znaky pro hledání v EIA.",true);return}
+ const button=$("#buildDiscover");button.disabled=true;button.textContent="Vyhledávám…";
+ $("#buildCandidates").innerHTML='<div class="build-source-loading">Prohledávám veřejnou evidenci EIA…</div>';
+ try{
+  if(!window.PLOTAOAdmin?.request)throw Error("Nejdřív se přihlaste do administrace.");
+  const result=await window.PLOTAOAdmin.request("/functions/v1/build-opportunities-discover","POST",{query,region});
+  candidates=Array.isArray(result.candidates)?result.candidates:[];
+  $("#buildCandidates").dataset.searched="true";
+  $("#buildDiscoveryResultCount").textContent=candidates.length+" vhodných návrhů · kontrola "+new Date(result.checked_at).toLocaleString("cs-CZ");
+  renderCandidates();
+ }catch(error){
+  candidates=[];$("#buildDiscoveryResultCount").textContent="";
+  $("#buildCandidates").innerHTML='<div class="build-source-empty">'+esc(error.message||"Vyhledání selhalo.")+'</div>';
+ }finally{button.disabled=false;button.textContent="Hledat v EIA"}
+}
+function renderCandidates(){
+ const host=$("#buildCandidates");if(!host)return;
+ if(!candidates.length){if(!host.dataset.searched)host.innerHTML='<div class="build-source-empty">Zadejte hledanou frázi a spusťte vyhledávání. Výsledky se zde nejdřív zobrazí ke kontrole.</div>';else host.innerHTML='<div class="build-source-empty">EIA nenašla odpovídající obytné záměry na první stránce výsledků. Zkuste jiný výraz nebo kraj.</div>';return}
+ host.dataset.searched="true";
+ host.innerHTML=candidates.map(c=>{const exists=rows.some(r=>r.external_ref===c.external_ref);return '<article class="build-candidate"><div class="build-candidate-main"><div><strong>'+esc(c.title)+'</strong><small>'+esc(c.location)+(c.region?' · '+esc(c.region):'')+' · '+esc(c.code)+'</small><p>Stav EIA: '+esc(c.status||"neuveden")+'</p></div><div class="build-candidate-actions"><a href="'+esc(c.url)+'" target="_blank" rel="noopener noreferrer">Otevřít zdroj ↗</a><button class="action" type="button" data-import-eia="'+esc(c.external_ref)+'" '+(exists?'disabled':'')+'>'+(exists?'Již v evidenci':'Přidat k ověření')+'</button></div></div></article>'}).join("");
+}
+async function importEiaCandidate(ref){
+ const c=candidates.find(x=>x.external_ref===ref);if(!c)return;
+ const button=document.querySelector('[data-import-eia="'+CSS.escape(ref)+'"]');if(button){button.disabled=true;button.textContent="Ukládám…"}
+ try{
+  await api("POST",{opportunity:{title:c.title,location:c.location,region:c.region,project_type:c.project_type,stage:"zamer",units:0,source_name:c.source_name,source_url:c.url,expected_start:"",outreach_status:"neosloveno",contact_name:"",contact_email:"",contact_phone:"",notes:["Kód EIA: "+c.code,c.status?"Stav EIA: "+c.status:""].filter(Boolean).join("\n"),external_ref:c.external_ref,verified:false}});
+  await load();renderCandidates();message("Návrh z EIA byl přidán k ručnímu ověření.");
+ }catch(error){if(button){button.disabled=false;button.textContent="Přidat k ověření"}message("Uložení návrhu se nezdařilo: "+error.message,true)}
+}
 function render(){
  const q=($("#buildSearch")?.value||"").toLocaleLowerCase("cs-CZ"),stage=$("#buildStage")?.value||"",type=$("#buildType")?.value||"",reach=$("#buildOutreach")?.value||"";
  const shown=rows.filter(x=>(!q||(x.title+" "+x.location+" "+x.region+" "+x.source_name).toLocaleLowerCase("cs-CZ").includes(q))&&(!stage||x.stage===stage)&&(!type||x.project_type===type)&&(!reach||x.outreach_status===reach));
@@ -36,7 +67,7 @@ function render(){
  $("#buildUncontacted").textContent=rows.filter(x=>x.outreach_status==="neosloveno").length;
  $("#buildCount").textContent=shown.length+" příležitostí";
  $("#buildRows").innerHTML=shown.map(x=>'<tr><td><strong>'+esc(x.title)+'</strong><small>'+esc(x.location)+(x.region?' · '+esc(x.region):'')+'</small><small>'+esc(labels.project_type[x.project_type]||x.project_type)+(x.expected_start?' · plán '+fmtDate(x.expected_start):'')+'</small></td><td><span class="build-pill '+esc(x.stage)+'">'+esc(labels.stage[x.stage]||x.stage)+'</span></td><td>'+Number(x.units||0).toLocaleString("cs-CZ")+'</td><td>'+(x.source_url?'<a href="'+esc(x.source_url)+'" target="_blank" rel="noopener noreferrer">'+esc(x.source_name)+' ↗</a>':esc(x.source_name))+'<small>'+(x.verified_at?'Ověřeno '+new Date(x.verified_at).toLocaleDateString("cs-CZ"):'Zdroj zatím neověřen')+'</small></td><td><select data-reach="'+esc(x.id)+'" aria-label="Stav oslovení pro '+esc(x.title)+'">'+Object.entries(labels.outreach_status).map(([k,v])=>'<option value="'+k+'" '+(x.outreach_status===k?'selected':'')+'>'+v+'</option>').join("")+'</select></td><td class="build-actions"><button type="button" class="secondary" data-edit-build="'+esc(x.id)+'">Upravit</button><button type="button" class="link danger" data-delete-build="'+esc(x.id)+'">Smazat</button></td></tr>').join("")||'<tr><td colspan="6" class="empty">Pro tato kritéria nebyla nalezena žádná příležitost.</td></tr>';
- renderMap();
+ renderMap();renderCandidates();
 }
 async function load(){
  if(!window.PLOTAOAdmin?.request)return;
@@ -70,12 +101,15 @@ document.addEventListener("click",e=>{
  const del=e.target.closest("[data-delete-build]");if(del){const row=rows.find(x=>x.id===del.dataset.deleteBuild);if(row&&confirm("Smazat příležitost „"+row.title+"“?"))api("DELETE",{id:row.id}).then(load).catch(err=>message("Smazání se nezdařilo: "+err.message,true))}
  if(e.target.closest("#buildDelete")){if(editing&&confirm("Smazat tuto příležitost?"))api("DELETE",{id:editing}).then(()=>{closeForm();load()}).catch(err=>message("Smazání se nezdařilo: "+err.message,true))}
  if(e.target.closest("#buildReload"))load();
+ if(e.target.closest("#buildDiscover"))discoverEia();
+ const imported=e.target.closest("[data-import-eia]");if(imported)importEiaCandidate(imported.dataset.importEia);
 });
 document.addEventListener("change",e=>{
  if(e.target.matches("[data-reach]")){const row=rows.find(x=>x.id===e.target.dataset.reach);if(!row)return;row.outreach_status=e.target.value;api("PATCH",{opportunity:{...row,verified:!!row.verified_at}},row.id).then(load).catch(err=>{message("Stav oslovení se nepodařilo uložit: "+err.message,true);load()})}
  if(e.target.matches("#buildStage,#buildType,#buildOutreach"))render();
 });
 document.addEventListener("input",e=>{if(e.target.id==="buildSearch")render()});
+document.addEventListener("change",e=>{if(e.target.id==="buildDiscoveryRegion"&&candidates.length)discoverEia()});
 document.addEventListener("submit",e=>{if(e.target.id==="buildForm")save(e)});
 window.PLOTAOBuildOpportunities={reload:load};
 })();
