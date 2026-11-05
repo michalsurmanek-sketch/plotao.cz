@@ -32,7 +32,7 @@ Deno.serve(async req=>{
  if(query.length<3||region&&!REGION_NAMES.includes(region))return json({error:"invalid_search"},422);
  try{
   const start=await getPage(BASE+"/view/eia100_cr?lang=cs",{headers:{"accept":"text/html"}});
-  const formInput=start.html.match(/<input\\b[^>]*\\bname=["']typHledani["'][^>]*>/i)?.[0]||"";
+  const formInput=start.html.match(/<input\b[^>]*\bname=["']typHledani["'][^>]*>/i)?.[0]||"";
   const mode=attr(formInput,"value");
   if(!mode)return json({error:"cenia_form_changed"},502);
   const cookie=start.headers.get("set-cookie")?.split(";")[0]||"";
