@@ -28,22 +28,26 @@ Deno.serve(async req=>{
  if(!claims||String(claims.email||"").toLowerCase()!==ADMIN_EMAIL)return json({error:"admin_forbidden"},403);
  if(req.method!=="POST")return json({error:"method_not_allowed"},405);
  let b;try{b=await req.json()}catch{return json({error:"invalid_json"},400)}
- const query=String(b.query||"").trim().slice(0,100),region=String(b.region||"").trim();
+ const query=String(b.query||"").trim().slice(0,100),region=String(b.region||"").trim(),broad=b.broad===true;
  if(query.length<3||region&&!REGION_NAMES.includes(region))return json({error:"invalid_search"},422);
  try{
   const start=await getPage(BASE+"/view/eia100_cr?lang=cs",{headers:{"accept":"text/html"}});
-  const formInput=start.html.match(/<input\b[^>]*\bname=["']typHledani["'][^>]*>/i)?.[0]||"";
+  const formInput=start.html.match(/<input\\b[^>]*\\bname=["']typHledani["'][^>]*>/i)?.[0]||"";
   const mode=attr(formInput,"value");
   if(!mode)return json({error:"cenia_form_changed"},502);
   const cookie=start.headers.get("set-cookie")?.split(";")[0]||"";
-  const payload=new URLSearchParams({typHledani:mode,quickSearch:query,stavRychleHledani:"",razeniRychleHledani:"1",filtrRychleHledani:""});
-  const results=await getPage(BASE+"/view/eia100_cr?lang=cs",{method:"POST",headers:{"accept":"text/html","content-type":"application/x-www-form-urlencoded","origin":ORIGIN,"referer":BASE+"/view/eia100_cr?lang=cs",...(cookie?{cookie}:{})},body:payload.toString()});
-  const found=[];const linkRe=/<a\b[^>]*href=["']([^"']*\/eiasea\/detail\/EIA_([A-Z0-9_-]+)[^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi;
-  let match;
-  while((match=linkRe.exec(results.html))&&found.length<10){
-   const code=match[2],title=plain(match[3]);
-   if(!/^[A-Z0-9_-]{3,40}$/i.test(code)||!isHousing(title))continue;
-   found.push({code,title,url:ORIGIN+entity(match[1])});
+  const queries=[...new Set([query,...(broad?["bytové domy","rodinné domy","rezidenční projekt","obytný soubor"]:[])])];
+  const found=[],seen=new Set(),linkRe=/<a\b[^>]*href=["']([^"']*\/eiasea\/detail\/EIA_([A-Z0-9_-]+)[^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  for(const searchQuery of queries){
+   if(found.length>=12)break;
+   const payload=new URLSearchParams({typHledani:mode,quickSearch:searchQuery,stavRychleHledani:"",razeniRychleHledani:"1",filtrRychleHledani:""});
+   const results=await getPage(BASE+"/view/eia100_cr?lang=cs",{method:"POST",headers:{"accept":"text/html","content-type":"application/x-www-form-urlencoded","origin":ORIGIN,"referer":BASE+"/view/eia100_cr?lang=cs",...(cookie?{cookie}:{})},body:payload.toString()});
+   linkRe.lastIndex=0;let match;
+   while((match=linkRe.exec(results.html))&&found.length<12){
+    const code=match[2],title=plain(match[3]);
+    if(!/^[A-Z0-9_-]{3,40}$/i.test(code)||seen.has(code)||!isHousing(title))continue;
+    seen.add(code);found.push({code,title,url:ORIGIN+entity(match[1])});
+   }
   }
   const details=await Promise.all(found.map(async item=>{
    try{
@@ -53,6 +57,6 @@ Deno.serve(async req=>{
    }catch{return {...item,region:"",district:"",town:"",location:"",status:"",project_type:/bytov/i.test(item.title)&&!/rodinn/i.test(item.title)?"bytove_domy":"rodinne_domy",external_ref:"EIA:"+item.code}}
   }));
   const candidates=details.filter(x=>x.location&&regionMatches(x.region,region)).map(x=>({...x,stage:"zamer",units:1,source_name:"CENIA – Informační systém EIA",notes:["Kód EIA: "+x.code,x.status?"Stav EIA: "+x.status:""].filter(Boolean).join("\n")}));
-  return json({source:"CENIA",query,region:region||null,checked_at:new Date().toISOString(),count:candidates.length,candidates});
+  return json({source:"CENIA",query,queries,region:region||null,checked_at:new Date().toISOString(),count:candidates.length,candidates});
  }catch(error){console.error("CENIA discovery failed",error?.message||error);return json({error:"source_unavailable",message:"Veřejnou evidenci EIA se nyní nepodařilo načíst. Zkuste to později."},502)}
 });
