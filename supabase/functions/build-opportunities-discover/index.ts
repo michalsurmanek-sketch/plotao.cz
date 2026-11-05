@@ -15,7 +15,7 @@ function locationFields(html){
  return {region:cells[0]||"",district:cells[1]||"",town:cells[2]||""};
 }
 const normalize=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("cs-CZ");
-function isHousing(s){const n=normalize(s);return /(obytn|rodinn.{0,12}dom|bytov.{0,15}dom|rezidenc|sidliste|sidliste|bytov.{0,15}zon|domy)/.test(n)}
+function isHousing(s){const n=normalize(s);return /(obytn|rodinn.{0,12}dom|bytov.{0,15}dom|rezidenc|sidliste|bytov.{0,15}zon|viladom|domy)/.test(n)}
 function regionMatches(value,region){if(!region)return true;return normalize(value)===normalize(region)}
 async function getPage(url,opts={}){
  const r=await fetch(url,{...opts,signal:AbortSignal.timeout(12000),redirect:"follow"});
@@ -48,11 +48,11 @@ Deno.serve(async req=>{
   const details=await Promise.all(found.map(async item=>{
    try{
     const d=await getPage(BASE+"/detail/EIA_"+encodeURIComponent(item.code)+"?lang=cs",{headers:{"accept":"text/html","referer":BASE+"/view/eia100_cr?lang=cs",...(cookie?{cookie}:{})}});
-    const loc=locationFields(d.html),status=cellValue(d.html,"Stav:"),reporter=cellValue(d.html,"Oznamovatel:");
-    return {...item,...loc,status,reporter,location:loc.town||loc.district||"",project_type:/bytov/i.test(item.title)&&!/rodinn/i.test(item.title)?"bytove_domy":"rodinne_domy",external_ref:"EIA:"+item.code};
-   }catch{return {...item,region:"",district:"",town:"",location:"",status:"",reporter:"",project_type:/bytov/i.test(item.title)&&!/rodinn/i.test(item.title)?"bytove_domy":"rodinne_domy",external_ref:"EIA:"+item.code}}
+    const loc=locationFields(d.html),status=cellValue(d.html,"Stav:");
+    return {...item,...loc,status,location:loc.town||loc.district||"",project_type:/bytov/i.test(item.title)&&!/rodinn/i.test(item.title)?"bytove_domy":"rodinne_domy",external_ref:"EIA:"+item.code};
+   }catch{return {...item,region:"",district:"",town:"",location:"",status:"",project_type:/bytov/i.test(item.title)&&!/rodinn/i.test(item.title)?"bytove_domy":"rodinne_domy",external_ref:"EIA:"+item.code}}
   }));
-  const candidates=details.filter(x=>x.location&&regionMatches(x.region,region)).map(x=>({...x,stage:"zamer",units:1,source_name:"CENIA – Informační systém EIA",notes:["Kód EIA: "+x.code,x.status?"Stav EIA: "+x.status:"",x.reporter?"Oznamovatel: "+x.reporter:""].filter(Boolean).join("\n")}));
+  const candidates=details.filter(x=>x.location&&regionMatches(x.region,region)).map(x=>({...x,stage:"zamer",units:1,source_name:"CENIA – Informační systém EIA",notes:["Kód EIA: "+x.code,x.status?"Stav EIA: "+x.status:""].filter(Boolean).join("\n")}));
   return json({source:"CENIA",query,region:region||null,checked_at:new Date().toISOString(),count:candidates.length,candidates});
  }catch(error){console.error("CENIA discovery failed",error?.message||error);return json({error:"source_unavailable",message:"Veřejnou evidenci EIA se nyní nepodařilo načíst. Zkuste to později."},502)}
 });
