@@ -61,8 +61,8 @@ async function importEiaCandidate(ref){
  }catch(error){if(button){button.disabled=false;button.textContent="Přidat k ověření"}message("Uložení návrhu se nezdařilo: "+error.message,true)}
 }
 function filteredRows(){
- const q=($("#buildSearch")?.value||"").toLocaleLowerCase("cs-CZ"),stage=$("#buildStage")?.value||"",type=$("#buildType")?.value||"",reach=$("#buildOutreach")?.value||"";
- return rows.filter(x=>(!q||(x.title+" "+x.location+" "+x.region+" "+x.source_name+" "+x.external_ref+" "+x.notes+" "+(labels.stage[x.stage]||x.stage)+" "+(labels.project_type[x.project_type]||x.project_type)).toLocaleLowerCase("cs-CZ").includes(q))&&(!stage||x.stage===stage)&&(!type||x.project_type===type)&&(!reach||x.outreach_status===reach));
+ const q=($("#buildSearch")?.value||"").toLocaleLowerCase("cs-CZ"),stage=$("#buildStage")?.value||"",type=$("#buildType")?.value||"",reach=$("#buildOutreach")?.value||"",verification=$("#buildVerification")?.value||"";
+ return rows.filter(x=>(!q||(x.title+" "+x.location+" "+x.region+" "+x.source_name+" "+x.external_ref+" "+x.notes+" "+(labels.stage[x.stage]||x.stage)+" "+(labels.project_type[x.project_type]||x.project_type)).toLocaleLowerCase("cs-CZ").includes(q))&&(!stage||x.stage===stage)&&(!type||x.project_type===type)&&(!reach||x.outreach_status===reach)&&(!verification||(verification==="pending"?!x.verified_at:!!x.verified_at)));
 }
 function exportCsv(){
  const shown=filteredRows();if(!shown.length){message("Pro export nejsou vybrané žádné příležitosti.",true);return}
@@ -126,7 +126,7 @@ document.addEventListener("click",e=>{
 });
 document.addEventListener("change",e=>{
  if(e.target.matches("[data-reach]")){const row=rows.find(x=>x.id===e.target.dataset.reach);if(!row)return;row.outreach_status=e.target.value;api("PATCH",{opportunity:{...row,verified:!!row.verified_at,external_ref:row.external_ref||""}},row.id).then(load).catch(err=>{message("Stav oslovení se nepodařilo uložit: "+err.message,true);load()})}
- if(e.target.matches("#buildStage,#buildType,#buildOutreach"))render();
+ if(e.target.matches("#buildStage,#buildType,#buildOutreach,#buildVerification"))render();
 });
 document.addEventListener("input",e=>{if(e.target.id==="buildSearch")render()});
 document.addEventListener("change",e=>{if(e.target.id==="buildDiscoveryRegion"&&candidates.length)discoverEia()});
