@@ -4,7 +4,10 @@ const ORIGIN="https://portal.cenia.cz";
 const REGION_NAMES=["Hlavní město Praha","Středočeský kraj","Jihočeský kraj","Plzeňský kraj","Karlovarský kraj","Ústecký kraj","Liberecký kraj","Královéhradecký kraj","Pardubický kraj","Kraj Vysočina","Jihomoravský kraj","Olomoucký kraj","Zlínský kraj","Moravskoslezský kraj"];
 const cors={"Content-Type":"application/json","Cache-Control":"no-store","Access-Control-Allow-Origin":"https://plotao.cz","Access-Control-Allow-Headers":"authorization,apikey,content-type","Access-Control-Allow-Methods":"POST,OPTIONS"};
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:cors});
-const decode=token=>{try{const p=token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/");return JSON.parse(atob(p.padEnd(p.length+((4-p.length%4)%4),"=")))}catch{return null}};
+async function isAdminToken(token,base,key){
+ if(!token)return false;
+ try{const response=await fetch(base+"/auth/v1/user",{headers:{apikey:key,Authorization:"Bearer "+token},signal:AbortSignal.timeout(8000)});if(!response.ok)return false;const user=await response.json();return String(user?.email||"").toLowerCase()===ADMIN_EMAIL}catch{return false}
+}
 function entity(s){return String(s||"").replace(/&nbsp;/gi," ").replace(/&amp;/gi,"&").replace(/&lt;/gi,"<").replace(/&gt;/gi,">").replace(/&quot;/gi,'"').replace(/&#39;|&#x27;/gi,"'").replace(/&#(\d+);/g,(_,n)=>String.fromCodePoint(Number(n))).replace(/&#x([0-9a-f]+);/gi,(_,n)=>String.fromCodePoint(parseInt(n,16)))}
 function plain(s){return entity(String(s||"").replace(/<br\s*\/?\s*>/gi," ").replace(/<[^>]*>/g," ")).replace(/\s+/g," ").trim()}
 function attr(tag,name){const m=tag.match(new RegExp("\\b"+name+"\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'|([^\\s>]+))","i"));return entity(m?.[1]??m?.[2]??m?.[3]??"")}
@@ -24,8 +27,10 @@ async function getPage(url,opts={}){
 }
 Deno.serve(async req=>{
  if(req.method==="OPTIONS")return new Response("ok",{headers:cors});
- const claims=decode(req.headers.get("authorization")?.replace(/^Bearer\s+/i,"")||"");
- if(!claims||String(claims.email||"").toLowerCase()!==ADMIN_EMAIL)return json({error:"admin_forbidden"},403);
+ const supabaseUrl=Deno.env.get("SUPABASE_URL"),serviceKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+ if(!supabaseUrl||!serviceKey)return json({error:"server_config"},500);
+ const token=req.headers.get("authorization")?.replace(/^Bearer\s+/i,"")||"";
+ if(!await isAdminToken(token,supabaseUrl,serviceKey))return json({error:"admin_forbidden"},403);
  if(req.method!=="POST")return json({error:"method_not_allowed"},405);
  let b;try{b=await req.json()}catch{return json({error:"invalid_json"},400)}
  const query=String(b.query||"").trim().slice(0,100),region=String(b.region||"").trim(),broad=b.broad===true;
