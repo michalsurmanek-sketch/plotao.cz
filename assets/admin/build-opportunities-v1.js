@@ -20,7 +20,7 @@ function renderMap(){
  const box=$("#buildMap");if(!box)return;
  if(!window.L){box.innerHTML='<div class="build-map-error">Mapové podklady se nepodařilo načíst. Seznam příležitostí zůstává dostupný.</div>';return}
  setupMap();markers.forEach(m=>map.removeLayer(m));markers=[];
- const located=rows.filter(x=>Number.isFinite(Number(x.latitude))&&Number.isFinite(Number(x.longitude)));
+ const located=rows.filter(x=>x.latitude!==null&&x.latitude!==undefined&&x.latitude!==""&&x.longitude!==null&&x.longitude!==undefined&&x.longitude!==""&&Number.isFinite(Number(x.latitude))&&Number.isFinite(Number(x.longitude))&&Number(x.latitude)>=47&&Number(x.latitude)<=52.5&&Number(x.longitude)>=11&&Number(x.longitude)<=20);
  located.forEach(x=>{
   const m=L.marker([Number(x.latitude),Number(x.longitude)]).addTo(map);
   m.bindPopup('<b>'+esc(x.title)+'</b><br>'+esc(x.location)+'<br>'+esc(labels.stage[x.stage]||x.stage));
