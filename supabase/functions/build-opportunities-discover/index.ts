@@ -8,7 +8,7 @@ const decode=token=>{try{const p=token.split(".")[1].replace(/-/g,"+").replace(/
 function entity(s){return String(s||"").replace(/&nbsp;/gi," ").replace(/&amp;/gi,"&").replace(/&lt;/gi,"<").replace(/&gt;/gi,">").replace(/&quot;/gi,'"').replace(/&#39;|&#x27;/gi,"'").replace(/&#(\d+);/g,(_,n)=>String.fromCodePoint(Number(n))).replace(/&#x([0-9a-f]+);/gi,(_,n)=>String.fromCodePoint(parseInt(n,16)))}
 function plain(s){return entity(String(s||"").replace(/<br\s*\/?\s*>/gi," ").replace(/<[^>]*>/g," ")).replace(/\s+/g," ").trim()}
 function attr(tag,name){const m=tag.match(new RegExp("\\b"+name+"\\s*=\\s*(?:\"([^\"]*)\"|'([^']*)'|([^\\s>]+))","i"));return entity(m?.[1]??m?.[2]??m?.[3]??"")}
-function cellValue(html,label){const re=new RegExp('<td[^>]*class=["\\']label["\\'][^>]*>\\s*'+label+'\\s*<\\/td>\\s*<td[^>]*class=["\\']value["\\'][^>]*>([\\s\\S]*?)<\\/td>','i');return plain(html.match(re)?.[1]||"")}
+function cellValue(html,label){const re=new RegExp('<td[^>]*class[^>]*label[^>]*>\\s*'+label+'\\s*<\\/td>\\s*<td[^>]*class[^>]*value[^>]*>([\\s\\S]*?)<\\/td>','i');return plain(html.match(re)?.[1]||"")}
 function locationFields(html){
  const m=html.match(/<table[^>]*class=["'][^"']*umisteni[^"']*["'][^>]*>[\s\S]*?<tr[^>]*>\s*<th[^>]*>[\s\S]*?<\/tr>\s*<tr[^>]*>([\s\S]*?)<\/tr>/i);
  const cells=m?[...m[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map(x=>plain(x[1])):[];
