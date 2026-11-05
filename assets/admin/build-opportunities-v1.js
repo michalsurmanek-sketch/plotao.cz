@@ -66,13 +66,14 @@ function render(){
  $("#buildTotal").textContent=rows.length;$("#buildEarly").textContent=rows.filter(x=>["uzemni_plan","zamer"].includes(x.stage)).length;
  $("#buildUnits").textContent=rows.filter(x=>x.project_type==="rodinne_domy"||x.project_type==="bytove_domy").reduce((a,x)=>a+(Number(x.units)||0),0);
  $("#buildUncontacted").textContent=rows.filter(x=>x.outreach_status==="neosloveno").length;
+ const unverified=rows.filter(x=>!x.verified_at).length;const unverifiedEl=$("#buildUnverified");if(unverifiedEl)unverifiedEl.textContent=unverified;
  $("#buildCount").textContent=shown.length+" příležitostí";
  $("#buildRows").innerHTML=shown.map(x=>'<tr><td><strong>'+esc(x.title)+'</strong><small>'+esc(x.location)+(x.region?' · '+esc(x.region):'')+'</small><small>'+esc(labels.project_type[x.project_type]||x.project_type)+(x.expected_start?' · plán '+fmtDate(x.expected_start):'')+'</small></td><td><span class="build-pill '+esc(x.stage)+'">'+esc(labels.stage[x.stage]||x.stage)+'</span></td><td>'+Number(x.units||0).toLocaleString("cs-CZ")+'</td><td>'+(x.source_url?'<a href="'+esc(x.source_url)+'" target="_blank" rel="noopener noreferrer">'+esc(x.source_name)+' ↗</a>':esc(x.source_name))+'<small>'+(x.verified_at?'Ověřeno '+new Date(x.verified_at).toLocaleDateString("cs-CZ"):'Zdroj zatím neověřen')+'</small></td><td><select data-reach="'+esc(x.id)+'" aria-label="Stav oslovení pro '+esc(x.title)+'">'+Object.entries(labels.outreach_status).map(([k,v])=>'<option value="'+k+'" '+(x.outreach_status===k?'selected':'')+'>'+v+'</option>').join("")+'</select></td><td class="build-actions"><button type="button" class="secondary" data-edit-build="'+esc(x.id)+'">Upravit</button><button type="button" class="link danger" data-delete-build="'+esc(x.id)+'">Smazat</button></td></tr>').join("")||'<tr><td colspan="6" class="empty">Pro tato kritéria nebyla nalezena žádná příležitost.</td></tr>';
  renderMap();renderCandidates();
 }
 async function load(){
  if(!window.PLOTAOAdmin?.request)return;
- try{message("Načítám stavební příležitosti…");const data=await api();rows=Array.isArray(data)?data:[];ready=true;message(rows.length?"Záznamy jsou uložené v zabezpečené databázi PLOTAO.":"Zatím nejsou vložené žádné ověřené příležitosti.");render()}
+ try{message("Načítám stavební příležitosti…");const data=await api();rows=Array.isArray(data)?data:[];ready=true;message(rows.length?"Záznamy jsou uložené v zabezpečené databázi PLOTAO.":"Zatím nejsou vložené žádné příležitosti.");render()}
  catch(e){message("Načtení se nezdařilo: "+e.message,true)}
 }
 function openForm(row=null){
@@ -80,6 +81,7 @@ function openForm(row=null){
  $("#buildFormTitle").textContent=editing?"Upravit příležitost":"Přidat příležitost";
  $("#buildDelete").hidden=!editing;
  $("#buildVerified").checked=!!row?.verified_at;
+ $("#buildVerificationHelp").textContent=row?.verified_at?"Ověřeno "+new Date(row.verified_at).toLocaleDateString("cs-CZ")+". Odškrtnutím ověření odeberete.":"Záznam zůstane označen jako neověřený, dokud zdroj ručně nezkontrolujete.";
  for(const key of ["title","location","region","project_type","stage","units","source_name","source_url","expected_start","outreach_status","contact_name","contact_email","contact_phone","notes","latitude","longitude"]){const input=$("#buildForm [name="+key+"]");if(input)input.value=row?.[key]??(key==="project_type"?"rodinne_domy":key==="stage"?"zamer":key==="outreach_status"?"neosloveno":key==="units"?1:"")}
  $("#buildDialog").hidden=false;document.body.classList.add("build-modal-open");$("#buildForm [name=title]").focus();
 }
@@ -106,7 +108,7 @@ document.addEventListener("click",e=>{
  const imported=e.target.closest("[data-import-eia]");if(imported)importEiaCandidate(imported.dataset.importEia);
 });
 document.addEventListener("change",e=>{
- if(e.target.matches("[data-reach]")){const row=rows.find(x=>x.id===e.target.dataset.reach);if(!row)return;row.outreach_status=e.target.value;api("PATCH",{opportunity:{...row,verified:!!row.verified_at}},row.id).then(load).catch(err=>{message("Stav oslovení se nepodařilo uložit: "+err.message,true);load()})}
+ if(e.target.matches("[data-reach]")){const row=rows.find(x=>x.id===e.target.dataset.reach);if(!row)return;row.outreach_status=e.target.value;api("PATCH",{opportunity:{...row,verified:!!row.verified_at,external_ref:row.external_ref||""}},row.id).then(load).catch(err=>{message("Stav oslovení se nepodařilo uložit: "+err.message,true);load()})}
  if(e.target.matches("#buildStage,#buildType,#buildOutreach"))render();
 });
 document.addEventListener("input",e=>{if(e.target.id==="buildSearch")render()});
