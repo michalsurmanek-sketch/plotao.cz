@@ -9,12 +9,12 @@ const validId=v=>typeof v==="string"&&/^[0-9a-f-]{36}$/i.test(v);
 const validUrl=v=>!v||/^https:\/\//i.test(v);
 const clean=v=>{
  if(!v||typeof v!=="object")return null;
- const title=String(v.title||"").trim().slice(0,180),location=String(v.location||"").trim().slice(0,180),region=String(v.region||"").trim().slice(0,100),project_type=String(v.project_type||"rodinne_domy"),stage=String(v.stage||"zamer"),source_name=String(v.source_name||"").trim().slice(0,180),source_url=String(v.source_url||"").trim().slice(0,1000),outreach_status=String(v.outreach_status||"neosloveno"),units=Number(v.units||0),expected_start=String(v.expected_start||"").trim(),contact_name=String(v.contact_name||"").trim().slice(0,120),contact_email=String(v.contact_email||"").trim().toLowerCase().slice(0,254),contact_phone=String(v.contact_phone||"").trim().slice(0,40),notes=String(v.notes||"").trim().slice(0,4000),latitude=v.latitude===""||v.latitude==null?null:Number(v.latitude),longitude=v.longitude===""||v.longitude==null?null:Number(v.longitude);
- if(title.length<3||location.length<2||source_name.length<2||!ALLOWED_TYPES.includes(project_type)||!ALLOWED_STAGES.includes(stage)||!ALLOWED_OUTREACH.includes(outreach_status)||!Number.isInteger(units)||units<0||units>100000||!validUrl(source_url))return null;
+ const title=String(v.title||"").trim().slice(0,180),location=String(v.location||"").trim().slice(0,180),region=String(v.region||"").trim().slice(0,100),project_type=String(v.project_type||"rodinne_domy"),stage=String(v.stage||"zamer"),source_name=String(v.source_name||"").trim().slice(0,180),source_url=String(v.source_url||"").trim().slice(0,1000),outreach_status=String(v.outreach_status||"neosloveno"),units=Number(v.units||0),expected_start=String(v.expected_start||"").trim(),contact_name=String(v.contact_name||"").trim().slice(0,120),contact_email=String(v.contact_email||"").trim().toLowerCase().slice(0,254),contact_phone=String(v.contact_phone||"").trim().slice(0,40),notes=String(v.notes||"").trim().slice(0,4000),external_ref=String(v.external_ref||"").trim().slice(0,120),latitude=v.latitude===""||v.latitude==null?null:Number(v.latitude),longitude=v.longitude===""||v.longitude==null?null:Number(v.longitude);
+ if(title.length<3||location.length<2||source_name.length<2||!ALLOWED_TYPES.includes(project_type)||!ALLOWED_STAGES.includes(stage)||!ALLOWED_OUTREACH.includes(outreach_status)||!Number.isInteger(units)||units<0||units>100000||!validUrl(source_url)||external_ref&&!/^EIA:[A-Z0-9_-]{3,40}$/i.test(external_ref))return null;
  if(expected_start&&!/^\d{4}-\d{2}-\d{2}$/.test(expected_start))return null;
  if(contact_email&&!/^\S+@\S+\.\S+$/.test(contact_email))return null;
  if(latitude!==null&&(!Number.isFinite(latitude)||latitude<47||latitude>52.5)||longitude!==null&&(!Number.isFinite(longitude)||longitude<11||longitude>20)||(latitude===null)!==(longitude===null))return null;
- return {title,location,region,project_type,stage,units,source_name,source_url,expected_start:expected_start||null,outreach_status,contact_name,contact_email,contact_phone,notes,latitude,longitude,verified_at:v.verified?new Date().toISOString():null,updated_at:new Date().toISOString()};
+ return {title,location,region,project_type,stage,units,source_name,source_url,external_ref,expected_start:expected_start||null,outreach_status,contact_name,contact_email,contact_phone,notes,latitude,longitude,verified_at:v.verified?new Date().toISOString():null,updated_at:new Date().toISOString()};
 };
 Deno.serve(async req=>{
  if(req.method==="OPTIONS")return new Response("ok",{headers:cors});
@@ -37,7 +37,7 @@ Deno.serve(async req=>{
    const row=clean(body.opportunity);if(!row)return json({error:"invalid_opportunity"},422);
    const r=await fetch(body.id?url+"?id=eq."+encodeURIComponent(body.id):url,{method:body.id?"PATCH":"POST",headers:{...api,"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify(row)});
    let data;try{data=await r.json()}catch{data=null}
-   if(!r.ok)return json({error:"save_failed"},r.status);
+   if(!r.ok)return json({error:r.status===409?"duplicate_source":"save_failed"},r.status);
    return json(Array.isArray(data)?data[0]:data,body.id?200:201);
  }
  if(req.method==="DELETE"){
