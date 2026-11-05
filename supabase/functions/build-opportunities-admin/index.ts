@@ -4,7 +4,10 @@ const ALLOWED_STAGES=["uzemni_plan","zamer","povoleno","realizace","dokonceno","
 const ALLOWED_OUTREACH=["neosloveno","pripraveno","osloveno","jednani","zakazka","bez_zajmu"];
 const cors={"Content-Type":"application/json","Cache-Control":"no-store","Access-Control-Allow-Origin":"https://plotao.cz","Access-Control-Allow-Headers":"authorization,apikey,content-type","Access-Control-Allow-Methods":"GET,POST,PATCH,DELETE,OPTIONS"};
 const json=(body,status=200)=>new Response(JSON.stringify(body),{status,headers:cors});
-const decode=token=>{try{const p=token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/");return JSON.parse(atob(p.padEnd(p.length+((4-p.length%4)%4),"=")))}catch{return null}};
+async function isAdminToken(token,base,key){
+ if(!token)return false;
+ try{const response=await fetch(base+"/auth/v1/user",{headers:{apikey:key,Authorization:"Bearer "+token},signal:AbortSignal.timeout(8000)});if(!response.ok)return false;const user=await response.json();return String(user?.email||"").toLowerCase()===ADMIN_EMAIL}catch{return false}
+}
 const validId=v=>typeof v==="string"&&/^[0-9a-f-]{36}$/i.test(v);
 const validUrl=v=>!v||/^https:\/\//i.test(v);
 const clean=v=>{
@@ -18,11 +21,10 @@ const clean=v=>{
 };
 Deno.serve(async req=>{
  if(req.method==="OPTIONS")return new Response("ok",{headers:cors});
- const token=req.headers.get("authorization")?.replace(/^Bearer\s+/i,"")||"";
- const claims=decode(token);
- if(!claims||String(claims.email||"").toLowerCase()!==ADMIN_EMAIL)return json({error:"admin_forbidden"},403);
  const base=Deno.env.get("SUPABASE_URL"),key=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
  if(!base||!key)return json({error:"server_config"},500);
+ const token=req.headers.get("authorization")?.replace(/^Bearer\s+/i,"")||"";
+ if(!await isAdminToken(token,base,key))return json({error:"admin_forbidden"},403);
  const api={apikey:key,Authorization:"Bearer "+key};
  const url=base+"/rest/v1/plotao_build_opportunities";
  if(req.method==="GET"){
