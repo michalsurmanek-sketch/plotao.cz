@@ -34,7 +34,17 @@ Deno.serve(async req=>{
  }
  let body;try{body=await req.json()}catch{return json({error:"invalid_json"},400)}
  if(req.method==="POST"||req.method==="PATCH"){
-   if(body.id!=null&&!validId(body.id))return json({error:"invalid_id"},422);
+   if(req.method==="PATCH"&&body.op==="set_verification"){
+   if(!validId(body.id))return json({error:"invalid_id"},422);
+   if(typeof body.verified!=="boolean")return json({error:"invalid_verification"},422);
+   const now=new Date().toISOString();
+   const patch={verified_at:body.verified?now:null,updated_at:now};
+   const r=await fetch(url+"?id=eq."+encodeURIComponent(body.id),{method:"PATCH",headers:{...api,"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify(patch)});
+   let data;try{data=await r.json()}catch{data=null}
+   if(!r.ok)return json({error:"verification_update_failed"},r.status);
+   return json(Array.isArray(data)?data[0]:data,200);
+  }
+  if(body.id!=null&&!validId(body.id))return json({error:"invalid_id"},422);
    if(req.method==="PATCH"&&!body.id)return json({error:"invalid_id"},422);
    const row=clean(body.opportunity);if(!row)return json({error:"invalid_opportunity"},422);
    const r=await fetch(body.id?url+"?id=eq."+encodeURIComponent(body.id):url,{method:body.id?"PATCH":"POST",headers:{...api,"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify(row)});
