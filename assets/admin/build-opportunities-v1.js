@@ -35,10 +35,11 @@ async function discoverEia(){
  $("#buildCandidates").innerHTML='<div class="build-source-loading">Prohledávám veřejnou evidenci EIA…</div>';
  try{
   if(!window.PLOTAOAdmin?.request)throw Error("Nejdřív se přihlaste do administrace.");
-  const result=await window.PLOTAOAdmin.request("/functions/v1/build-opportunities-discover","POST",{query,region});
+  const broad=$("#buildDiscoveryBroad")?.checked===true;
+  const result=await window.PLOTAOAdmin.request("/functions/v1/build-opportunities-discover","POST",{query,region,broad});
   candidates=Array.isArray(result.candidates)?result.candidates:[];
   $("#buildCandidates").dataset.searched="true";
-  $("#buildDiscoveryResultCount").textContent=candidates.length+" vhodných návrhů · kontrola "+new Date(result.checked_at).toLocaleString("cs-CZ");
+  $("#buildDiscoveryResultCount").textContent=candidates.length+" vhodných návrhů · hledané fráze: "+(result.queries?.length||1)+" · kontrola "+new Date(result.checked_at).toLocaleString("cs-CZ");
   renderCandidates();
  }catch(error){
   candidates=[];$("#buildDiscoveryResultCount").textContent="";
