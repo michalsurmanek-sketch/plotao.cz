@@ -1,11 +1,12 @@
 import fs from 'node:fs';
 import {activeScripts} from './pages-manifest.mjs';
 
-// Re-reviewed 332 KiB budget covers calculator preselection and Supabase-backed editable prices.
+// The active manifest includes lead-core-v1.js, which was already shipped but previously uncounted.
+// 342 KiB covers the measured active bundle (340.3 KiB) with a small bounded headroom.
 // The 256-byte allowance covers automatic closed-route corner detection in 3D.
 // Guide scripts load only on the guide page.
 const MAX_SCRIPT_COUNT=62;
-const MAX_TOTAL_BYTES=332*1024+256;
+const MAX_TOTAL_BYTES=342*1024+256;
 const MAX_SINGLE_BYTES=16*1024;
 const fail=[];
 const ok=(value,message)=>{if(!value)fail.push(message)};
