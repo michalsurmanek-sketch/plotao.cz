@@ -8,8 +8,8 @@ async function isAdminToken(token,base,key){
  if(!token)return false;
  try{const response=await fetch(base+"/auth/v1/user",{headers:{apikey:key,Authorization:"Bearer "+token},signal:AbortSignal.timeout(8000)});if(!response.ok)return false;const user=await response.json();return String(user?.email||"").toLowerCase()===ADMIN_EMAIL}catch{return false}
 }
-const validId=v=>typeof v==="string"&&/^[0-9a-f-]{36}$/i.test(v);
-const validUrl=v=>!v||/^https:\/\//i.test(v);
+const validId=v=>typeof v==="string"&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+const validUrl=v=>{if(!v)return true;try{const u=new URL(v);return u.protocol==="https:"&&Boolean(u.hostname)&&!u.username&&!u.password}catch{return false}};
 const clean=v=>{
  if(!v||typeof v!=="object")return null;
  const title=String(v.title||"").trim().slice(0,180),location=String(v.location||"").trim().slice(0,180),region=String(v.region||"").trim().slice(0,100),project_type=String(v.project_type||"rodinne_domy"),stage=String(v.stage||"zamer"),source_name=String(v.source_name||"").trim().slice(0,180),source_url=String(v.source_url||"").trim().slice(0,1000),outreach_status=String(v.outreach_status||"neosloveno"),units=Number(v.units||0),expected_start=String(v.expected_start||"").trim(),contact_name=String(v.contact_name||"").trim().slice(0,120),contact_email=String(v.contact_email||"").trim().toLowerCase().slice(0,254),contact_phone=String(v.contact_phone||"").trim().slice(0,40),notes=String(v.notes||"").trim().slice(0,4000),external_ref=String(v.external_ref||"").trim().slice(0,120),latitude=v.latitude===""||v.latitude==null?null:Number(v.latitude),longitude=v.longitude===""||v.longitude==null?null:Number(v.longitude);
