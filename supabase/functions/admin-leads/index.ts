@@ -105,6 +105,7 @@ Deno.serve(async req=>{
  }
  if(req.method==="GET"){
   const resource=new URL(req.url).searchParams.get("resource")||"leads";
+  if(resource==="trash"){const r=await fetch(base+"/rest/v1/plotao_leads?select=*&archived_at=not.is.null&order=archived_at.desc&limit=500",{headers:apiHeaders(key)});return json(await r.json(),r.status)}
   if(resource==="quote_decision"){
    const id=url.searchParams.get("id")||"",token=url.searchParams.get("token")||"";
    if(!validId(id)||!/^[A-Za-z0-9_-]{40,100}$/.test(token))return json({error:"invalid_decision_link"},400);
@@ -151,11 +152,35 @@ Deno.serve(async req=>{
    const r=await fetch(base+"/rest/v1/plotao_competitor_prices?select=id,source_sku,product_name,source_category,source_url,price_net,price_gross,availability,observed_at&source_key=eq.ploty-dobry&order=product_name.asc&limit=1000&offset="+offset,{headers:apiHeaders(key)});
    return json(await r.json(),r.status)
   }
-  const r=await fetch(base+"/rest/v1/plotao_leads?select=*&order=created_at.desc&limit=500",{headers:apiHeaders(key)});
+  const r=await fetch(base+"/rest/v1/plotao_leads?select=*&archived_at=is.null&order=created_at.desc&limit=500",{headers:apiHeaders(key)});
   return json(await r.json(),r.status)
  }
  if(req.method==="POST"){
   let b;try{b=await req.json()}catch{return json({error:"invalid_json"},400)}
+  if(["trash_lead","restore_lead","delete_trashed_lead"].includes(b.action)){
+   if(!validId(b.id))return json({error:"invalid_lead_id"},422);
+   const current=await fetch(leadUrl(base,b.id,"id,archived_at"),{headers:apiHeaders(key)});
+   if(!current.ok)return json({error:"lead_lookup_failed"},502);
+   const row=(await current.json())[0];if(!row)return json({error:"lead_not_found"},404);
+   if(b.action==="trash_lead"&&row.archived_at)return json({ok:true,id:b.id,archived_at:row.archived_at});
+   if(b.action==="restore_lead"&&!row.archived_at)return json({ok:true,id:b.id,archived_at:null});
+   if(b.action==="delete_trashed_lead"&&!row.archived_at)return json({error:"lead_not_in_trash"},409);
+   if(b.action==="delete_trashed_lead"&&b.confirm!=="DELETE")return json({error:"confirmation_required"},422);
+   if(b.action==="delete_trashed_lead"){
+    for(const [table,column] of [["plotao_quotes","lead_id"],["plotao_jobs","lead_id"],["plotao_lead_referrals","lead_id"],["opravao_lead_distribution","lead_id"],["opravao_revenue","lead_id"]]){
+     const check=await fetch(base+"/rest/v1/"+table+"?"+column+"=eq."+encodeURIComponent(b.id)+"&select=id&limit=1",{headers:apiHeaders(key)});
+     if(!check.ok)return json({error:"related_records_check_failed"},502);
+     if((await check.json()).length)return json({error:"lead_has_related_records",table},409);
+    }
+   }
+   const method=b.action==="delete_trashed_lead"?"DELETE":"PATCH";
+   const payload=method==="PATCH"?{archived_at:b.action==="trash_lead"?new Date().toISOString():null}:null;
+   const updated=await fetch(leadUrl(base,b.id,"id"),{method,headers:{...apiHeaders(key),...(payload?{"Content-Type":"application/json"}:{}),"Prefer":"return=representation"},...(payload?{body:JSON.stringify(payload)}:{})});
+   if(!updated.ok)return json({error:method==="DELETE"?"lead_has_related_records_or_delete_failed":"lead_trash_update_failed"},updated.status===409||updated.status===400?409:502);
+   let changed;try{changed=await updated.json()}catch{changed=null}
+   if(!Array.isArray(changed)||changed.length!==1||changed[0]?.id!==b.id)return json({error:"lead_change_not_confirmed"},409);
+   return json({ok:true,id:b.id,archived_at:payload?.archived_at??null,deleted:method==="DELETE"});
+  }
   if(b.action==="set_products_active"){
    const raw=Array.isArray(b.product_ids)?b.product_ids:[],ids=[...new Set(raw)];
    if(typeof b.active!=="boolean"||!ids.length||ids.length>200||ids.length!==raw.length||!ids.every(validId))return json({error:"invalid_product_selection"},422);
