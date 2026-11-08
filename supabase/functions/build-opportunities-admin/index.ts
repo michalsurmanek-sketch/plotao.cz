@@ -17,7 +17,7 @@ const clean=v=>{
  if(expected_start&&!/^\d{4}-\d{2}-\d{2}$/.test(expected_start))return null;
  if(contact_email&&!/^\S+@\S+\.\S+$/.test(contact_email))return null;
  if(latitude!==null&&(!Number.isFinite(latitude)||latitude<47||latitude>52.5)||longitude!==null&&(!Number.isFinite(longitude)||longitude<11||longitude>20)||(latitude===null)!==(longitude===null))return null;
- return {title,location,region,project_type,stage,units,source_name,source_url,external_ref,expected_start:expected_start||null,outreach_status,contact_name,contact_email,contact_phone,notes,latitude,longitude,verified_at:v.verified?new Date().toISOString():null,updated_at:new Date().toISOString()};
+ return {title,location,region,project_type,stage,units,source_name,source_url,external_ref,expected_start:expected_start||null,outreach_status,contact_name,contact_email,contact_phone,notes,latitude,longitude,updated_at:new Date().toISOString()};
 };
 Deno.serve(async req=>{
  if(req.method==="OPTIONS")return new Response("ok",{headers:cors});
@@ -47,6 +47,8 @@ Deno.serve(async req=>{
   if(body.id!=null&&!validId(body.id))return json({error:"invalid_id"},422);
    if(req.method==="PATCH"&&!body.id)return json({error:"invalid_id"},422);
    const row=clean(body.opportunity);if(!row)return json({error:"invalid_opportunity"},422);
+   // Verification is managed only by set_verification; editing metadata must not clear it.
+   if(!body.id)row.verified_at=null;
    const r=await fetch(body.id?url+"?id=eq."+encodeURIComponent(body.id):url,{method:body.id?"PATCH":"POST",headers:{...api,"Content-Type":"application/json","Prefer":"return=representation"},body:JSON.stringify(row)});
    let data;try{data=await r.json()}catch{data=null}
    if(!r.ok)return json({error:r.status===409?"duplicate_source":"save_failed"},r.status);
